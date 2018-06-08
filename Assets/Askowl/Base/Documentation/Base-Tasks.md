@@ -9,5 +9,4 @@
 ## Release 2018-06
 
 * [x] Move code from CustomAssets
-* [ ] Get tests working
-* [ ] Relink all to Askowl/Base
+* [x] Get tests working

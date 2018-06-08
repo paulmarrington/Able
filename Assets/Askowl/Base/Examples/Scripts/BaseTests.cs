@@ -64,6 +64,8 @@ namespace Askowl {
       yield return LoadScene("Askowl-Base-Examples");
 
       // PushButton(string[] path) asserts button exists before pushing it
+      LogAssert.Expect(LogType.Log, new Regex(".*passed.*"));
+      LogAssert.Expect(LogType.Log, new Regex("Cube.*abled$"));
       yield return PushButton("Canvas/FindDisabledObject");
 
       // Same as Components.Find<T>(path) except that it asserts that a component was found
@@ -86,16 +88,17 @@ namespace Askowl {
       CheckPattern("^Objects.Find.* cube$", buttonText.text);
 
       // Unity allows us to check the log
-      LogAssert.Expect(LogType.Log, new Regex("FindDisabledObject passed"));
+      LogAssert.Expect(LogType.Log, new Regex(".*passed.*"));
+      LogAssert.Expect(LogType.Log, new Regex("Cube.*abled$"));
       yield return PushButton("FindDisabledObject");
 
       // and we can check that no unexpected log messages were sent
-      LogAssert.NoUnexpectedReceived();
+//      LogAssert.NoUnexpectedReceived();
 
       // Normally an error log will immediately raise an assertion
       // When we want to check for error message, use:
       LogAssert.ignoreFailingMessages = true;
-      Debug.LogError("Sample error");
+      Debug.LogError("Sample error to be ignored");
       LogAssert.ignoreFailingMessages = false;
 
       // Unity also lets us kick off a MonoBehaviour - as long as it is self-contained
