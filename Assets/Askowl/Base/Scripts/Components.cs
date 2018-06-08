@@ -30,11 +30,18 @@ namespace Askowl {
       return default(T);
     }
 
-    private static T Find<T>(GameObject parentObject, string[] path) where T : Component {
+    /// <summary>
+    /// Give a root game object, find a component on a non-contiguous path
+    /// </summary>
+    /// <param name="parentObject">Starting object for the search</param>
+    /// <param name="path">Path from starting object to the one we want (need not be all elements)</param>
+    /// <typeparam name="T">Type of component we are expecting</typeparam>
+    /// <returns>The component reference or null</returns>
+    public static T Find<T>(GameObject parentObject, params string[] path) where T : Component {
       T[] components = parentObject.GetComponentsInChildren<T>();
       if (components.Length == 0) return default(T);
 
-      if (path.Length == 1) return components[0];
+      if (components.Length == 1) return components[0];
 
       for (int i = 0; i < components.Length; i++) {
         bool found = true;
@@ -64,29 +71,9 @@ namespace Askowl {
     /// <param name="name">The name given to both the game object and contained component</param>
     /// <typeparam name="T">Type of component we are creating</typeparam>
     /// <returns>a reference to the game object containing the newly minted component</returns>
-    // ReSharper disable once UnusedMember.Global
     public static T Create<T>(string name = null) where T : Component {
-      GameObject gameObject = new GameObject();
-
-      T instance = Create<T>(gameObject, name);
-      gameObject.name = instance.name;
-      return instance;
-    }
-
-    /// <summary>
-    /// Create a new GameObject, name it and add a component of the specified type.
-    /// </summary>
-    /// <remarks><a href="http://customassets.marrington.net#componentscreatetgameobjectname">More...</a></remarks>
-    /// <param name="gameObject">The existing game object to which we are adding a new component</param>
-    /// <param name="name">The name given to both the game object and contained component</param>
-    /// <typeparam name="T">Type of component we are creating</typeparam>
-    /// <returns>a reference to the game object containing the newly minted component</returns>
-    // ReSharper disable once MemberCanBePrivate.Global
-    public static T Create<T>(GameObject gameObject, string name = null)
-      where T : Component {
-      T instance = gameObject.AddComponent<T>();
-      instance.name = name ?? typeof(T).ToString();
-      return instance;
+      GameObject gameObject = new GameObject(name);
+      return gameObject.AddComponent<T>();
     }
   }
 }

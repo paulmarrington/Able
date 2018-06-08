@@ -4,4 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Askowl/Base/Examples/Askowl-Base-Examples.unity
+    guid: d8f32db365c4e46c19d4ec747f8219db
+  m_configObjects: {}

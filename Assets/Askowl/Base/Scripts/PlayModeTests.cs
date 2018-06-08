@@ -66,19 +66,10 @@ namespace Askowl {
       return objects[0];
     }
 
-    /// <summary>
-    /// Override for Objects.Find to check the result for compliance. Finds an active object. Used to retrieve custom assets that have been loaded into the scene elsewhere.
-    /// </summary>
-    /// <remarks><a href="http://customassets.marrington.net#playmodetests">More...</a></remarks>
-    /// <see cref="FindObject{T}(string)"/>
-    /// <typeparam name="T">Type of object to find</typeparam>
-    /// <returns></returns>
-    protected static T FindObject<T>() where T : Object { return FindObject<T>(typeof(T).Name); }
-
     /// <inheritdoc />
     /// <remarks><a href="http://customassets.marrington.net#playmodetests">More...</a></remarks>
     protected override IEnumerator PushButton(params string[] path) {
-      yield return PushButton(Component<Button>(path));
+      yield return PushButton(Component<Button>(path)); // so it uses test version with assert
     }
 
     /// <summary>

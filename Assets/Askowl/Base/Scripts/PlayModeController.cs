@@ -49,15 +49,5 @@ namespace Askowl {
     protected virtual IEnumerator PushButton(params string[] path) {
       yield return PushButton(Components.Find<Button>(path));
     }
-
-    /// <summary>
-    /// Shortcut to display formatted log messages to the console.
-    /// </summary>
-    /// <remarks><a href="http://customassets.marrington.net#log">More...</a></remarks>
-    /// <param name="format">Format string - or simple string if no parameters</param>
-    /// <param name="parameters">List of parameters to fill the format</param>
-    protected void Log(string format, params object[] parameters) {
-      Debug.LogFormat(format, parameters);
-    }
   }
 }

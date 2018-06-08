@@ -13,8 +13,8 @@ namespace Askowl {
   /// <remarks><a href="http://customassets.marrington.net#range">More...</a></remarks>
   [Serializable]
   public class Range : Pick<float> {
-    [SerializeField, UsedImplicitly] private float min;
-    [SerializeField, UsedImplicitly] private float max;
+    [SerializeField] private float min;
+    [SerializeField] private float max;
 
     /// <summary>
     /// Lowest value a number can have in this range
