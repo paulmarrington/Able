@@ -41,8 +41,6 @@ namespace Askowl {
       T[] components = parentObject.GetComponentsInChildren<T>();
       if (components.Length == 0) return default(T);
 
-      if (components.Length == 1) return components[0];
-
       for (int i = 0; i < components.Length; i++) {
         bool found = true;
 
