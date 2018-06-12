@@ -7,25 +7,25 @@ namespace Askowl {
   using System.Text.RegularExpressions;
 
   public class JSON {
-    public class Node : Dictionary<string, object> { };
+    private class Node : Dictionary<string, object> { };
 
-    private Node dict = new Node();
+    private class Raw {
+      private string json;
+    }
 
-    private string text;
     private object here;
+    private Node   root;
+
+    private static readonly Node EmptyRoot = new Node();
 
     public T Here<T>() { return (here is T) ? (T) here : default(T); }
 
     public JSON(string json = null) { Reset(json); }
 
-    public void Reset(string json) {
-      dict.Clear();
-      text = json;
-      here = dict;
-    }
+    public void Reset(string json) { root = ParseChildren(json) ?? EmptyRoot; }
 
     public T Get<T>(params string[] path) {
-      here = dict;
+      here = root;
       Walk(path);
       return Here<T>();
     }
@@ -40,18 +40,33 @@ namespace Askowl {
       return true;
     }
 
-    private bool Step(string next) {
+    private Node Step() {
       if (here is string) {
-        here = JsonUtility.FromJson<Node>((string) here);
+        Node child = JsonUtility.FromJson<Node>((string) here);
       }
 
-      if (!(here is Node)) return false;
+      return (here as Node) ?? EmptyRoot;
+    }
 
-      Node node = (Node) here;
+    private bool Step(string next) {
+      Node node = Step();
       if (!node.ContainsKey(next)) return false;
 
       here = node[next];
       return true;
+    }
+
+    private Node ParseChildren(string json) {
+      try {
+        Node t = JsonUtility.FromJson<Node>(json);
+
+        Debug.LogWarningFormat("**** JSON:58 t={0}  #### DELETE-ME #### 12/6/18 1:18 PM",
+                               t.Count); //#DM#//
+
+        return JsonUtility.FromJson<Node>(json);
+      } catch {
+        return EmptyRoot;
+      }
     }
   }
 }
