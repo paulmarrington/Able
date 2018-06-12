@@ -217,6 +217,10 @@ namespace Askowl.Samples {
 
       Debug.Log("SelectorExample passed");
     }
+
+    public void JsonExample() {
+
+    }
   }
 }
 #endif
