@@ -20,9 +20,11 @@ namespace Askowl {
 
     public T Here<T>() { return (here is T) ? (T) here : default(T); }
 
+    public bool IsA<T>() { return here is T; }
+
     public JSON(string json = null) { Reset(json); }
 
-    public void Reset(string json) { root = ParseChildren(json) ?? EmptyRoot; }
+    public void Reset(string json) { root = Parse(json); }
 
     public T Get<T>(params string[] path) {
       here = root;
@@ -40,53 +42,118 @@ namespace Askowl {
       return true;
     }
 
-    private Node Step() {
-      if (here is string) {
-        Node child = JsonUtility.FromJson<Node>((string) here);
+    private bool Step(string next) {
+      if (here is Node) {
+        Node node = here as Node;
+        if (!node.ContainsKey(next)) return false;
+
+        here = node[next];
+      } else if (here is Array) {
+        var array = (object[]) here;
+        int idx;
+        if (!int.TryParse(next, out idx) || (idx >= array.Length)) return false;
+
+        here = array[idx];
+      } else {
+        return false;
       }
 
-      return (here as Node) ?? EmptyRoot;
-    }
-
-    private bool Step(string next) {
-      Node node = Step();
-      if (!node.ContainsKey(next)) return false;
-
-      here = node[next];
       return true;
     }
 
-    private Node ParseChildren(string json) {
+    private Node Parse(string json) {
       Node node = new Node();
       int  idx  = 0;
 
       if (!CheckToken('{', json, ref idx)) return node;
 
-      while (ParseToNode(node, json, ref idx)) {
-        if (!SkipWhiteSpace(json, ref idx) || (json[idx++] == '}')) break;
-      }
-
-      return node;
+      return ParseToNode(node, json, ref idx);
     }
 
     private bool CheckToken(char token, string json, ref int idx) {
       if (!SkipWhiteSpace(json, ref idx)) return false;
 
       if (json[idx++] != token) {
-        Debug.LogErrorFormat("Bad JSON, expecting '{token}' at {idx} for {json}");
+        string part = json.Substring((idx < 10) ? 10 : idx - 1, 100);
+        Debug.LogErrorFormat("Bad JSON, expecting '{0}' for {1}", token, part);
         return false;
       }
 
       return SkipWhiteSpace(json, ref idx);
     }
 
-    private bool ParseToNode(Node node, string json, ref int idx) {
+    private Node ParseToNode(Node node, string json, ref int idx) {
+      while (ParseOneEntryToNode(node, json, ref idx)) {
+        if (!SkipWhiteSpace(json, ref idx) || (json[idx] == '}')) {
+          idx++;
+          break;
+        }
+      }
+
+      return node;
+    }
+
+    private bool ParseOneEntryToNode(Node node, string json, ref int idx) {
+      if (!CheckToken('"', json, ref idx)) return false;
+
       string key = ParseString(json, ref idx);
+
+      if (!CheckToken(':', json, ref idx)) return false;
+      if (!SkipWhiteSpace(json, ref idx)) return false;
+
+      node.Add(key, ParseObject(json, ref idx));
+      return idx < json.Length;
+    }
+
+    private object ParseObject(string json, ref int idx) {
+      char token = json[idx++];
+
+      switch (token) {
+        case '{':
+          return ParseNode(json, ref idx);
+        case '[':
+          return ParseArray(json, ref idx);
+        case '"':
+          return ParseString(json, ref idx);
+        default:
+          string word = NextWord(json, ref idx);
+
+          switch (word) {
+            case "true":  return true;
+            case "false": return false;
+            case "null":  return null;
+            default:
+              double d;
+              if (double.TryParse(word, out d)) return d;
+
+              long i;
+              if (long.TryParse(word, out i)) return i;
+
+              string part = json.Substring((idx < 10) ? 10 : idx - 1, 100);
+              Debug.LogErrorFormat("JSON error, word '{0}' unknown for {1}", word, part);
+              return word;
+          }
+      }
+    }
+
+    private object ParseArray(string json, ref int idx) {
+      List<object> list = new List<object>();
+
+      while (SkipWhiteSpace(json, ref idx) && (json[idx] != ']')) {
+        list.Add(ParseObject(json, ref idx));
+      }
+
+      idx++;
+      return list.ToArray();
+    }
+
+    private Node ParseNode(string json, ref int idx) {
+      Node node = new Node();
+      return ParseToNode(node, json, ref idx);
     }
 
     private string ParseString(string json, ref int idx) {
       StringBuilder builder = new StringBuilder();
-      if (!CheckToken('"', json, ref idx)) return null;
 
       while (json[idx] != '"') {
         builder.Append((json[idx] == '\\') ? Escape(json, ref idx) : json[idx++]);
@@ -107,25 +174,6 @@ namespace Askowl {
       }
     }
 
-    private static bool ParseToken(string json, ref int idx) {
-      switch (json[idx++]) {
-        case '{': break;
-        case '}': break;
-        case '[': break;
-        case ']': break;
-        case '"': break;
-        case ',': break;
-        case ':': break;
-        default:
-          string word = NextWord(json, ref idx);
-
-          if (char.IsDigit(word[0])) { }
-          break;
-      }
-
-      return idx >= json.Length;
-    }
-
     private static string NextWord(string json, ref int idx) {
       int first = idx - 1;
 
@@ -133,11 +181,19 @@ namespace Askowl {
         if (++idx >= json.Length) return null;
       }
 
+      if (idx == first) {
+        string part = json.Substring((idx < 10) ? 10 : idx - 1, 100);
+        Debug.LogErrorFormat("JSON error, no word at {0}", part);
+        idx++;
+      }
+
       return json.Substring(startIndex: first, length: idx - first);
     }
 
+    private static bool IsWhiteSpace(char chr) { return char.IsWhiteSpace(chr) || (chr == ','); }
+
     private static bool SkipWhiteSpace(string json, ref int idx) {
-      while ((idx < json.Length) && !char.IsWhiteSpace(json[idx])) idx++;
+      while ((idx < json.Length) && IsWhiteSpace(json[idx])) idx++;
       return idx < json.Length;
     }
   }

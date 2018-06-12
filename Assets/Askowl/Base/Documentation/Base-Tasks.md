@@ -1,6 +1,7 @@
 # Askowl-Base
 ## Release 2018-??
 
+- [ ] Doc: JSON
 - [ ] Remove all that is not base from documentation
 - [ ] Doc: objects.path(gameobject)
 - [ ] Docx - relink

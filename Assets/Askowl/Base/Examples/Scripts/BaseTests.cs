@@ -43,6 +43,9 @@ namespace Askowl {
     public IEnumerator SelectorExample() { yield return Press("SelectorExample"); }
 
     [UnityTest]
+    public IEnumerator JsonReaderExample() { yield return Press("JSON Reader"); }
+
+    [UnityTest]
     public IEnumerator PlayModeControllerExample() {
       // LoadScene is derived from PlayModeTests and asserts that the scene was loaded
       // The current scene is kept in a protected field `Scene`

@@ -220,12 +220,25 @@ namespace Askowl.Samples {
 
     public void JsonExample() {
       Debug.LogFormat("Expecting: {0}", jsonSampler);
-      JSON   json         = new JSON(jsonSampler);
+      JSON json = new JSON(jsonSampler);
+
       string rootAsString = json.Here<string>();
-      Debug.LogFormat("Root isn't a string: {0}", rootAsString == null);
+      if (rootAsString != null) Debug.LogErrorFormat("Root isn't a string");
+
+      string id = json.Get<string>("items", "item", "0", "id");
+      if (id != "0001") Debug.LogErrorFormat("Expecting an ID of '0001', not {0}", id);
+
+      int iid = json.Get<int>("items", "item", "0", "id");
+      if (iid != 0) Debug.LogErrorFormat("Expecting a failure in kind, not {0}",        iid);
+      if (json.IsA<int>()) Debug.LogErrorFormat("Expecting a failure in kind, not {0}", iid);
+
+      if (!json.Walk("items.item.0.type")) Debug.LogErrorFormat("Can't find the donut");
+      if (!json.IsA<string>()) Debug.LogErrorFormat("Expecting Donut to be a string");
+      string donut = json.Here<string>();
+      if (donut!="donut")Debug.LogErrorFormat("Expecting 'donut', not '{0}'",donut);
     }
 
-    [SerializeField, Multiline] string jsonSampler = @"{
+    [SerializeField, Multiline] private string jsonSampler = @"{
   ""items"":
     {
       ""item"":
@@ -255,8 +268,7 @@ namespace Askowl.Samples {
                 { ""id"": ""5003"", ""type"": ""Chocolate"" },
                 { ""id"": ""5004"", ""type"": ""Maple"" }
               ]
-          },
-
+          }
         ]
     }
 }
