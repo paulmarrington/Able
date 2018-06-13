@@ -12,6 +12,7 @@
 * [x] ~~Move code from CustomAssets~~
 * [x] ~~Get tests working~~
 * [x] add regions
+* [x] Move parse params to class ones
 * [ ] create error
 * [ ] create errormessage
 * [ ] create parseerro

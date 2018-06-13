@@ -222,9 +222,9 @@ namespace Askowl.Samples {
       Debug.LogFormat("Expecting: {0}", jsonSampler);
 
       // We cah pass in json for parsing...
-      JSON json = new JSON(jsonSampler);
+      Json json = new Json(jsonSampler);
       // ... or use Reset later to change the string.
-      json.Reset(jsonSampler);
+      json.Parse(jsonSampler);
 
       // Here will retrieve the current node or leaf based on type
       string rootAsString = json.Here<string>();
