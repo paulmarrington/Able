@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Askowl {
@@ -19,6 +21,7 @@ namespace Askowl {
     /// </summary>
     /// <param name="jsonText">String with hopefully correctly formatted JSON</param>
     /// <returns>false on error and sets <see cref="ErrorMessage"/></returns>
+    // ReSharper disable once UnusedMethodReturnValue.Global
     public bool Parse(string jsonText) {
       json         = jsonText;
       idx          = 0;
@@ -177,13 +180,42 @@ namespace Askowl {
     /// </summary>
     /// <param name="path">Optional absolute path to the list</param>
     /// <returns>An array of strings as documented in the summary</returns>
-    public string[] List(params object[] path) {
-      if ((path.Length > 0) && !Walk(path)) return new string[0];
+    public string[] List(params object[] path) { return List<string>(x => x.ToString(), path); }
 
-      if (IsNode) return (new List<string>(((Node) here).Keys)).ToArray();
-      if (IsArray) return Array.ConvertAll(((object[]) here), x => x.ToString());
+    /// <summary>
+    /// Returns a list of children. For a tree node, this will a list of keys.
+    /// For an array it will be a list elements.
+    /// On a path error it will return an empty list and set ErrorMessage
+    /// Otherwise it will return a list with one entry - being the current node
+    /// </summary>
+    /// <param name="path">Optional absolute path to the list</param>
+    /// <returns>An array of strings as documented in the summary</returns>
+    public T[] List<T>(params object[] path) {
+      if ((path.Length > 0) && !Walk(path)) return new T[0];
 
-      return new[] {here.ToString()};
+      ((Node) here).Keys.Cast<object>();
+      if (IsNode) return new List<T>(((Node) here).Keys.Cast<T>()).ToArray();
+      if (IsArray) return Array.ConvertAll(((object[]) here), x => (T) x);
+
+      return new[] {(T) here};
+    }
+
+    /// <summary>
+    /// Returns a list of children. For a tree node, this will a list of keys.
+    /// For an array it will be a list elements.
+    /// On a path error it will return an empty list and set ErrorMessage
+    /// Otherwise it will return a list with one entry - being the current node
+    /// </summary>
+    /// <param name="path">Optional absolute path to the list</param>
+    /// <returns>An array of strings as documented in the summary</returns>
+    public T[] List<T>(Func<object, T> converter, params object[] path) {
+      if ((path.Length > 0) && !Walk(path)) return new T[0];
+
+      ((Node) here).Keys.Cast<object>();
+      if (IsNode) return new List<T>(((Node) here).Keys.Cast<T>()).ToArray();
+      if (IsArray) return Array.ConvertAll(((object[]) here), converter);
+
+      return new[] {(T) here};
     }
     #endregion
     #endregion
@@ -200,31 +232,32 @@ namespace Askowl {
     private bool Stepper(object next) {
       if (IsNode) return Step(next.ToString());
       if (!IsArray) return AccessFailure("Expecting array for {0}", next);
-      if (next is int?) return Step((int) next);
+      if (next is int) return Step((int) next);
 
-      int idx;
+      int index;
 
-      if (!int.TryParse(next.ToString(), out idx)) {
+      if (!int.TryParse(next.ToString(), out index)) {
         return AccessFailure("Expecting array index '{0}'", next);
       }
 
-      return Step(idx);
+      return Step(index);
     }
 
-    private bool Step(int idx) {
+    private bool Step(int index) {
       var array = (object[]) here;
 
-      if (idx >= array.Length) {
-        return AccessFailure("Array index {0} out of bounds for {1}", idx, array.Length);
+      if (index >= array.Length) {
+        return AccessFailure("Array index {0} out of bounds for {1}", index, array.Length);
       }
 
-      here = array[idx];
+      here = array[index];
       return true;
     }
 
     private bool Step(string next) {
       Node node = here as Node;
 
+      // ReSharper disable once PossibleNullReferenceException
       if (!node.ContainsKey(next)) {
         string nodes = string.Join(", ", List());
         return AccessFailure("No node '{0}' in '{1}'", next, nodes);

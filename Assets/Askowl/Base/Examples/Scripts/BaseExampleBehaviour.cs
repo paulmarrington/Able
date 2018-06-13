@@ -218,6 +218,10 @@ namespace Askowl.Samples {
       Debug.Log("SelectorExample passed");
     }
 
+    public void Error(Json json, string fmt, params object[] args) {
+      Debug.LogErrorFormat("{0} - {1}", string.Format(fmt, args), json.ErrorMessage);
+    }
+
     public void JsonExample() {
       Debug.LogFormat("Expecting: {0}", jsonSampler);
 
@@ -228,41 +232,71 @@ namespace Askowl.Samples {
 
       // Here will retrieve the current node or leaf based on type
       string rootAsString = json.Here<string>();
-      if (rootAsString != null) Debug.LogErrorFormat("Root isn't a string");
+      if (rootAsString != null) Error(json, "Root isn't a string");
 
       // You can also check the type of here
-      if (json.IsA<String>() != false) Debug.LogErrorFormat("IsA failed to work for root");
+      if (json.IsA<string>() != false) Error(json, "IsA failed to work for root");
 
       // If you know the structure of your JSON you can retrieve a leaf directly
       string id = json.Get<string>("items", "item", 0, "id");
-      if (id != "0001") Debug.LogErrorFormat("Expecting an ID of '0001', not {0}", id);
+      if (id != "0001") Error(json, "Expecting an ID of '0001', not {0}", id);
 
       // If you provide the wrong type the default<T> is returned - 0 for an int
       int iid = json.Get<int>("items", "item", "0", "id");
-      if (iid != 0) Debug.LogErrorFormat("Expecting a failure in kind, not {0}", iid);
+      if (iid != 0) Error(json, "Expecting a failure in kind, not {0}", iid);
       // If this is a problem, use IsA<>
-      if (json.IsA<int>()) Debug.LogErrorFormat("Expecting a failure in kind, not {0}", iid);
+      if (json.IsA<int>()) Error(json, "Expecting a failure in kind, not {0}", iid);
 
       // You can separate walking the tree and retrievaly using Walk, WalkOn, IsA and Here
-      if (!json.Walk("items.item.0.type")) Debug.LogErrorFormat("Can't find the donut");
-      if (!json.IsA<string>()) Debug.LogErrorFormat("Expecting Donut to be a string");
+      if (!json.Walk("items.item.0.type")) Error(json, "Can't find the donut");
+      if (!json.IsA<string>()) Error(json,             "Expecting Donut to be a string");
       string donut = json.Here<string>();
-      if (donut != "donut") Debug.LogErrorFormat("Expecting 'donut', not '{0}'", donut);
+      if (donut != "donut") Error(json, "Expecting 'donut', not '{0}'", donut);
 
       // Walk is absolute, but you can use WalkOn to get where you want in steps
-      if (!json.Walk("items.item")) Debug.LogErrorFormat("Can't find the first item");
-      if (!json.WalkOn(0, "item")) Debug.LogErrorFormat("Can't walk on to the donut");
+      if (!json.Walk("items.item")) Error(json, "Can't find the first item");
+      if (!json.WalkOn(0, "item")) Error(json,  "Can't walk on to the donut");
       donut = json.Here<string>();
-      if (donut != "donut") Debug.LogErrorFormat("Expecting 'donut', not '{0}'", donut);
+      if (donut != "donut") Error(json, "Expecting 'donut', not '{0}'", donut);
 
       // Because walking to a leave and expecting a certain type of data is common, we can combine them
-      if (!json.Walk<double>("items", "item", 0, "ppu"))
-        Debug.LogErrorFormat("Can't walk to a number");
+      if (!json.Walk<double>("items", "item", 0, "ppu")) Error(json, "Can't walk to ppu");
 
-      // note that floating point numbers are doubles and integers are longs
+      // A floating point can be retrieved as a double or float
       double ppu = json.Here<double>();
+      if (json.ErrorMessage != null) Error(json, "Can't get double '{0}'", ppu);
+      float fppu = json.Here<float>();
+      if (json.ErrorMessage != null) Error(json, "Can't get float '{0}'", fppu);
 
-      Debug.LogErrorFormat("MORE TO DO");
+      if ((Math.Abs(ppu - fppu) > 1e5) || (Math.Abs(ppu - 0.55) > 1e5)) {
+        Error(json, "Retrieving double and float failed since {0} != {1}", ppu, fppu);
+      }
+
+      // A whole number can be retrieved as an int, long, float or double
+      if (!json.Walk("items", "item", 0, "qty")) Error(json, "Can't walk to qty");
+      long lqty = json.Here<long>();
+      if (json.ErrorMessage != null) Error(json, "Can't get long '{0}'", lqty);
+      int iqty = json.Get<int>("items.item.0.qty");
+      if (json.ErrorMessage != null) Error(json, "Can't get int '{0}'", iqty);
+      float fqty = json.Get<float>("items.item.0.qty");
+      if (json.ErrorMessage != null) Error(json, "Can't get float '{0}'", fqty);
+      double dqty = json.Get<double>("items.item.0.qty");
+      if (json.ErrorMessage != null) Error(json, "Can't get double '{0}'", dqty);
+
+      if ((lqty != iqty) || (Math.Abs(fqty - iqty) > 1e5) || (Math.Abs(dqty - iqty) > 1e5)) {
+        Error(json, "Whole number mismatch {0} == {1} == {2} == {3}", lqty, iqty, fqty, dqty);
+      }
+
+      // Sometimes we need to look around to guide ourselves
+      json.Walk("items");
+      if (!json.IsNode) Error(json, "Expecting a Node");
+      json.WalkOn("item");
+      if (!json.IsArray) Error(json, "Expecting an Array");
+      json.WalkOn("qty");
+      if (json.NodeType != typeof(int)) Error(json,    "Expecting a whole number");
+      if (json.NodeType != typeof(double)) Error(json, "Expecting a whole number");
+      if (json.NodeType != typeof(float)) Error(json,  "Expecting a number");
+      if (json.NodeType != typeof(double)) Error(json, "Expecting a number");
     }
 
     [SerializeField, Multiline] private string jsonSampler = @"{
@@ -275,6 +309,7 @@ namespace Askowl.Samples {
             ""type"": ""donut"",
             ""name"": ""Cake"",
             ""ppu"": 0.55,
+            ""qty"": 12,
             ""batters"":
               {
                 ""batter"":

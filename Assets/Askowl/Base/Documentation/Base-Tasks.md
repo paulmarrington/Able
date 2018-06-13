@@ -13,10 +13,11 @@
 * [x] ~~Get tests working~~
 * [x] add regions
 * [x] Move parse params to class ones
-* [ ] create error
-* [ ] create errormessage
-* [ ] create parseerro
-* [ ] create accesserror
-* [ ] add error messages to failed tests
+* [x] create error
+* [x] create errormessage
+* [x] create parseerro
+* [x] create accesserror
+* [x] add error messages to failed tests
+* [ ] using (Here){asdf}
 * [ ] add more tests
 
