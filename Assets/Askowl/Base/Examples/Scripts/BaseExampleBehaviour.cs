@@ -287,7 +287,7 @@ namespace Askowl.Samples {
         Error(json, "Whole number mismatch {0} == {1} == {2} == {3}", lqty, iqty, fqty, dqty);
       }
 
-      // Sometimes we need to look around to guide ourselves
+      // Sometimes we need to look around to see the lay of the land
       json.Walk("items");
       if (!json.IsNode) Error(json, "Expecting a Node");
       json.WalkOn("item");
@@ -297,6 +297,16 @@ namespace Askowl.Samples {
       if (json.NodeType != typeof(double)) Error(json, "Expecting a whole number");
       if (json.NodeType != typeof(float)) Error(json,  "Expecting a number");
       if (json.NodeType != typeof(double)) Error(json, "Expecting a number");
+
+      // When a node is a leaf of type Node we may want fetch an individual child using [] or generic
+      json.Walk("items.item.0");
+      if ((string) json["name"] != "Cake") Error(json, "Expecting Cake");
+      if (Fetch<string>("id")   != "0001") Error(json, "Expecting id of 0001");
+
+      // When a node is a leaf of type Array we may want fetch an individual element using [] or generic
+      json.Walk("items.item.0.magic");
+      if (((int) json[2]) != 333) Error(json,  "Expecting 333, not '{0}'",  json[2]);
+      if (Fetch<int>(3)   != 4444) Error(json, "expecting 4444, not '{0}'", json[3]);
     }
 
     [SerializeField, Multiline] private string jsonSampler = @"{
@@ -310,6 +320,8 @@ namespace Askowl.Samples {
             ""name"": ""Cake"",
             ""ppu"": 0.55,
             ""qty"": 12,
+            ""magic:"":
+              [ 1, 22, 333, 444, 5555 ],
             ""batters"":
               {
                 ""batter"":

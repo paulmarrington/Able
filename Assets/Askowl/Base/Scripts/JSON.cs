@@ -8,7 +8,7 @@ namespace Askowl {
   /// <summary>
   /// Parse JSON of unknown format to a dictionary and provide access methods
   /// </summary>
-  public class Json {
+  public class Json : IEnumerable, IDisposable {
     #region PublicInterface
     /// <summary>
     /// Constructor that can optionally parse a JSON string
@@ -72,16 +72,6 @@ namespace Askowl {
     /// If we fail to parse the json, or later fail to retrieve a node by name, this will be set. When there are no errors it will be null.
     /// </summary>
     public string ErrorMessage { get; private set; }
-
-    /// <summary>
-    /// Retrieve a count of the number of child nodes from our location. Will return one for nodes that are not tree nodes or arrays.
-    /// </summary>
-    public int Count {
-      get {
-        return (IsNode)  ? ((Node) here).Count :
-               (IsArray) ? ((object[]) here).Length : 1;
-      }
-    }
 
     #region AccessNodes
     /// <summary>
@@ -171,52 +161,63 @@ namespace Askowl {
     /// </param>
     /// <returns>false if path does not exist</returns>
     public bool WalkOn<T>(params object[] path) { return WalkOn(path) && CheckIsA<T>(); }
+    #endregion
 
+    #region NodeEnumeration
     /// <summary>
-    /// Returns a list of children. For a tree node, this will a list of keys.
-    /// For an array it will be a list of string representations of the elements.
-    /// On a path error it will return an empty list and set ErrorMessage
-    /// Otherwise it will return a list with one entry - being the string representation of the current node
+    /// Retrieve a count of the number of child nodes from our location. Will return one for nodes that are not tree nodes or arrays.
     /// </summary>
-    /// <param name="path">Optional absolute path to the list</param>
-    /// <returns>An array of strings as documented in the summary</returns>
-    public string[] List(params object[] path) { return List<string>(x => x.ToString(), path); }
-
-    /// <summary>
-    /// Returns a list of children. For a tree node, this will a list of keys.
-    /// For an array it will be a list elements.
-    /// On a path error it will return an empty list and set ErrorMessage
-    /// Otherwise it will return a list with one entry - being the current node
-    /// </summary>
-    /// <param name="path">Optional absolute path to the list</param>
-    /// <returns>An array of strings as documented in the summary</returns>
-    public T[] List<T>(params object[] path) {
-      if ((path.Length > 0) && !Walk(path)) return new T[0];
-
-      ((Node) here).Keys.Cast<object>();
-      if (IsNode) return new List<T>(((Node) here).Keys.Cast<T>()).ToArray();
-      if (IsArray) return Array.ConvertAll(((object[]) here), x => (T) x);
-
-      return new[] {(T) here};
+    public int Count {
+      get {
+        return (IsNode)  ? ((Node) here).Count :
+               (IsArray) ? ((object[]) here).Length : 1;
+      }
     }
 
     /// <summary>
-    /// Returns a list of children. For a tree node, this will a list of keys.
-    /// For an array it will be a list elements.
-    /// On a path error it will return an empty list and set ErrorMessage
-    /// Otherwise it will return a list with one entry - being the current node
+    /// Use to set and return to a current location after some operations. Best for enumerations
+    /// <code>using json.Anchor { json.Walk("first.one"); }</code>
     /// </summary>
-    /// <param name="path">Optional absolute path to the list</param>
-    /// <returns>An array of strings as documented in the summary</returns>
-    public T[] List<T>(Func<object, T> converter, params object[] path) {
-      if ((path.Length > 0) && !Walk(path)) return new T[0];
-
-      ((Node) here).Keys.Cast<object>();
-      if (IsNode) return new List<T>(((Node) here).Keys.Cast<T>()).ToArray();
-      if (IsArray) return Array.ConvertAll(((object[]) here), converter);
-
-      return new[] {(T) here};
+    public Json Anchor {
+      get {
+        anchor = here;
+        return this;
+      }
     }
+
+    /// <inheritdoc />
+    public void Dispose() { here = anchor; }
+
+    private object anchor;
+
+    /// <summary>
+    /// Retrieve the value by key in the children of the current dictionary node
+    /// </summary>
+    /// <param name="key">Name of child node</param>
+    public object this[string key] { get { return Fetch<object>(key); } }
+
+    /// <summary>
+    /// Retrive the value by index in the children of the current array node
+    /// </summary>
+    /// <param name="i">Index into array node</param>
+    public object this[int i] { get { return Fetch<object>(i); } }
+
+    /// <summary>
+    /// Use enumerator to itnerate through all children in a node. Use on leaf nodes to retrieve keys or array items. Use with active nodes to process all children.
+    /// </summary>
+    /// <code>
+    /// json.Walk("to.tree.leaf");
+    /// foreach(string key in json) process(key, json[key]);
+    /// </code>
+    /// <returns></returns>
+    public IEnumerator GetEnumerator() {
+      if (IsNode) return ((Node) here).Keys.GetEnumerator();
+      if (IsArray) return ((object[]) here).GetEnumerator();
+
+      return OneNode().GetEnumerator();
+    }
+
+    private IEnumerable OneNode() { yield return here; }
     #endregion
     #endregion
 
@@ -243,28 +244,50 @@ namespace Askowl {
       return Step(index);
     }
 
-    private bool Step(int index) {
+    private bool Fetch(int index, ref object value) {
+      if (!IsArray) return AccessFailure("Not an Array for {0}", index);
+
       var array = (object[]) here;
 
-      if (index >= array.Length) {
-        return AccessFailure("Array index {0} out of bounds for {1}", index, array.Length);
+      if (index < array.Length) {
+        return AccessFailure("Array[{1}] out of bounds for {0}", index, array.Length);
       }
 
-      here = array[index];
+      value = array[index];
       return true;
     }
 
-    private bool Step(string next) {
+    private T Fetch<T>(int index) {
+      ErrorMessage = null;
+      object value = null;
+      Fetch(index, ref value);
+      return (value is T) ? (T) value : default(T);
+    }
+
+    private bool Step(int index) { return Fetch(index, ref here); }
+
+    private bool Step(string next) { return Fetch(next, ref here); }
+
+    private bool Fetch(string next, ref object value) {
+      if (!IsNode) return AccessFailure("Not a node for {0}", next);
+
       Node node = here as Node;
 
       // ReSharper disable once PossibleNullReferenceException
       if (!node.ContainsKey(next)) {
-        string nodes = string.Join(", ", List());
+        string nodes = string.Join(", ", this.Cast<string>().ToArray());
         return AccessFailure("No node '{0}' in '{1}'", next, nodes);
       }
 
-      here = node[next];
+      value = node[next];
       return true;
+    }
+
+    private T Fetch<T>(string next) {
+      ErrorMessage = null;
+      object value = null;
+      Fetch(next, ref value);
+      return (value is T) ? (T) value : default(T);
     }
     #endregion
 
