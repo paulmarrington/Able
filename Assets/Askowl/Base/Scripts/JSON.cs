@@ -26,7 +26,7 @@ namespace Askowl {
       json         = jsonText;
       idx          = 0;
       ErrorMessage = null;
-      root         = new Node();
+      here         = root = new Node();
       if (!CheckToken('{')) return false;
 
       ParseToNode(root);
@@ -44,7 +44,7 @@ namespace Askowl {
     /// <remarks>It will fill <see cref="ErrorMessage"/> if there is a fault.</remarks>
     /// <typeparam name="T">The type we anticipate this node to be</typeparam>
     /// <returns>The requested node in the correct form for (T) or default&lt;T> if it can't be accessed</returns>
-    public T Here<T>() { return CheckIsA<T>() ? (T) here : default(T); }
+    public T Here<T>() { return Convert<T>(here); }
 
     /// <summary>
     /// Checks to see if we can cast the node type to that provided.
@@ -52,6 +52,13 @@ namespace Askowl {
     /// <remarks>It will fill <see cref="ErrorMessage"/> if there is a fault.</remarks>
     /// <typeparam name="T">The type we anticipate this node to be</typeparam>
     public bool IsA<T>() { return CheckIsA<T>(); }
+
+    /// <summary>
+    /// Checks to see if we can cast the node type to that provided.
+    /// </summary>
+    /// <remarks>It will fill <see cref="ErrorMessage"/> if there is a fault.</remarks>
+    /// <typeparam name="T">The type we anticipate this node to be</typeparam>
+    public bool IsA<T>(object node) { return CheckIsA<T>(node); }
 
     /// <summary>
     /// See if we have walked to a tree node, being a list of nodes accessed by name
@@ -191,6 +198,32 @@ namespace Askowl {
     private object anchor;
 
     /// <summary>
+    /// Retrieve an array entry of a required type
+    /// </summary>
+    /// <param name="index">Index into the array</param>
+    /// <typeparam name="T">Type of entry expected. Use `object` for anything</typeparam>
+    /// <returns>value of element or default&lt;T> and sets <see cref="ErrorMessage"/> if unavailable</returns>
+    public T Fetch<T>(int index) {
+      ErrorMessage = null;
+      object value = null;
+      Fetch(index, ref value);
+      return Convert<T>(value);
+    }
+
+    /// <summary>
+    /// Retrieve an tree node entry of a required type
+    /// </summary>
+    /// <param name="next">key to entry in node tree</param>
+    /// <typeparam name="T">Type of entry expected. Use `object` for anything</typeparam>
+    /// <returns>value of node or default&lt;T> and sets <see cref="ErrorMessage"/> if unavailable</returns>
+    public T Fetch<T>(string next) {
+      ErrorMessage = null;
+      object value = null;
+      Fetch(next, ref value);
+      return Convert<T>(value);
+    }
+
+    /// <summary>
     /// Retrieve the value by key in the children of the current dictionary node
     /// </summary>
     /// <param name="key">Name of child node</param>
@@ -249,19 +282,12 @@ namespace Askowl {
 
       var array = (object[]) here;
 
-      if (index < array.Length) {
+      if (index >= array.Length) {
         return AccessFailure("Array[{1}] out of bounds for {0}", index, array.Length);
       }
 
       value = array[index];
       return true;
-    }
-
-    private T Fetch<T>(int index) {
-      ErrorMessage = null;
-      object value = null;
-      Fetch(index, ref value);
-      return (value is T) ? (T) value : default(T);
     }
 
     private bool Step(int index) { return Fetch(index, ref here); }
@@ -281,13 +307,6 @@ namespace Askowl {
 
       value = node[next];
       return true;
-    }
-
-    private T Fetch<T>(string next) {
-      ErrorMessage = null;
-      object value = null;
-      Fetch(next, ref value);
-      return (value is T) ? (T) value : default(T);
     }
     #endregion
 
@@ -343,11 +362,11 @@ namespace Askowl {
             case "false": return false;
             case "null":  return null;
             default:
-              double d;
-              if (double.TryParse(word, out d)) return d;
-
               long i;
               if (long.TryParse(word, out i)) return i;
+
+              double d;
+              if (double.TryParse(word, out d)) return d;
 
               ParseError("word '{0}' unknown", word);
               return word;
@@ -425,20 +444,37 @@ namespace Askowl {
     }
 
     private bool AccessFailure(string fmt, params object[] args) {
-      ErrorMessage = string.Format("JSON Access Failure: {0} -  at {1}",
-                                   string.Format(fmt, args), here.GetType().Name);
+      if (here == null) {
+        ErrorMessage = string.Format("No `here` reference: {0}", string.Format(fmt, args));
+      } else {
+        ErrorMessage = string.Format("JSON Access Failure: {0} -  at {1}",
+                                     string.Format(fmt, args), here.GetType().Name);
+      }
 
       return false;
     }
 
-    private bool CheckIsA<T>() {
-      if (IsA<T>()) return true;
-      if ((typeof(T) == typeof(int))    && IsA<long>()) return true;
-      if ((typeof(T) == typeof(float))  && IsA<double>()) return true;
-      if ((typeof(T) == typeof(float))  && IsA<long>()) return true;
-      if ((typeof(T) == typeof(double)) && IsA<long>()) return true;
+    private bool CheckIsA<T>() { return CheckIsA<T>(here); }
+
+    private bool CheckIsA<T>(object node) {
+      if (node is T) return true;
+      if ((typeof(T) == typeof(int))    && (node is long)) return true;
+      if ((typeof(T) == typeof(float))  && (node is double)) return true;
+      if ((typeof(T) == typeof(float))  && (node is long)) return true;
+      if ((typeof(T) == typeof(double)) && (node is long)) return true;
 
       return AccessFailure("Expecting type {0}", typeof(T).Name);
+    }
+
+    private T Convert<T>(object node) {
+      if ((typeof(T) == typeof(int))    && (node is long)) node   = (int) ((long) node);
+      if ((typeof(T) == typeof(float))  && (node is double)) node = (float) ((double) node);
+      if ((typeof(T) == typeof(float))  && (node is long)) node   = (float) ((long) node);
+      if ((typeof(T) == typeof(double)) && (node is long)) node   = (double) ((long) node);
+      if (node is T) return (T) node;
+
+      AccessFailure("Expecting type {0} for conversion - was {1}", typeof(T), node.GetType());
+      return default(T);
     }
     #endregion
   }

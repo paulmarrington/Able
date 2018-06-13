@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
@@ -255,7 +256,7 @@ namespace Askowl.Samples {
 
       // Walk is absolute, but you can use WalkOn to get where you want in steps
       if (!json.Walk("items.item")) Error(json, "Can't find the first item");
-      if (!json.WalkOn(0, "item")) Error(json,  "Can't walk on to the donut");
+      if (!json.WalkOn(0, "type")) Error(json,  "Can't walk on to the donut");
       donut = json.Here<string>();
       if (donut != "donut") Error(json, "Expecting 'donut', not '{0}'", donut);
 
@@ -292,21 +293,65 @@ namespace Askowl.Samples {
       if (!json.IsNode) Error(json, "Expecting a Node");
       json.WalkOn("item");
       if (!json.IsArray) Error(json, "Expecting an Array");
-      json.WalkOn("qty");
-      if (json.NodeType != typeof(int)) Error(json,    "Expecting a whole number");
-      if (json.NodeType != typeof(double)) Error(json, "Expecting a whole number");
-      if (json.NodeType != typeof(float)) Error(json,  "Expecting a number");
-      if (json.NodeType != typeof(double)) Error(json, "Expecting a number");
+      json.WalkOn("0.qty");
+      if (json.NodeType != typeof(long)) Error(json, "Expecting a whole number");
 
       // When a node is a leaf of type Node we may want fetch an individual child using [] or generic
       json.Walk("items.item.0");
-      if ((string) json["name"] != "Cake") Error(json, "Expecting Cake");
-      if (Fetch<string>("id")   != "0001") Error(json, "Expecting id of 0001");
+
+      if (json["name"]                 == null) Error(json,   "No key `name`");
+      else if (json["name"].ToString() != "Cake") Error(json, "Expecting Cake");
+
+      if (json.Fetch<string>("id") != "0001") Error(json, "Expecting id of 0001");
 
       // When a node is a leaf of type Array we may want fetch an individual element using [] or generic
       json.Walk("items.item.0.magic");
-      if (((int) json[2]) != 333) Error(json,  "Expecting 333, not '{0}'",  json[2]);
-      if (Fetch<int>(3)   != 4444) Error(json, "expecting 4444, not '{0}'", json[3]);
+
+      if (json[2]              == null) Error(json, "No index 2");
+      else if (((int) json[2]) != 333) Error(json,  "Expecting 333, not '{0}'", json[2]);
+
+      if (json.Fetch<int>(3) != 4444) Error(json, "expecting 4444, not '{0}'", json[3]);
+
+      // You can use `IsA` or a retrieved node
+      json.Walk("items.item.0.magic");
+      if (!json.IsA<int>(json[2])) Error(json, "Testing IsA(object)");
+
+      // json is also an iterator for processing children of tree nodes
+      json.Walk("items.item.0");
+      string keys = "id,type,name,ppu,qty,magic,batters,topping";
+
+      foreach (string key in json) {
+        if (keys.IndexOf(key) == -1) Error(json, "Unexpected key '{0}'", key);
+      }
+
+      // json is also an iterator for processing entries in array
+      json.Walk("items.item.0.magic");
+      int[] values = {1, 22, 333, 4444, 55555};
+      int   i      = 0;
+
+      foreach (int entry in json.Cast<int>()) {
+        if (i >= values.Length) {
+          Error(json, "Too many values");
+          break;
+        }
+
+        if (entry != values[i++]) Error(json, "Array retrieval error for {0}", i);
+      }
+
+      if (i != values.Length) Error(json, "incorrect array length {0}", i);
+
+      // If we want to keep processing from an iterator we need to set an anchor to return to
+      json.Walk("items.item.0");
+
+      foreach (string key in json) {
+        using (json.Anchor) {
+          if (json.IsNode) json.Walk("batter");
+
+          if (key == "topping") {
+            if (json.Count != 7) Error(json, "Probably Anchor failure");
+          }
+        }
+      }
     }
 
     [SerializeField, Multiline] private string jsonSampler = @"{
@@ -321,7 +366,7 @@ namespace Askowl.Samples {
             ""ppu"": 0.55,
             ""qty"": 12,
             ""magic:"":
-              [ 1, 22, 333, 444, 5555 ],
+              [ 1, 22, 333, 4444, 55555 ],
             ""batters"":
               {
                 ""batter"":

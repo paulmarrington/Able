@@ -18,6 +18,7 @@
 * [x] create parseerro
 * [x] create accesserror
 * [x] add error messages to failed tests
-* [ ] using (Here){asdf}
+* [x] using (Here){asdf}
+* [ ] parse makes int double
 * [ ] add more tests
 
