@@ -220,22 +220,49 @@ namespace Askowl.Samples {
 
     public void JsonExample() {
       Debug.LogFormat("Expecting: {0}", jsonSampler);
-      JSON json = new JSON(jsonSampler);
 
+      // We cah pass in json for parsing...
+      JSON json = new JSON(jsonSampler);
+      // ... or use Reset later to change the string.
+      json.Reset(jsonSampler);
+
+      // Here will retrieve the current node or leaf based on type
       string rootAsString = json.Here<string>();
       if (rootAsString != null) Debug.LogErrorFormat("Root isn't a string");
 
-      string id = json.Get<string>("items", "item", "0", "id");
+      // You can also check the type of here
+      if (json.IsA<String>() != false) Debug.LogErrorFormat("IsA failed to work for root");
+
+      // If you know the structure of your JSON you can retrieve a leaf directly
+      string id = json.Get<string>("items", "item", 0, "id");
       if (id != "0001") Debug.LogErrorFormat("Expecting an ID of '0001', not {0}", id);
 
+      // If you provide the wrong type the default<T> is returned - 0 for an int
       int iid = json.Get<int>("items", "item", "0", "id");
-      if (iid != 0) Debug.LogErrorFormat("Expecting a failure in kind, not {0}",        iid);
+      if (iid != 0) Debug.LogErrorFormat("Expecting a failure in kind, not {0}", iid);
+      // If this is a problem, use IsA<>
       if (json.IsA<int>()) Debug.LogErrorFormat("Expecting a failure in kind, not {0}", iid);
 
+      // You can separate walking the tree and retrievaly using Walk, WalkOn, IsA and Here
       if (!json.Walk("items.item.0.type")) Debug.LogErrorFormat("Can't find the donut");
       if (!json.IsA<string>()) Debug.LogErrorFormat("Expecting Donut to be a string");
       string donut = json.Here<string>();
-      if (donut!="donut")Debug.LogErrorFormat("Expecting 'donut', not '{0}'",donut);
+      if (donut != "donut") Debug.LogErrorFormat("Expecting 'donut', not '{0}'", donut);
+
+      // Walk is absolute, but you can use WalkOn to get where you want in steps
+      if (!json.Walk("items.item")) Debug.LogErrorFormat("Can't find the first item");
+      if (!json.WalkOn(0, "item")) Debug.LogErrorFormat("Can't walk on to the donut");
+      donut = json.Here<string>();
+      if (donut != "donut") Debug.LogErrorFormat("Expecting 'donut', not '{0}'", donut);
+
+      // Because walking to a leave and expecting a certain type of data is common, we can combine them
+      if (!json.Walk<double>("items", "item", 0, "ppu"))
+        Debug.LogErrorFormat("Can't walk to a number");
+
+      // note that floating point numbers are doubles and integers are longs
+      double ppu = json.Here<double>();
+
+      Debug.LogErrorFormat("MORE TO DO");
     }
 
     [SerializeField, Multiline] private string jsonSampler = @"{

@@ -1,12 +1,11 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
+using UnityEngine;
 
 namespace Askowl {
-  using System;
-  using System.Collections.Generic;
-  using System.Text;
-  using System.Text.RegularExpressions;
-
   public class JSON {
+    #region SupportData
     private class Node : Dictionary<string, object> { };
 
     private class Raw {
@@ -15,56 +14,104 @@ namespace Askowl {
 
     private object here;
     private Node   root;
+    #endregion
 
-    private static readonly Node EmptyRoot = new Node();
-
+    #region PublicFieldAccess
     public T Here<T>() { return (here is T) ? (T) here : default(T); }
 
     public bool IsA<T>() { return here is T; }
 
+    public bool IsNode { get { return here is Node; } }
+
+    public bool IsArray { get { return here is Array; } }
+
+    public string ErrorMessage { get; private set; }
+
+    public int Count {
+      get {
+        return (IsNode)  ? ((Node) here).Count :
+               (IsArray) ? ((object[]) here).Length : 1;
+      }
+    }
+    #endregion
+
+    #region Initialisation
     public JSON(string json = null) { Reset(json); }
 
     public void Reset(string json) { root = Parse(json); }
 
-    public T Get<T>(params string[] path) {
-      here = root;
+    #region AccessNodes
+    public T Get<T>(params object[] path) {
       Walk(path);
       return Here<T>();
     }
+    #endregion
 
-    public bool Walk(params string[] path) {
-      if (path.Length == 1) path = path[0].Split('.');
+    public bool Walk(params object[] path) {
+      here = root;
+      return WalkOn(path);
+    }
 
-      for (int i = 0; i < path.Length; i++) {
-        if (!Step(path[i])) return false;
+    public bool Walk<T>(params object[] path) {
+      here = root;
+      return WalkOn<T>(path);
+    }
+
+    public bool WalkOn(params object[] path) {
+      if ((path.Length == 1) && (path[0] is string)) {
+        path = ((string) path[0]).Split('.');
       }
 
+      for (int i = 0; i < path.Length; i++) {
+        if (!Stepper(path[i])) return false;
+      }
+
+      return true;
+    }
+
+    public bool WalkOn<T>(params object[] path) { return WalkOn(path) && IsA<T>(); }
+
+    public string[] List(params string[] path) {
+      if ((path.Length > 0) && !Walk(path)) return new string[0];
+
+      if (IsNode) return (new List<string>(((Node) here).Keys)).ToArray();
+      if (IsArray) return Array.ConvertAll(((object[]) here), x => x.ToString());
+
+      return new string[] {here.ToString()};
+    }
+    #endregion
+
+    #region AccessSupport
+    private bool Stepper(object next) {
+      if (IsNode) return Step(next.ToString());
+      if (!IsArray) return false;
+      if (next is int?) return Step((int) next);
+
+      int idx;
+      return int.TryParse(next.ToString(), out idx) && Step(idx);
+    }
+
+    private bool Step(int idx) {
+      var array = (object[]) here;
+      if (idx >= array.Length) return false;
+
+      here = array[idx];
       return true;
     }
 
     private bool Step(string next) {
-      if (here is Node) {
-        Node node = here as Node;
-        if (!node.ContainsKey(next)) return false;
+      Node node = here as Node;
+      if (!node.ContainsKey(next)) return false;
 
-        here = node[next];
-      } else if (here is Array) {
-        var array = (object[]) here;
-        int idx;
-        if (!int.TryParse(next, out idx) || (idx >= array.Length)) return false;
-
-        here = array[idx];
-      } else {
-        return false;
-      }
-
+      here = node[next];
       return true;
     }
+    #endregion
 
+    #region Parsing
     private Node Parse(string json) {
       Node node = new Node();
       int  idx  = 0;
-
       if (!CheckToken('{', json, ref idx)) return node;
 
       return ParseToNode(node, json, ref idx);
@@ -97,7 +144,6 @@ namespace Askowl {
       if (!CheckToken('"', json, ref idx)) return false;
 
       string key = ParseString(json, ref idx);
-
       if (!CheckToken(':', json, ref idx)) return false;
       if (!SkipWhiteSpace(json, ref idx)) return false;
 
@@ -196,5 +242,6 @@ namespace Askowl {
       while ((idx < json.Length) && IsWhiteSpace(json[idx])) idx++;
       return idx < json.Length;
     }
+    #endregion
   }
 }
