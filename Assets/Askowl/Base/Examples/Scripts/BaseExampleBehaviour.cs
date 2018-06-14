@@ -231,10 +231,6 @@ namespace Askowl.Samples {
       // ... or use Reset later to change the string.
       json.Parse(jsonSampler);
 
-      // Here will retrieve the current node or leaf based on type
-      string rootAsString = json.Here<string>();
-      if (rootAsString != null) Error(json, "Root isn't a string");
-
       // You can also check the type of here
       if (json.IsA<string>() != false) Error(json, "IsA failed to work for root");
 
@@ -346,13 +342,15 @@ namespace Askowl.Samples {
 
       foreach (string key in json) {
         using (json.Anchor) {
-          if (json.IsNode) json.Walk("batter");
+          json.WalkOn(key);
 
           if (key == "topping") {
-            if (json.Count != 7) Error(json, "Probably Anchor failure");
+            if (json.Count != 7) Error(json, "Probably Anchor failure ({0})", json.Count);
           }
         }
       }
+
+      Debug.Log("JsonExample passed");
     }
 
     [SerializeField, Multiline] private string jsonSampler = @"{

@@ -1,6 +1,7 @@
 # Askowl-Base
 ## Release 2018-??
 
+- [ ] move Json to it's own project
 - [ ] Doc: JSON
 - [ ] Remove all that is not base from documentation
 - [ ] Doc: objects.path(gameobject)
@@ -20,7 +21,7 @@
 * [x] add error messages to failed tests
 * [x] using (Here){asdf}
 * [x] parse makes int double
-* [ ] add As
+* [x] add As
 * [ ] Add pin/restore
-* [ ] add more tests
+* [x] add more tests
 

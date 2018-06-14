@@ -8,7 +8,7 @@ namespace Askowl {
   /// <summary>
   /// Parse JSON of unknown format to a dictionary and provide access methods
   /// </summary>
-  public class Json : IEnumerable, IDisposable {
+  public class Json : IEnumerable<string>, IDisposable {
     #region PublicInterface
     /// <summary>
     /// Constructor that can optionally parse a JSON string
@@ -236,21 +236,60 @@ namespace Askowl {
     public object this[int i] { get { return Fetch<object>(i); } }
 
     /// <summary>
-    /// Use enumerator to itnerate through all children in a node. Use on leaf nodes to retrieve keys or array items. Use with active nodes to process all children.
+    /// Use enumerator to iterate through all children in a node. Use on leaf nodes to retrieve keys or array items.
+    /// Use with active nodes to process all children. If all the children are of one type, use <see cref="As{T}()"/>.
     /// </summary>
     /// <code>
     /// json.Walk("to.tree.leaf");
-    /// foreach(string key in json) process(key, json[key]);
+    /// foreach(object key in json) process(key, json[key]);
     /// </code>
     /// <returns></returns>
-    public IEnumerator GetEnumerator() {
-      if (IsNode) return ((Node) here).Keys.GetEnumerator();
-      if (IsArray) return ((object[]) here).GetEnumerator();
+    IEnumerator IEnumerable.GetEnumerator() { return GetEnumerable().GetEnumerator(); }
 
-      return OneNode().GetEnumerator();
+    private IEnumerable GetEnumerable() {
+      return IsNode ? ((Node) here).Keys : IsArray ? (IEnumerable) here : OneNode();
     }
 
     private IEnumerable OneNode() { yield return here; }
+
+    /// <summary>
+    /// Use enumerator to iterate through all children as strings. Most useful to retrieve node keys or leaf nodes when you only want strings.
+    /// </summary>
+    /// <code>
+    /// json.Walk("to.tree.leaf");
+    /// foreach(string key in json) print(key + "=" + json[key]);
+    /// </code>
+    /// <returns></returns>
+    IEnumerator<string> IEnumerable<string>.GetEnumerator() {
+      return As<string>(GetEnumerable()).GetEnumerator();
+    }
+
+    /// <summary>
+    /// Used to convert each item of an enumeration into a known type
+    /// </summary>
+    /// <code>
+    /// json.Walk("to.tree.arrayLeaf");
+    /// var there = json.Here&lt;json.Node>();
+    /// foreach(int count in json.As&lt;int>(there)) sum += count;
+    /// </code>
+    /// <typeparam name="T">Type of items needed</typeparam>
+    /// <returns>Converted object or default(T) if it can't be found</returns>
+    public IEnumerable<T> As<T>(IEnumerable enumerable) {
+      foreach (object item in enumerable) yield return Convert<T>(item);
+    }
+
+    /// <summary>
+    /// Used to convert each item of an enumeration of the current node into a known type
+    /// </summary>
+    /// <code>
+    /// json.Walk("to.tree.arrayLeaf");
+    /// foreach(int count in json.As&lt;int>()) sum += count;
+    /// </code>
+    /// <typeparam name="T">Type of items needed</typeparam>
+    /// <returns>Converted object or default(T) if it can't be found</returns>
+    public IEnumerable<T> As<T>() {
+      foreach (object item in GetEnumerable()) yield return Convert<T>(item);
+    }
     #endregion
     #endregion
 
@@ -444,7 +483,7 @@ namespace Askowl {
       if (here == null) {
         ErrorMessage = string.Format("No `here` reference: {0}", string.Format(fmt, args));
       } else {
-        string nodeText = (here is Node) ? string.Join(", ", this.Cast<string>().ToArray()) : "";
+        string nodeText = (here is Node) ? string.Join(", ", this.ToArray()) : "";
 
         ErrorMessage = string.Format(
           "JSON Access Failure: {0} -  at {1}  [[{2}]]",
@@ -467,14 +506,18 @@ namespace Askowl {
     }
 
     private T Convert<T>(object node) {
-      if ((typeof(T) == typeof(int))    && (node is long)) node   = (int) ((long) node);
-      if ((typeof(T) == typeof(float))  && (node is double)) node = (float) ((double) node);
-      if ((typeof(T) == typeof(float))  && (node is long)) node   = (float) ((long) node);
-      if ((typeof(T) == typeof(double)) && (node is long)) node   = (double) ((long) node);
-      if (node is T) return (T) node;
-      if (node == null) return default(T);
+      // ReSharper disable EnforceIfStatementBraces
+      if (node           == null) node                                 = default(T);
+      else if (typeof(T) == typeof(string)) node                       = node.ToString();
+      else if ((typeof(T) == typeof(int))    && (node is long)) node   = (int) ((long) node);
+      else if ((typeof(T) == typeof(float))  && (node is double)) node = (float) ((double) node);
+      else if ((typeof(T) == typeof(float))  && (node is long)) node   = (float) ((long) node);
+      else if ((typeof(T) == typeof(double)) && (node is long)) node   = (double) ((long) node);
+      // ReSharper restore EnforceIfStatementBraces
 
-//      string nodeName = (node == null) ? "null" : node.GetType().Name;
+      if (node is T) return (T) node;
+
+      // ReSharper disable once PossibleNullReferenceException
       AccessFailure("Expecting type {0} for conversion - was {1}", typeof(T), node.GetType().Name);
       return default(T);
     }
