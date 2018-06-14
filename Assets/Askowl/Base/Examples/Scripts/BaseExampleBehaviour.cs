@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if UNITY_EDITOR && AskowlBase
+using System;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.TestTools;
@@ -6,7 +7,6 @@ using UnityEngine.UI;
 
 // ReSharper disable MissingXmlDoc
 
-#if UNITY_EDITOR && AskowlBase
 namespace Askowl.Samples {
   public class BaseExampleBehaviour : MonoBehaviour {
     public void FindDisabledObject() {
@@ -70,7 +70,7 @@ namespace Askowl.Samples {
 
     public void FindComponentLocal() {
       GameObject textObject = Objects.FindGameObject("Canvas");
-      Text       text2      = Components.Find<Text>(textObject, "Text 2");
+      Text       text2 = Components.Find<Text>(textObject, "Text 2");
 
       if (text2 == null) {
         Debug.LogErrorFormat("Failed to find the game object text component with a local search");
@@ -141,7 +141,7 @@ namespace Askowl.Samples {
     }
 
     public void SelectorExample() {
-      int[] ints   = {0, 1, 2, 3, 4};
+      int[] ints = {0, 1, 2, 3, 4};
       int[] counts = {0, 0, 0, 0, 0};
 
       // default is random
@@ -324,7 +324,7 @@ namespace Askowl.Samples {
       // `As` returns default(T) if it cannot be case or converted
       json.Walk("items.item.0.magic");
       int[] values = {1, 22, 333, 4444, 55555};
-      int   i      = 0;
+      int   i = 0;
 
       foreach (int entry in json.As<int>()) {
         if (i >= values.Length) {
