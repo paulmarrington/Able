@@ -143,6 +143,21 @@ MonoBehaviour:
   range:
     min: 12
     max: 18
+  jsonSampler: "{\n  \"items\":\n    {\n      \"item\":\n        [\n          {\n
+    \           \"id\": \"0001\",\n            \"type\": \"donut\",\n            \"name\":
+    \"Cake\",\n            \"ppu\": 0.55,\n            \"qty\": 12,\n            \"magic\":\n
+    \             [ 1, 22, 333, 4444, 55555 ],\n            \"batters\":\n              {\n
+    \               \"batter\":\n                  [\n                    { \"id\":
+    \"1001\", \"type\": \"Regular\" },\n                    { \"id\": \"1002\", \"type\":
+    \"Chocolate\" },\n                    { \"id\": \"1003\", \"type\": \"Blueberry\"
+    },\n                    { \"id\": \"1004\", \"type\": \"Devil's Food\" }\n                  ]\n
+    \             },\n            \"topping\":\n              [\n                {
+    \"id\": \"5001\", \"type\": \"None\" },\n                { \"id\": \"5002\", \"type\":
+    \"Glazed\" },\n                { \"id\": \"5005\", \"type\": \"Sugar\" },\n                {
+    \"id\": \"5007\", \"type\": \"Powdered Sugar\" },\n                { \"id\": \"5006\",
+    \"type\": \"Chocolate with Sprinkles\" },\n                { \"id\": \"5003\",
+    \"type\": \"Chocolate\" },\n                { \"id\": \"5004\", \"type\": \"Maple\"
+    }\n              ]\n          }\n        ]\n    }\n}\n"
 --- !u!4 &33540762
 Transform:
   m_ObjectHideFlags: 0
@@ -551,7 +566,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.01, y: 0.5}
   m_AnchorMax: {x: 0.79, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: -111}
+  m_AnchoredPosition: {x: 0, y: -113}
   m_SizeDelta: {x: 0, y: 60}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &422248274

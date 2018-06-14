@@ -296,7 +296,7 @@ namespace Askowl.Samples {
       json.WalkOn("0.qty");
       if (json.NodeType != typeof(long)) Error(json, "Expecting a whole number");
 
-      // When a node is a leaf of type Node we may want fetch an individual child using [] or generic
+      // When a node is a leaf of type Node we may want fetch an individual child using [] or generic Fetch
       json.Walk("items.item.0");
 
       if (json["name"]                 == null) Error(json,   "No key `name`");
@@ -304,11 +304,11 @@ namespace Askowl.Samples {
 
       if (json.Fetch<string>("id") != "0001") Error(json, "Expecting id of 0001");
 
-      // When a node is a leaf of type Array we may want fetch an individual element using [] or generic
+      // When a node is a leaf of type Array we may want fetch an individual element using [] or generic Fetch
       json.Walk("items.item.0.magic");
 
-      if (json[2]              == null) Error(json, "No index 2");
-      else if (((int) json[2]) != 333) Error(json,  "Expecting 333, not '{0}'", json[2]);
+      if (json[2]               == null) Error(json, "No index 2");
+      else if (((long) json[2]) != 333) Error(json,  "Expecting 333, not '{0}'", json[2]);
 
       if (json.Fetch<int>(3) != 4444) Error(json, "expecting 4444, not '{0}'", json[3]);
 
@@ -325,11 +325,12 @@ namespace Askowl.Samples {
       }
 
       // json is also an iterator for processing entries in array
+      // `As` returns default(T) if it cannot be case or converted
       json.Walk("items.item.0.magic");
       int[] values = {1, 22, 333, 4444, 55555};
       int   i      = 0;
 
-      foreach (int entry in json.Cast<int>()) {
+      foreach (int entry in json.As<int>()) {
         if (i >= values.Length) {
           Error(json, "Too many values");
           break;
@@ -365,7 +366,7 @@ namespace Askowl.Samples {
             ""name"": ""Cake"",
             ""ppu"": 0.55,
             ""qty"": 12,
-            ""magic:"":
+            ""magic"":
               [ 1, 22, 333, 4444, 55555 ],
             ""batters"":
               {

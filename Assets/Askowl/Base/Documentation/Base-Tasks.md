@@ -19,6 +19,8 @@
 * [x] create accesserror
 * [x] add error messages to failed tests
 * [x] using (Here){asdf}
-* [ ] parse makes int double
+* [x] parse makes int double
+* [ ] add As
+* [ ] Add pin/restore
 * [ ] add more tests
 

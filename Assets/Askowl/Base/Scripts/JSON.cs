@@ -278,7 +278,7 @@ namespace Askowl {
     }
 
     private bool Fetch(int index, ref object value) {
-      if (!IsArray) return AccessFailure("Not an Array for {0}", index);
+      if (!IsArray) return AccessFailure("Not an Array (is {1}) for {0}", index, NodeType);
 
       var array = (object[]) here;
 
@@ -300,10 +300,7 @@ namespace Askowl {
       Node node = here as Node;
 
       // ReSharper disable once PossibleNullReferenceException
-      if (!node.ContainsKey(next)) {
-        string nodes = string.Join(", ", this.Cast<string>().ToArray());
-        return AccessFailure("No node '{0}' in '{1}'", next, nodes);
-      }
+      if (!node.ContainsKey(next)) return AccessFailure("No node '{0}'", next);
 
       value = node[next];
       return true;
@@ -447,8 +444,11 @@ namespace Askowl {
       if (here == null) {
         ErrorMessage = string.Format("No `here` reference: {0}", string.Format(fmt, args));
       } else {
-        ErrorMessage = string.Format("JSON Access Failure: {0} -  at {1}",
-                                     string.Format(fmt, args), here.GetType().Name);
+        string nodeText = (here is Node) ? string.Join(", ", this.Cast<string>().ToArray()) : "";
+
+        ErrorMessage = string.Format(
+          "JSON Access Failure: {0} -  at {1}  [[{2}]]",
+          string.Format(fmt, args), here.GetType().Name, nodeText);
       }
 
       return false;
@@ -472,8 +472,10 @@ namespace Askowl {
       if ((typeof(T) == typeof(float))  && (node is long)) node   = (float) ((long) node);
       if ((typeof(T) == typeof(double)) && (node is long)) node   = (double) ((long) node);
       if (node is T) return (T) node;
+      if (node == null) return default(T);
 
-      AccessFailure("Expecting type {0} for conversion - was {1}", typeof(T), node.GetType());
+//      string nodeName = (node == null) ? "null" : node.GetType().Name;
+      AccessFailure("Expecting type {0} for conversion - was {1}", typeof(T), node.GetType().Name);
       return default(T);
     }
     #endregion
