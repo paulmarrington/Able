@@ -168,6 +168,9 @@ namespace Askowl {
     /// </param>
     /// <returns>false if path does not exist</returns>
     public bool WalkOn<T>(params object[] path) { return WalkOn(path) && CheckIsA<T>(); }
+
+    public object Pin()             { return here; }
+    public void   Reset(object pin) { here = pin; }
     #endregion
 
     #region NodeEnumeration

@@ -224,7 +224,7 @@ namespace Askowl.Samples {
     }
 
     public void JsonExample() {
-      Debug.LogFormat("Expecting: {0}", jsonSampler);
+      Debug.LogFormat("Using JSON: {0}", jsonSampler);
 
       // We cah pass in json for parsing...
       Json json = new Json(jsonSampler);
@@ -349,6 +349,18 @@ namespace Askowl.Samples {
           }
         }
       }
+
+      // Get back, get back, get back to where we once belonged
+      // This will work even if we are use Parse
+      json.Walk("items.item.0.name");
+      var pin = json.Pin();
+      if (json.Here<string>() != "Cake") Error(json, "Expecting cake");
+
+      json.Walk("items.item.0.batters.batter.1.id");
+      if (json.Here<string>() != "1002") Error(json, "Expecting batter 1002");
+
+      json.Reset(pin);
+      if (json.Here<string>() != "Cake") Error(json, "Expecting cake");
 
       Debug.Log("JsonExample passed");
     }
