@@ -1,12 +1,19 @@
 # Askowl-Base
 ## Release 2018-??
 
+- [ ] Doc: IsDisplaying PlayModeController
+- [ ] Docx: IsDisplaying PlayModeController
+- [ ] Doc: IsDisplaying PlayModeTests
+- [ ] Docx: IsDisplaying PlayModeTests
+- [ ] Doc: IsNotDisplaying PlayModeTests
+- [ ] Docx: IsNotDisplaying PlayModeTests
 - [ ] move Json to it's own project
 - [ ] split up functionality
 - [ ] Add JSON writer
 - [ ] Doc: JSON
 - [ ] Remove all that is not base from documentation
 - [ ] Doc: objects.path(gameobject)
+- [ ] Doc: Csv
 - [ ] Docx - relink
 - [ ] Link to Wix
 

@@ -66,6 +66,18 @@ namespace Askowl {
       return objects[0];
     }
 
+    public IEnumerator IsDisplaying(string gameObjectPath, float afterSeconds) {
+      yield return new WaitForSeconds(afterSeconds);
+
+      Assert.IsTrue(IsDisplaying(gameObjectPath));
+    }
+
+    public IEnumerator IsNotDisplaying(string gameObjectPath, float afterSeconds) {
+      yield return new WaitForSeconds(afterSeconds);
+
+      Assert.IsFalse(IsDisplaying(gameObjectPath));
+    }
+
     /// <inheritdoc />
     /// <remarks><a href="http://customassets.marrington.net#playmodetests">More...</a></remarks>
     protected override IEnumerator PushButton(params string[] path) {

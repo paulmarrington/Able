@@ -49,5 +49,11 @@ namespace Askowl {
     protected virtual IEnumerator PushButton(params string[] path) {
       yield return PushButton(Components.Find<Button>(path));
     }
+
+    public bool IsDisplaying(string gameObjectPath) {
+      Renderer renderer = Components.Find<Renderer>(gameObjectPath);
+      return (renderer != null) && renderer.isVisible;
+    }
+
   }
 }
