@@ -39,7 +39,7 @@ namespace Askowl {
     /// <remarks><a href="http://customassets.marrington.net#playmodetests">More...</a></remarks>
     protected static T Component<T>(params string[] path) where T : Component {
       T component = Components.Find<T>(path);
-      Assert.AreNotEqual(default(T), component);
+      Assert.AreNotEqual(default(T), component, "For button " + Csv<string>.Instance(path).ToString());
       return component;
     }
 
@@ -66,16 +66,8 @@ namespace Askowl {
       return objects[0];
     }
 
-    public IEnumerator IsDisplaying(string gameObjectPath, float afterSeconds) {
-      yield return new WaitForSeconds(afterSeconds);
-
-      Assert.IsTrue(IsDisplaying(gameObjectPath));
-    }
-
-    public IEnumerator IsNotDisplaying(string gameObjectPath, float afterSeconds) {
-      yield return new WaitForSeconds(afterSeconds);
-
-      Assert.IsFalse(IsDisplaying(gameObjectPath));
+    public IEnumerator IsDisplayingInUI(string gameObjectPath, bool visible = true) {
+      while (base.IsDisplayingInUI(gameObjectPath) != visible) yield return null;
     }
 
     /// <inheritdoc />
