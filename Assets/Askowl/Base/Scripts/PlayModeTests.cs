@@ -39,7 +39,10 @@ namespace Askowl {
     /// <remarks><a href="http://customassets.marrington.net#playmodetests">More...</a></remarks>
     protected static T Component<T>(params string[] path) where T : Component {
       T component = Components.Find<T>(path);
-      Assert.AreNotEqual(default(T), component, "For button " + Csv<string>.Instance(path).ToString());
+
+      Assert.AreNotEqual(default(T), component,
+                         "For button " + Csv<string>.Instance(path).ToString());
+
       return component;
     }
 
