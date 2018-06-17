@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace Askowl {
   /// <summary>
@@ -23,6 +24,8 @@ namespace Askowl {
     /// <returns>false on error and sets <see cref="ErrorMessage"/></returns>
     // ReSharper disable once UnusedMethodReturnValue.Global
     public bool Parse(string jsonText) {
+      if (string.IsNullOrEmpty(jsonText)) return ParseError("json input has no content");
+
       json         = jsonText;
       idx          = 0;
       ErrorMessage = null;
@@ -353,10 +356,7 @@ namespace Askowl {
     private bool CheckToken(char token) {
       if (!SkipWhiteSpace()) return false;
 
-      if (json[idx++] != token) {
-        ParseError("Expecting token '{0}", token);
-        return false;
-      }
+      if (json[idx++] != token) return ParseError("Expecting token '{0}'", token);
 
       return SkipWhiteSpace();
     }
@@ -475,11 +475,14 @@ namespace Askowl {
     #endregion
 
     #region ErrorProcessing
-    private void ParseError(string fmt, params object[] args) {
-      string part = json.Substring((idx < 10) ? 10 : idx - 1, 32);
+    private bool ParseError(string fmt, params object[] args) {
+      int    length = Mathf.Min(32, json.Length - idx);
+      string part   = (length > 0) ? json.Substring(idx - 1, length) : "";
 
       ErrorMessage = string.Format("JSON Parsing Error: {0} - at {1}, from {2}",
                                    string.Format(fmt, args), idx, part);
+
+      return false;
     }
 
     private bool AccessFailure(string fmt, params object[] args) {
