@@ -1,6 +1,8 @@
 # Askowl-Base
 ## Release 2018-??
 
+- [ ] Doc: Polling, IPolling
+- [ ] Test: Polling
 - [ ] Doc: IsDisplaying PlayModeController
 - [ ] Docx: IsDisplaying PlayModeController
 - [ ] Doc: IsDisplaying PlayModeTests
