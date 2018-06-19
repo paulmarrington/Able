@@ -3,7 +3,6 @@
 namespace Askowl {
   using System;
   using System.Collections.Generic;
-  using JetBrains.Annotations;
 
   /// <inheritdoc />
   /// <summary> Pick one item from a list. </summary>
@@ -55,7 +54,6 @@ namespace Askowl {
     /// <remarks><a href="http://customassets.marrington.net#selectorchoices">More...</a></remarks>
     public T[] Choices {
       get { return choices; }
-
       set {
         choices = value;
         Init();
