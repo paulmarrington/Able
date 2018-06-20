@@ -3,6 +3,8 @@
 
 - [ ] Give Polling it's own project
 - [ ] Poll custom assets as well as mono behaviours.
+- [ ] doc and test for Set
+- [ ] doc and test for Compare
 - [ ] Doc: Polling, IPolling
 - [ ] Test: Polling
 - [ ] Doc: IsDisplaying PlayModeController
