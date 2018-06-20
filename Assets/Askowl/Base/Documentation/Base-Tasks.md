@@ -1,6 +1,8 @@
 # Askowl-Base
 ## Release 2018-??
 
+- [ ] Give Polling it's own project
+- [ ] Poll custom assets as well as mono behaviours.
 - [ ] Doc: Polling, IPolling
 - [ ] Test: Polling
 - [ ] Doc: IsDisplaying PlayModeController
