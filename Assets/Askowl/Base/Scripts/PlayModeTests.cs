@@ -40,8 +40,8 @@ namespace Askowl {
     protected static T Component<T>(params string[] path) where T : Component {
       T component = Components.Find<T>(path);
 
-      Assert.AreNotEqual(default(T), component,
-                         "For button " + Csv<string>.Instance(path).ToString());
+      Assert.AreNotEqual(expected: default(T), actual: component,
+                         message: "For button " + Csv<string>.Instance(path));
 
       return component;
     }
@@ -69,6 +69,12 @@ namespace Askowl {
       return objects[0];
     }
 
+    /// <summary>
+    /// Wait for a UI component to be visible or invisible to the player
+    /// </summary>
+    /// <param name="gameObjectPath">Path to the game object we want (in)visible</param>
+    /// <param name="visible">true to wait until visible, fals to wait until not visible</param>
+    /// <returns></returns>
     public IEnumerator IsDisplayingInUI(string gameObjectPath, bool visible = true) {
       while (base.IsDisplayingInUI(gameObjectPath) != visible) yield return null;
     }
