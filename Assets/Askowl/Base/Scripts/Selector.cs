@@ -1,8 +1,14 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
+using System;
+using System.Collections.Generic;
+using UnityEditor.iOS;
+using UnityEngine;
+using Random = UnityEngine.Random;
+
 namespace Askowl {
-  using System;
-  using System.Collections.Generic;
+//  using System;
+//  using System.Collections.Generic;
 
   /// <inheritdoc />
   /// <summary> Pick one item from a list. </summary>
@@ -21,17 +27,19 @@ namespace Askowl {
       if (choices != null) this.choices = choices;
       choices = this.choices;
 
-      if (!isRandom) { // cycle through list
+      if (choices.Length == 0) {
+        picker = () => default(T);
+      } else if (!isRandom) { // cycle through list
         picker = () => choices[cycleIndex++ % choices.Length];
       } else if (choices.Length >= exhaustiveBelow) { // randoms election
-        picker = () => choices[random.Next(minValue: 0, maxValue: choices.Length)];
+        picker = () => choices[Random.Range(0, choices.Length)];
       } else {
         picker = () => { // different random choice until list exhausted, then repeat
           if (remainingSelections.Count == 0) {
             remainingSelections = new List<T>(collection: choices);
           }
 
-          cycleIndex = random.Next(minValue: 0, maxValue: remainingSelections.Count);
+          cycleIndex = Random.Range(0, remainingSelections.Count);
           T result = remainingSelections[index: cycleIndex];
           remainingSelections.RemoveAt(index: cycleIndex);
           return result;
@@ -40,8 +48,6 @@ namespace Askowl {
 
       Init();
     }
-
-    private readonly Random random = new Random();
 
     private void Init() {
       remainingSelections = new List<T>(collection: choices);

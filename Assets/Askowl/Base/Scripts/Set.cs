@@ -4,7 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using Askowl;
 using UnityEngine;
 
 namespace Askowl {
@@ -59,7 +58,7 @@ namespace Askowl {
     /// at the next Pick() call. It can be overridden by more complex Set types.
     /// </summary>
     protected virtual void BuildSelector() {
-      Selector = new Selector<T>(Elements.ToArray(), !Cycle, ExhaustiveBelow);
+      selector = new Selector<T>(Elements.ToArray(), !Cycle, ExhaustiveBelow);
     }
 
     /// <inheritdoc />
@@ -73,12 +72,19 @@ namespace Askowl {
     /// If something has changed the underlying data we need to tell the Selector
     /// that it is now out of date.
     /// </summary>
-    public void Reset() { Selector = null; }
+    public void Reset() { selector = null; }
 
     /// <summary>
-    /// Delector used to pick an element from the set
+    /// Detector used to pick an element from the set
     /// </summary>
-    protected Selector<T> Selector;
+    protected Selector<T> Selector {
+      get {
+        if (selector == null) BuildSelector();
+        return selector;
+      }
+    }
+
+    private Selector<T> selector;
     #endregion
 
     #region Mutable
