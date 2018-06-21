@@ -8,47 +8,98 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-[CanEditMultipleObjects,
- CustomEditor(inspectedType: typeof(MonoBehaviour), editorForChildClasses: true)]
-public class MonoBehaviourEditor : Editor { }
+namespace CustomAsset {
+  #region CustomAssetsInMonoBehaviour
+  [CanEditMultipleObjects,
+   CustomEditor(inspectedType: typeof(MonoBehaviour), editorForChildClasses: true)]
+  public class MonoBehaviourEditor : Editor { }
 
-[CustomPropertyDrawer(type: typeof(ScriptableObject), useForChildren: true)]
-public class ScriptableObjectDrawer : PropertyDrawer {
-  private static readonly Dictionary<string, bool>
-    FoldoutByType = new Dictionary<string, bool>();
+  [CustomPropertyDrawer(type: typeof(ScriptableObject), useForChildren: true)]
+  public class ScriptableObjectDrawer : PropertyDrawer {
+    private static readonly Dictionary<string, bool>
+      FoldoutByType = new Dictionary<string, bool>();
 
-  private Editor editor = null;
+    private Editor editor = null;
 
-  public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
-    EditorGUI.PropertyField(position, property, label, includeChildren: true);
+    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
+      EditorGUI.PropertyField(position, property, label, includeChildren: true);
 
-    bool foldout = false;
+      bool foldout = false;
 
-    if (property.objectReferenceValue != null) {
-      string objectReferenceValueType = property.objectReferenceValue.name;
+      if (property.objectReferenceValue != null) {
+        string objectReferenceValueType = property.objectReferenceValue.name;
 
-      bool foldoutExists =
-        FoldoutByType.TryGetValue(key: objectReferenceValueType, value: out foldout);
+        bool foldoutExists =
+          FoldoutByType.TryGetValue(key: objectReferenceValueType, value: out foldout);
 
-      foldout = EditorGUI.Foldout(position: position, foldout: foldout, content: GUIContent.none);
+        foldout = EditorGUI.Foldout(position: position, foldout: foldout, content: GUIContent.none);
 
-      if (foldoutExists) {
-        FoldoutByType[objectReferenceValueType] = foldout;
-      } else {
-        FoldoutByType.Add(objectReferenceValueType, foldout);
+        if (foldoutExists) {
+          FoldoutByType[objectReferenceValueType] = foldout;
+        } else {
+          FoldoutByType.Add(objectReferenceValueType, foldout);
+        }
       }
+
+      if (!foldout) return;
+
+      EditorGUI.indentLevel++;
+
+      if (!editor) {
+        Editor.CreateCachedEditor(
+          targetObject: property.objectReferenceValue, editorType: null,
+          previousEditor: ref editor);
+      }
+
+      editor.OnInspectorGUI();
+      EditorGUI.indentLevel--;
     }
-
-    if (!foldout) return;
-
-    EditorGUI.indentLevel++;
-
-    if (!editor) {
-      Editor.CreateCachedEditor(
-        targetObject: property.objectReferenceValue, editorType: null, previousEditor: ref editor);
-    }
-
-    editor.OnInspectorGUI();
-    EditorGUI.indentLevel--;
   }
+  #endregion
+#region ValueLabelChange
+  [   CustomEditor(inspectedType: typeof(Base), editorForChildClasses: true)]
+  public class CustomAssetEditor : Editor { }
+
+  [CustomPropertyDrawer(type: typeof(ScriptableObject), useForChildren: true)]
+  public class ScriptableObjectDrawer : PropertyDrawer {
+    private static readonly Dictionary<string, bool>
+      FoldoutByType = new Dictionary<string, bool>();
+
+    private Editor editor = null;
+
+    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
+      EditorGUI.PropertyField(position, property, label, includeChildren: true);
+
+      bool foldout = false;
+
+      if (property.objectReferenceValue != null) {
+        string objectReferenceValueType = property.objectReferenceValue.name;
+
+        bool foldoutExists =
+          FoldoutByType.TryGetValue(key: objectReferenceValueType, value: out foldout);
+
+        foldout = EditorGUI.Foldout(position: position, foldout: foldout, content: GUIContent.none);
+
+        if (foldoutExists) {
+          FoldoutByType[objectReferenceValueType] = foldout;
+        } else {
+          FoldoutByType.Add(objectReferenceValueType, foldout);
+        }
+      }
+
+      if (!foldout) return;
+
+      EditorGUI.indentLevel++;
+
+      if (!editor) {
+        Editor.CreateCachedEditor(
+          targetObject: property.objectReferenceValue, editorType: null,
+          previousEditor: ref editor);
+      }
+
+      editor.OnInspectorGUI();
+      EditorGUI.indentLevel--;
+    }
+  }
+  #endregion
 }
