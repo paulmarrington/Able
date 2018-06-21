@@ -4,13 +4,14 @@ using UnityEngine;
 
 namespace Askowl {
   public interface IPolling {
-    void Update();
+    void Poll();
   }
 
   public class Polling : MonoBehaviour {
-    [SerializeField] private float    updateIntervalInSeconds;
-    [SerializeField] private IPolling toPoll;
-    [SerializeField] private bool     running;
+    [SerializeField] private float      updateIntervalInSeconds;
+    [SerializeField] private IPolling[] componentsToPoll;
+
+    private bool running;
 
     public bool Running {
       get { return running; }
@@ -20,12 +21,11 @@ namespace Askowl {
       }
     }
 
-    private void OnEnable() { Running = running; }
+    private void OnEnable() { StartPolling(); }
 
     /// <summary>
-    /// Start a coroutine to poll the gyroscope on the given MonoBehaviour.
+    /// Start a coroutine to poll a component on the given MonoBehaviour.
     /// </summary>
-    /// <param name="monoBehaviour">The MonoBehaviour that owns the polling coroutine</param>
     public virtual void StartPolling() {
       if (updateIntervalInSeconds > 0) StartCoroutine(StartPollingCoroutine());
     }
@@ -34,7 +34,7 @@ namespace Askowl {
       var interval = new WaitForSecondsRealtime(updateIntervalInSeconds);
 
       while (running) {
-        toPoll.Update();
+        foreach (IPolling component in componentsToPoll) component.Poll();
         yield return interval;
       }
     }
