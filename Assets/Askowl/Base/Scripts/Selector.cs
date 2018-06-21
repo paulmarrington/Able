@@ -15,23 +15,36 @@ namespace Askowl {
   /// <typeparam name="T">Type of item. It can be a primative, object or even a Unity Asset</typeparam>
   /// <remarks><a href="http://customassets.marrington.net#selector">More...</a></remarks>
   public sealed class Selector<T> : Pick<T> {
-    private          T[]     choices = { };
-    private readonly Func<T> picker;
+    /// <summary>
+    /// Defaults to random. Set false to cycle through entries sequentially
+    /// </summary>
+    public bool IsRandom = true;
+
+    /// <summary>
+    /// If the list is shorter then select items randomly, but never choose one a second time until
+    /// all have been picked. This is useful for short lists to reduce repeats.
+    /// </summary>
+    public int ExhaustiveBelow = 30;
+
+    private T[]     choices = { };
+    private Func<T> picker;
 
     /// <summary>Constructor to create selection list.</summary>
     /// <remarks><a href="http://customassets.marrington.net#selectorinitialiser">More...</a></remarks>
     /// <param name="choices">The list to choose an item from</param>
-    /// <param name="isRandom">Defaults to random. Set false to cycle through entries sequentially</param>
-    /// <param name="exhaustiveBelow">If the list is shorter then select items randomly, but never choose one a second time until all have been picked. This is useful for short lists to reduce repeats.</param>
-    public Selector(T[] choices = null, bool isRandom = true, int exhaustiveBelow = 0) {
+    /// <code>selector = new Selector<T>(Elements.ToArray()) {IsRandom = !Cycle, ExhaustiveBelow = ExhaustiveBelow};</code>
+    public Selector(T[] choices = null) {
       if (choices != null) this.choices = choices;
-      choices = this.choices;
+      ChoosePicker();
+      Init();
+    }
 
+    private void ChoosePicker() {
       if (choices.Length == 0) {
         picker = () => default(T);
-      } else if (!isRandom) { // cycle through list
+      } else if (!IsRandom) { // cycle through list
         picker = () => choices[cycleIndex++ % choices.Length];
-      } else if (choices.Length >= exhaustiveBelow) { // randoms election
+      } else if (choices.Length >= ExhaustiveBelow) { // randoms election
         picker = () => choices[Random.Range(0, choices.Length)];
       } else {
         picker = () => { // different random choice until list exhausted, then repeat
@@ -45,8 +58,6 @@ namespace Askowl {
           return result;
         };
       }
-
-      Init();
     }
 
     private void Init() {
@@ -62,6 +73,7 @@ namespace Askowl {
       get { return choices; }
       set {
         choices = value;
+        ChoosePicker();
         Init();
       }
     }

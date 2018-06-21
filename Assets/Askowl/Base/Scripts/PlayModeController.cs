@@ -57,10 +57,9 @@ namespace Askowl {
 
     public bool IsDisplayingInUI(string gameObjectPath) {
       RectTransform transform = Components.Find<RectTransform>(gameObjectPath);
-      if (!transform.gameObject.activeInHierarchy) return false;
+      if (transform == null||!transform.gameObject.activeInHierarchy) return false;
 
       Rect screenRect = new Rect(0, 0, Screen.width, Screen.height);
-      if (transform == null) return false;
 
       Vector3[] objectCorners = new Vector3[4];
       transform.GetWorldCorners(objectCorners);

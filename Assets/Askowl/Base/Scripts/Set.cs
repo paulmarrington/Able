@@ -58,15 +58,11 @@ namespace Askowl {
     /// at the next Pick() call. It can be overridden by more complex Set types.
     /// </summary>
     protected virtual void BuildSelector() {
-      selector = new Selector<T>(Elements.ToArray(), !Cycle, ExhaustiveBelow);
+      selector = new Selector<T>(Elements.ToArray()) {IsRandom = !Cycle, ExhaustiveBelow = ExhaustiveBelow};
     }
 
     /// <inheritdoc />
-    public T Pick() {
-      if (Selector == null) BuildSelector();
-
-      return Selector.Pick();
-    }
+    public T Pick() { return Selector.Pick(); }
 
     /// <summary>
     /// If something has changed the underlying data we need to tell the Selector
@@ -91,7 +87,7 @@ namespace Askowl {
     /// <summary>Add an entry if one does not exist already - and trigger a change event.</summary>
     /// <remarks><a href="http://customassets.marrington.net#addentry">More...</a></remarks>
     /// <param name="entry">Element to add if it isn't in the list</param>
-    // ReSharper disable once UnusedMember.Global
+// ReSharper disable once UnusedMember.Global
     protected void Add(T entry) {
       if (Elements.Contains(entry)) return;
 
@@ -102,7 +98,7 @@ namespace Askowl {
     /// <summary>Remove an entry if it exists - and trigger a change event.</summary>
     /// <remarks><a href="http://customassets.marrington.net#removeentry">More...</a></remarks>
     /// <param name="entry">Element to remove if it is in the list</param>
-    // ReSharper disable once UnusedMember.Global
+// ReSharper disable once UnusedMember.Global
     protected void Remove(T entry) {
       if (!Elements.Contains(entry)) return;
 
