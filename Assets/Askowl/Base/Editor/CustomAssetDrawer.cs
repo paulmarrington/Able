@@ -17,32 +17,23 @@ namespace CustomAsset {
 
   [CustomPropertyDrawer(type: typeof(ScriptableObject), useForChildren: true)]
   public class ScriptableObjectDrawer : PropertyDrawer {
-    private static readonly Dictionary<string, bool>
-      FoldoutByType = new Dictionary<string, bool>();
+    private static readonly Dictionary<string, bool> FoldoutByType = new Dictionary<string, bool>();
 
     private Editor editor = null;
 
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
       EditorGUI.PropertyField(position, property, label, includeChildren: true);
 
-      bool foldout = false;
+      if (property.objectReferenceValue == null) return;
 
-      if (property.objectReferenceValue != null) {
-        string objectReferenceValueType = property.objectReferenceValue.name;
+      if (label.text.StartsWith("Element ")) return;
 
-        bool foldoutExists =
-          FoldoutByType.TryGetValue(key: objectReferenceValueType, value: out foldout);
+      string typeKey = property.objectReferenceValue.name;
+      bool   foldout = FoldoutByType.ContainsKey(typeKey) && FoldoutByType[typeKey];
 
-        foldout = EditorGUI.Foldout(position: position, foldout: foldout, content: GUIContent.none);
+      FoldoutByType[typeKey] = EditorGUI.Foldout(position, foldout, GUIContent.none);
 
-        if (foldoutExists) {
-          FoldoutByType[objectReferenceValueType] = foldout;
-        } else {
-          FoldoutByType.Add(objectReferenceValueType, foldout);
-        }
-      }
-
-      if (!foldout) return;
+      if (!FoldoutByType[typeKey]) return;
 
       EditorGUI.indentLevel++;
 
