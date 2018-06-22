@@ -2,8 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using UnityEditor.iOS;
-using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace Askowl {
@@ -32,7 +30,7 @@ namespace Askowl {
     /// <summary>Constructor to create selection list.</summary>
     /// <remarks><a href="http://customassets.marrington.net#selectorinitialiser">More...</a></remarks>
     /// <param name="choices">The list to choose an item from</param>
-    /// <code>selector = new Selector<T>(Elements.ToArray()) {IsRandom = !Cycle, ExhaustiveBelow = ExhaustiveBelow};</code>
+    /// <code>selector = new Selector{T}(Elements.ToArray()) {IsRandom = !Cycle, ExhaustiveBelow = ExhaustiveBelow};</code>
     public Selector(T[] choices = null) {
       if (choices != null) this.choices = choices;
       ChoosePicker();
