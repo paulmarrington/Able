@@ -73,5 +73,9 @@ namespace Askowl {
       GameObject gameObject = new GameObject(name);
       return gameObject.AddComponent<T>();
     }
+
+    public static T Establish<T>(params string[] path) where T : Component {
+      return Find<T>(path) ?? Create<T>(path[path.Length - 1]);
+    }
   }
 }
