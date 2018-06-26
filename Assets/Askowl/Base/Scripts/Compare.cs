@@ -8,11 +8,15 @@ namespace Askowl {
     /// <summary>
     /// Check two floating point numbers to be within rounding tolerance.
     /// </summary>
-    public static bool AlmostEqual(float a, float b) { return Math.Abs(a - b) < 1e-5; }
+    public static bool AlmostEqual(float a, float b, float minimumChange = 1e-5f) {
+      return Math.Abs(a - b) < minimumChange;
+    }
 
     /// <summary>
     /// Check two double floating point numbers to be within rounding tolerance.
     /// </summary>
-    public static bool AlmostEqual(double a, double b) { return Math.Abs(a - b) < 1e-5; }
+    public static bool AlmostEqual(double a, double b, double minimumChange = 1e-5) {
+      return Math.Abs(a - b) < minimumChange;
+    }
   }
 }
