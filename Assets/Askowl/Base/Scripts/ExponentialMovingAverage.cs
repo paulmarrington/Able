@@ -1,20 +1,10 @@
-﻿using System;
+﻿public class ExponentialMovingAverage {
+  private float alpha;
+  private float lastValue = float.NaN;
 
-public class ExponentialMovingAverage {
-  /// Decay parameter (0 &lt; alpha &lt; 1);
-  public double alpha = 0.2;
+  public ExponentialMovingAverage(int lookback = 8) { alpha = 2.0f / (lookback + 1); }
 
-  private bool   hasLastValue;
-  private double lastValue;
-
-  public double Average(double value) {
-    if (!hasLastValue) {
-      hasLastValue = true;
-      return lastValue = value;
-    }
-
-    double emaValue = lastValue + alpha * (value - lastValue);
-    lastValue = emaValue;
-    return emaValue;
+  public float Average(float value) {
+    return lastValue = float.IsNaN(lastValue) ? value : (value - lastValue) * alpha + lastValue;
   }
 }
