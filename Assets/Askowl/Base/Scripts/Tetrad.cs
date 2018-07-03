@@ -1,10 +1,31 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace Askowl {
   public class Tetrad {
-    private double x, y, z, w;
+    private double     x, y, z, w;
+    private Quaternion quaternion;
+    private Tetrad     tetrad;
 
-    public static readonly Tetrad Identity = (new Tetrad()).Set(x: 0, y: 0, z: 0, w: 1);
+    public static readonly Tetrad Identity = new Tetrad().Set(x: 0, y: 0, z: 0, w: 1);
+
+    public class Direction {
+      internal int x, y, z;
+    }
+
+    public static readonly Direction xAxis = new Direction {x = 1};
+    public static readonly Direction yAxis = new Direction {y = 1};
+    public static readonly Direction zAxis = new Direction {z = 1};
+
+    public Quaternion Quaternion {
+      get {
+        quaternion.x = (float) x;
+        quaternion.y = (float) y;
+        quaternion.z = (float) z;
+        quaternion.w = (float) w;
+        return quaternion;
+      }
+    }
 
     public Tetrad Set(float x, float y, float z, float w) {
       this.x = x;
@@ -62,6 +83,19 @@ namespace Askowl {
       return this;
     }
 
+    public Tetrad RotateTo(Direction axis, float degrees) {
+      // remove rotation from the axis indicated
+      var theta = Math.Atan2(z, w);
+      var sin   = -Math.Sin(theta);
+      Rotate(tetrad.Set(axis.x * sin, axis.y * sin, axis.z * sin, Math.Cos(theta)));
+      // Now add in the new angle along the axis indicated
+      theta = degrees / 2;
+      sin   = Math.Sin(theta);
+      return Rotate(tetrad.Set(axis.x * sin, axis.y * sin, axis.z * sin, Math.Cos(theta)));
+    }
+
+    public Tetrad Inverse() { return Conjugate().Multiply(scalar: 1.0f / LengthSquared); }
+
     public Tetrad Multiply(float scalar) {
       x *= scalar;
       y *= scalar;
@@ -70,15 +104,11 @@ namespace Askowl {
       return this;
     }
 
-    public Tetrad Negate() {
-      x = -x;
-      y = -y;
-      z = -z;
-      w = -w;
-      return this;
-    }
+    public Tetrad Negate() { return Set(x: -x, y: -y, z: -z, w: -w); }
 
-    private Tetrad Slerp(Tetrad a, Tetrad b, float t) {
+    public Tetrad Conjugate() { return Set(x: -x, y: -y, z: -z, w: w); }
+
+    public Tetrad Slerp(Tetrad a, Tetrad b, float t) {
       // if either input is zero, return the other.
       bool startToSmall = (a.LengthSquared < 0.000001f);
       bool endToSmall   = (b.LengthSquared < 0.000001f);
@@ -127,10 +157,6 @@ namespace Askowl {
     }
 
     /// Gyro is right-handed while Unity is left-handed.
-    public Tetrad RightToLeftHanded() {
-      z = -z;
-      w = -w;
-      return this;
-    }
+    public Tetrad RightToLeftHanded() { return Set(x, y, -z, -w); }
   }
 }
