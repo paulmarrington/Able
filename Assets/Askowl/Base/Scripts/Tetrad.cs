@@ -3,7 +3,8 @@ using UnityEngine;
 
 namespace Askowl {
   public class Tetrad {
-    private double     x, y, z, w;
+    private double x, y, z, w;
+
     private Quaternion quaternion;
     private Tetrad     tetrad;
 
@@ -27,14 +28,6 @@ namespace Askowl {
       }
     }
 
-    public Tetrad Set(float x, float y, float z, float w) {
-      this.x = x;
-      this.y = y;
-      this.z = z;
-      this.w = w;
-      return this;
-    }
-
     public Tetrad Set(double x, double y, double z, double w) {
       this.x = x;
       this.y = y;
@@ -43,15 +36,11 @@ namespace Askowl {
       return this;
     }
 
-    public Tetrad Set(Quaternion to) {
-      Set(to.x, to.y, to.z, to.w);
-      return this;
-    }
+    public Tetrad Set(float x, float y, float z, float w) { return Set((double) x, y, z, w); }
 
-    public Tetrad Set(Tetrad to) {
-      Set(to.x, to.y, to.z, to.w);
-      return this;
-    }
+    public Tetrad Set(Quaternion to) { return Set(to.x, to.y, to.z, to.w); }
+
+    public Tetrad Set(Tetrad to) { return Set(to.x, to.y, to.z, to.w); }
 
     public Tetrad Rotate(params Quaternion[] attitudes) {
       foreach (var rhs in attitudes) {
@@ -84,6 +73,7 @@ namespace Askowl {
     }
 
     public Tetrad RotateTo(Direction axis, float degrees) {
+      if (tetrad == null) tetrad = new Tetrad();
       // remove rotation from the axis indicated
       var theta = Math.Atan2(z, w);
       var sin   = -Math.Sin(theta);
