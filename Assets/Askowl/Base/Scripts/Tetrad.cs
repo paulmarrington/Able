@@ -42,6 +42,8 @@ namespace Askowl {
 
     public Tetrad Set(Tetrad to) { return Set(to.x, to.y, to.z, to.w); }
 
+    public Tetrad Reset() { return Set(Identity); }
+
     public Tetrad Rotate(params Quaternion[] attitudes) {
       foreach (var rhs in attitudes) {
         double xx = w * rhs.x + x * rhs.w + y * rhs.z - z * rhs.y;
@@ -72,81 +74,125 @@ namespace Askowl {
       return this;
     }
 
-    public Tetrad RotateTo(Direction axis, float degrees) {
+    public Tetrad Rotate(Direction axis, float degrees) {
       if (tetrad == null) tetrad = new Tetrad();
-      // remove rotation from the axis indicated
-      var theta = Math.Atan2(z, w);
-      var sin   = -Math.Sin(theta);
-      Rotate(tetrad.Set(axis.x * sin, axis.y * sin, axis.z * sin, Math.Cos(theta)));
-      // Now add in the new angle along the axis indicated
-      theta = degrees / 2;
-      sin   = Math.Sin(theta);
+      var theta                  = ToRadians(degrees) / 2;
+      var sin                    = Math.Sin(theta);
       return Rotate(tetrad.Set(axis.x * sin, axis.y * sin, axis.z * sin, Math.Cos(theta)));
     }
 
-    public Tetrad Inverse() { return Conjugate().Multiply(scalar: 1.0f / LengthSquared); }
+    public Tetrad RotateTo(Direction axis, float degrees) {
+      return ZeroAxis(axis).Rotate(axis, degrees);
+    }
 
-    public Tetrad Multiply(float scalar) {
-      x *= scalar;
-      y *= scalar;
-      z *= scalar;
-      w *= scalar;
-      return this;
+    /// remove rotation from the axis indicated
+    public Tetrad ZeroAxis(Direction axis) {
+      if (tetrad == null) tetrad = new Tetrad();
+      var theta                  = Math.Atan2((axis.x * x) + (axis.y * y) + (axis.z * z), w);
+      var sin                    = -Math.Sin(theta);
+      return Rotate(tetrad.Set(axis.x * sin, axis.y * sin, axis.z * sin, Math.Cos(theta)));
+    }
+
+    public Tetrad Inverse() { return Conjugate().Multiply(scalar: 1.0 / LengthSquared); }
+
+    public Tetrad Multiply(double scalar) {
+      return Set(x * scalar, y * scalar, z * scalar, w * scalar).Normalize();
     }
 
     public Tetrad Negate() { return Set(x: -x, y: -y, z: -z, w: -w); }
 
     public Tetrad Conjugate() { return Set(x: -x, y: -y, z: -z, w: w); }
 
-    public Tetrad Slerp(Tetrad a, Tetrad b, float t) {
+    public Tetrad Slerp(Tetrad start, Tetrad end, float delta) {
+      // Only unit quaternions are valid rotations.
+      // Normalize to avoid undefined behavior.
+      start.Normalize();
+      end.Normalize();
       // if either input is zero, return the other.
-      bool startToSmall = (a.LengthSquared < 0.000001f);
-      bool endToSmall   = (b.LengthSquared < 0.000001f);
-      if (startToSmall) return endToSmall ? Set(Identity) : Set(b);
-      if (endToSmall) return Set(a);
+      bool startToSmall = (start.LengthSquared < 0.000001f);
+      bool endToSmall   = (end.LengthSquared   < 0.000001f);
+      if (startToSmall) return endToSmall ? Set(Identity) : Set(end);
+      if (endToSmall) return Set(start);
 
-      float cosHalfAngle = a.Dot(b);
+      double cosHalfAngle = start.Dot(end);
 
       if ((cosHalfAngle >= 1.0f) || (cosHalfAngle <= -1.0f)) {
-        return Set(a); // angle = 0.0f, so just return one input.
-      } else if (cosHalfAngle < 0.0f) {
-        b.Negate();
+        return Set(start); // angle = 0.0f, so just return one input.
+      }
+
+      // If the dot product is negative, slerp won't take the shorter path.
+      // Note that start and -start are equivalent when the negation is applied
+      // to all four components. Fix by  reversing one quaternion.
+      if (cosHalfAngle < 0.0f) { // Warning: modifies end
+        end.Negate();
         cosHalfAngle = -cosHalfAngle;
       }
 
-      float blendA;
-      float blendB;
+      double fromStart, fromEnd;
 
-      if (cosHalfAngle < 0.99f) { // do proper slerp for big angles
-        float halfAngle           = Mathf.Acos(cosHalfAngle);
-        float sinHalfAngle        = Mathf.Sin(halfAngle);
-        float oneOverSinHalfAngle = 1.0f / sinHalfAngle;
-        blendA = Mathf.Sin(halfAngle * (1.0f - t)) * oneOverSinHalfAngle;
-        blendB = Mathf.Sin(halfAngle * t)          * oneOverSinHalfAngle;
+      if (cosHalfAngle < 0.99f) { // do proper slerp for big angles (below a threshold)
+//        double halfAngleStartToEnd = Math.Acos(cosHalfAngle);
+//        double halfAngleStartToResult = halfAngleStartToEnd * delta;
+//        double sinHalfStartAngle = Math.Sin(halfAngleStartToEnd);
+//        double sinHalfResultAngle = Math.Sin(halfAngleStartToResult);
+//        double cosHalfResultAngle = Math.Cos(halfAngleStartToResult);
+//
+//        fromStart = cosHalfResultAngle - cosHalfAngle * sinHalfResultAngle / sinHalfStartAngle;
+//        fromEnd = sinHalfResultAngle / sinHalfStartAngle;
+
+        double halfAngle           = Math.Acos(cosHalfAngle); // start to end
+        double sinHalfAngle        = Math.Sin(halfAngle);
+        double oneOverSinHalfAngle = 1.0f / sinHalfAngle;
+        fromStart = Math.Sin(halfAngle * (1.0f - delta)) * oneOverSinHalfAngle;
+        fromEnd   = Math.Sin(halfAngle * delta)          * oneOverSinHalfAngle;
       } else { // do lerp if angle is really small.
-        blendA = 1 - t;
-        blendB = t;
+        fromStart = 1 - delta;
+        fromEnd   = delta;
       }
 
-      x = blendA * a.x + blendB * b.x;
-      y = blendA * a.y + blendB * b.y;
-      z = blendA * a.z + blendB * b.z;
-      w = blendA * a.w + blendB * b.w;
+      x = fromStart * start.x + fromEnd * end.x;
+      y = fromStart * start.y + fromEnd * end.y;
+      z = fromStart * start.z + fromEnd * end.z;
+      w = fromStart * start.w + fromEnd * end.w;
 
       return (LengthSquared > 0.0f) ? Normalize() : Set(Identity);
     }
 
-    public Tetrad Normalize() { return Multiply(scalar: 1f / Length); }
+    public Tetrad Normalize() {
+      var length = Length;
+      if (length <= 0) return Set(Identity);
 
-    public float Length { get { return Mathf.Sqrt(LengthSquared); } }
+      var scalar = 1f / length;
 
-    public float LengthSquared { get { return (float) (x * x + y * y + z * z + w * w); } }
-
-    public float Dot(Tetrad other) {
-      return (float) (x * other.x + y * other.y + z * other.z + w * other.w);
+      return Set(x * scalar, y * scalar, z * scalar, w * scalar);
     }
 
-    /// Gyro is right-handed while Unity is left-handed.
+    public double Length { get { return Math.Sqrt(LengthSquared); } }
+
+    public double LengthSquared { get { return (x * x + y * y + z * z + w * w); } }
+
+    public double Dot(Tetrad other) {
+      return (x * other.x + y * other.y + z * other.z + w * other.w);
+    }
+
+    // Have to conjugate when we switch axes
+    public Tetrad SwitchAxis(Direction from, Direction to) {
+      if (from.x == 0) return Set(-x, -z, -y, w);
+      if (from.y == 0) return Set(-z, -y, -x, w);
+
+      return Set(-y, -x, -z, w);
+    }
+
+    /// Gyro is right-handed while Unity is left-handed - so change Chirilty
     public Tetrad RightToLeftHanded() { return Set(x, y, -z, -w); }
+
+    public override string ToString() {
+      return string.Format("({0:n1}, {1:n1}, {2:n1}, {3:n1})", x, y, z, w);
+    }
+
+    private static double radiansToDegrees = (180.0   / Math.PI);
+    private static double degreesToRadians = (Math.PI / 180.0);
+    private static double ToRadians(double degrees) { return degrees * degreesToRadians; }
+    private static double ToDegrees(double radians) { return radians * radiansToDegrees; }
   }
 }
