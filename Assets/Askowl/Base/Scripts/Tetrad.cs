@@ -76,7 +76,7 @@ namespace Askowl {
 
     public Tetrad Rotate(Direction axis, float degrees) {
       if (tetrad == null) tetrad = new Tetrad();
-      var theta                  = ToRadians(degrees) / 2;
+      var theta                  = Trig.ToRadians(degrees) / 2;
       var sin                    = Math.Sin(theta);
       return Rotate(tetrad.Set(axis.x * sin, axis.y * sin, axis.z * sin, Math.Cos(theta)));
     }
@@ -189,10 +189,5 @@ namespace Askowl {
     public override string ToString() {
       return string.Format("({0:n1}, {1:n1}, {2:n1}, {3:n1})", x, y, z, w);
     }
-
-    private static double radiansToDegrees = (180.0   / Math.PI);
-    private static double degreesToRadians = (Math.PI / 180.0);
-    private static double ToRadians(double degrees) { return degrees * degreesToRadians; }
-    private static double ToDegrees(double radians) { return radians * radiansToDegrees; }
   }
 }
