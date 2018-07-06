@@ -44,7 +44,7 @@ namespace Askowl {
 
     public Tetrad Reset() { return Set(Identity); }
 
-    public Tetrad Rotate(params Quaternion[] attitudes) {
+    public Tetrad RotateBy(params Quaternion[] attitudes) {
       foreach (var rhs in attitudes) {
         double xx = w * rhs.x + x * rhs.w + y * rhs.z - z * rhs.y;
         double yy = w * rhs.y + y * rhs.w + z * rhs.x - x * rhs.z;
@@ -59,7 +59,7 @@ namespace Askowl {
       return this;
     }
 
-    public Tetrad Rotate(params Tetrad[] attitudes) {
+    public Tetrad RotateBy(params Tetrad[] attitudes) {
       foreach (var rhs in attitudes) {
         double xx = w * rhs.x + x * rhs.w + y * rhs.z - z * rhs.y;
         double yy = w * rhs.y + y * rhs.w + z * rhs.x - x * rhs.z;
@@ -74,15 +74,15 @@ namespace Askowl {
       return this;
     }
 
-    public Tetrad Rotate(Direction axis, float degrees) {
+    public Tetrad RotateBy(Direction axis, float degrees) {
       if (tetrad == null) tetrad = new Tetrad();
       var theta                  = Trig.ToRadians(degrees) / 2;
       var sin                    = Math.Sin(theta);
-      return Rotate(tetrad.Set(axis.x * sin, axis.y * sin, axis.z * sin, Math.Cos(theta)));
+      return RotateBy(tetrad.Set(axis.x * sin, axis.y * sin, axis.z * sin, Math.Cos(theta)));
     }
 
     public Tetrad RotateTo(Direction axis, float degrees) {
-      return ZeroAxis(axis).Rotate(axis, degrees);
+      return ZeroAxis(axis).RotateBy(axis, degrees);
     }
 
     /// remove rotation from the axis indicated
@@ -90,7 +90,7 @@ namespace Askowl {
       if (tetrad == null) tetrad = new Tetrad();
       var theta                  = Math.Atan2((axis.x * x) + (axis.y * y) + (axis.z * z), w);
       var sin                    = -Math.Sin(theta);
-      return Rotate(tetrad.Set(axis.x * sin, axis.y * sin, axis.z * sin, Math.Cos(theta)));
+      return RotateBy(tetrad.Set(axis.x * sin, axis.y * sin, axis.z * sin, Math.Cos(theta)));
     }
 
     public Tetrad Inverse() { return Conjugate().Multiply(scalar: 1.0 / LengthSquared); }

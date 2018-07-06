@@ -8,7 +8,7 @@ namespace Askowl {
   /// Origin: late 16th century: from modern Latin geodaesia, from Greek geōdaisia, from gē ‘earth’ + daiein ‘divide’.
   /// https://en.wikipedia.org/wiki/Geodesy  https://www.movable-type.co.uk/scripts/latlong.html
   public class Geodetic {
-    public float EarthMeanRadiusMetres = 6371e3f;
+    public static float EarthMeanRadiusMetres = 6371e3f;
 
     public struct Coordinates {
       public double Latitude, Longitude;
@@ -40,11 +40,19 @@ namespace Askowl {
       return coordinates;
     }
 
-    public double Kilometres(Coordinates first, Coordinates second) {
+    public static double Kilometres(Coordinates first, Coordinates second) {
       return Haversine(first, second);
     }
 
-    public double Haversine(Coordinates first, Coordinates second) {
+    public static string DistanceBetween(Coordinates first, Coordinates second) {
+      double km = Kilometres(first, second);
+      if (km < 1) return string.Format("{0} m", (int) (km * 1000));
+
+      var fmt = (km > 10) ? "{0:n0} km" : "{0:n1}";
+      return string.Format(fmt, km);
+    }
+
+    public static double Haversine(Coordinates first, Coordinates second) {
       var deltaLatitude  = Trig.ToRadians(second.Latitude  - first.Latitude);
       var deltaLongitude = Trig.ToRadians(second.Longitude - first.Longitude);
 
@@ -59,7 +67,7 @@ namespace Askowl {
       return EarthMeanRadiusMetres * (2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a)));
     }
 
-    public double SphericalLawOfCosines(Coordinates first, Coordinates second) {
+    public static double SphericalLawOfCosines(Coordinates first, Coordinates second) {
       var firstRadians  = Trig.ToRadians(first.Latitude);
       var secondRadians = Trig.ToRadians(second.Latitude);
 
@@ -68,7 +76,7 @@ namespace Askowl {
                        Trig.ToRadians(second.Longitude - second.Latitude)) * EarthMeanRadiusMetres;
     }
 
-    public double BearingDegrees(Coordinates from, Coordinates to) { // forward azimuth
+    public static double BearingDegrees(Coordinates from, Coordinates to) { // forward azimuth
       from.ToRadians();
       to.ToRadians();
       var y = Math.Sin(to.Longitude - from.Longitude) * Math.Cos(to.Latitude);
@@ -80,7 +88,8 @@ namespace Askowl {
       return Trig.ToDegrees(Math.Atan2(y, x));
     }
 
-    public Coordinates Destination(Coordinates start, double distanceKm, double bearingDegrees) {
+    public static Coordinates Destination(Coordinates start, double distanceKm,
+                                          double      bearingDegrees) {
       start.ToRadians();
       var deltaDistance    = distanceKm / EarthMeanRadiusMetres;
       var sinStartLatitude = Math.Sin(start.Latitude);
