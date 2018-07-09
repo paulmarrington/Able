@@ -79,7 +79,7 @@ namespace Askowl {
                        Trig.ToRadians(second.Longitude - second.Latitude)) * EarthMeanRadiusKm;
     }
 
-    public static double BearingDegrees(Coordinates from, Coordinates to) { // forward azimuth
+    public static double BearingRadians(Coordinates from, Coordinates to) { // forward azimuth
       from.ToRadians();
       to.ToRadians();
       var y = Math.Sin(to.Longitude - from.Longitude) * Math.Cos(to.Latitude);
@@ -88,7 +88,11 @@ namespace Askowl {
               Math.Sin(from.Latitude) * Math.Cos(to.Latitude) *
               Math.Cos(to.Longitude - from.Longitude);
 
-      return Trig.ToDegrees(Math.Atan2(y, x));
+      return Math.Atan2(y, x);
+    }
+
+    public static double BearingDegrees(Coordinates from, Coordinates to) {
+      return Trig.ToDegrees(BearingRadians(from, to));
     }
 
     public static Coordinates Destination(Coordinates start, double distanceKm,

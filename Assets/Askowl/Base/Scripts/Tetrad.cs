@@ -32,6 +32,12 @@ namespace Askowl {
       return workingCopy.Set(x, y, z, w);
     }
 
+    public static Tetrad Do(Quaternion quaternion) {
+      return Do(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
+    }
+
+    public static Tetrad Do(Tetrad tetrad) { return Do(tetrad.x, tetrad.y, tetrad.z, tetrad.w); }
+
     public Tetrad Set(double xx, double yy, double zz, double ww) {
       x = xx;
       y = yy;
@@ -90,7 +96,7 @@ namespace Askowl {
       return ZeroAxis(axis).RotateBy(axis, degrees);
     }
 
-    public Tetrad AngleAxis(Direction axis, float degrees) {
+    public Tetrad AngleAxis(Direction axis, double degrees) {
       var radians = Trig.ToRadians(degrees) / 2;
       var sin     = Math.Sin(radians);
 
