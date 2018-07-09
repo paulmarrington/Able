@@ -7,7 +7,7 @@ namespace Askowl {
   /// Geodesy: The branch of mathematics dealing with the shape and area of the earth or large portions of it.
   /// Origin: late 16th century: from modern Latin geodaesia, from Greek geōdaisia, from gē ‘earth’ + daiein ‘divide’.
   /// https://en.wikipedia.org/wiki/Geodesy  https://www.movable-type.co.uk/scripts/latlong.html
-  public class Geodetic {
+  public static class Geodetic {
     public static float EarthMeanRadiusMetres = 6371e3f;
 
     public struct Coordinates {
@@ -29,6 +29,10 @@ namespace Askowl {
         Longitude = Trig.ToDegrees(Longitude);
         radians   = false;
       }
+
+      public override string ToString() {
+        return String.Format("({0:n5}, {1:n5})", Latitude, Longitude);
+      }
     }
 
     public static Coordinates Coords(double latitude, double longitude, bool radians = false) {
@@ -48,8 +52,7 @@ namespace Askowl {
       double km = Kilometres(first, second);
       if (km < 1) return string.Format("{0} m", (int) (km * 1000));
 
-      var fmt = (km > 10) ? "{0:n0} km" : "{0:n1}";
-      return string.Format(fmt, km);
+      return string.Format((km > 10) ? "{0:n0} km" : "{0:n1} km", km);
     }
 
     public static double Haversine(Coordinates first, Coordinates second) {
