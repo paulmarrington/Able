@@ -3,12 +3,11 @@ using UnityEngine;
 
 namespace Askowl {
   public class Tetrad {
-    private double x, y, z, w;
-
+    private double     x, y, z, w;
     private Quaternion quaternion;
-    private Tetrad     tetrad;
 
-    public static readonly Tetrad Identity = new Tetrad().Set(x: 0, y: 0, z: 0, w: 1);
+    public static readonly Tetrad Identity = new Tetrad().Set(xx: 0, yy: 0, zz: 0, ww: 1);
+    private static         Tetrad workingCopy;
 
     public class Direction {
       internal int x, y, z;
@@ -28,15 +27,22 @@ namespace Askowl {
       }
     }
 
-    public Tetrad Set(double x, double y, double z, double w) {
-      this.x = x;
-      this.y = y;
-      this.z = z;
-      this.w = w;
+    public static Tetrad Do(double x, double y, double z, double w) {
+      if (workingCopy == null) workingCopy = new Tetrad();
+      return workingCopy.Set(x, y, z, w);
+    }
+
+    public Tetrad Set(double xx, double yy, double zz, double ww) {
+      x = xx;
+      y = yy;
+      z = zz;
+      w = ww;
       return this;
     }
 
-    public Tetrad Set(float x, float y, float z, float w) { return Set((double) x, y, z, w); }
+    public Tetrad Set(float xx, float yy, float zz, float ww) {
+      return Set((double) xx, yy, zz, ww);
+    }
 
     public Tetrad Set(Quaternion to) { return Set(to.x, to.y, to.z, to.w); }
 
@@ -75,34 +81,47 @@ namespace Askowl {
     }
 
     public Tetrad RotateBy(Direction axis, float degrees) {
-      if (tetrad == null) tetrad = new Tetrad();
-      var theta                  = Trig.ToRadians(degrees) / 2;
-      var sin                    = Math.Sin(theta);
-      return RotateBy(tetrad.Set(axis.x * sin, axis.y * sin, axis.z * sin, Math.Cos(theta)));
+      var theta = Trig.ToRadians(degrees) / 2;
+      var sin   = Math.Sin(theta);
+      return RotateBy(Do(axis.x * sin, axis.y * sin, axis.z * sin, Math.Cos(theta)));
     }
 
     public Tetrad RotateTo(Direction axis, float degrees) {
       return ZeroAxis(axis).RotateBy(axis, degrees);
     }
 
-    /// remove rotation from the axis indicated
-    public Tetrad ZeroAxis(Direction axis) {
-      if (tetrad == null) tetrad = new Tetrad();
-      var theta                  = Math.Atan2((axis.x * x) + (axis.y * y) + (axis.z * z), w);
-      var sin                    = -Math.Sin(theta);
-      return RotateBy(tetrad.Set(axis.x * sin, axis.y * sin, axis.z * sin, Math.Cos(theta)));
+    public Tetrad AngleAxis(Direction axis, float degrees) {
+      var radians = Trig.ToRadians(degrees) / 2;
+      var sin     = Math.Sin(radians);
+
+      x = axis.x * sin;
+      y = axis.y * sin;
+      z = axis.z * sin;
+      w = Math.Cos(radians);
+
+      return Normalize();
     }
 
+    /// remove rotation from the axis indicated
+    public Tetrad ZeroAxis(Direction axis) {
+      var theta = Math.Atan2((axis.x * x) + (axis.y * y) + (axis.z * z), w);
+      var sin   = -Math.Sin(theta);
+      return RotateBy(Do(axis.x * sin, axis.y * sin, axis.z * sin, Math.Cos(theta)));
+    }
+
+    // ReSharper disable once UnusedMethodReturnValue.Global
     public Tetrad Inverse() { return Conjugate().Multiply(scalar: 1.0 / LengthSquared); }
 
     public Tetrad Multiply(double scalar) {
       return Set(x * scalar, y * scalar, z * scalar, w * scalar).Normalize();
     }
 
-    public Tetrad Negate() { return Set(x: -x, y: -y, z: -z, w: -w); }
+    // ReSharper disable once UnusedMethodReturnValue.Global
+    public Tetrad Negate() { return Set(xx: -x, yy: -y, zz: -z, ww: -w); }
 
-    public Tetrad Conjugate() { return Set(x: -x, y: -y, z: -z, w: w); }
+    public Tetrad Conjugate() { return Set(xx: -x, yy: -y, zz: -z, ww: w); }
 
+    // ReSharper disable once UnusedMethodReturnValue.Global
     public Tetrad Slerp(Tetrad start, Tetrad end, float delta) {
       // Only unit quaternions are valid rotations.
       // Normalize to avoid undefined behavior.
@@ -176,14 +195,15 @@ namespace Askowl {
     }
 
     // Have to conjugate when we switch axes
-    public Tetrad SwitchAxis(Direction from, Direction to) {
-      if (from.x == 0) return Set(-x, -z, -y, w);
-      if (from.y == 0) return Set(-z, -y, -x, w);
+    public Tetrad SwitchAxis(Direction to) {
+      if (to.x == 0) return Set(-x, -z, -y, w);
+      if (to.y == 0) return Set(-z, -y, -x, w);
 
       return Set(-y, -x, -z, w);
     }
 
     /// Gyro is right-handed while Unity is left-handed - so change Chirilty
+    // ReSharper disable once UnusedMethodReturnValue.Global
     public Tetrad RightToLeftHanded() { return Set(x, y, -z, -w); }
 
     public override string ToString() {

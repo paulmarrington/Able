@@ -8,7 +8,7 @@ namespace Askowl {
   /// Origin: late 16th century: from modern Latin geodaesia, from Greek geōdaisia, from gē ‘earth’ + daiein ‘divide’.
   /// https://en.wikipedia.org/wiki/Geodesy  https://www.movable-type.co.uk/scripts/latlong.html
   public static class Geodetic {
-    public static float EarthMeanRadiusMetres = 6371e3f;
+    public static float EarthMeanRadiusKm = 6371;
 
     public struct Coordinates {
       public double Latitude, Longitude;
@@ -67,7 +67,7 @@ namespace Askowl {
               Math.Cos(Trig.ToRadians(second.Latitude)) *
               (sinDeltaLongitude * sinDeltaLongitude);
 
-      return EarthMeanRadiusMetres * (2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a)));
+      return EarthMeanRadiusKm * (2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a)));
     }
 
     public static double SphericalLawOfCosines(Coordinates first, Coordinates second) {
@@ -76,7 +76,7 @@ namespace Askowl {
 
       return Math.Acos(Math.Sin(firstRadians) * Math.Sin(secondRadians) +
                        Math.Cos(firstRadians) * Math.Cos(secondRadians) *
-                       Trig.ToRadians(second.Longitude - second.Latitude)) * EarthMeanRadiusMetres;
+                       Trig.ToRadians(second.Longitude - second.Latitude)) * EarthMeanRadiusKm;
     }
 
     public static double BearingDegrees(Coordinates from, Coordinates to) { // forward azimuth
@@ -94,7 +94,7 @@ namespace Askowl {
     public static Coordinates Destination(Coordinates start, double distanceKm,
                                           double      bearingDegrees) {
       start.ToRadians();
-      var deltaDistance    = distanceKm / EarthMeanRadiusMetres;
+      var deltaDistance    = distanceKm / EarthMeanRadiusKm;
       var sinStartLatitude = Math.Sin(start.Latitude);
       var cosStartLatitude = Math.Cos(start.Latitude);
       var sinDeltaDistance = Math.Sin(deltaDistance);

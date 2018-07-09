@@ -84,7 +84,7 @@ namespace CustomAsset {
 
       if (attr.Length > 0 && attr[0] is ValueNameAttribute) {
         var valueName = attr[0] as ValueNameAttribute;
-        label.text = valueName.label;
+        label.text = valueName.Label;
       }
 
       EditorGUI.PropertyField(position, property, label, includeChildren: true);
