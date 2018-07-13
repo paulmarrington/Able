@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
 namespace Askowl {
   /// Geodesy: The branch of mathematics dealing with the shape and area of the earth or large portions of it.
@@ -30,9 +27,7 @@ namespace Askowl {
         radians   = false;
       }
 
-      public override string ToString() {
-        return String.Format("({0:n5}, {1:n5})", Latitude, Longitude);
-      }
+      public override string ToString() => $"({Latitude:n5}, {Longitude:n5})";
     }
 
     public static Coordinates Coords(double latitude, double longitude, bool radians = false) {
@@ -44,15 +39,13 @@ namespace Askowl {
       return coordinates;
     }
 
-    public static double Kilometres(Coordinates first, Coordinates second) {
-      return Haversine(first, second);
-    }
+    public static double Kilometres(Coordinates from, Coordinates to) => Haversine(from, to);
 
-    public static string DistanceBetween(Coordinates first, Coordinates second) {
-      double km = Kilometres(first, second);
-      if (km < 1) return string.Format("{0} m", (int) (km * 1000));
+    public static string DistanceBetween(Coordinates from, Coordinates to) {
+      double km = Kilometres(from, to);
+      if (km < 1) return $"{(int) (km * 1000)} m";
 
-      return string.Format((km > 10) ? "{0:n0} km" : "{0:n1} km", km);
+      return (km > 10) ? $"{km:n0} km" : $"{km:n1} km";
     }
 
     public static double Haversine(Coordinates first, Coordinates second) {
@@ -91,9 +84,8 @@ namespace Askowl {
       return Math.Atan2(y, x);
     }
 
-    public static double BearingDegrees(Coordinates from, Coordinates to) {
-      return Trig.ToDegrees(BearingRadians(from, to));
-    }
+    public static double BearingDegrees(Coordinates from, Coordinates to) =>
+      Trig.ToDegrees(BearingRadians(from, to));
 
     public static Coordinates Destination(Coordinates start, double distanceKm,
                                           double      bearingDegrees) {
