@@ -1,0 +1,12 @@
+{
+    "name": "BaseEditor",
+    "references": [
+        "Base"
+    ],
+    "optionalUnityReferences": [],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false
+}

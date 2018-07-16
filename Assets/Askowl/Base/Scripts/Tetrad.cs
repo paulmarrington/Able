@@ -9,14 +9,6 @@ namespace Askowl {
     public static readonly Tetrad Identity = new Tetrad().Set(xx: 0, yy: 0, zz: 0, ww: 1);
     private static         Tetrad workingCopy;
 
-    public class Direction {
-      internal int x, y, z;
-    }
-
-    public static readonly Direction xAxis = new Direction {x = 1};
-    public static readonly Direction yAxis = new Direction {y = 1};
-    public static readonly Direction zAxis = new Direction {z = 1};
-
     public Quaternion Quaternion {
       get {
         quaternion.x = (float) x;
@@ -83,22 +75,19 @@ namespace Askowl {
       return this;
     }
 
-    public Tetrad RotateBy(Direction axis, double degrees) {
+    public Tetrad RotateBy(Trig.Direction axis, double degrees) {
       var theta = Trig.ToRadians(degrees) / 2;
       var sin   = Math.Sin(theta);
       return RotateBy(Do(axis.x * sin, axis.y * sin, axis.z * sin, Math.Cos(theta)));
     }
 
-    public double BearingInDegreesFor(Direction axis) {
-      var radians = Math.Atan2((axis.x * x) + (axis.y * y) + (axis.z * z), w);
-      return Trig.ToDegrees(BearingInRadiansFor(axis));
-    }
+    public double BearingInDegreesFor(Trig.Direction axis) =>
+      Trig.ToDegrees(BearingInRadiansFor(axis));
 
-    public double BearingInRadiansFor(Direction axis) {
-      return Math.Atan2((axis.x * x) + (axis.y * y) + (axis.z * z), w);
-    }
+    public double BearingInRadiansFor(Trig.Direction axis) =>
+      Math.Atan2((axis.x * x) + (axis.y * y) + (axis.z * z), w);
 
-    public Tetrad AngleAxis(Direction axis, double degrees) {
+    public Tetrad AngleAxis(Trig.Direction axis, double degrees) {
       var theta = Trig.ToRadians(degrees) / 2;
       var sin   = Math.Sin(theta);
 
@@ -108,14 +97,6 @@ namespace Askowl {
       w = Math.Cos(theta);
 
       return Normalize();
-    }
-
-    /// remove rotation from the axis indicated
-    public Tetrad ZeroAxis(Direction axis) {
-      var radians = Math.Atan2((axis.x * x) + (axis.y * y) + (axis.z * z), w) / 2;
-      Debug.Log($"**** Tetrad:114 theta={Trig.ToDegrees(radians)}"); //#DM#//
-      var sin = Math.Sin(radians);
-      return RotateBy(Do(axis.x * sin, axis.y * sin, axis.z * sin, Math.Cos(radians)));
     }
 
     // ReSharper disable once UnusedMethodReturnValue.Global
@@ -201,7 +182,7 @@ namespace Askowl {
     public double Dot(Tetrad other) => x * other.x + y * other.y + z * other.z + w * other.w;
 
     // Have to conjugate when we switch axes
-    public Tetrad SwitchAxis(Direction to) {
+    public Tetrad SwitchAxis(Trig.Direction to) {
       if (to.x == 0) return Set(-x, -z, -y, w);
       if (to.y == 0) return Set(-z, -y, -x, w);
 

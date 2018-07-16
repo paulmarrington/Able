@@ -5,7 +5,6 @@
  */
 
 using System.Collections.Generic;
-using Askowl;
 using UnityEngine;
 using UnityEditor;
 
@@ -19,7 +18,7 @@ namespace CustomAsset {
   public class ScriptableObjectDrawer : PropertyDrawer {
     private static readonly Dictionary<string, bool> FoldoutByType = new Dictionary<string, bool>();
 
-    private Editor editor = null;
+    private Editor editor;
 
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
       EditorGUI.PropertyField(position, property, label, includeChildren: true);
@@ -82,17 +81,16 @@ namespace CustomAsset {
       var attr = property.serializedObject.targetObject.GetType()
                          .GetCustomAttributes(typeof(ValueNameAttribute), false);
 
-      if (attr.Length > 0 && attr[0] is ValueNameAttribute) {
-        var valueName = attr[0] as ValueNameAttribute;
+      if ((attr.Length > 0) && attr[0] is ValueNameAttribute) {
+        var valueName = (ValueNameAttribute) attr[0];
         label.text = valueName.Label;
       }
 
       EditorGUI.PropertyField(position, property, label, includeChildren: true);
     }
 
-    public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
-      return EditorGUI.GetPropertyHeight(property);
-    }
+    public override float GetPropertyHeight(SerializedProperty property, GUIContent label) =>
+      EditorGUI.GetPropertyHeight(property);
   }
   #endregion
 }
