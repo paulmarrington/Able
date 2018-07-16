@@ -6,24 +6,34 @@ using UnityEngine;
 namespace Askowl {
   public class LinkedList<T> : IEnumerable<T> {
     public class Node {
-      internal Node          Previous, Next;
-      internal T             Item;
+      internal Node Previous, Next;
+      public   T    Item;
     }
 
     private Node          first, current;
     private Func<T, bool> insertBeforeHereComparator = (t) => true;
 
-    public T First => first.Item;
+    public T First => (current = first).Item;
 
     public bool Empty => (first == null);
 
-    public Node Mark { get { return current; } set { current = value; } }
+    public Node Mark { get { return current ?? first; } set { current = value; } }
 
-    public void Add(T newItem) { Insert(new Node() {Item = newItem}); }
+    public void Add(T newItem) { Insert(NewNode(newItem)); }
 
-    public void InsertBefore(T newItem, Func<T, bool> insertBeforeHere) {
-      InsertBefore(new Node() {Item = newItem}, insertBeforeHere);
+    public void Link(object o) {
+      var node = o as Node;
     }
+
+    public T Unlink() {
+      current = first;
+      Unlink(current);
+      return current.Item;
+    }
+
+//    public void InsertBefore(T newItem, Func<T, bool> insertBeforeHere) {
+//      InsertBefore(NewNode(newItem), insertBeforeHere);
+//    }
 
     public T MoveTo(LinkedList<T> to) {
       var node = current;
@@ -43,38 +53,37 @@ namespace Askowl {
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    private void Insert(Node node) { InsertBefore(node, insertBeforeHereComparator); }
-
-    private Node InsertBefore(Node mark, Node nodeToInsert) {
-      if (mark == null) mark = first;
-
-      Unlink(nodeToInsert);
-
-      if (mark == null) {
-        first = nodeToInsert;
-      } else {
-        nodeToInsert.Next     = mark;
-        nodeToInsert.Previous = mark.Previous;
-        mark.Previous         = nodeToInsert;
-        if (mark == first) first = nodeToInsert;
-      }
-
-      return nodeToInsert;
+    private Node NewNode(T item) {
+      Node node = new Node() {Item = item};
+      return node;
     }
 
-    private Node InsertBefore(Node nodeToInsert, Func<T, bool> insertBeforeHere) {
-      var current = first;
+    private Node Insert(Node nodeToInsert) {
+      var next = first;
       if (first == null) return first = nodeToInsert;
 
       while (true) {
-        if (insertBeforeHere(current.Item)) return InsertBefore(current, nodeToInsert);
-        if (current.Next == null) return current.Next = nodeToInsert;
+        if (insertBeforeHereComparator(next.Item)) {
+          Unlink(nodeToInsert);
+          nodeToInsert.Next     = next;
+          nodeToInsert.Previous = next.Previous;
+          next.Previous         = nodeToInsert;
+          if (next == first) first = nodeToInsert;
+          return nodeToInsert;
+        }
+
+        if (next.Next == null) return next.Next = nodeToInsert;
       }
     }
 
     private Node Unlink(Node node) {
-      if (node.Previous != null) node.Previous.Next = node.Next;
-      if (node.Next     != null) node.Next.Previous = node.Previous;
+      if (node.Previous != null) {
+        node.Previous.Next = node.Next;
+      } else {
+        first = node.Next;
+      }
+
+      if (node.Next != null) node.Next.Previous = node.Previous;
 
       node.Previous = node.Next = null;
       return node;
