@@ -91,9 +91,9 @@ namespace Askowl {
       var theta = Trig.ToRadians(degrees) / 2;
       var sin   = Math.Sin(theta);
 
-      x = axis.x * sin;
-      y = axis.y * sin;
-      z = axis.z * sin;
+      if (axis.x != 0) x = sin;
+      if (axis.y != 0) y = sin;
+      if (axis.z != 0) z = sin;
       w = Math.Cos(theta);
 
       return Normalize();
@@ -182,9 +182,9 @@ namespace Askowl {
     public double Dot(Tetrad other) => x * other.x + y * other.y + z * other.z + w * other.w;
 
     // Have to conjugate when we switch axes
-    public Tetrad SwitchAxis(Trig.Direction to) {
-      if (to.x == 0) return Set(-x, -z, -y, w);
-      if (to.y == 0) return Set(-z, -y, -x, w);
+    public Tetrad SwitchAxis(Trig.Direction pivot) {
+      if (pivot.x != 0) return Set(-x, -z, -y, w);
+      if (pivot.y != 0) return Set(-z, -y, -x, w);
 
       return Set(-y, -x, -z, w);
     }
