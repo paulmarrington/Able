@@ -13,6 +13,8 @@ namespace Askowl {
       public bool InRange => owner.InRange(Item);
 
       public Node MoveTo(LinkedList<T> to) => to.Insert(this);
+
+      public void MoveBack() => lastOwner.Insert(this);
     }
 
     public LinkedList() { InRange = (t => false); }
@@ -24,6 +26,14 @@ namespace Askowl {
     public Node First { get; private set; }
 
     public bool Empty => (First == null);
+
+    public int Count {
+      get {
+        int count = 0;
+        for (Node next = First; next != null; next = next.Next) count++;
+        return count;
+      }
+    }
 
     public Node Add(T newItem) => Insert(NewNode(newItem));
 
