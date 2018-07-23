@@ -26,11 +26,17 @@ namespace Askowl {
 
   public class Emitter<T> : Emitter, IObservable<T> {
     private event Action<T> listeners = delegate { };
+    private T               lastValue;
+
+    public T LastValue => lastValue;
 
     /// <summary>
     /// Tell all watchers we have changed
     /// </summary>
-    public void Fire(T t) { listeners(t); }
+    public void Fire(T value) {
+      lastValue = value;
+      listeners(value);
+    }
 
     public IDisposable Subscribe(IObserver<T> observer) {
       Action<T> listener = observer.OnNext;
