@@ -7,15 +7,17 @@ namespace Askowl {
   public class LinkedList<T> {
     public class Node {
       public Node          Previous, Next;
-      public LinkedList<T> owner,    lastOwner;
+      public LinkedList<T> Owner,    LastOwner;
       public T             Item;
 
-      public bool InRange => owner.InRange(Item);
+      public bool InRange => Owner.InRange(Item);
 
       public Node MoveTo(LinkedList<T> to) => to.Insert(this);
 
-      public void MoveBack() => lastOwner.Insert(this);
+      public void MoveBack() => LastOwner.Insert(this);
     }
+
+    public string Name;
 
     public LinkedList() { InRange = (t => false); }
 
@@ -38,14 +40,13 @@ namespace Askowl {
     public Node Add(T newItem) => Insert(NewNode(newItem));
 
     private Node NewNode(T item) {
-      Node node = new Node() {Item = item, owner = this};
+      Node node = new Node() {Item = item, Owner = this};
       return node;
     }
 
     private Node Insert(Node nodeToInsert) {
       Unlink(nodeToInsert);
-      nodeToInsert.lastOwner = nodeToInsert.owner;
-      nodeToInsert.owner     = this;
+      nodeToInsert.Owner = this;
       if (Empty) return First = nodeToInsert;
 
       Node next;
@@ -65,14 +66,18 @@ namespace Askowl {
       if (node.Previous != null) {
         node.Previous.Next = node.Next;
       } else {
-        First = node.Next;
+        node.Owner.First = node.Next;
       }
 
       if (node.Next != null) node.Next.Previous = node.Previous;
 
-      node.Previous = node.Next = null;
-      node.owner    = null;
+      node.Previous  = node.Next = null;
+      node.LastOwner = node.Owner;
+      node.Owner     = null;
       return node;
     }
+
+    /// <inheritdoc />
+    public override string ToString() => Name;
   }
 }
