@@ -15,7 +15,12 @@ namespace Askowl {
       public Node MoveTo(LinkedList<T> to) => to.Insert(this);
 
       public void MoveBack() => LastOwner.Insert(this);
+
+      public override string ToString() =>
+        $"Node Owner: `{Owner}`, Last Owner: `{LastOwner}`, Item: `{Item}`";
     }
+
+    public static bool DebugMode = true;
 
     public string Name;
 
@@ -45,6 +50,7 @@ namespace Askowl {
     }
 
     private Node Insert(Node nodeToInsert) {
+      if (DebugMode) DebugMessage(nodeToInsert);
       Unlink(nodeToInsert);
       nodeToInsert.Owner = this;
       if (Empty) return First = nodeToInsert;
@@ -60,6 +66,13 @@ namespace Askowl {
       next.Previous         = nodeToInsert;
       if (next == First) First = nodeToInsert;
       return nodeToInsert;
+    }
+
+    private void DebugMessage(Node node) {
+      if (node.Owner == this)
+        Debug.Log($"**** LinkedList: Add to {this}"); //#DM#//
+      else
+        Debug.Log($"**** LinkedList: move {node.Owner} to {this}"); //#DM#//
     }
 
     private Node Unlink(Node node) {
