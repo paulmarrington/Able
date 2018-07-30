@@ -10,25 +10,22 @@ namespace Askowl {
       public LinkedList<T> Owner,    LastOwner;
       public T             Item;
 
-      public bool InRange => Owner.InRange(Item);
+      public bool InRange => Owner.InRange(this);
 
       public Node MoveTo(LinkedList<T> to) => to.Insert(this);
 
       public void MoveBack() => LastOwner.Insert(this);
 
-      public override string ToString() =>
-        $"Node Owner: `{Owner}`, Last Owner: `{LastOwner}`, Item: `{Item}`";
+      public override string ToString() => Owner.Name;
     }
-
-    public static bool DebugMode = true;
 
     public string Name;
 
     public LinkedList() { InRange = (t => false); }
 
-    public LinkedList(Func<T, bool> inRangeComparator) { InRange = inRangeComparator; }
+    public LinkedList(Func<Node, bool> inRangeComparator) { InRange = inRangeComparator; }
 
-    public Func<T, bool> InRange;
+    public Func<Node, bool> InRange;
 
     public Node First { get; private set; }
 
@@ -57,7 +54,7 @@ namespace Askowl {
 
       Node next;
 
-      for (next = First; InRange(next.Item); next = next.Next) {
+      for (next = First; InRange(next); next = next.Next) {
         if (next.Next == null) return next.Next = nodeToInsert;
       }
 
@@ -67,6 +64,8 @@ namespace Askowl {
       if (next == First) First = nodeToInsert;
       return nodeToInsert;
     }
+
+    public static bool DebugMode = false;
 
     private void DebugMessage(Node node) {
       if (node.Owner == this)
