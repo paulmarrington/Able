@@ -7,27 +7,46 @@ namespace Askowl {
   public class LinkedList<T> {
     public class Node {
       public Node          Previous, Next;
-      public LinkedList<T> Owner,    LastOwner;
+      public LinkedList<T> Owner;
       public T             Item;
 
-      public bool InRange => Owner.InRange(this);
+      public bool InRange => Owner.InRange(Item);
 
       public Node MoveTo(LinkedList<T> to) => to.Insert(this);
-
-      public void MoveBack() => LastOwner.Insert(this);
 
       public override string ToString() => Owner.Name;
     }
 
     public string Name;
 
-    public LinkedList() { InRange = (t => false); }
+    private bool ordered;
 
-    public LinkedList(Func<Node, bool> inRangeComparator) { InRange = inRangeComparator; }
+    private Func<T, bool> inRange = (t => true);
 
-    public Func<Node, bool> InRange;
+    public Action<T> OnComplete = delegate { };
+
+    public Node MoveTo(LinkedList<T> to) => First.MoveTo(to);
+
+    public Func<T, bool> InRange {
+      get { return inRange; }
+      set {
+        inRange = value;
+        ordered = true;
+      }
+    }
 
     public Node First { get; private set; }
+
+    public bool Walk(Func<Node, bool> action) {
+      for (var node = First; node != null; node = node.Next) {
+        if (!InRange(node.Item) || !action(node)) {
+          OnComplete(node.Item);
+          return false;
+        }
+      }
+
+      return true;
+    }
 
     public bool Empty => (First == null);
 
@@ -48,14 +67,17 @@ namespace Askowl {
 
     private Node Insert(Node nodeToInsert) {
       if (DebugMode) DebugMessage(nodeToInsert);
+
       Unlink(nodeToInsert);
       nodeToInsert.Owner = this;
       if (Empty) return First = nodeToInsert;
 
-      Node next;
+      Node next = First;
 
-      for (next = First; InRange(next); next = next.Next) {
-        if (next.Next == null) return next.Next = nodeToInsert;
+      if (ordered) {
+        for (next = First; InRange(next.Item); next = next.Next) {
+          if (next.Next == null) return next.Next = nodeToInsert;
+        }
       }
 
       nodeToInsert.Next     = next;
@@ -69,9 +91,9 @@ namespace Askowl {
 
     private void DebugMessage(Node node) {
       if (node.Owner == this)
-        Debug.Log($"**** LinkedList: Add to {this}"); //#DM#//
+        Debug.Log($"**** LinkedList: Add to {this}");
       else
-        Debug.Log($"**** LinkedList: move {node.Owner} to {this}"); //#DM#//
+        Debug.Log($"**** LinkedList: move {node.Owner} to {this}");
     }
 
     private Node Unlink(Node node) {
@@ -83,9 +105,8 @@ namespace Askowl {
 
       if (node.Next != null) node.Next.Previous = node.Previous;
 
-      node.Previous  = node.Next = null;
-      node.LastOwner = node.Owner;
-      node.Owner     = null;
+      node.Previous = node.Next = null;
+      node.Owner    = null;
       return node;
     }
 
