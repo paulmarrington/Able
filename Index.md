@@ -1,1 +1,1 @@
-redirect_to:\n  - /Assets/Askowl/Base/Documentation/Askowl-Base
+redirect_to:\n  - /Assets/Askowl/Able/Documentation/Askowl-Able

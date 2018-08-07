@@ -1,15 +1,13 @@
-﻿#if UNITY_EDITOR && AskowlBase
+﻿#if UNITY_EDITOR && Able
 using System;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.TestTools;
 using UnityEngine.UI;
 
-// ReSharper disable MissingXmlDoc
-
-namespace Askowl.Samples {
-  public class BaseExampleBehaviour : MonoBehaviour {
-    public void FindDisabledObject() {
+namespace Askowl.Examples {
+  /// <inheritdoc />
+  public class AbleExampleBehaviour : MonoBehaviour {
+    internal void FindDisabledObject() {
       MeshFilter[] cubes = Objects.Find<MeshFilter>("Disabled Cube");
 
       if (cubes.Length != 1) {
@@ -24,7 +22,7 @@ namespace Askowl.Samples {
       Debug.Log("FindDisabledObject passed");
     }
 
-    public void FindGameObjectsAndReturnPath() {
+    internal void FindGameObjectsAndReturnPath() {
       GameObject[] texts = Objects.FindGameObjects("Text 2");
 
       if (texts.Length != 1) {
@@ -42,7 +40,7 @@ namespace Askowl.Samples {
       Debug.Log("FindGameObjectsAndReturnPath passed");
     }
 
-    public void FindComponentGlobal() {
+    internal void FindComponentGlobal() {
       Text text = Components.Find<Text>("Canvas", "Text 2");
 
       if (text == null) {
@@ -68,9 +66,9 @@ namespace Askowl.Samples {
       Debug.Log("findComponentGlobal passed");
     }
 
-    public void FindComponentLocal() {
+    internal void FindComponentLocal() {
       GameObject textObject = Objects.FindGameObject("Canvas");
-      Text       text2 = Components.Find<Text>(textObject, "Text 2");
+      Text       text2      = Components.Find<Text>(textObject, "Text 2");
 
       if (text2 == null) {
         Debug.LogErrorFormat("Failed to find the game object text component with a local search");
@@ -87,7 +85,7 @@ namespace Askowl.Samples {
       Debug.Log("findComponentGlobal passed");
     }
 
-    public void CreateComponent() {
+    internal void CreateComponent() {
       if (Objects.Find<Text>("Created GameObject").Length != 0) {
         Debug.LogErrorFormat("Can't create what is already there");
         return;
@@ -112,10 +110,10 @@ namespace Askowl.Samples {
 
     private class PickImplementation : Pick<string> {
       private int    count;
-      public  string Pick() { return (++count).ToString(); }
+      public  string Pick() => (++count).ToString();
     }
 
-    public void PickExample() {
+    internal void PickExample() {
       PickImplementation nose = new PickImplementation();
 
       if ((nose.Pick() != "1") || (nose.Pick() != "2") || (nose.Pick() != "3")) {
@@ -127,12 +125,12 @@ namespace Askowl.Samples {
 
     [SerializeField, RangeBounds(10, 20)] private Range range = new Range(min: 12, max: 18);
 
-    public void RangeExample() {
+    internal void RangeExample() {
       for (int i = 0; i < 10; i++) {
         int value = (int) range.Pick();
 
-        if (value < 12 || value > 18) {
-          Debug.LogErrorFormat("{0} is not in range", value);
+        if ((value < 12) || (value > 18)) {
+          Debug.LogError($"{value} is not in range");
           return;
         }
       }
@@ -140,8 +138,8 @@ namespace Askowl.Samples {
       Debug.Log("RangeExample passed");
     }
 
-    public void SelectorExample() {
-      int[] ints = {0, 1, 2, 3, 4};
+    internal void SelectorExample() {
+      int[] ints   = {0, 1, 2, 3, 4};
       int[] counts = {0, 0, 0, 0, 0};
 
       // default is random
@@ -166,7 +164,7 @@ namespace Askowl.Samples {
       }
 
       // or we can be sequential
-      selector = new Selector<int>(choices: ints, isRandom: false);
+      selector = new Selector<int>(choices: ints) {IsRandom = false};
 
       for (int i = 0; i < 10; i++) {
         int pick = selector.Pick();
@@ -177,9 +175,9 @@ namespace Askowl.Samples {
       }
 
       // or we can be random, but exhaust all possibilities before going round again
-      selector = new Selector<int>(choices: ints, exhaustiveBelow: 100);
+      selector = new Selector<int>(choices: ints) {ExhaustiveBelow = 100};
 
-      counts = new int[] {0, 0, 0, 0, 0};
+      counts = new[] {0, 0, 0, 0, 0};
 
       for (int i = 0; i < 10; i++) {
         int pick = selector.Pick();
@@ -196,7 +194,7 @@ namespace Askowl.Samples {
       }
 
       // Unless our number of choices are below a watermark value
-      selector = new Selector<int>(choices: ints, exhaustiveBelow: 4);
+      selector = new Selector<int>(choices: ints) {ExhaustiveBelow = 4};
 
       for (int i = 0; i < 10; i++) {
         int pick = selector.Pick();
@@ -219,11 +217,11 @@ namespace Askowl.Samples {
       Debug.Log("SelectorExample passed");
     }
 
-    public void Error(Json json, string fmt, params object[] args) {
+    internal void Error(Json json, string fmt, params object[] args) {
       Debug.LogErrorFormat("{0} - {1}", string.Format(fmt, args), json.ErrorMessage);
     }
 
-    public void JsonExample() {
+    internal void JsonExample() {
       Debug.LogFormat("Using JSON: {0}", jsonSampler);
 
       // We cah pass in json for parsing...
@@ -232,7 +230,7 @@ namespace Askowl.Samples {
       json.Parse(jsonSampler);
 
       // You can also check the type of here
-      if (json.IsA<string>() != false) Error(json, "IsA failed to work for root");
+      if (json.IsA<string>()) Error(json, "IsA failed to work for root");
 
       // If you know the structure of your JSON you can retrieve a leaf directly
       string id = json.Get<string>("items", "item", 0, "id");
@@ -295,16 +293,20 @@ namespace Askowl.Samples {
       // When a node is a leaf of type Node we may want fetch an individual child using [] or generic Fetch
       json.Walk("items.item.0");
 
-      if (json["name"]                 == null) Error(json,   "No key `name`");
-      else if (json["name"].ToString() != "Cake") Error(json, "Expecting Cake");
+      if (json["name"] == null) {
+        Error(json, "No key `name`");
+      } else if (json["name"].ToString() != "Cake") {
+        Error(json, "Expecting Cake");
+      }
 
       if (json.Fetch<string>("id") != "0001") Error(json, "Expecting id of 0001");
 
       // When a node is a leaf of type Array we may want fetch an individual element using [] or generic Fetch
       json.Walk("items.item.0.magic");
 
-      if (json[2]               == null) Error(json, "No index 2");
-      else if (((long) json[2]) != 333) Error(json,  "Expecting 333, not '{0}'", json[2]);
+      if (json[2] == null) {
+        Error(json, "No index 2");
+      } else if (((long) json[2]) != 333) Error(json, "Expecting 333, not '{0}'", json[2]);
 
       if (json.Fetch<int>(3) != 4444) Error(json, "expecting 4444, not '{0}'", json[3]);
 
@@ -316,15 +318,15 @@ namespace Askowl.Samples {
       json.Walk("items.item.0");
       string keys = "id,type,name,ppu,qty,magic,batters,topping";
 
-      foreach (string key in json) {
-        if (keys.IndexOf(key) == -1) Error(json, "Unexpected key '{0}'", key);
+      foreach (string key in json.Where(key => keys.IndexOf(key, StringComparison.Ordinal) == -1)) {
+        Error(json, "Unexpected key '{0}'", key);
       }
 
       // json is also an iterator for processing entries in array
       // `As` returns default(T) if it cannot be case or converted
       json.Walk("items.item.0.magic");
       int[] values = {1, 22, 333, 4444, 55555};
-      int   i = 0;
+      int   i      = 0;
 
       foreach (int entry in json.As<int>()) {
         if (i >= values.Length) {

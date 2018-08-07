@@ -1,7 +1,7 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-namespace CustomAsset {
+namespace Askowl {
   /// <inheritdoc />
   /// <summary>
   /// A Unity Inspector Editor that has a *Preview* to preview the component without having to run the application

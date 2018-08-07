@@ -1,12 +1,12 @@
-﻿#if UNITY_EDITOR && AskowlBase
+﻿#if UNITY_EDITOR && Able
 
 using NUnit.Framework;
 using UnityEngine;
 
-namespace Askowl {
-  public class GeodeticTests {
+namespace Askowl.Examples {
+  internal class GeodeticTests {
     [Test]
-    public void TestDistances() {
+    internal void TestDistances() {
       double[,] coords = new double[,] {
         {-27.46850, 151.94379, 5}, {-27.46855, 151.94379, 5},
         {-27.46851, 151.94377, 34}, {-27.46820, 151.94377, 34},

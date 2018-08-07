@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR && AskowlBase
+﻿#if UNITY_EDITOR && Able
 using System.Collections;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 // ReSharper disable MissingXmlDoc
 
-namespace Askowl {
+namespace Askowl.Examples {
   public class BaseTests : PlayModeTests {
     private IEnumerator Setup() { yield return LoadScene("Askowl-Base-Examples"); }
 
@@ -110,7 +110,7 @@ namespace Askowl {
       var test = new MonoBehaviourTest<MonoBehaviourTestable>();
       yield return test;
 
-      MonoBehaviour.Destroy(test.gameObject);
+      Object.Destroy(test.gameObject);
     }
   }
 

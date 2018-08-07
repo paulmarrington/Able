@@ -1,9 +1,11 @@
 {
-    "name": "BaseEditor",
+    "name": "AbleTests",
     "references": [
-        "Base"
+        "Able"
     ],
-    "optionalUnityReferences": [],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
     "includePlatforms": [
         "Editor"
     ],

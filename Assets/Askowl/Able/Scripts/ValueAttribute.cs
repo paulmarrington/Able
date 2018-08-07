@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace CustomAsset {
+namespace Askowl {
   public class ValueAttribute : PropertyAttribute {
     public string Label;
   }

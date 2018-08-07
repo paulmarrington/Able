@@ -7,7 +7,7 @@ using UnityEngine.Assertions;
 using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
-namespace Askowl {
+namespace Askowl.Examples {
   /// <inheritdoc />
   /// <summary>
   /// Base class for PlayMode Unity tests. Provides explicit `Setup` and `Teardown` functions.
