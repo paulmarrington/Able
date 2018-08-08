@@ -9,7 +9,7 @@ using UnityEngine.UI;
 // ReSharper disable MissingXmlDoc
 
 namespace Askowl.Examples {
-  public class BaseTests : PlayModeTests {
+  public class AbleTests : PlayModeTests {
     private IEnumerator Setup() { yield return LoadScene("Askowl-Base-Examples"); }
 
     private IEnumerator Press(string buttonName) {

@@ -1,6 +1,8 @@
-# [Custom Assets](http://www.askowl.net/unity-customassets-package)
+# [Able - Askowl Base Library Enabler](http://unitydoc.marrington.net/Able)
 
 ## Executive Summary
+
+Unity provides lots of great functionality, but there are always
 
 
 * {:toc}
@@ -9,10 +11,153 @@
 
 ## Introduction
 
+## Maths functions
 
-## Asset Support
+### Clock.cs - time and date conversions
+
+#### Epoch Time
+
+Epoch time was invented by the early Unix creators to represent time as seconds since the start of 1970 in a 32 bit integer for fast calculations. In this form it wraps around on 2038. It also suffered some inaccuracy because it did not account for leap seconds. This conversion is not 2038 limited as it uses doubles. Leap seconds will only be an issue if you are using dates each side of one - an unlikely event with minor implications.
+
+```c#
+DateTime now          = DateTime.Now;
+double   epochTimeNow = Clock.EpochTimeNow;
+double   epochTime    = Clock.EpochTimeAt(now);
+AssertAlmostEqual(epochTime, epochTimeNow);
+
+DateTime later          = now.AddDays(1);
+double   epochTimeLater = Clock.EpochTimeAt(later);
+AssertAlmostEqual(24 * 60 * 60, epochTimeLater - epochTimeNow);
+
+var diff = later.Subtract(Clock.FromEpochTime(epochTimeLater));
+AssertAlmostEqual(diff.TotalSeconds, 0);
+```
+
+
+
+##### double EpochTimeNow;
+
+Epoch time is always UTC.
+
+##### double EpochTimeAt(DateTime when);
+
+Convert local time to UTC if necessary then translate to epoch time. Unlike Unix Epoch time, leap seconds are accounted for.
+
+##### DateTime FromEpochTime(double epochTime);
+
+Convert back from Epoch UTC time to local time, C# style.
+
+### Compare.cs - equality and almost equality
+
+### AlmostEqual for Floating Point
+
+Comparing floating point numbers can be a hit or miss affair. Every mathematical operation is subject to rounding to fit into the number of bits. A single precision 32 bit float has around 7 digits of accuracy.  Even trivial calculations may not compare equal.
+
+Enter `Compare.AlmostEqual`. You can specify the minimum change or use the defaults of 0.001 for single precision and 0.00001 for doubles.
+
+```c#
+IsFalse(Compare.AlmostEqual(a: 1.1f, b: 1.2f, minimumChange: 0.1f));
+IsTrue(Compare.AlmostEqual(a: 1.1f,  b: 1.2f, minimumChange: 0.11f));
+
+IsFalse(Compare.AlmostEqual(a: 1.1f, b: 1.11f));
+IsTrue(Compare.AlmostEqual(a: 1.1f,  b: 1.0999f));
+
+IsFalse(Compare.AlmostEqual(a: 103.11, b: 104, minimumChange: 0.5));
+IsTrue(Compare.AlmostEqual(a: 103.11,  b: 104, minimumChange: 0.9));
+
+IsFalse(Compare.AlmostEqual(a: 123.45678, b: 123.45679));
+IsTrue(Compare.AlmostEqual(a: 123.456789, b: 123.45679));
+```
+
+
+
+### AlmostEqual for Integers
+
+Integers don't suffer from rounding problems. Sometimes it is useful to see if two values are close.
+
+```c#
+
+IsFalse(Compare.AlmostEqual(a: 123L, b: 133L, minimumChange: 10L));
+IsTrue(Compare.AlmostEqual(a: 123L,  b: 133L, minimumChange: 11L));
+
+IsFalse(Compare.AlmostEqual(a: 123L, b: 125L));
+IsFalse(Compare.AlmostEqual(a: 123L, b: 121L));
+IsTrue(Compare.AlmostEqual(a: 123L,  b: 124L));
+IsTrue(Compare.AlmostEqual(a: 123L,  b: 122L));
+
+IsFalse(Compare.AlmostEqual(a: 1, b: 4, minimumChange: 2));
+IsTrue(Compare.AlmostEqual(a: 1,  b: 3, minimumChange: 4));
+
+IsFalse(Compare.AlmostEqual(a: 1, b: 4));
+IsTrue(Compare.AlmostEqual(a: 1,  b: 2));
+```
+
+
+
+### [ExponentialMovingAverage.cs](https://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average)
+
+***<u>From Wikipedia</u>***:
+
+> An **exponential moving average (EMA)**, also known as an **exponentially weighted moving average (EWMA)**,[[5\]](https://en.wikipedia.org/wiki/Moving_average#cite_note-5) is a first-order [infinite impulse response](https://en.wikipedia.org/wiki/Infinite_impulse_response) filter that applies weighting factors which decrease [exponentially](https://en.wikipedia.org/wiki/Exponential_decay). The weighting for each older [datum](https://en.wikipedia.org/wiki/Data) decreases exponentially, never reaching zero. The graph at right shows an example of the weight decrease.
+
+ ***<u>From Me (Paul Marrington):</u>***
+
+> An **exponential moving average** is a way to calculate an average where older values have less impact on the average than more recent ones.
+
+It is most often used in financial calculations, but I use it mainly for IoT. Many devices can read wildly until the settle down. Then real-world interactions make then inaccurate again. A classis is the compass or magnetometer. Walk past a mass of steel and they will be attracted - just like an engineer. Using an EMA and these variations will be dampened. EMA is also useful when merging IoT data.
+
+#### EMA Initialisation
+
+#### EMA Average Value
+
+#### EMA Average Angle
+
+### Geodetic.cs - distances and bearings
+
+### Tetrad.cs - quaternions with minimal heap use
+
+### Trig.cs - degrees, radians, sides and angles
+
+## Data Structures
+
+### Disposable.cs - helper for IDisposable.Dispose()
+
+### Emitter.cs - the observer pattern
+
+### LinkedList.cs - efficient walking movement
+
+### Pick.cs - Interface to choose from options
+
+### Selector.cs - maintain and pick from a list
+
+### Set.cs - Unity component implementing selector
+
+## Text Manipulation
+
+### Csv.cs - serialization of comma-separated lists
+
+### Json.cs - parse any JSON to dictionary
+
+## Unity Support
+
+### Components.cs - find or create components
+
+### ConditionalHideAttribute.cs
+
+### Log.cs - pluggable logging function
+
+### Object.cs - find game objects
+
+### PlayModeController.cs - control app for live testing
+
+### PlayModeTests.cs - adding asserts to controller
+
+### Range.cs - inspector tool to set high and low bounds
+
+### ValueAttribute.cs - change name of inspector field
 
 ### Components
+
 `Components` is a static helper class with functions to create and find Components.
 
 #### Components.Find&lt;T>(name)

@@ -1,12 +1,11 @@
 # Askowl-Base
-## Release 2018-??
+## Release 2018-08
 
-- [ ] Give Polling it's own project
-- [ ] Poll custom assets as well as mono behaviours.
+- [x] organise document sections
+- [x] Doc and test Clock
+- [ ] doc and test compare
 - [ ] doc and test for Set
 - [ ] doc and test for Compare
-- [ ] Doc: Polling, IPolling
-- [ ] Test: Polling
 - [ ] Doc: IsDisplaying PlayModeController
 - [ ] Docx: IsDisplaying PlayModeController
 - [ ] Doc: IsDisplaying PlayModeTests
@@ -14,7 +13,7 @@
 - [ ] Doc: IsNotDisplaying PlayModeTests
 - [ ] Docx: IsNotDisplaying PlayModeTests
 - [ ] move Json to it's own project
-- [ ] split up functionality
+- [x] split up functionality
 - [ ] Add JSON writer
 - [ ] Doc: JSON
 - [ ] Remove all that is not base from documentation

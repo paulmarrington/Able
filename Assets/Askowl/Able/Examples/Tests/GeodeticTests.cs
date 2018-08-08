@@ -6,7 +6,7 @@ using UnityEngine;
 namespace Askowl.Examples {
   internal class GeodeticTests {
     [Test]
-    internal void TestDistances() {
+    internal void GeodeticDistances() {
       double[,] coords = new double[,] {
         {-27.46850, 151.94379, 5}, {-27.46855, 151.94379, 5},
         {-27.46851, 151.94377, 34}, {-27.46820, 151.94377, 34},
