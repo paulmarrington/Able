@@ -108,6 +108,20 @@ It is most often used in financial calculations, but I use it mainly for IoT. Ma
 
 #### EMA Initialisation
 
+The simplest form is to create a new EMA object without parameters.
+
+```c#
+var ema = new ExponentialMovingAverage(); // lookback defaults to 8
+```
+
+As the comment says, the average is over the last 8 values plus the new one. You can set your own.
+
+```c#
+var ema = new ExponentialMovingAverage(lookback: 50);
+```
+
+
+
 #### EMA Average Value
 
 #### EMA Average Angle
