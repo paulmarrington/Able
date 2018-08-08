@@ -120,13 +120,83 @@ As the comment says, the average is over the last 8 values plus the new one. You
 var ema = new ExponentialMovingAverage(lookback: 50);
 ```
 
-
+The lookback value is application specific. Ask yourself how many data points back is the information irrelevant to the current value. If you take one reading a second and any reading over 15 seconds old has no value, set lookback to 15.
 
 #### EMA Average Value
 
+If you don't make `Average` calls at consistent time intervals the you will need to consider other methods to make the values equally spaced.
+
+```c#
+AreEqual(expected: 1f,      actual: ema.Average(value: 1));
+AreEqual(expected: 2.6f,    actual: ema.Average(value: 5));
+AreEqual(expected: 2.76f,   actual: ema.Average(value: 3));
+AreEqual(expected: 4.056f,  actual: ema.Average(value: 6));
+AreEqual(expected: 4.0336f, actual: ema.Average(value: 4));
+```
+
 #### EMA Average Angle
 
+Using EMA with angles in degrees is exactly the same except that the result is normalised to be between -180 and +180 degrees.
+
+```c#
+AreEqual(expected: -10f,       actual: ema.AverageAngle(degrees: -10));
+AreEqual(expected: -5.555555f, actual: ema.AverageAngle(degrees: 10));
+AreEqual(expected: -5.432098f, actual: ema.AverageAngle(degrees: -5));
+AreEqual(expected: -3.113854f, actual: ema.AverageAngle(degrees: 5));
+AreEqual(expected: -3.088552f, actual: ema.AverageAngle(degrees: 357));
+AreEqual(expected: -1.513316f, actual: ema.AverageAngle(degrees: 364));
+```
+
 ### Geodetic.cs - distances and bearings
+
+> **Geodesy**: The branch of mathematics dealing with the shape and area of the earth or large portions of it.
+>
+> **Origin**: late 16th century: from modern Latin geodaesia, from Greek geōdaisia, from gē ‘earth’ + daiein ‘divide’.
+>
+> https://en.wikipedia.org/wiki/Geodesy
+> https://www.movable-type.co.uk/scripts/latlong.html
+
+> **Paul's Definition**: Calculations of distances and bearings of and between two points on the earth's surface and accounting for the curvature of the earth.
+
+#### Coordinates Data Structure
+
+Yet another data structure to contain coordinates. In the end it is more efficient to have separate definitions than it is to burden one definition with lots of irrelevant data. It is particularly poignant when we are dealing with pass-by-value.
+
+In this world-view, coordinates use 64 bit double floating points for accuracy and know whether they are degrees or radians.
+
+```c#
+var location = Geodetic.Coords(-27.46850, 151.94379);
+var same = Geodetic.Coords(-0.4794157656, 2.65191941345, radians: true);
+location.ToRadians();
+same.ToDegrees();
+Debug.Log(same.ToString()); // -27.46850, 151.94379
+```
+
+
+
+#### Distance Between Two Points
+
+In geodetic parlance the shortest distance between two points is an arc, not a straight line. This is kind of important if you don't want to tunnel through earth and dive under the sea to get anywhere.
+
+`Kilometres(from, to)` uses the Haversine formula to calculate the distance taking into account an approximation of the earth's curvature. For display convenience there is a version, `DistanceBetween(from, to)`, that returns a string that is more friendly than the raw kilometres. If the distance is below one kilometre, it returns the value as a whole number of metres (i.e. 43 m). For distances below ten kilometres, one decimal place is provided (4.7 km). Above the kilometres are whole numbers only (23 km).
+
+#### Bearing from One Point to the Next
+
+If you were hiking you would take a bearing between yourself and a known landmark and use that bearing to get there.
+
+```c#
+var degrees = Geodetic.BearingDegrees(from, to);
+var radians = Geodetic.BearingRadians(from, to);
+Assert.AreEqual(degrees, Trig.degrees(radians));
+```
+
+#### Find One Point from Another
+
+The next navigational trick is to find a destination coordinate when knowing the bearing and distance of that point. Useful if you want to call an air-strike down on an enemy position you are observing.
+
+```c#
+Geodetic.Destination(start: here, distanceKm: 1.2, bearingDegrees: 23.4);
+```
 
 ### Tetrad.cs - quaternions with minimal heap use
 
