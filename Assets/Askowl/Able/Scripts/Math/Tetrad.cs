@@ -2,12 +2,22 @@
 using UnityEngine;
 
 namespace Askowl {
+  /// <summary>
+  /// An alternate implementation of Quaternions that are less active on the heap
+  /// and provide some otherwise missing functionality.
+  /// </summary> //#TBD#
+  /// <remarks><a href="http://unitydoc.marrington.net/Able#Tetradcs-quaternions-with-minimal-heap-use">Geodetics</a></remarks>
   public class Tetrad {
     private double     x, y, z, w;
     private Quaternion quaternion;
 
+    /// <summary>
+    /// The identity rotation (Read Only).<br/>
+    /// This quaternion corresponds to "no rotation" - the object is perfectly aligned with the world or parent axes.
+    /// </summary>
     public static readonly Tetrad Identity = new Tetrad().Set(xx: 0, yy: 0, zz: 0, ww: 1);
-    private static         Tetrad workingCopy;
+
+    private static Tetrad workingCopy;
 
     public Quaternion Quaternion {
       get {

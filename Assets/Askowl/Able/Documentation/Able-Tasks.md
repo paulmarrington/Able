@@ -3,22 +3,30 @@
 
 - [x] organise document sections
 - [x] Doc and test Clock
-- [ ] doc and test compare
-- [ ] doc and test for Set
-- [ ] doc and test for Compare
-- [ ] Doc: IsDisplaying PlayModeController
-- [ ] Docx: IsDisplaying PlayModeController
-- [ ] Doc: IsDisplaying PlayModeTests
-- [ ] Docx: IsDisplaying PlayModeTests
-- [ ] Doc: IsNotDisplaying PlayModeTests
-- [ ] Docx: IsNotDisplaying PlayModeTests
-- [ ] move Json to it's own project
+- [x] Doc and test ExponentialMovingAverage
+- [x] Doc and test Geodetic
+- [x] doc and test compare
+- [ ] doc and test Tetrad
+- [ ] doc and test Trig
+- [ ] doc and test Disposable
+- [ ] doc and test Emitter
+- [ ] doc and test LinkedList
+- [ ] Doc and test Pick
+- [ ] Doc and test Selector
+- [ ] doc and test Set
+- [ ] doc and test Csv
+- [ ] doc and test PlayModeController
+- [ ] doc and test PlayModeTests
 - [x] split up functionality
 - [ ] Add JSON writer
-- [ ] Doc: JSON
+- [ ] doc and test JSON
+- [ ] doc and test objects.path(gameobject)
+- [ ] doc and test Components
+- [ ] doc and test ConditionalHideAttribute
+- [ ] Doc and test Log
+- [ ] doc and test range
+- [ ] doc and test ValueAttribute
 - [ ] Remove all that is not base from documentation
-- [ ] Doc: objects.path(gameobject)
-- [ ] Doc: Csv
 - [ ] Docx - relink
 - [ ] Link to Wix
 
@@ -30,7 +38,7 @@
 * [x] Move parse params to class ones
 * [x] create error
 * [x] create errormessage
-* [x] create parseerro
+* [x] create parseerror
 * [x] create accesserror
 * [x] add error messages to failed tests
 * [x] using (Here){asdf}

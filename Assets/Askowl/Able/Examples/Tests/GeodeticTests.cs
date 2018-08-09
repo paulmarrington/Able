@@ -2,9 +2,9 @@
 
 using System;
 using NUnit.Framework;
-using UnityEngine;
 
 namespace Askowl.Examples {
+  /// <remarks><a href="http://unitydoc.marrington.net/Able#geodeticcs-distance-and-bearings">Geodetics</a></remarks>
   public class GeodeticTests {
     double[,] coords = {
       {-27.46850, 151.94379, 5, 180}, {-27.46855, 151.94379, 5, 180},
@@ -17,6 +17,7 @@ namespace Askowl.Examples {
 
     string[] distances = {"5 m", "34 m", "7 m", "43 m", "2.7 km", "229 km"};
 
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#distance-between-two-points">Distance Between Two Points</a></remarks>
     [Test]
     public void GeodeticDistances() {
       TestCoords((idx, from, to) => {
@@ -31,6 +32,7 @@ namespace Askowl.Examples {
       });
     }
 
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#bearing-from-one-point-to-the-next">Distance Between Two Points</a></remarks>
     [Test]
     public void GeodeticBearings() {
       TestCoords((idx, from, to) => {
@@ -41,7 +43,20 @@ namespace Askowl.Examples {
       });
     }
 
-    public void TestCoords(Action<int, Geodetic.Coordinates, Geodetic.Coordinates> action) {
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#find-one-point-from-another">Distance Between Two Points</a></remarks>
+    [Test]
+    public void GeodeticDestination() {
+      TestCoords((idx, from, to) => {
+        var kmApart = Geodetic.Kilometres(from, to);
+        var bearing = Geodetic.BearingDegrees(from, to);
+
+        var destination = Geodetic.Destination(start: from, distanceKm: kmApart, bearingDegrees: bearing);
+
+        Assert.AreEqual(expected: to, actual: destination);
+      });
+    }
+
+    private void TestCoords(Action<int, Geodetic.Coordinates, Geodetic.Coordinates> action) {
       for (int i = 0; i < coords.GetLength(0); i += 2) {
         var from = Geodetic.Coords(latitude: coords[i, 0],     longitude: coords[i, 1]);
         var to   = Geodetic.Coords(latitude: coords[i + 1, 0], longitude: coords[i + 1, 1]);

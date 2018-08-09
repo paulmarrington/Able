@@ -23,61 +23,80 @@ namespace Askowl {
       /// Decimal latitude and longitude held in a 64 bit floating point number/
       /// </summary>
       /// <remarks><a href="http://unitydoc.marrington.net/Able#coordinates-data-structure">Coordinates Data Structure</a></remarks>
-      public double Latitude, Longitude;
+      public readonly double Latitude;
+
+      /// <summary>
+      /// Decimal latitude and longitude held in a 64 bit floating point number/
+      /// </summary>
+      /// <remarks><a href="http://unitydoc.marrington.net/Able#coordinates-data-structure">Coordinates Data Structure</a></remarks>
+      public readonly double Longitude;
 
       /// <summary>
       /// Whether we will be working in radians or degrees
       /// </summary>
       /// <remarks><a href="http://unitydoc.marrington.net/Able#coordinates-data-structure">Coordinates Data Structure</a></remarks>
-      public bool radians;
+      public readonly bool Radians;
+
+      /// <summary>
+      /// Create a coordinates data structure.
+      /// </summary>
+      /// <param name="latitude"></param>
+      /// <param name="longitude"></param>
+      /// <param name="radians">True for radians, false for degrees (default)</param>
+      /// <remarks><a href="http://unitydoc.marrington.net/Able#coordinates-data-structure">Coordinates Data Structure</a></remarks>
+      public Coordinates(double latitude, double longitude, bool radians = false) {
+        Latitude  = latitude;
+        Longitude = longitude;
+        Radians   = radians;
+      }
 
       /// <summary>
       /// Convert to radians if needed
       /// </summary>
       /// <remarks><a href="http://unitydoc.marrington.net/Able#coordinates-data-structure">Coordinates Data Structure</a></remarks>
-      public Coordinates ToRadians() {
-        if (radians) return this;
-
-        Latitude  = Trig.ToRadians(Latitude);
-        Longitude = Trig.ToRadians(Longitude);
-        radians   = true;
-        return this;
-      }
+      public Coordinates ToRadians() =>
+        Radians ? this : Coords(Trig.ToRadians(Latitude), Trig.ToRadians(Longitude), true);
 
       /// <summary>
       /// Convert to degrees if needed.
       /// </summary>
       /// <remarks><a href="http://unitydoc.marrington.net/Able#coordinates-data-structure">Coordinates Data Structure</a></remarks>
-      public Coordinates ToDegrees() {
-        if (!radians) return this;
-
-        Latitude  = Trig.ToDegrees(Latitude);
-        Longitude = Trig.ToDegrees(Longitude);
-        radians   = false;
-        return this;
-      }
+      public Coordinates ToDegrees() =>
+        Radians ? Coords(Trig.ToDegrees(Latitude), Trig.ToDegrees(Longitude), true) : this;
 
       /// <inheritdoc />
       /// <remarks><a href="http://unitydoc.marrington.net/Able#coordinates-data-structure">Coordinates Data Structure</a></remarks>
       public override string ToString() => $"({Latitude:n5}, {Longitude:n5})";
+
+      /// <summary>
+      /// Account for inexact equality
+      /// </summary>
+      public bool Equals(Coordinates other) {
+        var my = ToRadians();
+        other = other.ToRadians();
+        return Compare.AlmostEqual(my.Latitude, other.Latitude) && Compare.AlmostEqual(my.Longitude, other.Longitude);
+      }
+
+      /// <inheritdoc />
+      public override bool Equals(object obj) => base.Equals(obj);
+
+      /// <inheritdoc />
+      public override int GetHashCode() {
+        unchecked {
+          return (Latitude.GetHashCode() * 397) ^ Longitude.GetHashCode();
+        }
+      }
     }
 
     /// <summary>
     /// Create a coordinates data structure.
     /// </summary>
-    /// <param name="latitude">decimal latitude</param>
-    /// <param name="longitude">decimal longitude</param>
+    /// <param name="latitude"></param>
+    /// <param name="longitude"></param>
     /// <param name="radians">True for radians, false for degrees (default)</param>
-    /// <returns>Coordinates struct in degrees</returns>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#coordinates-data-structure">Coordinates Data Structure</a></remarks>
-    public static Coordinates Coords(double latitude, double longitude, bool radians = false) {
-      Coordinates coordinates;
-      coordinates.Latitude  = latitude;
-      coordinates.Longitude = longitude;
-      coordinates.radians   = radians;
-      coordinates.ToDegrees();
-      return coordinates;
-    }
+    public static Coordinates Coords(double latitude, double longitude, bool radians = false) =>
+      new Coordinates(latitude, longitude, radians);
 
     /// <summary>
     /// Canculate the distance between two points accounting for the curvature of the earth.
@@ -104,8 +123,8 @@ namespace Askowl {
     /// </summary>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#distance-between-two-points">Distance Between Two Points</a></remarks>
     public static double Haversine(Coordinates first, Coordinates second) {
-      first.ToRadians();
-      second.ToRadians();
+      first  = first.ToRadians();
+      second = second.ToRadians();
       var sinDeltaLatitude  = Math.Sin((second.Latitude  - first.Latitude)  / 2);
       var sinDeltaLongitude = Math.Sin((second.Longitude - first.Longitude) / 2);
 
@@ -122,8 +141,8 @@ namespace Askowl {
     /// </summary>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#bearing-from-one-point-to-the-next">Distance Between Two Points</a></remarks>
     public static double BearingRadians(Coordinates from, Coordinates to) { // forward azimuth
-      from.ToRadians();
-      to.ToRadians();
+      from = from.ToRadians();
+      to   = to.ToRadians();
       var y = Math.Sin(to.Longitude - from.Longitude) * Math.Cos(to.Latitude);
 
       var x = Math.Cos(from.Latitude) * Math.Sin(to.Latitude) -
@@ -146,7 +165,7 @@ namespace Askowl {
     /// </summary>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#find-one-point-from-another">Distance Between Two Points</a></remarks>
     public static Coordinates Destination(Coordinates start, double distanceKm, double bearingDegrees) {
-      start.ToRadians();
+      start = start.ToRadians();
       var deltaDistance    = distanceKm / EarthMeanRadiusKm;
       var sinStartLatitude = Math.Sin(start.Latitude);
       var cosStartLatitude = Math.Cos(start.Latitude);
