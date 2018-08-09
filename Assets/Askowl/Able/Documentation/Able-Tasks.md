@@ -1,4 +1,5 @@
 # Askowl-Base
+
 ## Release 2018-08
 
 - [x] organise document sections
@@ -10,6 +11,7 @@
 - [ ] doc and test Trig
 - [ ] doc and test Disposable
 - [ ] doc and test Emitter
+- [ ] add InstanceCache to LinkedList
 - [ ] doc and test LinkedList
 - [ ] Doc and test Pick
 - [ ] Doc and test Selector

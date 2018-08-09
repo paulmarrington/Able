@@ -198,7 +198,126 @@ The next navigational trick is to find a destination coordinate when knowing the
 Geodetic.Destination(start: here, distanceKm: 1.2, bearingDegrees: 23.4);
 ```
 
-### Tetrad.cs - quaternions with minimal heap use
+### Tetrad.cs - another perspective on quaternions
+
+#### Tetrad.Identity
+
+#### Tetrad.Quaternion
+
+#### Tetrad.AngleAxis
+
+
+
+```c#
+// ... A
+// rotate z axis for magnetic heading
+attitude.AngleAxis(Trig.zAxis, compass.MagneticHeading);
+// ... B
+```
+
+
+
+#### Tetrad.Bearing
+
+#### Tetrad.Conjugate
+
+
+
+#### Tetrad.Do
+
+```c#
+float bearing = (float) Geodetic.BearingDegrees(here, there);
+chevrons.transform.localRotation =
+    Tetrad.Do(chevrons.transform.localRotation)
+        .AngleAxis(Trig.zAxis, -bearing).Quaternion;
+```
+
+#### Tetrad.Dot
+
+#### Tetrad.Inverse
+
+
+
+```c#
+// C ...
+// Inverse changes direction of rotation
+attitude.Inverse();
+mainCamera.transform.localRotation = attitude.Quaternion;
+```
+
+
+
+#### Tetrad.Length
+
+#### Tetrad.LengthSquared
+
+#### Tetrad.Multiply
+
+```c#
+Inverse() => Conjugate().Multiply(scalar: 1.0 / LengthSquared);
+```
+
+#### Tetrad.Negate
+
+#### Tetrad.Normalize
+
+```c#
+Multiply(double by) => Set(x * by, y * by, z * by, w * by).Normalize();
+```
+
+#### Tetrad.RotateBy
+
+
+
+```c#
+var attitude = gyro.Attitude; // cache this to stop recalculations
+// rotate for webcam out of back of camera & z axis for magnetic heading
+attitude.RotateBy(rotateForWebcam);
+// ... A
+```
+
+
+
+#### Tetrad.Set
+
+#### Tetrad.ALerp
+
+
+
+```c#
+rotateTo.Set(gyroscope.Attitude).RightToLeftHanded();
+rotation.ALerp(rotateFrom, rotateTo, smoothing);
+rotateFrom.Set(rotateTo);
+```
+
+
+
+#### Tetrad.ESlerp
+
+
+
+```c#
+rotateTo.Set(gyroscope.Attitude).RightToLeftHanded();
+rotation.ESlerp(rotateFrom, rotateTo, smoothing);
+rotateFrom.Set(rotateTo);
+```
+
+
+
+#### Tetrad.SwitchAxis
+
+
+
+```c#
+// B ...
+// Gyro Z axis is Unity camera Y.
+attitude.SwitchAxis(pivot: Trig.xAxis)
+// ... C
+```
+
+
+
+#### 
 
 ### Trig.cs - degrees, radians, sides and angles
 
