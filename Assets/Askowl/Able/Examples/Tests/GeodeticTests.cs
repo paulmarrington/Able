@@ -2,7 +2,6 @@
 
 using System;
 using NUnit.Framework;
-using UnityEngine;
 
 namespace Askowl.Examples {
   /// <remarks><a href="http://unitydoc.marrington.net/Able#geodeticcs-distance-and-bearings">Geodetics</a></remarks>
@@ -12,12 +11,12 @@ namespace Askowl.Examples {
       {-27.46851, 151.94377, 34, 0}, {-27.46820, 151.94377, 34, 0},
       {-27.46851, 151.94377, 7, 0}, {-27.46844, 151.94377, 7, 0},
       {-27.46850, 151.94379, 43, 0}, {-27.46811, 151.94379, 43, 0},
-      {36.12, -86.67, 2886444, 0}, {33.94, -118.4, 2886444, 0},
-      {-27.49210, 151.94379, 2667.57, -36.49}, {-27.46811, 151.92379, 2667.57, -36.49},
+      {36.12, -86.67, 2886444, -85.4}, {33.94, -118.4, 2886444, -85.4},
+      {-27.49210, 151.94379, 3318, -36.49}, {-27.46811, 151.92379, 3318, -36.49},
       {-27.49210, 151.94379, 202926.01, 90.4748}, {-27.49210, 154.00109, 202926.01, 90.4748}
     };
 
-    string[] distances = {"5 m", "34 m", "7 m", "43 m", "2,886 km", "2.7 km", "229 km"};
+    string[] distances = {"5 m", "34 m", "7 m", "43 m", "2,886 km", "3.3 km", "203 km"};
 
     /// <remarks><a href="http://unitydoc.marrington.net/Able#distance-between-two-points">Distance Between Two Points</a></remarks>
     [Test]
@@ -25,15 +24,6 @@ namespace Askowl.Examples {
       TestCoords((idx, from, to) => {
         var metresApart   = Geodetic.Kilometres(from, to) * 1000;
         var distanceApart = Geodetic.DistanceBetween(from, to);
-
-//        var lat1 = Trig.ToRadians(coords[idx, 0]);
-//        var lon1 = Trig.ToRadians(coords[idx, 1]);
-//        var lat2 = Trig.ToRadians(coords[idx + 1, 0]);
-//        var lon2 = Trig.ToRadians(coords[idx + 1, 1]);
-//        var h0   = Geodetic.Haversine(from, to);
-//        var h2   = Geodetic.Haversine2(lat1, lat2, lon1, lon2);
-//        var h3   = Geodetic.Haversine3(lat1, lat2, lon1, lon2);
-//        Debug.Log($"DISTANCES: {h0}\t{h2}"); //#DM#//
 
         Assert.AreEqual(expected: coords[idx, 2], actual: metresApart, delta: 0.99);
 
@@ -63,7 +53,7 @@ namespace Askowl.Examples {
 
         var destination = Geodetic.Destination(start: from, distanceKm: kmApart, bearingDegrees: bearing);
 
-        Assert.AreEqual(expected: to, actual: destination);
+        Assert.IsTrue(to.Equals(destination));
       });
     }
 

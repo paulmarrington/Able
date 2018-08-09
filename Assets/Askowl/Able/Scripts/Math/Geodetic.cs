@@ -1,5 +1,4 @@
 ﻿using System;
-using UnityEngine;
 
 namespace Askowl {
   /// Geodesy: The branch of mathematics dealing with the shape and area of the earth or large portions of it.<br/>
@@ -12,7 +11,7 @@ namespace Askowl {
     /// Yes, all the calculations herein are based on a guess of the earth's
     /// radius between the two points in question.
     /// </summary>
-    public const float EarthMeanRadiusKm = 6371;
+    public const double EarthMeanRadiusKm = 6371.01;
 
     /// <summary>
     /// Yet another way to specify coordinates. Consider it as another view on truth.
@@ -75,7 +74,9 @@ namespace Askowl {
       public bool Equals(Coordinates other) {
         var my = ToRadians();
         other = other.ToRadians();
-        return Compare.AlmostEqual(my.Latitude, other.Latitude) && Compare.AlmostEqual(my.Longitude, other.Longitude);
+
+        return Compare.AlmostEqual(my.Latitude,  other.Latitude,  0.001) &&
+               Compare.AlmostEqual(my.Longitude, other.Longitude, 0.001);
       }
 
       /// <inheritdoc />
@@ -126,42 +127,15 @@ namespace Askowl {
     public static double Haversine(Coordinates first, Coordinates second) {
       first  = first.ToRadians();
       second = second.ToRadians();
-      Debug.Log($"**** Geodetic:128 first={first}, second={second}"); //#DM#//
       var sinDeltaLatitude  = Math.Sin((second.Latitude  - first.Latitude)  / 2);
       var sinDeltaLongitude = Math.Sin((second.Longitude - first.Longitude) / 2);
-      Debug.Log($"**** Geodetic:132 sd={sinDeltaLatitude} {sinDeltaLongitude}");//#DM#//
 
       var a = (sinDeltaLatitude * sinDeltaLatitude) +
               Math.Cos(first.Latitude) * Math.Cos(second.Latitude) *
               (sinDeltaLongitude * sinDeltaLongitude);
-Debug.Log($"**** Geodetic:137 a={a}");//#DM#//
+
       // return EarthMeanRadiusKm * 2 * Math.Atan2(Math.Sqrt(a), Math.Sqrt(1 - a));
       return EarthMeanRadiusKm * 2 * Math.Asin(Math.Sqrt(a));
-    }
-
-    public static double Haversine2(double lat1, double lat2, double lon1, double lon2) {
-      const double r = 6371; // meters
-
-      var sdlat = Math.Sin((lat2 - lat1) / 2);
-      var sdlon = Math.Sin((lon2 - lon1) / 2);
-      var q     = sdlat * sdlat + Math.Cos(lat1) * Math.Cos(lat2) * sdlon * sdlon;
-      var d     = 2 * r * Math.Asin(Math.Sqrt(q));
-
-      return d;
-    }
-
-    public static double Haversine3(double lat1, double lat2, double lon1, double lon2) {
-      const double r    = 6371e3; // meters
-      var          dlat = (lat2 - lat1) / 2;
-      var          dlon = (lon2 - lon1) / 2;
-
-      var q = Math.Pow(Math.Sin(dlat), 2) + Math.Cos(lat1) * Math.Cos(lat2) *
-              Math.Pow(Math.Sin(dlon), 2);
-
-      var c = 2 * Math.Atan2(Math.Sqrt(q), Math.Sqrt(1 - q));
-
-      var d = r * c;
-      return d / 1000;
     }
 
     /// <summary>
@@ -194,17 +168,18 @@ Debug.Log($"**** Geodetic:137 a={a}");//#DM#//
     /// <remarks><a href="http://unitydoc.marrington.net/Able#find-one-point-from-another">Distance Between Two Points</a></remarks>
     public static Coordinates Destination(Coordinates start, double distanceKm, double bearingDegrees) {
       start = start.ToRadians();
+      var bearingRadians   = Trig.ToRadians(bearingDegrees);
       var deltaDistance    = distanceKm / EarthMeanRadiusKm;
-      var sinStartLatitude = Math.Sin(start.Latitude);
-      var cosStartLatitude = Math.Cos(start.Latitude);
       var sinDeltaDistance = Math.Sin(deltaDistance);
       var cosDeltaDistance = Math.Cos(deltaDistance);
+      var sinStartLatitude = Math.Sin(start.Latitude);
+      var cosStartLatitude = Math.Cos(start.Latitude);
 
       var latitude = Math.Asin((sinStartLatitude * cosDeltaDistance) +
-                               cosStartLatitude * sinDeltaDistance * Math.Cos(bearingDegrees));
+                               cosStartLatitude * sinDeltaDistance * Math.Cos(bearingRadians));
 
       var longitude = start.Longitude + Math.Atan2(
-                        Math.Sin(bearingDegrees) * sinDeltaDistance * cosStartLatitude,
+                        Math.Sin(bearingRadians) * sinDeltaDistance * cosStartLatitude,
                         cosDeltaDistance - sinStartLatitude * Math.Sin(latitude));
 
       return Coords(latitude, longitude, radians: true);
