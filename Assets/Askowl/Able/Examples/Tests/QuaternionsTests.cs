@@ -7,27 +7,47 @@ using Random = UnityEngine.Random;
 namespace Askowl.Examples {
   public class QuaternionsTests {
     [Test]
-    public void Normalise() {
-      Reset("Normalise", 1, 100000, 0);
+    public void AroundAxis() {
+      Reset(test: "RotateBy", setsWithNewSeed: 100, nearRepeats: 1000, maxDegrees: 10);
 
       Walker(() => {
-        DenormaliseSeed();
-        AreEqual(seed.normalized, seed.Normalise());
+        var angle = randomAngle;
+        var axis  = randomAxis;
+
+        Quaternion rotateBy = Quaternion.Euler(new Vector3 {[axis] = angle});
+        rotateBy = Quaternion.AngleAxis(angle, seed.Axis(directions[axis]));
+        Quaternion actual = rotateBy * seed;
+
+        Quaternion expected = seed.AroundAxis(directions[axis], angle);
+
+        AreEqual(expected, actual);
       });
     }
+
+    [Test]
+    public void RotateBy() {
+      Reset(test: "RotateBy", setsWithNewSeed: 100, nearRepeats: 1000, maxDegrees: 10);
+
+      Walker(() => {
+        var start    = seed;
+        var rotateBy = NextSeed();
+
+        var actual = start * rotateBy;
+
+        var expected = start.RotateBy(rotateBy);
+
+        AreEqual(actual, expected);
+      });
+    }
+
+    private Trig.Direction[] directions = {Trig.xAxis, Trig.yAxis, Trig.zAxis};
 
     private void Reset(string test, int setsWithNewSeed, int nearRepeats, float maxDegrees) {
       testName     = test;
       sets         = setsWithNewSeed;
       repetitions  = nearRepeats;
       degreesApart = maxDegrees;
-      testCount    = slowNormaliseCount = 0;
-    }
-
-    private void DenormaliseSeed() {
-      for (int i = 0; i < 4; i++) {
-        seed[i] = Random.Range(-0.5f, 0.5f);
-      }
+      testCount    = 0;
     }
 
     private void AreEqual(Quaternion expected, Quaternion actual) {
@@ -47,31 +67,31 @@ namespace Askowl.Examples {
 
     private void Walker(Action action) {
       var startTime = Time.realtimeSinceStartup;
+
       for (int i = 0; i < sets; i++) {
         Reseed();
 
         for (int j = 0; j < repetitions; j++) {
           testCount++;
-          if (seed.LengthSquared() >= 0.8) slowNormaliseCount++;
           action();
           NextSeed();
         }
       }
 
       var elapsed = Time.realtimeSinceStartup - startTime;
-      Debug.Log($"{testCount} tests run in {elapsed} seconds, {slowNormaliseCount} using slow normalise");
+      Debug.Log($"{testCount} tests run in {elapsed} seconds");
     }
 
     private Quaternion seed;
     private float      degreesApart = 180;
-    private int        sets         = 2, repetitions = 10, testCount, slowNormaliseCount;
+    private int        sets         = 2, repetitions = 10, testCount;
     private string     testName;
+    private float      randomAngle => Random.Range(-degreesApart, +degreesApart);
+    private int        randomAxis  => Random.Range(1,             3);
 
-    private void NextSeed() {
-      var     angle  = Random.Range(-degreesApart, +degreesApart);
-      var     axis   = Random.Range(1,             3);
-      Vector3 vector = new Vector3 {[axis] = angle};
-      seed *= Quaternion.Euler(vector);
+    private Quaternion NextSeed() {
+      Vector3 vector = new Vector3 {[randomAxis] = randomAngle};
+      return seed *= Quaternion.Euler(vector);
     }
 
     private void Reseed() =>

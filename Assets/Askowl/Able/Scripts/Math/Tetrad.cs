@@ -359,5 +359,32 @@ namespace Askowl.Old {
     public Tetrad RightToLeftHanded() => Set(x, y, -z, -w);
 
     public override string ToString() => $"({x:n1}, {y:n1}, {z:n1}, {w:n1})";
+
+    /// <summary>
+    /// A much faster normalise, accurate to a dot product of 0.9995 or better.
+    /// </summary>
+    /// <param name="q"></param>
+    /// <returns></returns>
+    public static Quaternion Normalise(Quaternion q) {
+      float lengthSquared = 1;                                                   //q.LengthSquared();
+      if ((lengthSquared < 0.02) || (lengthSquared >= 0.8)) return q.normalized; // do it the long way
+
+      float il    = additiveConstant + factor * (lengthSquared - Neighborhood);
+      int   count = 0;
+
+      do {
+        il *= additiveConstant + factor * (lengthSquared - Neighborhood);
+      } while (((lengthSquared * il * il) < Limit) && (count++ < 8));
+
+      if (count > 3) Debug.LogWarning($"Normalise for {q}, sql {lengthSquared} had {count} iterations");
+
+      return new Quaternion(q.x * il, q.y * il, q.z * il, q.w * il);
+    }
+
+    private const           float Neighborhood     = 0.959066f;
+    private const           float Scale            = 1.000311f;
+    private const           float Limit            = 0.9995f * 0.9995f;
+    private static readonly float additiveConstant = Scale / Mathf.Sqrt(Neighborhood);
+    private static readonly float factor           = Scale * (-0.5f / (Neighborhood * Mathf.Sqrt(Neighborhood)));
   }
 }

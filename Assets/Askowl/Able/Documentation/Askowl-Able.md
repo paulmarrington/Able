@@ -202,73 +202,35 @@ Geodetic.Destination(start: here, distanceKm: 1.2, bearingDegrees: 23.4);
 
 Unity quaternion math focusses on the needs of the game. Great, but there are a few methods needed for augmented reality that are not provided.
 
-#### ALerp
-
-> When game programmers want to interpolate between quaternions, they tend to copy Ken Shoemake's code without really understanding it. Ken uses a function called *slerp* that walks along the unit sphere in 4-dimensional space from one quaternion to the other. Because it's navigating a sphere, it involves a fair amount of trigonometry, and is correspondingly slow.  Lacking a strong grasp of quaternions, most game developers just accept this: slerp is slow, and if you want something faster, maybe you should go back to Euler angles and all their nastiness. But the situation is not so bad. There's a cheap approximation to slerp that will work in most cases, and is so braindead simple and fast that it's shocking. Shocking, I tell you.
-
-| **The Inner Product, March 2002**<br/>**Jonathan Blow** ([jon@number-none.com](mailto:jon@number-none.com)) |
-| -----------------------------------------------------------: |
-|        http://number-none.com/product/Hacking%20Quaternions/ |
-
-
-
-```c#
-rotateTo.Set(gyroscope.Attitude).RightToLeftHanded();
-rotation.ALerp(rotateFrom, rotateTo, smoothing);
-rotateFrom.Set(rotateTo);
-```
-
-
-
-#### 
-
 #### AroundAxis
+
+Rotate a quaternion around the X, Y or Z axis by the given number of degrees. This is a useful approact for a clock face, a compass or a merry-go-round.
 
 ```c#
 // ... A
 // rotate z axis for magnetic heading
-attitude.AngleAxis(Trig.zAxis, compass.MagneticHeading);
+attitude = attitude.AngleAxis(Trig.zAxis, compass.MagneticHeading);
 // ... B
 ```
 
-
-
 #### Inverse
 
-
+An inverse changes the direction of the rotation. If you rotate a quaternion then rotate it again using the inverse then you will get back the original quaternion.
 
 ```c#
 // C ...
-// Inverse changes direction of rotation
-attitude.Inverse();
-mainCamera.transform.localRotation = attitude.Quaternion;
+mainCamera.transform.localRotation = attitude.Inverse();
 ```
-
-#### Normalise
-
-
-
-> To normalize any vector, quaternions included, we want to divide the vector by its length. The squared length of some vector v is cheap to compute -- it's v·v -- so we need to obtain 1/sqrt(v·v) and multiply the vector by that. Division and square-rooting are pretty expensive though.  We can compute a fast 1/sqrt(x) by using a tangent-line approximation to the function. This is like a really simple 1-step Newton-Raphson iteration, and by tuning it for our specific case, we can achieve high accuracy for cheap. (A Newton-Raphson iteration is how specialized instruction sets like 3DNow and SSE compute fast 1/sqrt).  The basic idea is that we graph the function 1/sqrt(x), locate some neighborhood that we're interested in, and pretend that the function is linear there. A linear function is cheap to evaluate.
-
-| **The Inner Product, March 2002**<br/>**Jonathan Blow** ([jon@number-none.com](mailto:jon@number-none.com)) |
-| -----------------------------------------------------------: |
-|        http://number-none.com/product/Hacking%20Quaternions/ |
-
-
 
 #### RightToLeftHanded
 
-#### RotateBy
+For rotations, quaternions hold information on direction in 3 dimensions and the rotation of the object. Think of an airplane flying straight in a particular direction. Given a point of reference you can calculate the angle on the X, Y and Z planes. Now the airplane dips it's wing and spins upside-down. The calculations before are exactly the same, but the rotation has changed. Just as the euler angles define the direction of travel, the sign of the rotation defines which way the airplane is spinning.
 
-
+Two of anything with opposite chirality cannot be superimposed on each other and yet can be otherwise identical. The choice of which rotation direction is positive is arbitrary. The gyroscope used in phones has right-hand chirality, while Unity uses left-handed.
 
 ```c#
-var attitude = gyro.Attitude; // cache this to stop recalculations
-// rotate for webcam out of back of camera & z axis for magnetic heading
-attitude.RotateBy(rotateForWebcam);
-// ... A
+Quaternion rotateTo = Device.Attitude.RightToLeftHanded();
 ```
-
 
 
 #### SwitchAxis
@@ -282,9 +244,7 @@ attitude.SwitchAxis(pivot: Trig.xAxis)
 // ... C
 ```
 
-
-
-#### 
+ 
 
 ### Trig.cs - degrees, radians, sides and angles
 
