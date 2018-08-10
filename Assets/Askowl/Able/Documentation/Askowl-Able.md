@@ -198,7 +198,7 @@ The next navigational trick is to find a destination coordinate when knowing the
 Geodetic.Destination(start: here, distanceKm: 1.2, bearingDegrees: 23.4);
 ```
 
-### Tetrad.cs - another perspective on quaternions
+### Quaternions.cs - adding features
 
 #### Tetrad.Identity
 

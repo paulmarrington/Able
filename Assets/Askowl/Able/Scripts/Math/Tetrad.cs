@@ -14,7 +14,7 @@ namespace Askowl.Old {
   /// Conversion between them is low-cost.
   /// </summary> //#TBD#
   /// <remarks><a href="http://unitydoc.marrington.net/Able#tetradcs-another-perspective-on-quaternions">Tetrads</a></remarks>
-  public struct Tetrad {
+  public class Tetrad {
     private double     x, y, z, w;
     private Quaternion quaternion;
 
@@ -283,37 +283,37 @@ namespace Askowl.Old {
     /// <param name="percentage">The relative weight of the second source Tetrad in the interpolation.</param>
     /// <returns>the tetrad for command chains</returns>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#tetradlerp">Tetrad Lerp</a></remarks>
-    public Tetrad ALerp(Tetrad start, Tetrad end, float percentage) {
-      float left = percentage, right = 1f - percentage;
-
-      Quaternion r = new Quaternion();
-
-      float dot = start.X * end.X + start.Y * end.Y +
-                  start.Z * end.Z + start.W * end.W;
-
-      if (dot >= 0.0f) {
-        r.X = right * start.X + left * end.X;
-        r.Y = right * start.Y + left * end.Y;
-        r.Z = right * start.Z + left * end.Z;
-        r.W = right * start.W + left * end.W;
-      } else {
-        r.X = right * start.X - left * end.X;
-        r.Y = right * start.Y - left * end.Y;
-        r.Z = right * start.Z - left * end.Z;
-        r.W = right * start.W - left * end.W;
-      }
-
-      // Normalize it.
-      float ls      = r.X * r.X + r.Y * r.Y + r.Z * r.Z + r.W * r.W;
-      float invNorm = 1.0f / (float) Math.Sqrt((double) ls);
-
-      r.X *= invNorm;
-      r.Y *= invNorm;
-      r.Z *= invNorm;
-      r.W *= invNorm;
-
-      return r;
-    }
+//    public Tetrad ALerp(Tetrad start, Tetrad end, float percentage) {
+//      float left = percentage, right = 1f - percentage;
+//
+//      Quaternion r = new Quaternion();
+//
+//      float dot = start.X * end.X + start.Y * end.Y +
+//                  start.Z * end.Z + start.W * end.W;
+//
+//      if (dot >= 0.0f) {
+//        r.X = right * start.X + left * end.X;
+//        r.Y = right * start.Y + left * end.Y;
+//        r.Z = right * start.Z + left * end.Z;
+//        r.W = right * start.W + left * end.W;
+//      } else {
+//        r.X = right * start.X - left * end.X;
+//        r.Y = right * start.Y - left * end.Y;
+//        r.Z = right * start.Z - left * end.Z;
+//        r.W = right * start.W - left * end.W;
+//      }
+//
+//      // Normalize it.
+//      float ls      = r.X * r.X + r.Y * r.Y + r.Z * r.Z + r.W * r.W;
+//      float invNorm = 1.0f / (float) Math.Sqrt((double) ls);
+//
+//      r.X *= invNorm;
+//      r.Y *= invNorm;
+//      r.Z *= invNorm;
+//      r.W *= invNorm;
+//
+//      return r;
+//    }
 
     /// <summary>
     /// When normalized, a quaternion keeps the same orientation but its magnitude is 1.0<br/>
