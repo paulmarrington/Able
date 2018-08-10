@@ -40,11 +40,19 @@ namespace Askowl {
     }
 
     /// <summary>
+    /// The inverse used when the Quaternion is a rotation - and is the reverse rotation.
+    /// In other words apply rotation then apply inverse and nothing will have changed.
+    /// </summary>
+    /// <returns>the quaternion for command chains</returns>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#inverse">Invert the Quaternion Rotation</a></remarks>
+    public static Quaternion Inverse(this Quaternion q) => Quaternion.Inverse(q);
+
+    /// <summary>
     /// Gyro is right-handed while Unity is left-handed - so change Chirilty
     /// </summary>
     /// <param name="q"></param>
     /// <returns>the quaternion for command chains</returns>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#quaternionsrighttolefthanded">Change chirilty</a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#righttolefthanded">Change chirilty</a></remarks>
     public static Quaternion RightToLeftHanded(this Quaternion q) =>
       new Quaternion(q.x, q.y, -q.z, -q.w);
 
@@ -54,7 +62,7 @@ namespace Askowl {
     /// <param name="q">this</param>
     /// <param name="attitudes"></param>
     /// <returns>the quaternion for command chains</returns>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#quaternionsrotateby">Rotate By Angle in Degrees</a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#rotateby">Rotate By Angle in Degrees</a></remarks>
     public static Quaternion RotateBy(this Quaternion q, params Quaternion[] attitudes) {
       for (int i = 0; i < attitudes.Length; i++) {
         float x = q.w * attitudes[i].x + q.x * attitudes[i].w + q.y * attitudes[i].z - q.z * attitudes[i].y;
@@ -71,12 +79,13 @@ namespace Askowl {
     }
 
     /// <summary>
-    ///
+    /// One person's left is another person's up. More importantly the gyroscope
+    /// in the phone sees forward as the Z axis while Unity likes to use Y for that.
     /// </summary>
     /// <param name="q">this</param>
     /// <param name="pivot">Axis that does not change</param>
     /// <returns>the quaternion for command chains</returns>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#quaternionsswitchaxis">Switch two axes</a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#switchaxis">Switch two axes</a></remarks>
     public static Quaternion SwitchAxis(this Quaternion q, Trig.Direction pivot) {
       if (pivot.x != 0) return new Quaternion(-q.x, -q.z, -q.y, q.w);
       if (pivot.y != 0) return new Quaternion(-q.z, -q.y, -q.x, q.w);
@@ -85,11 +94,36 @@ namespace Askowl {
     }
 
     /// <summary>
-    /// The inverse used when the Quaternion is a rotation - and is the reverse rotation.
-    /// In other words apply rotation then apply inverse and nothing will have changed.
+    ///
     /// </summary>
-    /// <returns>the quaternion for command chains</returns>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#quaternionsinverse">Invert the Quaternion Rotation</a></remarks>
-    public static Quaternion Inverse(this Quaternion q) => Quaternion.Inverse(q);
+    /// <param name="q">this</param>
+    public static float LengthSquared(this Quaternion q) => q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w;
+
+    /// <summary>
+    /// A much faster normalise, accurate to a dot product of 0.9995 or better.
+    /// </summary>
+    /// <param name="q"></param>
+    /// <returns></returns>
+    public static Quaternion Normalise(this Quaternion q) {
+      float lengthSquared = q.LengthSquared();
+      if (lengthSquared >= 0.8) return q.normalized; // do it the long way
+
+      float il    = additiveConstant + factor * (lengthSquared - Neighborhood);
+      int   count = 0;
+
+      do {
+        il *= additiveConstant + factor * (lengthSquared - Neighborhood);
+      } while (((lengthSquared * il * il) < Limit) && (count++ < 8));
+
+      if (count > 3) Debug.LogWarning($"Normalise for {q}, sql {lengthSquared} had {count} iterations");
+
+      return new Quaternion(q.x * il, q.y * il, q.z * il, q.w * il);
+    }
+
+    private const           float Neighborhood     = 0.959066f;
+    private const           float Scale            = 1.000311f;
+    private const           float Limit            = 0.9995f * 0.9995f;
+    private static readonly float additiveConstant = Scale / Mathf.Sqrt(Neighborhood);
+    private static readonly float factor           = Scale * (-0.5f / (Neighborhood * Mathf.Sqrt(Neighborhood)));
   }
 }

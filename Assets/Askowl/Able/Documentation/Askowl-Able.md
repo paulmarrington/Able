@@ -200,13 +200,29 @@ Geodetic.Destination(start: here, distanceKm: 1.2, bearingDegrees: 23.4);
 
 ### Quaternions.cs - adding features
 
-#### Tetrad.Identity
+Unity quaternion math focusses on the needs of the game. Great, but there are a few methods needed for augmented reality that are not provided.
 
-#### Tetrad.Quaternion
+#### ALerp
 
-#### Tetrad.AngleAxis
+> When game programmers want to interpolate between quaternions, they tend to copy Ken Shoemake's code without really understanding it. Ken uses a function called *slerp* that walks along the unit sphere in 4-dimensional space from one quaternion to the other. Because it's navigating a sphere, it involves a fair amount of trigonometry, and is correspondingly slow.  Lacking a strong grasp of quaternions, most game developers just accept this: slerp is slow, and if you want something faster, maybe you should go back to Euler angles and all their nastiness. But the situation is not so bad. There's a cheap approximation to slerp that will work in most cases, and is so braindead simple and fast that it's shocking. Shocking, I tell you.
+
+| **The Inner Product, March 2002**<br/>**Jonathan Blow** ([jon@number-none.com](mailto:jon@number-none.com)) |
+| -----------------------------------------------------------: |
+|        http://number-none.com/product/Hacking%20Quaternions/ |
 
 
+
+```c#
+rotateTo.Set(gyroscope.Attitude).RightToLeftHanded();
+rotation.ALerp(rotateFrom, rotateTo, smoothing);
+rotateFrom.Set(rotateTo);
+```
+
+
+
+#### 
+
+#### AroundAxis
 
 ```c#
 // ... A
@@ -217,24 +233,7 @@ attitude.AngleAxis(Trig.zAxis, compass.MagneticHeading);
 
 
 
-#### Tetrad.Bearing
-
-#### Tetrad.Conjugate
-
-
-
-#### Tetrad.Do
-
-```c#
-float bearing = (float) Geodetic.BearingDegrees(here, there);
-chevrons.transform.localRotation =
-    Tetrad.Do(chevrons.transform.localRotation)
-        .AngleAxis(Trig.zAxis, -bearing).Quaternion;
-```
-
-#### Tetrad.Dot
-
-#### Tetrad.Inverse
+#### Inverse
 
 
 
@@ -245,27 +244,21 @@ attitude.Inverse();
 mainCamera.transform.localRotation = attitude.Quaternion;
 ```
 
+#### Normalise
 
 
-#### Tetrad.Length
 
-#### Tetrad.LengthSquared
+> To normalize any vector, quaternions included, we want to divide the vector by its length. The squared length of some vector v is cheap to compute -- it's v·v -- so we need to obtain 1/sqrt(v·v) and multiply the vector by that. Division and square-rooting are pretty expensive though.  We can compute a fast 1/sqrt(x) by using a tangent-line approximation to the function. This is like a really simple 1-step Newton-Raphson iteration, and by tuning it for our specific case, we can achieve high accuracy for cheap. (A Newton-Raphson iteration is how specialized instruction sets like 3DNow and SSE compute fast 1/sqrt).  The basic idea is that we graph the function 1/sqrt(x), locate some neighborhood that we're interested in, and pretend that the function is linear there. A linear function is cheap to evaluate.
 
-#### Tetrad.Multiply
+| **The Inner Product, March 2002**<br/>**Jonathan Blow** ([jon@number-none.com](mailto:jon@number-none.com)) |
+| -----------------------------------------------------------: |
+|        http://number-none.com/product/Hacking%20Quaternions/ |
 
-```c#
-Inverse() => Conjugate().Multiply(scalar: 1.0 / LengthSquared);
-```
 
-#### Tetrad.Negate
 
-#### Tetrad.Normalize
+#### RightToLeftHanded
 
-```c#
-Multiply(double by) => Set(x * by, y * by, z * by, w * by).Normalize();
-```
-
-#### Tetrad.RotateBy
+#### RotateBy
 
 
 
@@ -278,33 +271,7 @@ attitude.RotateBy(rotateForWebcam);
 
 
 
-#### Tetrad.Set
-
-#### Tetrad.ALerp
-
-
-
-```c#
-rotateTo.Set(gyroscope.Attitude).RightToLeftHanded();
-rotation.ALerp(rotateFrom, rotateTo, smoothing);
-rotateFrom.Set(rotateTo);
-```
-
-
-
-#### Tetrad.ESlerp
-
-
-
-```c#
-rotateTo.Set(gyroscope.Attitude).RightToLeftHanded();
-rotation.ESlerp(rotateFrom, rotateTo, smoothing);
-rotateFrom.Set(rotateTo);
-```
-
-
-
-#### Tetrad.SwitchAxis
+#### SwitchAxis
 
 
 
