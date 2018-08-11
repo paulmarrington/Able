@@ -202,6 +202,16 @@ Geodetic.Destination(start: here, distanceKm: 1.2, bearingDegrees: 23.4);
 
 Unity quaternion math focusses on the needs of the game. Great, but there are a few methods needed for augmented reality that are not provided.
 
+#### Axis
+
+Unity insists on using Vector3 constants right, up and forward when a quaternion function needs an axis. I am tired of trying to remember which is which. Hence this little helper.
+
+```c#
+Assert.AreEqual(Vector3.right,   quat.Axis(Trig.xAxis));
+Assert.AreEqual(Vector3.up,      quat.Axis(Trig.yAxis));
+Assert.AreEqual(Vector3.forward, quat.Axis(Trig.zAxis));
+```
+
 #### AroundAxis
 
 Rotate a quaternion around the X, Y or Z axis by the given number of degrees. This is a useful approact for a clock face, a compass or a merry-go-round.
@@ -222,6 +232,10 @@ An inverse changes the direction of the rotation. If you rotate a quaternion the
 mainCamera.transform.localRotation = attitude.Inverse();
 ```
 
+#### LengthSquared
+
+The concept of length or magnitude for a quaternion has no visual representation when dealing with attitude or rotation. The catch is that most algorithms require unit quaternions - where the length squared will approach one.
+
 #### RightToLeftHanded
 
 For rotations, quaternions hold information on direction in 3 dimensions and the rotation of the object. Think of an airplane flying straight in a particular direction. Given a point of reference you can calculate the angle on the X, Y and Z planes. Now the airplane dips it's wing and spins upside-down. The calculations before are exactly the same, but the rotation has changed. Just as the euler angles define the direction of travel, the sign of the rotation defines which way the airplane is spinning.
@@ -229,9 +243,10 @@ For rotations, quaternions hold information on direction in 3 dimensions and the
 Two of anything with opposite chirality cannot be superimposed on each other and yet can be otherwise identical. The choice of which rotation direction is positive is arbitrary. The gyroscope used in phones has right-hand chirality, while Unity uses left-handed.
 
 ```c#
-Quaternion rotateTo = Device.Attitude.RightToLeftHanded();
+Quaternion rotateTo = Device.Attitude.RightToLeftHanded(Trig.zAxis);
 ```
 
+#### RotateBy
 
 #### SwitchAxis
 

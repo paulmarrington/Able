@@ -5,6 +5,12 @@ namespace Askowl {
   /// Added needed features to Quaternion.
   /// <remarks><a href="http://unitydoc.marrington.net/Able#quaternionscs-another-perspective-on-quaternions">Tetrads</a></remarks>
   public static class Quaternions {
+    /// <summary>
+    /// I hate using right, up and forward for X Y and Z.
+    /// </summary>
+    /// <param name="q">this</param>
+    /// <param name="axis">Vector3.right, up or forward</param>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#axis">Trig Axis to Vector3</a></remarks>
     public static Vector3 Axis(this Quaternion q, Trig.Direction axis) => directions[axis];
 
     private static Dictionary<Trig.Direction, Vector3> directions
@@ -19,12 +25,10 @@ namespace Askowl {
     /// <param name="axis">Trig.xAxis, yAxis or zAxis</param>
     /// <param name="degrees">Amount to rotate by</param>
     /// <returns>the quaternion for command chains</returns>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#quaternionsaroundaxis">Rotate round an XYZ axis</a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#aroundaxis">Rotate round an XYZ axis</a></remarks>
     public static Quaternion AroundAxis(this Quaternion q, Trig.Direction axis, float degrees) {
-      float      theta    = (float) (Trig.ToRadians(degrees) / 2);
-      var        sin      = Mathf.Sin(theta);
-      Quaternion rotation = new Quaternion(axis.x * sin, axis.y * sin, axis.z * sin, Mathf.Cos(theta));
-      return rotation.normalized * q;
+      var rotateBy = Quaternion.AngleAxis(degrees, q.Axis(axis));
+      return rotateBy * q;
     }
 
     /// <summary>
@@ -39,17 +43,47 @@ namespace Askowl {
     ///
     /// </summary>
     /// <param name="q">this</param>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#lengthsquared">Magnitude of a Quaternion**2</a></remarks>
     public static float LengthSquared(this Quaternion q) => q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w;
 
     /// <summary>
-    /// Gyro is right-handed while Unity is left-handed - so change chiralty
+    /// A much faster normalise, accurate to a dot product of 0.9995 or better.
+    /// </summary>
+    /// <param name="q"></param>
+    /// <returns></returns>
+    public static Quaternion Normalise(this Quaternion q) {
+      float lengthSquared = q.LengthSquared();
+      if ((lengthSquared < 0.02) || (lengthSquared >= 0.8)) return q.normalized; // do it the long way
+
+      float il    = additiveConstant + factor * (lengthSquared - Neighborhood);
+      int   count = 0;
+
+      while (((lengthSquared * il * il) < Limit) && (count++ < 8)) {
+        il *= additiveConstant + factor * (lengthSquared - Neighborhood);
+      }
+
+      if (count > 3) Debug.LogWarning($"Normalise for {q}, sql {lengthSquared} had {count} iterations");
+
+      return new Quaternion(q.x * il, q.y * il, q.z * il, q.w * il);
+    }
+
+    private const           float Neighborhood     = 0.959066f;
+    private const           float Scale            = 1.000311f;
+    private const           float Limit            = 0.9995f * 0.9995f;
+    private static readonly float additiveConstant = Scale / Mathf.Sqrt(Neighborhood);
+    private static readonly float factor           = Scale * (-0.5f / (Neighborhood * Mathf.Sqrt(Neighborhood)));
+
+    /// <summary>
+    /// Gyro is right-handed while Unity is left-handed - so change chirality
     /// </summary>
     /// <param name="q"></param>
     /// <param name="axis">Axis that represents forward and hence the spindle to rotate around</param>
     /// <returns>the quaternion for command chains</returns>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#righttolefthanded">Change chiralty</a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#righttolefthanded">Change chirality</a></remarks>
     public static Quaternion RightToLeftHanded(this Quaternion q, Trig.Direction axis) {
       return new Quaternion(q.x * -axis.x, q.y * -axis.y, q.z * -axis.z, -q.w);
+
+      q.Normalize();
     }
 
     /// <summary>
@@ -57,7 +91,7 @@ namespace Askowl {
     /// </summary>
     /// <param name="attitude"></param>
     /// <returns>the quaternion for command chains</returns>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#rotateby">Quaternion Rotate By</a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#rotateby">Quaternion Rotate By another</a></remarks>
     public static Quaternion RotateBy(this Quaternion q, Quaternion attitude) => attitude * q;
 
     /// <summary>
