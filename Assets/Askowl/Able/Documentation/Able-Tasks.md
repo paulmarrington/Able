@@ -1,5 +1,9 @@
 # Askowl-Base
 
+## Release 201?-??
+
+- [ ] Add JSON writer
+
 ## Release 2018-08
 
 - [x] organise document sections
@@ -7,7 +11,7 @@
 - [x] Doc and test ExponentialMovingAverage
 - [x] Doc and test Geodetic
 - [x] doc and test compare
-- [ ] doc and test Tetrad
+- [x] doc and test Quaternions
 - [ ] doc and test Trig
 - [ ] doc and test Disposable
 - [ ] doc and test Emitter
@@ -20,7 +24,6 @@
 - [ ] doc and test PlayModeController
 - [ ] doc and test PlayModeTests
 - [x] split up functionality
-- [ ] Add JSON writer
 - [ ] doc and test JSON
 - [ ] doc and test objects.path(gameobject)
 - [ ] doc and test Components

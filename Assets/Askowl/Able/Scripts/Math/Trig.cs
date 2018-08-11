@@ -3,24 +3,59 @@ using UnityEngine;
 
 namespace Askowl {
   public class Trig : MonoBehaviour {
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#direction">Define axes</a></remarks>
     public class Direction {
       public readonly int    Ord;
       public readonly int    X, Y, Z;
-      public readonly string Name;
-      public override string ToString() => $"{Name}-Axis";
+      public readonly char   Name;
+      public readonly bool   Negative;
+      public readonly Vector2 vector2;
+      public readonly Vector3 vector3;
+      public override string ToString() => $"{minus}{Name}-Axis";
 
-      internal Direction(string name, int ord, int x = 0, int y = 0, int z = 0) {
-        Ord  = ord;
-        X    = x;
-        Y    = y;
-        Z    = z;
-        Name = name;
+      internal Direction(char name, bool neg, int ord, int x = 0, int y = 0, int z = 0) {
+        Ord      = ord;
+        X        = x;
+        Y        = y;
+        Z        = z;
+        Name     = name;
+        Negative = neg;
+        minus    = neg ? "-" : "";
+        vector2 = Vector2.zero;
+        vector3 = Vector3.zero;
+        vector2[ord] = vector3[ord] = 1f;
       }
+
+      private readonly string minus;
+
+      /// <summary>
+      /// For negative axis directions
+      /// </summary>
+      /// <param name="d">xAxis, yAxis or zAxis</param>
+      /// <returns></returns>
+      public static Direction operator -(Direction d) => d.Negative ? positives[d.Ord] : negatives[d.Ord];
     }
 
-    public static readonly Direction xAxis = new Direction("X", ord: 0, x: 1);
-    public static readonly Direction yAxis = new Direction("Y", ord: 1, y: 1);
-    public static readonly Direction zAxis = new Direction("Z", ord: 2, z: 1);
+    private static Direction[] positives = {
+      new Direction('X', neg: false, ord: 0, x: 1),
+      new Direction('Y', neg: false, ord: 1, y: 1),
+      new Direction('Z', neg: false, ord: 2, z: 1)
+    };
+
+    private static Direction[] negatives = {
+      new Direction('X', neg: true, ord: 0, x: -1),
+      new Direction('Y', neg: true, ord: 1, y: -1),
+      new Direction('Z', neg: true, ord: 2, z: -1)
+    };
+
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#direction">Define axes</a></remarks>
+    public static readonly Direction xAxis = positives[0];
+
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#direction">Define axes</a></remarks>
+    public static readonly Direction yAxis = positives[1];
+
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#direction">Define axes</a></remarks>
+    public static readonly Direction zAxis = positives[2];
 
     private const double RadiansToDegrees = (180.0   / Math.PI);
     private const double DegreesToRadians = (Math.PI / 180.0);

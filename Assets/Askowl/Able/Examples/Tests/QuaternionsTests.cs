@@ -209,15 +209,11 @@ namespace Askowl.Examples {
     }
 
     private Quaternion seed;
-
-    // ReSharper disable once NotAccessedField.Local
-    private float degreesApart = 180, angle;
-
-    // ReSharper disable once NotAccessedField.Local
-    private int    sets = 2, repetitions = 10, testCount, axis;
+    private float degreesApart = 180;
+    private int    sets = 2, repetitions = 10, testCount;
     private string testName;
-    private float  randomAngle => angle = Random.Range(-degreesApart, +degreesApart);
-    private int    randomAxis  => axis = Random.Range(1,              3);
+    private float  randomAngle => Random.Range(-degreesApart, +degreesApart);
+    private int    randomAxis  => Random.Range(1,              3);
 
     private Quaternion NextSeed() {
       Vector3 vector = new Vector3 {[randomAxis] = randomAngle};

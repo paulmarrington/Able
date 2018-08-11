@@ -271,6 +271,12 @@ attitude.SwitchAxis(pivot: Trig.xAxis)
 
 #### Direction
 
+When I prefer to use *X, Y, Z* instead of *right, up, forward* I use Trig.Direction values.
+
+```c#
+
+```
+
 #### ToRadians
 
 #### ToDegrees
