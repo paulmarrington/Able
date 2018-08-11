@@ -33,8 +33,6 @@ var diff = later.Subtract(Clock.FromEpochTime(epochTimeLater));
 AssertAlmostEqual(diff.TotalSeconds, 0);
 ```
 
-
-
 ##### double EpochTimeNow;
 
 Epoch time is always UTC.
@@ -69,8 +67,6 @@ IsFalse(Compare.AlmostEqual(a: 123.45678, b: 123.45679));
 IsTrue(Compare.AlmostEqual(a: 123.456789, b: 123.45679));
 ```
 
-
-
 ### AlmostEqual for Integers
 
 Integers don't suffer from rounding problems. Sometimes it is useful to see if two values are close.
@@ -91,8 +87,6 @@ IsTrue(Compare.AlmostEqual(a: 1,  b: 3, minimumChange: 4));
 IsFalse(Compare.AlmostEqual(a: 1, b: 4));
 IsTrue(Compare.AlmostEqual(a: 1,  b: 2));
 ```
-
-
 
 ### [ExponentialMovingAverage.cs](https://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average)
 
@@ -172,8 +166,6 @@ same.ToDegrees();
 Debug.Log(same.ToString()); // -27.46850, 151.94379
 ```
 
-
-
 #### Distance Between Two Points
 
 In geodetic parlance the shortest distance between two points is an arc, not a straight line. This is kind of important if you don't want to tunnel through earth and dive under the sea to get anywhere.
@@ -236,6 +228,16 @@ mainCamera.transform.localRotation = attitude.Inverse();
 
 The concept of length or magnitude for a quaternion has no visual representation when dealing with attitude or rotation. The catch is that most algorithms require unit quaternions - where the length squared will approach one.
 
+#### Normalise
+
+> We can compute a fast 1/sqrt(x) by using a tangent-line approximation to the function. This is like a really simple 1-step Newton-Raphson iteration, and by tuning it for our specific case, we can achieve high accuracy for cheap. (A Newton-Raphson iteration is how specialized instruction sets like 3DNow and SSE compute fast 1/sqrt).
+
+|           http://www.cs.uky.edu/~cheng/cs633/quaternion.html |
+| -----------------------------------------------------------: |
+| **The Inner Product, March 2002<br>**Jonathan Blow ([jon@number-none.com](mailto:jon@number-none.com)) |
+
+This version is on an average 20% faster than `normalized` as provided by Unity.
+
 #### RightToLeftHanded
 
 For rotations, quaternions hold information on direction in 3 dimensions and the rotation of the object. Think of an airplane flying straight in a particular direction. Given a point of reference you can calculate the angle on the X, Y and Z planes. Now the airplane dips it's wing and spins upside-down. The calculations before are exactly the same, but the rotation has changed. Just as the euler angles define the direction of travel, the sign of the rotation defines which way the airplane is spinning.
@@ -248,9 +250,15 @@ Quaternion rotateTo = Device.Attitude.RightToLeftHanded(Trig.zAxis);
 
 #### RotateBy
 
+Unity is left handed using the Z axis for forard. The iOS gyroscope, for example is right handed. We can reverse the Chirality (a fancy word for handed) by negating the offending axis and W. This effectively reverses the direction of rotation.
+
+```c#
+var attitude = GPS.Attitude.RightToLeftHanded(Trig.zAxis);
+```
+
 #### SwitchAxis
 
-
+Different IoT devices define different axes as forward. We need to pivot on the third axis by 90 degrees to correct for the difference. This reverses the chirality, but this function corrects for that.
 
 ```c#
 // B ...
@@ -259,9 +267,15 @@ attitude.SwitchAxis(pivot: Trig.xAxis)
 // ... C
 ```
 
- 
+### Trig.cs
 
-### Trig.cs - degrees, radians, sides and angles
+#### Direction
+
+#### ToRadians
+
+#### ToDegrees
+
+#### Relative
 
 ## Data Structures
 

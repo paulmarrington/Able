@@ -11,6 +11,7 @@ namespace Askowl {
     /// <param name="q">this</param>
     /// <param name="axis">Vector3.right, up or forward</param>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#axis">Trig Axis to Vector3</a></remarks>
+    // ReSharper disable once UnusedParameter.Global
     public static Vector3 Axis(this Quaternion q, Trig.Direction axis) => directions[axis];
 
     private static Dictionary<Trig.Direction, Vector3> directions
@@ -40,17 +41,17 @@ namespace Askowl {
     public static Quaternion Inverse(this Quaternion q) => Quaternion.Inverse(q);
 
     /// <summary>
-    ///
+    /// The concept of length or magnitude for a quaternion has no visual representation when dealing with attitude or rotation. The catch is that most algorithms require unit quaternions - where the length squared will approach one.
     /// </summary>
     /// <param name="q">this</param>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#lengthsquared">Magnitude of a Quaternion**2</a></remarks>
     public static float LengthSquared(this Quaternion q) => q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w;
 
     /// <summary>
-    /// A much faster normalise, accurate to a dot product of 0.9995 or better.
+    /// A faster normalise, accurate to a dot product of 0.9995 or better.
     /// </summary>
-    /// <param name="q"></param>
-    /// <returns></returns>
+    /// <param name="q">this</param>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#normalise">Magnitude of a Quaternion**2</a></remarks>
     public static Quaternion Normalise(this Quaternion q) {
       float lengthSquared = q.LengthSquared();
       if ((lengthSquared < 0.02) || (lengthSquared >= 0.8)) return q.normalized; // do it the long way
@@ -81,14 +82,15 @@ namespace Askowl {
     /// <returns>the quaternion for command chains</returns>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#righttolefthanded">Change chirality</a></remarks>
     public static Quaternion RightToLeftHanded(this Quaternion q, Trig.Direction axis) {
-      return new Quaternion(q.x * -axis.x, q.y * -axis.y, q.z * -axis.z, -q.w);
-
-      q.Normalize();
+      q[axis.Ord] = -q[axis.Ord];
+      q.w         = -q.w;
+      return q;
     }
 
     /// <summary>
     /// Apply a rotation - same as nultiply (*) but can be chained
     /// </summary>
+    /// <param name="q">this</param>
     /// <param name="attitude"></param>
     /// <returns>the quaternion for command chains</returns>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#rotateby">Quaternion Rotate By another</a></remarks>
@@ -97,16 +99,22 @@ namespace Askowl {
     /// <summary>
     /// One person's left is another person's up. More importantly the gyroscope
     /// in the phone sees forward as the Z axis while Unity likes to use Y for that.
+    /// This function also changes the chirality (handedmess).
+    /// <code>reading = gps.reading.SwitchAxis(Trig.xAxis);</code>
     /// </summary>
     /// <param name="q">this</param>
     /// <param name="pivot">Axis that does not change</param>
     /// <returns>the quaternion for command chains</returns>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#switchaxis">Switch two axes</a></remarks>
     public static Quaternion SwitchAxis(this Quaternion q, Trig.Direction pivot) {
-      if (pivot.x != 0) return new Quaternion(-q.x, -q.z, -q.y, q.w);
-      if (pivot.y != 0) return new Quaternion(-q.z, -q.y, -q.x, q.w);
-
-      return new Quaternion(-q.y, -q.x, -q.z, q.w);
+      q.Set(-q.x, -q.y, -q.z, -q.w); // change chirality
+      int left = otherAxes[pivot.Ord, 0], right = otherAxes[pivot.Ord, 1];
+      var swap = q[left];
+      q[left]  = q[right];
+      q[right] = swap;
+      return q.Normalise();
     }
+
+    static int[,] otherAxes = {{1, 2}, {0, 2}, {0, 1}};
   }
 }

@@ -2,12 +2,12 @@
 using System.Diagnostics;
 using NUnit.Framework;
 using UnityEngine;
-using UnityEngine.Analytics;
 using Debug = UnityEngine.Debug;
 using Random = UnityEngine.Random;
 
 #if UNITY_EDITOR && Able
 namespace Askowl.Examples {
+  /// <remarks><a href="http://unitydoc.marrington.net/Able#quaternionscs-another-perspective-on-quaternions">Tetrads</a></remarks>
   public class QuaternionsTests {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#axis">Trig Axis to Vector3</a></remarks>
     [Test]
@@ -23,13 +23,13 @@ namespace Askowl.Examples {
       Reset(test: "RotateBy", setsWithNewSeed: 100, nearRepeats: 1000, maxDegrees: 10);
 
       Walker(() => {
-        var angle = randomAngle;
-        var axis  = randomAxis;
+        var rangle = randomAngle;
+        var raxis  = randomAxis;
 
-        Quaternion rotateBy = Quaternion.AngleAxis(angle, seed.Axis(directions[axis]));
+        Quaternion rotateBy = Quaternion.AngleAxis(rangle, seed.Axis(directions[raxis]));
         Quaternion actual   = rotateBy * seed;
 
-        Quaternion expected = seed.AroundAxis(directions[axis], angle);
+        Quaternion expected = seed.AroundAxis(directions[raxis], rangle);
 
         AreEqual(expected, actual);
       });
@@ -63,9 +63,10 @@ namespace Askowl.Examples {
       });
     }
 
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#normalise">Magnitude of a Quaternion**2</a></remarks>
     [Test]
     public void Normalise() {
-      Reset("Normalise", 1, 100000, 0);
+      Reset("Normalise", 1, 100000, 180);
 
       Walker(() => {
         DenormaliseSeed();
@@ -77,9 +78,10 @@ namespace Askowl.Examples {
       });
     }
 
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#normalise">Magnitude of a Quaternion**2</a></remarks>
     [Test]
     public void NormaliseSpeed() {
-      Quaternion a = seed;
+      Quaternion a = Reseed();
       DenormaliseSeed();
 
       var expected = SpeedTest("normalized", 10, 1000000, () => a = seed.normalized);
@@ -109,15 +111,32 @@ namespace Askowl.Examples {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#rotateby">Quaternion Rotate By another</a></remarks>
     [Test]
     public void RotateBy() {
-      Reset(test: "RotateBy", setsWithNewSeed: 100, nearRepeats: 1000, maxDegrees: 10);
+      Reset(test: "RotateBy", setsWithNewSeed: 100, nearRepeats: 1000, maxDegrees: 180);
 
       Walker(() => {
         var start    = seed;
         var rotateBy = NextSeed();
 
-        var actual = start * rotateBy;
+        var expected = rotateBy * start;
 
-        var expected = start.RotateBy(rotateBy);
+        var actual = start.RotateBy(rotateBy);
+
+        AreEqual(actual, expected);
+      });
+    }
+
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#switchaxis">Switch Axis</a></remarks>
+    [Test]
+    public void SwitchAxis() {
+      Reset(test: "SwitchAxis", setsWithNewSeed: 100, nearRepeats: 1000, maxDegrees: 180);
+
+      Walker(() => {
+        Trig.Direction raxis = Trig.xAxis;
+
+        var euler    = seed.eulerAngles;
+        var expected = Quaternion.Euler(euler.x, euler.z, euler.y);
+
+        var actual = seed.SwitchAxis(raxis);
 
         AreEqual(actual, expected);
       });
@@ -163,8 +182,6 @@ namespace Askowl.Examples {
       var dot = Mathf.Abs(Quaternion.Dot(expected, actual));
       if (dot > 0.9995) return;
 
-      Debug.Log($"seed: {seed.eulerAngles} / {seed}");
-
       Assert.Fail(
         $"{testName} failed after {testCount} repititions with actual: {q2s(actual)}, expected: {q2s(expected)}");
     }
@@ -192,18 +209,22 @@ namespace Askowl.Examples {
     }
 
     private Quaternion seed;
-    private float      degreesApart = 180;
-    private int        sets         = 2, repetitions = 10, testCount;
-    private string     testName;
-    private float      randomAngle => Random.Range(-degreesApart, +degreesApart);
-    private int        randomAxis  => Random.Range(1,             3);
+
+    // ReSharper disable once NotAccessedField.Local
+    private float degreesApart = 180, angle;
+
+    // ReSharper disable once NotAccessedField.Local
+    private int    sets = 2, repetitions = 10, testCount, axis;
+    private string testName;
+    private float  randomAngle => angle = Random.Range(-degreesApart, +degreesApart);
+    private int    randomAxis  => axis = Random.Range(1,              3);
 
     private Quaternion NextSeed() {
       Vector3 vector = new Vector3 {[randomAxis] = randomAngle};
       return seed *= Quaternion.Euler(vector);
     }
 
-    private void Reseed() =>
+    private Quaternion Reseed() =>
       seed = Quaternion.Euler(Random.Range(-180, 360), Random.Range(-180, 360), Random.Range(-180, 360));
   }
 }
