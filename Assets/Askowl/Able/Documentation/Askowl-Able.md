@@ -356,6 +356,28 @@ Assert.IsTrue(Compare.AlmostEqual(90, Trig.ToDegrees(1.5708), 1e5));
 
 #### Relative Position given Distance and Angle or Bearing
 
+Calculate a relative vector in two dimensions give the distance away and the angle or bearing.
+
+##### RelativePositionFromAngle
+
+This is a trigonometric angle where 0 degrees in +X and 90 degrees is East or +1. Increasing angles move the result counter-clockwise
+
+```c#
+expected.Set(3.3f, 0);
+actual = Trig.RelativePositionFromBearing(3.3f, Trig.ToRadians(90));
+AreEqual(expected, actual);
+```
+
+##### RelativePositionFromBearing
+
+This is a compass bearing where 0 degrees in North or +Y and 90 degrees is East or +X. Increasing bearings move the result clockwise
+
+```c#
+expected.Set(0, 3.3f);
+actual = Trig.RelativePositionFromAngle(3.3f, Trig.ToRadians(90));
+AreEqual(expected, actual);
+```
+
 ## Data Structures
 
 ### Disposable.cs - helper for IDisposable.Dispose()
