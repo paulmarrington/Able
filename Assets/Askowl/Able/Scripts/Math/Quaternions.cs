@@ -1,24 +1,9 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Askowl {
   /// Added needed features to Quaternion.
   /// <remarks><a href="http://unitydoc.marrington.net/Able#quaternionscs-another-perspective-on-quaternions">Tetrads</a></remarks>
   public static class Quaternions {
-    /// <summary>
-    /// I hate using right, up and forward for X Y and Z.
-    /// </summary>
-    /// <param name="q">this</param>
-    /// <param name="axis">Vector3.right, up or forward</param>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#axis">Trig Axis to Vector3</a></remarks>
-    // ReSharper disable once UnusedParameter.Global
-    public static Vector3 Axis(this Quaternion q, Trig.Direction axis) => directions[axis];
-
-    private static Dictionary<Trig.Direction, Vector3> directions
-      = new Dictionary<Trig.Direction, Vector3> {
-        {Trig.xAxis, Vector3.right}, {Trig.yAxis, Vector3.up}, {Trig.zAxis, Vector3.forward}
-      };
-
     /// <summary>
     /// Rotate quaternion around an axis by a specified number of degrees then normalise
     /// </summary>
@@ -28,7 +13,7 @@ namespace Askowl {
     /// <returns>the quaternion for command chains</returns>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#aroundaxis">Rotate round an XYZ axis</a></remarks>
     public static Quaternion AroundAxis(this Quaternion q, Trig.Direction axis, float degrees) {
-      var rotateBy = Quaternion.AngleAxis(degrees, q.Axis(axis));
+      var rotateBy = Quaternion.AngleAxis(degrees, axis.Vector);
       return rotateBy * q;
     }
 

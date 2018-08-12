@@ -9,14 +9,6 @@ using Random = UnityEngine.Random;
 namespace Askowl.Examples {
   /// <remarks><a href="http://unitydoc.marrington.net/Able#quaternionscs-another-perspective-on-quaternions">Tetrads</a></remarks>
   public class QuaternionsTests {
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#axis">Trig Axis to Vector3</a></remarks>
-    [Test]
-    public void Axis() {
-      Assert.AreEqual(Vector3.right,   seed.Axis(Trig.xAxis));
-      Assert.AreEqual(Vector3.up,      seed.Axis(Trig.yAxis));
-      Assert.AreEqual(Vector3.forward, seed.Axis(Trig.zAxis));
-    }
-
     /// <remarks><a href="http://unitydoc.marrington.net/Able#aroundaxis">Rotate round an XYZ axis</a></remarks>
     [Test]
     public void AroundAxis() {
@@ -26,7 +18,7 @@ namespace Askowl.Examples {
         var rangle = randomAngle;
         var raxis  = randomAxis;
 
-        Quaternion rotateBy = Quaternion.AngleAxis(rangle, seed.Axis(directions[raxis]));
+        Quaternion rotateBy = Quaternion.AngleAxis(rangle, directions[raxis].Vector);
         Quaternion actual   = rotateBy * seed;
 
         Quaternion expected = seed.AroundAxis(directions[raxis], rangle);

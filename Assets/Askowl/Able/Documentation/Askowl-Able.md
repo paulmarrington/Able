@@ -194,16 +194,6 @@ Geodetic.Destination(start: here, distanceKm: 1.2, bearingDegrees: 23.4);
 
 Unity quaternion math focusses on the needs of the game. Great, but there are a few methods needed for augmented reality that are not provided.
 
-#### Axis
-
-Unity insists on using Vector3 constants right, up and forward when a quaternion function needs an axis. I am tired of trying to remember which is which. Hence this little helper.
-
-```c#
-Assert.AreEqual(Vector3.right,   quat.Axis(Trig.xAxis));
-Assert.AreEqual(Vector3.up,      quat.Axis(Trig.yAxis));
-Assert.AreEqual(Vector3.forward, quat.Axis(Trig.zAxis));
-```
-
 #### AroundAxis
 
 Rotate a quaternion around the X, Y or Z axis by the given number of degrees. This is a useful approact for a clock face, a compass or a merry-go-round.
@@ -271,17 +261,100 @@ attitude.SwitchAxis(pivot: Trig.xAxis)
 
 #### Direction
 
-When I prefer to use *X, Y, Z* instead of *right, up, forward* I use Trig.Direction values.
+##### Trig.xAxis, Trig.yAxis and Trig.zAxis
+
+When I prefer to use *X, Y, Z* instead of *right, up, forward* I use Trig.Direction values. These are unit directions with either the X, Y or Z component set 1 one to specify the axis.
+
+##### X, Y and Z
+
+Integersw here only one will be non-zero to define axis. Direction is also recorded as it can be 1 or -1.
+
+##### Name
+
+The name is a character constant, being 'X', 'Y' or 'Z'. Use it for switch statements where the character means more than using the ordinal value.
+
+##### Ord
+
+Ordinal value - the same as for `Vector3` - X=0, Y=1, Z=2. The values can be access by ordinal value (i.e. Trig.xAxis[0] == 1).
+
+##### Vector
+
+When Unity provided functions want to describe a direction, they use constants inside `Vector3` such as `Vector3.up`. To provide directions as XYZ, use `Trig.Y.Vector`.
+
+##### VectorName
+
+Just for kicks and giggles you can also retrieve the name of the asociated vector `Trig.Y.VectorName == "up"`.
+
+##### OtherAxes
+
+When we use an axis as a pivot we will really want the other axes to work with. This field refers to an array of the other two Directions. `Trig.xAxis.OtherAxes[0] == Trig.yAxis && Trig.xAxis.OtherAxes[1] == Trig.zAxis`.
+
+##### Negative
+
+`Vector3` has the concept of direction where positive is up and negative is down, with the same for left and right or forward and back. For Trig.Direction, use the unary minus as in `-Trig.xAxis`. OtherAxes for negative directions will themselves be negative. You can check if a direction is negative with `Trig.xAxis.Negative == false`.
+
+Here is a slice of the unit tests for `Trig.xAxis` only.  Use these as a guide for what you can achieve.
 
 ```c#
+var xAxis = Trig.xAxis;
+var yAxis = Trig.yAxis;
+var zAxis = Trig.zAxis;
 
+Assert.AreEqual(1,             xAxis.X);
+Assert.AreEqual(0,             xAxis.Y);
+Assert.AreEqual(0,             xAxis.Z);
+Assert.AreEqual(xAxis[0],      xAxis.X);
+Assert.AreEqual(xAxis[1],      xAxis.Y);
+Assert.AreEqual(xAxis[2],      xAxis.Z);
+Assert.AreEqual('X',           xAxis.Name);
+Assert.AreEqual("X Axis",      xAxis.ToString());
+Assert.AreEqual(0,             xAxis.Ord);
+Assert.AreEqual(Vector3.right, xAxis.Vector);
+Assert.AreEqual("right",       xAxis.VectorName);
+var otherAxes = xAxis.OtherAxes;
+Assert.AreEqual(yAxis, otherAxes[0]);
+Assert.AreEqual(zAxis, otherAxes[1]);
+
+// Tests for negative
+var minusX = -Trig.xAxis;
+var minusY = -Trig.yAxis;
+var minusZ = -Trig.zAxis;
+
+Assert.IsFalse(xAxis.Negative);
+Assert.IsTrue(minusX.Negative);
+Assert.AreEqual(-1,           minusX.X);
+Assert.AreEqual(0,            minusX.Y);
+Assert.AreEqual(0,            minusX.Z);
+Assert.AreEqual(minusX[0],    minusX.X);
+Assert.AreEqual(minusX[1],    minusX.Y);
+Assert.AreEqual(minusX[2],    minusX.Z);
+Assert.AreEqual('X',          minusX.Name);
+Assert.AreEqual("-X Axis",    minusX.ToString());
+Assert.AreEqual(0,            minusX.Ord);
+Assert.AreEqual(Vector3.left, minusX.Vector);
+Assert.AreEqual("left",       minusX.VectorName);
+otherAxes = minusX.OtherAxes;
+Assert.AreEqual(minusY, otherAxes[0]);
+Assert.AreEqual(minusZ, otherAxes[1]);
 ```
 
 #### ToRadians
 
+Convert a number in degrees to radians.
+
+```c#
+Assert.IsTrue(Compare.AlmostEqual(1.5708, Trig.ToRadians(90)));
+```
+
 #### ToDegrees
 
-#### Relative
+Convert a value in radians back to degrees. Note the need to reduce accuracy in the comparison due to the calculation.
+
+```c#
+Assert.IsTrue(Compare.AlmostEqual(90, Trig.ToDegrees(1.5708), 1e5));
+```
+
+#### Relative Position given Distance and Angle or Bearing
 
 ## Data Structures
 
