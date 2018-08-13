@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace Askowl.Examples {
   /// <remarks><a href="http://unitydoc.marrington.net/Able#geodeticcs-distance-and-bearings">Geodetics</a></remarks>
-  public class GeodeticTests {
+  public class GeodeticExamples {
     double[,] coords = {
       {-27.46850, 151.94379, 5, 180}, {-27.46855, 151.94379, 5, 180},
       {-27.46851, 151.94377, 34, 0}, {-27.46820, 151.94377, 34, 0},

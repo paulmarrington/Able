@@ -4,7 +4,7 @@ using NUnit.Framework;
 
 namespace Askowl.Examples { //#TBD#
   /// <remarks><a href="http://unitydoc.marrington.net/Able#comparecs-equality-and-almost-equality">check if two numbers are almost the same</a></remarks>
-  public class CompareTests {
+  public class CompareExamples {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#almostequal-for-floating-point">check if two numbers are almost the same</a></remarks>
     [Test]
     public void AlmostEqualFloatingPoint() {

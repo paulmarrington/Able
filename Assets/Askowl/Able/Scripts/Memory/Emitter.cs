@@ -26,7 +26,7 @@ namespace Askowl {
       listeners += listener;
 
       return new Disposable {
-        action = () => {
+        Action = () => {
           listeners -= listener;
           observer.OnCompleted();
         }
@@ -65,7 +65,7 @@ namespace Askowl {
       listeners += listener;
 
       return new Disposable {
-        action = () => {
+        Action = () => {
           listeners -= listener;
           observer.OnCompleted();
         }

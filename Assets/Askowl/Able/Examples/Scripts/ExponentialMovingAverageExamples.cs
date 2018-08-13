@@ -5,7 +5,7 @@ using System.Collections;
 
 namespace Askowl.Examples { //#TBD#
   /// <remarks><a href="http://unitydoc.marrington.net/Able#exponentialmovingaveragecs">exponential moving average</a></remarks>
-  public class ExponentialMovingAverageTests {
+  public class ExponentialMovingAverageExamples {
     [Test]
     /// <remarks><a href="http://unitydoc.marrington.net/Able#ema-average-value">EMA Average Value</a></remarks>
     public void AverageValue() {

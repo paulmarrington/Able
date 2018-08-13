@@ -6,8 +6,6 @@ using UnityEngine.Assertions;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
 
-// ReSharper disable MissingXmlDoc
-
 namespace Askowl.Examples {
   public class AbleTests : PlayModeTests {
     private IEnumerator Setup() { yield return LoadScene("Askowl-Base-Examples"); }

@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
+
+using System;
 
 namespace Askowl {
   /// Geodesy: The branch of mathematics dealing with the shape and area of the earth or large portions of it.<br/>

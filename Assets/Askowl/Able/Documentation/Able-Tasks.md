@@ -12,10 +12,9 @@
 - [x] Doc and test Geodetic
 - [x] doc and test compare
 - [x] doc and test Quaternions
-- [ ] doc and test Trig
-- [ ] doc and test Disposable
+- [x] doc and test Trig
+- [x] doc and test Disposable
 - [ ] doc and test Emitter
-- [ ] add InstanceCache to LinkedList
 - [ ] doc and test LinkedList
 - [ ] Doc and test Pick
 - [ ] Doc and test Selector

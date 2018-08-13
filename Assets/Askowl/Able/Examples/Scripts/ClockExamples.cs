@@ -5,7 +5,7 @@ using NUnit.Framework;
 
 namespace Askowl.Examples {
   /// <a href="http://unitydoc.marrington.net/Able#clock">Static time helpers</a>
-  public class ClockTests {
+  public class ClockExamples {
     /// <a href="http://unitydoc.marrington.net/Able#epoch-time">Convert to and from epoch time</a>
     [Test]
     public void EpochTime() {

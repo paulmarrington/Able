@@ -8,7 +8,7 @@ using Random = UnityEngine.Random;
 #if UNITY_EDITOR && Able
 namespace Askowl.Examples {
   /// <remarks><a href="http://unitydoc.marrington.net/Able#quaternionscs-another-perspective-on-quaternions">Tetrads</a></remarks>
-  public class QuaternionsTests {
+  public class QuaternionsExamples {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#aroundaxis">Rotate round an XYZ axis</a></remarks>
     [Test]
     public void AroundAxis() {
@@ -201,11 +201,11 @@ namespace Askowl.Examples {
     }
 
     private Quaternion seed;
-    private float degreesApart = 180;
-    private int    sets = 2, repetitions = 10, testCount;
-    private string testName;
-    private float  randomAngle => Random.Range(-degreesApart, +degreesApart);
-    private int    randomAxis  => Random.Range(1,              3);
+    private float      degreesApart = 180;
+    private int        sets         = 2, repetitions = 10, testCount;
+    private string     testName;
+    private float      randomAngle => Random.Range(-degreesApart, +degreesApart);
+    private int        randomAxis  => Random.Range(1,             3);
 
     private Quaternion NextSeed() {
       Vector3 vector = new Vector3 {[randomAxis] = randomAngle};

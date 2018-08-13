@@ -382,6 +382,28 @@ AreEqual(expected, actual);
 
 ### Disposable.cs - helper for IDisposable.Dispose()
 
+With closures and anonymous functions `using(...){...}` can be implemented where it is needed without creating a new class to manage it.
+
+```c#
+    [Test]
+    public void DisposableExample() {
+      Assert.AreEqual(expected: 0, actual: numberOfMonsters);
+
+      using (Ephemeral()) {
+        numberOfMonsters += 2;
+        Assert.AreEqual(expected: 2, actual: numberOfMonsters);
+      }
+
+      Assert.AreEqual(expected: 0, actual: numberOfMonsters);
+    }
+
+    private IDisposable Ephemeral() =>
+        new Disposable {Action = () => numberOfMonsters = 0};
+
+    private int numberOfMonsters;
+  }
+```
+
 ### Emitter.cs - the observer pattern
 
 ### LinkedList.cs - efficient walking movement
