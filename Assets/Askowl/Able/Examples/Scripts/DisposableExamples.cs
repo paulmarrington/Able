@@ -9,7 +9,7 @@ namespace Askowl.Examples {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#disposable">Use iDisposable for Greater Good</a></remarks>
     [Test]
     public void Disposable() {
-      Assert.AreEqual(expected: 0, actual: numberOfMonsters);
+      numberOfMonsters = 0;
 
       using (Ephemeral()) {
         numberOfMonsters += 2;
