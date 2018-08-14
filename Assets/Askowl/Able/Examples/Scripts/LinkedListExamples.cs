@@ -3,39 +3,20 @@
 #if UNITY_EDITOR && Able
 
 using System;
+using System.Text.RegularExpressions;
 using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.TestTools;
 using Assert = UnityEngine.Assertions.Assert;
 
 namespace Askowl.Examples {
   /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist"></a></remarks>
   public class LinkedListExamples {
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#unordered-link-lists"></a></remarks>
-    [Test]
-    public LinkedList<int> NewUnordered() {
-      var linkedList = new LinkedList<int> {Name = "Freddy"};
-      Assert.AreEqual("Freddy", linkedList.Name);
-      return linkedList;
-    }
-
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#ordered-link-lists"></a></remarks>
-    [Test]
-    public LinkedList<int> NewOrdered() {
-      var linkedList = new LinkedList<int> {InRange = (node, next) => node.Item < next.Item};
-      Assert.IsTrue(!string.IsNullOrWhiteSpace(linkedList.Name));
-      return linkedList;
-    }
-
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#linked-list-with-custom-create-item"></a></remarks>
-    [Test]
-    public LinkedList<int> NewWithCustomCreateItem() {
-      var linkedList = new LinkedList<int> {CreateItem = () => 33};
-      return linkedList;
-    }
-
     /// <remarks><a href="http://unitydoc.marrington.net/Able#add-an-item-to-the-current-list"></a></remarks>
     [Test]
     public void AddUnordered() {
-      var linkedList = NewUnordered();
+      var linkedList = new LinkedList<int> {Name = "Freddy"};
+      Assert.AreEqual("Freddy", linkedList.Name);
       Assert.IsTrue(linkedList.Empty);
       linkedList.Add(3);
       linkedList.Add(1);
@@ -49,7 +30,8 @@ namespace Askowl.Examples {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#add-an-item-to-the-current-list"></a></remarks>
     [Test]
     public void AddOrdered() {
-      var linkedList = NewOrdered();
+      var linkedList = new LinkedList<int> {InRange = (node, next) => node.Item < next.Item};
+      Assert.IsTrue(!string.IsNullOrWhiteSpace(linkedList.Name));
       Assert.IsTrue(linkedList.Empty);
       linkedList.Add(3);
       linkedList.Add(1);
@@ -63,7 +45,7 @@ namespace Askowl.Examples {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#recycle-a-currently-unused-node"></a></remarks>
     [Test]
     public void RecycleWithAdd() {
-      var linkedList = NewWithCustomCreateItem();
+      var linkedList = new LinkedList<int> {CreateItem = () => 33};
       var node       = linkedList.Add(3);
 
       node.Dispose();
@@ -79,7 +61,7 @@ namespace Askowl.Examples {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#recycle-a-currently-unused-node"></a></remarks>
     [Test]
     public void RecycleWithCreateItem() {
-      var linkedList = NewWithCustomCreateItem();
+      var linkedList = new LinkedList<int> {CreateItem = () => 33};
 
       var newFromRecycler = linkedList.Recycle();
       Assert.AreEqual(expected: 1,              actual: linkedList.Count);
@@ -90,7 +72,7 @@ namespace Askowl.Examples {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#recycle-a-currently-unused-node"></a></remarks>
     [Test]
     public void RecycleWithWithoutCreateItem() {
-      var linkedList = NewUnordered();
+      var linkedList = new LinkedList<int>();
 
       var newFromRecycler = linkedList.Recycle();
       Assert.AreEqual(expected: 1,            actual: linkedList.Count);
@@ -100,7 +82,7 @@ namespace Askowl.Examples {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#recycle-a-currently-unused-node"></a></remarks>
     [Test]
     public void RecycleWithCreatorFunction() {
-      var linkedList      = NewUnordered();
+      var linkedList      = new LinkedList<int>();
       var newFromRecycler = linkedList.Recycle(() => 1234);
       Assert.AreEqual(expected: 1234, actual: newFromRecycler.Item);
     }
@@ -108,8 +90,8 @@ namespace Askowl.Examples {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#move-items-between-lists"></a></remarks>
     [Test]
     public void ListMoveTo() {
-      var list1 = NewUnordered();
-      var list2 = NewUnordered();
+      var list1 = new LinkedList<int>();
+      var list2 = new LinkedList<int>();
 
       var node1 = list1.Add(21);
       var node2 = list1.Add(18);
@@ -125,8 +107,8 @@ namespace Askowl.Examples {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#move-items-between-lists"></a></remarks>
     [Test]
     public void UnorderedMoveTo() {
-      var list1 = NewUnordered();
-      var list2 = NewUnordered();
+      var list1 = new LinkedList<int>();
+      var list2 = new LinkedList<int>();
 
       var node1 = list1.Add(21);
       var node2 = list1.Add(18);
@@ -140,8 +122,8 @@ namespace Askowl.Examples {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#move-items-between-lists"></a></remarks>
     [Test]
     public void OrderedMoveTo() {
-      var list1 = NewUnordered();
-      var list2 = NewOrdered();
+      var list1 = new LinkedList<int>();
+      var list2 = new LinkedList<int> {InRange = (node, next) => node.Item < next.Item};
 
       var node21 = list1.Add(21);
       var node18 = list1.Add(18);
@@ -162,10 +144,10 @@ namespace Askowl.Examples {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#Node Disposal"></a></remarks>
     [Test]
     public void Dispose() {
-      var linkedList = NewOrdered();
-      var node       = linkedList.Add(5);
+      var linkedList = new LinkedList<int> {InRange = (node, next) => node.Item < next.Item};
+      var node2      = linkedList.Add(5);
 
-      node.Dispose();
+      node2.Dispose();
       Assert.IsTrue(linkedList.Empty);
       Assert.AreEqual(expected: 1, actual: linkedList.RecycleBin.Count);
       Assert.AreEqual(expected: 5, actual: linkedList.RecycleBin.Top.Item);
@@ -234,53 +216,72 @@ namespace Askowl.Examples {
       Assert.AreEqual(567, node6.Item);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist-walk-inrange"></a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#node-walking"></a></remarks>
     [Test]
-    public void WalkInRange() { }
+    public void WalkAll() {
+      var   list     = new LinkedList<int>();
+      var   node1    = list.Push(23);
+      var   node2    = list.Push(14);
+      var   node3    = list.Push(99);
+      int   count    = 0;
+      int[] expected = {99, 14, 23};
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist-add-inrange"></a></remarks>
-    [Test]
-    public void AddInRange() { }
+      var last = list.Walk((node, next) => {
+        Assert.AreEqual(expected: expected[count], actual: node.Item);
+        if (next != null) Assert.AreEqual(expected: expected[count + 1], actual: next.Item);
+        count += 1;
+        return true;
+      });
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist-oncomplete"></a></remarks>
-    [Test]
-    public void OnComplete() { }
+      Assert.IsNull(last);
+      Assert.AreEqual(expected: 3, actual: count);
+    }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist-moveto"></a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#node-walking"></a></remarks>
     [Test]
-    public void MoveTo() { }
+    public void WalkTerminated() {
+      var   list     = new LinkedList<int> {InRange = (node, next) => node.Item < next.Item};
+      var   node1    = list.Push(23);
+      var   node2    = list.Push(14);
+      var   node3    = list.Push(99);
+      int   count    = 0;
+      int[] expected = {99, 14, 23};
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist-first"></a></remarks>
-    [Test]
-    public void First() { }
+      var last = list.Walk((node, next) => {
+        Assert.AreEqual(expected: expected[count], actual: node.Item);
+        if (next != null) Assert.AreEqual(expected: expected[count + 1], actual: next.Item);
+        count += 1;
+        return node.Item <= 50;
+      });
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist-walk"></a></remarks>
-    [Test]
-    public void Walk() { }
-
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist-empty"></a></remarks>
-    [Test]
-    public void Empty() { }
-
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist-count"></a></remarks>
-    [Test]
-    public void Count() { }
-
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist-createitem"></a></remarks>
-    [Test]
-    public void CreateItem() { }
-
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist-recycle"></a></remarks>
-    [Test]
-    public void Recycle() { }
+      Assert.IsNotNull(last);
+      Assert.AreEqual(expected: 99, actual: last.Item);
+      Assert.AreEqual(expected: 2,  actual: count);
+      Assert.AreEqual(expected: 1,  actual: list.Count);
+      Assert.AreEqual(expected: 99, actual: list.Top.Item);
+    }
 
     /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist-debugmode"></a></remarks>
     [Test]
-    public void DebugMode() { }
+    public void DebugMode() {
+      LogAssert.Expect(LogType.Log, new Regex(".... LinkedList: Add to Tommy"));
+      LogAssert.Expect(LogType.Log, new Regex(".... LinkedList: move Tommy to Freddy"));
+      LogAssert.Expect(LogType.Log, new Regex(".... LinkedList: move Freddy to Tommy Recycle Bin"));
+
+      var tommy  = new LinkedList<int> {Name = "Tommy"};
+      var freddy = new LinkedList<int> {Name = "Freddy"};
+
+      var node = tommy.Add(1972);
+      node.MoveTo(freddy);
+      node.Dispose();
+    }
 
     /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist-tostring"></a></remarks>
     [Test]
-    public void ToStringExample() { }
+    public void ToStringExample() {
+      var julias = new LinkedList<int> {Name = "Julias"};
+      Assert.AreEqual(expected: "Julias", actual: julias.ToString());
+    }
   }
 }
 #endif

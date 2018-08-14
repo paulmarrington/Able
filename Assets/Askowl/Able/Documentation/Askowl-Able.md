@@ -505,12 +505,6 @@ While an ***Emitter*** provides some extra facilities to the built-in ***event**
 
 #### Node Walking
 
-##### Walk All Nodes
-
-##### Walk Nodes in Range
-
-#### Number of Nodes
-
 #### Debug Mode
 ##### Name
 ##### DebugMode

@@ -242,30 +242,18 @@ namespace Askowl {
     public Node Pop() => Dispose(Top);
     #endregion
 
-    #region Walking
     /// <summary>
     /// Walk all nodes - or until the action says otherwise
     /// </summary>
     /// <param name="action">Do something with node. Stop walking if returns false</param>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#walk-all-nodes"></a></remarks>
-    public Node WalkAll(Func<Node, Node, bool> action) {
-      for (var node = Top; node != null; node = node.Next) {
-        if (!action(node, node.Next)) {
-          return node;
-        }
+    public Node Walk(Func<Node, Node, bool> action) {
+      for (Node next, node = Top; node != null; node = next) {
+        if (!action(node, next = node.Next)) return node;
       }
 
       return null;
     }
-
-    /// <summary>
-    /// Walk nodes that are in range - or until the action says otherwise
-    /// </summary>
-    /// <param name="action">Do something with node. Stop walking if returns false</param>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#walk-nodes-in-range"></a></remarks>
-    public Node Walk(Func<Node, Node, bool> action) =>
-      WalkAll((node, next) => InRange(node, next) && action(node, next));
-    #endregion
 
     #region Debugging
     /// <summary>
