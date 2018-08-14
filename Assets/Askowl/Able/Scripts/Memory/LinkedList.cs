@@ -1,4 +1,6 @@
-﻿using System;
+﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
+
+using System;
 using UnityEngine;
 
 namespace Askowl {
@@ -53,9 +55,9 @@ namespace Askowl {
       /// Call Item.Dispose if the item is IDisposable, then move it to the recycle bin.
       /// </summary>
       /// <remarks><a href="http://unitydoc.marrington.net/Able#dispose-of-this-node"></a></remarks>
-      public void Dispose() {
+      public Node Dispose() {
         (Item as IDisposable)?.Dispose();
-        MoveTo(Home.RecycleBin);
+        return MoveTo(Home.RecycleBin);
       }
 
       /// <inheritdoc />
@@ -68,8 +70,15 @@ namespace Askowl {
     /// Name for this list - either provided or generated from the type of item.
     /// </summary>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#name"></a></remarks>
-    public string Name { get; set; }
+    public string Name { get { return name ?? (name = $"{typeof(T).Name}"); } set { name = value; } }
 
+    private string name;
+
+    /// <summary>
+    /// Given the current and next nodes, return true if the current node is in range.<br/>
+    ///
+    /// <code>new LinkedList&lt;int> {InRange = (node, next) => node.Item &lt; next.Item};</code>
+    /// </summary>
     public Func<Node, Node, bool> InRange {
       get { return inRangeFunc; }
       set {
@@ -80,8 +89,11 @@ namespace Askowl {
 
     private Func<Node, Node, bool> inRangeFunc = (node, next) => true;
 
-    public  Func<T> CreateItem { get { return createItemFunc; } set { createItemFunc = value; } }
-    private Func<T> createItemFunc = () => default(T);
+    /// <summary>
+    ///
+    /// </summary>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#linked-list-with-custom-create-item"></a></remarks>
+    public Func<T> CreateItem { get; set; } = () => default(T);
 
     private bool ordered;
 
@@ -90,6 +102,32 @@ namespace Askowl {
     #endregion
 
     #region Node Creation and Movement
+    /// <summary>
+    /// Give a new item, fetch a node from recycling or create it then insert into the linked list
+    /// </summary>
+    /// <param name="newItem"></param>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#add-an-item-to-the-current-list"></a></remarks>
+    public Node Add(T newItem) => (RecycleBin?.Empty != true) ? Insert(NewNode(newItem)) : Recycle(() => newItem);
+
+    /// <summary>
+    /// Fetch a node from the recycle bin. If the bin is empty, use the creator
+    /// function provided to create and Item and then a Node.
+    /// </summary>
+    /// <param name="newItemCreator">Function to create a new item</param>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#recycle-a-currently-unused-node"></a></remarks>
+    public Node Recycle(Func<T> newItemCreator) =>
+      (RecycleBin?.Empty != true) ? Add(newItemCreator()) : RecycleBin.MoveTo(this);
+
+    /// <summary>
+    /// Fetch a node from the recycle bin. If the bin is empty, use the creator
+    /// function linked to the list to create and Item and then a Node.
+    /// The default creator function returns `default(T)`, which is adequate for
+    /// move value items. It will be null for object and can be filled in later
+    /// if needed.
+    /// </summary>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#recycle-a-currently-unused-node"></a></remarks>
+    public Node Recycle() => Recycle(CreateItem);
+
     /// <summary>
     /// Moves the first node of this list to another.
     /// </summary>
@@ -101,30 +139,18 @@ namespace Askowl {
     /// Call Item.Dispose if the item is IDisposable, then move it to the recycle bin.
     /// </summary>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#disposal-of-a-node"></a></remarks>
-    public void Dispose(Node node) => node.Dispose();
-
-    /// <summary>
-    /// Give a new item, fetch a node from recycling or create it then insert into the linked list
-    /// </summary>
-    /// <param name="newItem"></param>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#add-an-item-to-the-current-list"></a></remarks>
-    public Node Add(T newItem) => (RecycleBin?.Empty != true) ? Insert(NewNode(newItem)) : Recycle(() => newItem);
-
-    /// <summary>
-    ///
-    /// </summary>
-    /// <param name="newItemCreator"></param>
-    /// <returns></returns>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#retrieve-a-node-from-the-recycle-bin"></a></remarks>
-    public Node Recycle(Func<T> newItemCreator) =>
-      (RecycleBin?.Empty != true) ? Add(newItemCreator()) : RecycleBin.MoveTo(this);
-
-    public Node Recycle() => Recycle(CreateItem);
+    public Node Dispose(Node node) => node.Dispose();
 
     private Node NewNode(T item) {
       Node node = new Node() {Item = item, Owner = this, Home = this};
       return node;
     }
+
+    /// <summary>
+    /// Every linked list has a recycle bin.
+    /// </summary>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#node-creation-and-movement"></a></remarks>
+    public LinkedList<T> RecycleBin => recycleBin ?? (recycleBin = new LinkedList<T> {Name = $"{Name} Recycling Bin"});
 
     private Node Insert(Node nodeToInsert) {
       if (DebugMode) DebugMessage(nodeToInsert);
@@ -149,7 +175,7 @@ namespace Askowl {
       return nodeToInsert;
     }
 
-    private Node Unlink(Node node) {
+    private void Unlink(Node node) {
       Count--;
 
       if (node.Previous != null) {
@@ -162,10 +188,7 @@ namespace Askowl {
 
       node.Previous = node.Next = null;
       node.Owner    = null;
-      return node;
     }
-
-    private LinkedList<T> RecycleBin => recycleBin ?? new LinkedList<T> {Name = $"{Name} Recycling Bin"};
 
     private LinkedList<T> recycleBin;
     #endregion
@@ -174,20 +197,49 @@ namespace Askowl {
     /// <summary>
     /// The node that is in the front of the linked list or null if list is empty
     /// </summary>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#the-first-node"></a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo"></a></remarks>
     public Node Top { get; private set; }
+
+    /// <summary>
+    /// The node that is second from the front of the linked list or null if list has less than two entries
+    /// </summary>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo"></a></remarks>
+    public Node Next => Top?.Next;
 
     /// <summary>
     /// Use to see if there are any nodes in the list
     /// </summary>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#number-of-nodes"></a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo"></a></remarks>
     public bool Empty => (Top == null);
 
     /// <summary>
     /// A count of the number of nodes in an active list, not including those in the recycle bin.
     /// </summary>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#number-of-nodes"></a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo"></a></remarks>
     public int Count { get; private set; }
+
+    /// <summary>
+    /// Push a reference to or value of an item onto the FIFO stack. <see cref="Add"/>
+    /// </summary>
+    /// <param name="item"></param>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo"></a></remarks>
+    public Node Push(T item) => Add(item);
+
+    /// <summary>
+    ///
+    /// </summary>
+    /// Push an already existing node. It could have been on the same or another list
+    /// or in a recycling bin. <see cref="MoveTo"/>
+    /// <param name="node"></param>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo"></a></remarks>
+    public Node Push(Node node) => node.MoveTo(this);
+
+    /// <summary>
+    /// Pop a node off the top of the fifo stack. <see cref="Dispose"/>
+    /// </summary>
+    /// <returns></returns>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo"></a></remarks>
+    public Node Pop() => Dispose(Top);
     #endregion
 
     #region Walking
@@ -211,17 +263,24 @@ namespace Askowl {
     /// </summary>
     /// <param name="action">Do something with node. Stop walking if returns false</param>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#walk-nodes-in-range"></a></remarks>
-    public Node Walk(Func<Node, Node, bool> action) => Walk((node, next) => InRange(node, next) && action(node, next));
+    public Node Walk(Func<Node, Node, bool> action) =>
+      WalkAll((node, next) => InRange(node, next) && action(node, next));
     #endregion
 
     #region Debugging
-    public static bool DebugMode = false;
+    /// <summary>
+    /// Set true and any call that modifies a linked list will write to the debug
+    /// log. Invaluable when you want to track object usage.
+    /// </summary>
+    // ReSharper disable once StaticMemberInGenericType
+    public static bool DebugMode { private get; set; } = false;
 
     private void DebugMessage(Node node) {
-      if (node.Owner == this)
+      if (node.Owner == this) {
         Debug.Log($"**** LinkedList: Add to {this}");
-      else
+      } else {
         Debug.Log($"**** LinkedList: move {node.Owner} to {this}");
+      }
     }
 
     /// <inheritdoc />

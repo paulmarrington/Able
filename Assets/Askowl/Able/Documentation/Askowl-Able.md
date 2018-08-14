@@ -475,11 +475,15 @@ While an ***Emitter*** provides some extra facilities to the built-in ***event**
 
 ##### Unordered Linked Lists
 
+##### Linked-List with Custom Create Item
+
 #### Node Creation and Movement
 
-#### Add an Item to the Current List
+##### Add an Item to the Current List
 
-##### Add a New Item
+##### Recycle a Currently Unused Node
+
+##### Move Item Between Lists
 
 ##### Retrieve a Node from the Recycle Bin
 
