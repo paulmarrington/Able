@@ -14,7 +14,7 @@
 - [x] doc and test Quaternions
 - [x] doc and test Trig
 - [x] doc and test Disposable
-- [ ] doc and test Emitter
+- [x] doc and test Emitter
 - [ ] doc and test LinkedList
 - [ ] Doc and test Pick
 - [ ] Doc and test Selector

@@ -4,7 +4,6 @@
 
 using System;
 using NUnit.Framework;
-using UnityEngine;
 
 namespace Askowl.Examples { //#TBD#
   /// <remarks><a href="http://unitydoc.marrington.net/Able#emitter">The Observer Pattern</a></remarks>
