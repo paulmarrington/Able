@@ -9,7 +9,7 @@ namespace Askowl.Examples {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist-new"></a></remarks>
     [Test]
     public LinkedList<int> New() {
-      var linkedList = LinkedList<int>.New();
+      var linkedList = new LinkedList<int>{inr}
       Assert.IsTrue(!string.IsNullOrWhiteSpace(linkedList.Name));
       return linkedList;
     }

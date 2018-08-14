@@ -469,27 +469,13 @@ While an ***Emitter*** provides some extra facilities to the built-in ***event**
 
 ##### Dispose of this Node
 
-#### Name
-
 #### Create a New Linked List
 
 ##### Ordered Linked Lists
 
 ##### Unordered Linked Lists
 
-#### Move the First Node to Another List
-
-#### Dispose of Another Node
-
-#### The First Node
-
-#### Node Walking
-
-##### Walk All Nodes
-
-##### Walk Nodes in Range
-
-#### Number of Nodes
+#### Node Creation and Movement
 
 #### Add an Item to the Current List
 
@@ -499,7 +485,32 @@ While an ***Emitter*** provides some extra facilities to the built-in ***event**
 
 ##### Implicit Item Creation
 
+##### Disposal of a Node
+
+#### A Lifo Stack
+
+##### Top
+
+##### Next
+
+##### Push
+
+##### Pop
+
+##### Swap
+
+#### Node Walking
+
+##### Walk All Nodes
+
+##### Walk Nodes in Range
+
+#### Number of Nodes
+
 #### Debug Mode
+##### Name
+##### DebugMode
+
 
 ### Pick.cs - Interface to choose from options
 
