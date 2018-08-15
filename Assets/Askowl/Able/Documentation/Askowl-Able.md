@@ -457,15 +457,34 @@ private struct Observer3 : IObserver<int> {
 
 While an ***Emitter*** provides some extra facilities to the built-in ***event*** delegates, it does not improve decoupling. It does pave the way for decoupled events using [***CustomAssets***](/CustomAssets), an extension of ***ScriptableObjects***.
 
-### LinkedList.cs - efficient walking movement
+### LinkedList - a different perspective
+
+C#/.Net provides an excellent LinkList implementation. It is, by necessity generic. My implementation has different goals.
+
+1. Reduce garbage collection by keeping unused nodes in a recycling list.
+2. Ordered lists by providing a comparator.
+3. State management by making it easy to move nodes between lists.
+4. Fifo implementation.
+5. Walk the list without creating new or temporary object.
+6. Debugging support by logging node movements.
 
 #### Nodes
 
-##### Node Home
+Each item added to a list is wrapped in a node instance. The node is a class, so it resides on the heap. Because nodes are recycled, no garbage collection is required.
 
-##### Is Node Inrange?
+##### Node Name
 
-##### Move Node to
+For clarity while debugging a node name includes the home and owner lists as well as whatever the held item gives `ToString()`.
+
+##### Node Owner and Home
+
+When a node is created, the list used is set as the `Home` list. When an item is recycled, it is always returned to it's home recycle bin. Each time a node is moved between lists it's `Owner` is set accordingly.
+
+##### Is Node in Range?
+
+##### Move the Node to Another List
+
+Moving nodes provides the core difference between this linked list implementation and others. Moving nodes between lists provides the basic mechanism for a caching state machine.
 
 ##### Update Node Contents
 
@@ -512,6 +531,10 @@ While an ***Emitter*** provides some extra facilities to the built-in ***event**
 #### Debug Mode
 ##### Name
 ##### DebugMode
+
+
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
 ### Pick.cs - Interface to choose from options

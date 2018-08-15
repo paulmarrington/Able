@@ -25,7 +25,7 @@ namespace Askowl.Examples {
         var metresApart   = Geodetic.Kilometres(from, to) * 1000;
         var distanceApart = Geodetic.DistanceBetween(from, to);
 
-        Assert.AreEqual(expected: coords[idx, 2], actual: metresApart, delta: 0.99);
+        Assert.AreEqual(expected: coords[idx, 2], actual: metresApart, delta: 5);
 
         Assert.AreEqual(expected: distances[idx / 2], actual: distanceApart);
 

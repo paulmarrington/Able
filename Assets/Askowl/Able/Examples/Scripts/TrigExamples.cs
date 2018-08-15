@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Askowl.Examples { //#TBD#
   /// <remarks><a href="http://unitydoc.marrington.net/Able#trigcs">Trigonometry Rocks</a></remarks>
-  public class TrigExamples {
+  public class TrigTests {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#direction">Define axes</a></remarks>
     [Test]
     public void PositiveDirection() {

@@ -10,9 +10,9 @@ using UnityEngine.TestTools;
 using Assert = UnityEngine.Assertions.Assert;
 
 namespace Askowl.Examples {
-  /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist"></a></remarks>
+  /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist-a-different-perspective">LinkedList - a different perspective</a></remarks>
   public class LinkedListExamples {
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#add-an-item-to-the-current-list"></a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#add-an-item-to-the-current-list">Add an Item</a></remarks>
     [Test]
     public void AddUnordered() {
       var linkedList = new LinkedList<int> {Name = "Freddy"};
@@ -27,7 +27,7 @@ namespace Askowl.Examples {
       Assert.AreEqual(expected: 1, actual: linkedList.Next.Item);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#add-an-item-to-the-current-list"></a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#add-an-item-to-the-current-list">Add an Item</a></remarks>
     [Test]
     public void AddOrdered() {
       var linkedList = new LinkedList<int> {InRange = (node, cursor) => node.Item < cursor.Item};
@@ -42,7 +42,7 @@ namespace Askowl.Examples {
       Assert.AreEqual(expected: 3, actual: linkedList.Next.Item);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#recycle-a-currently-unused-node"></a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#recycle-a-currently-unused-node">Dispose by Recycling</a></remarks>
     [Test]
     public void RecycleWithAdd() {
       var linkedList = new LinkedList<int> {CreateItem = () => 33};
@@ -58,7 +58,7 @@ namespace Askowl.Examples {
       Assert.AreEqual(expected: 4, actual: linkedList.Top.Item);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#recycle-a-currently-unused-node"></a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#recycle-a-currently-unused-node">Dispose by Recycling</a></remarks>
     [Test]
     public void RecycleWithCreateItem() {
       var linkedList = new LinkedList<int> {CreateItem = () => 33};
@@ -69,7 +69,7 @@ namespace Askowl.Examples {
       Assert.AreEqual(expected: linkedList.Top, actual: newFromRecycler);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#recycle-a-currently-unused-node"></a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#recycle-a-currently-unused-node">Dispose by Recycling</a></remarks>
     [Test]
     public void RecycleWithWithoutCreateItem() {
       var linkedList = new LinkedList<int>();
@@ -79,7 +79,7 @@ namespace Askowl.Examples {
       Assert.AreEqual(expected: default(int), actual: newFromRecycler.Item);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#recycle-a-currently-unused-node"></a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#recycle-a-currently-unused-node">Dispose by Recycling</a></remarks>
     [Test]
     public void RecycleWithCreatorFunction() {
       var linkedList      = new LinkedList<int>();
@@ -87,7 +87,7 @@ namespace Askowl.Examples {
       Assert.AreEqual(expected: 1234, actual: newFromRecycler.Item);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#move-items-between-lists"></a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#move-items-between-lists">Move Node</a></remarks>
     [Test]
     public void ListMoveTo() {
       var list1 = new LinkedList<int>();
@@ -104,7 +104,7 @@ namespace Askowl.Examples {
       Assert.AreEqual(expected: node2, actual: list2.Top);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#move-items-between-lists"></a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#move-items-between-lists">Move Node</a></remarks>
     [Test]
     public void UnorderedMoveTo() {
       var list1 = new LinkedList<int>();
@@ -119,7 +119,7 @@ namespace Askowl.Examples {
       Assert.AreEqual(expected: node2, actual: list1.Top);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#move-items-between-lists"></a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#move-items-between-lists">Move Node</a></remarks>
     [Test]
     public void OrderedMoveTo() {
       var list1 = new LinkedList<int>();
@@ -141,7 +141,7 @@ namespace Askowl.Examples {
       Assert.AreEqual(expected: node44, actual: list2.Next);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#Node Disposal"></a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#Node Disposal">Dispose of a Node</a></remarks>
     [Test]
     public void Dispose() {
       var linkedList = new LinkedList<int> {InRange = (node, cursor) => node.Item < cursor.Item};
@@ -153,7 +153,7 @@ namespace Askowl.Examples {
       Assert.AreEqual(expected: 5, actual: linkedList.RecycleBin.Top.Item);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#Node Disposal"></a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#Node Disposal">Dispose of a Node</a></remarks>
     [Test]
     public void IDisposable() {
       var linkedList = new LinkedList<DisposableInt>();
@@ -169,7 +169,7 @@ namespace Askowl.Examples {
       public   void Dispose() => counter = -1;
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#Node Disposal"></a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#Node Disposal">Dispose of a Node</a></remarks>
     [Test]
     public void DisposeAfterMove() {
       var list1 = new LinkedList<int>();
@@ -188,7 +188,7 @@ namespace Askowl.Examples {
       Assert.IsTrue(list2.RecycleBin.Empty);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo"></a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo">Fifo</a></remarks>
     [Test]
     public void Fifo() {
       var list1 = new LinkedList<int>();
@@ -216,7 +216,7 @@ namespace Askowl.Examples {
       Assert.AreEqual(567, node6.Item);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#node-walking"></a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#node-walking">Walking a list</a></remarks>
     [Test]
     public void WalkAll() {
       var list = new LinkedList<int>();
@@ -237,7 +237,7 @@ namespace Askowl.Examples {
       Assert.AreEqual(expected: 3, actual: count);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#node-walking"></a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#node-walking">Walking a list</a></remarks>
     [Test]
     public void WalkTerminated() {
       var list = new LinkedList<int> {InRange = (node, cursor) => node.Item < cursor.Item};
@@ -245,7 +245,7 @@ namespace Askowl.Examples {
       list.Push(14);
       list.Push(99);
       int   count    = 0;
-      int[] expected = {99, 14, 23};
+      int[] expected = {14, 23, 99};
 
       var last = list.Walk((node, next) => {
         Assert.AreEqual(expected: expected[count], actual: node.Item);
@@ -256,12 +256,12 @@ namespace Askowl.Examples {
 
       Assert.IsNotNull(last);
       Assert.AreEqual(expected: 99, actual: last.Item);
-      Assert.AreEqual(expected: 2,  actual: count);
-      Assert.AreEqual(expected: 1,  actual: list.Count);
-      Assert.AreEqual(expected: 99, actual: list.Top.Item);
+      Assert.AreEqual(expected: 3,  actual: count);
+      Assert.AreEqual(expected: 3,  actual: list.Count);
+      Assert.AreEqual(expected: 99, actual: list.Bottom.Item);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist-debugmode"></a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist-debugmode">Debugging</a></remarks>
     [Test]
     public void DebugMode() {
       LinkedList<int>.DebugMode = true;
@@ -277,7 +277,7 @@ namespace Askowl.Examples {
       node.Dispose();
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist-tostring"></a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist-tostring">Debugging</a></remarks>
     [Test]
     public void ToStringExample() {
       var julias = new LinkedList<int> {Name = "Julias"};
