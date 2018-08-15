@@ -63,7 +63,7 @@ namespace Askowl.Examples {
     public void RecycleWithCreateItem() {
       var linkedList = new LinkedList<int> {CreateItem = () => 33};
 
-      var newFromRecycler = linkedList.Recycle();
+      var newFromRecycler = linkedList.Fetch();
       Assert.AreEqual(expected: 1,              actual: linkedList.Count);
       Assert.AreEqual(expected: 33,             actual: newFromRecycler.Item);
       Assert.AreEqual(expected: linkedList.Top, actual: newFromRecycler);
@@ -74,17 +74,18 @@ namespace Askowl.Examples {
     public void RecycleWithWithoutCreateItem() {
       var linkedList = new LinkedList<int>();
 
-      var newFromRecycler = linkedList.Recycle();
+      var newFromRecycler = linkedList.Fetch();
       Assert.AreEqual(expected: 1,            actual: linkedList.Count);
       Assert.AreEqual(expected: default(int), actual: newFromRecycler.Item);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#recycle-a-currently-unused-node">Dispose by Recycling</a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#implicit-item-creation-and-activation">Dispose by Recycling</a></remarks>
     [Test]
-    public void RecycleWithCreatorFunction() {
-      var linkedList      = new LinkedList<int>();
-      var newFromRecycler = linkedList.Recycle(() => 1234);
-      Assert.AreEqual(expected: 1234, actual: newFromRecycler.Item);
+    public void RecycleWithActivator() {
+      var list = new LinkedList<int> {ReactivateItem = (node) => node.Item *= 2};
+      list.Add(44).Discard();
+      var reactivated = list.Fetch();
+      Assert.AreEqual(expected: 88, actual: reactivated.Item);
     }
 
     /// <remarks><a href="http://unitydoc.marrington.net/Able#move-items-between-lists">Move Node</a></remarks>
@@ -139,6 +140,28 @@ namespace Askowl.Examples {
       Assert.AreEqual(expected: node21, actual: list2.Next);
       node18.Dispose();
       Assert.AreEqual(expected: node44, actual: list2.Next);
+    }
+
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#move-items-between-lists">Move Node</a></remarks>
+    [Test]
+    public void MoveToEndOf() {
+      var list = new LinkedList<int>();
+
+      var node1 = list.Add(11);
+      var node2 = list.Add(22);
+      var node3 = list.Add(33);
+      var node4 = list.Add(44); // 44 33 22 11
+
+      node3.MoveToEndOf(list); // 44 22 11 33
+
+      Assert.AreEqual(expected: node3, actual: list.Bottom);
+
+      Assert.AreEqual(expected: 4,     actual: list.Count);
+      Assert.AreEqual(expected: node4, actual: list.Top);
+      Assert.AreEqual(expected: node2, actual: list.Next);
+      Assert.AreEqual(expected: node4, actual: list.Pop());
+      Assert.AreEqual(expected: node1, actual: list.Next);
+      Assert.AreEqual(expected: node3, actual: list.Bottom);
     }
 
     /// <remarks><a href="http://unitydoc.marrington.net/Able#Node Disposal">Dispose of a Node</a></remarks>
