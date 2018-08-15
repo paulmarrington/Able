@@ -465,7 +465,9 @@ While an ***Emitter*** provides some extra facilities to the built-in ***event**
 
 ##### Is Node Inrange?
 
-##### Move Node to 
+##### Move Node to
+
+##### Update Node Contents
 
 ##### Dispose of this Node
 
@@ -496,6 +498,8 @@ While an ***Emitter*** provides some extra facilities to the built-in ***event**
 ##### Top
 
 ##### Next
+
+##### Bottom
 
 ##### Push
 

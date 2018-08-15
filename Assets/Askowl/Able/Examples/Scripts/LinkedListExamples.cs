@@ -18,10 +18,10 @@ namespace Askowl.Examples {
       var linkedList = new LinkedList<int> {Name = "Freddy"};
       Assert.AreEqual("Freddy", linkedList.Name);
       Assert.IsTrue(linkedList.Empty);
-      linkedList.Add(3);
       linkedList.Add(1);
+      linkedList.Add(3);
       Assert.IsFalse(linkedList.Empty);
-      Assert.AreEqual(expected: 1, actual: linkedList.Count);
+      Assert.AreEqual(expected: 2, actual: linkedList.Count);
 
       Assert.AreEqual(expected: 3, actual: linkedList.Top.Item);
       Assert.AreEqual(expected: 1, actual: linkedList.Next.Item);
@@ -30,13 +30,13 @@ namespace Askowl.Examples {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#add-an-item-to-the-current-list"></a></remarks>
     [Test]
     public void AddOrdered() {
-      var linkedList = new LinkedList<int> {InRange = (node, next) => node.Item < next.Item};
+      var linkedList = new LinkedList<int> {InRange = (node, cursor) => node.Item < cursor.Item};
       Assert.IsTrue(!string.IsNullOrWhiteSpace(linkedList.Name));
       Assert.IsTrue(linkedList.Empty);
-      linkedList.Add(3);
       linkedList.Add(1);
+      linkedList.Add(3);
       Assert.IsFalse(linkedList.Empty);
-      Assert.AreEqual(expected: 1, actual: linkedList.Count);
+      Assert.AreEqual(expected: 2, actual: linkedList.Count);
 
       Assert.AreEqual(expected: 1, actual: linkedList.Top.Item);
       Assert.AreEqual(expected: 3, actual: linkedList.Next.Item);
@@ -52,7 +52,7 @@ namespace Askowl.Examples {
       Assert.IsTrue(linkedList.Empty);
       Assert.AreEqual(expected: 1, actual: linkedList.RecycleBin.Count);
 
-      node = linkedList.Add(4);
+      linkedList.Add(4);
       Assert.IsTrue(linkedList.RecycleBin.Empty);
       Assert.AreEqual(expected: 1, actual: linkedList.Count);
       Assert.AreEqual(expected: 4, actual: linkedList.Top.Item);
@@ -123,7 +123,7 @@ namespace Askowl.Examples {
     [Test]
     public void OrderedMoveTo() {
       var list1 = new LinkedList<int>();
-      var list2 = new LinkedList<int> {InRange = (node, next) => node.Item < next.Item};
+      var list2 = new LinkedList<int> {InRange = (node, cursor) => node.Item < cursor.Item};
 
       var node21 = list1.Add(21);
       var node18 = list1.Add(18);
@@ -144,7 +144,7 @@ namespace Askowl.Examples {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#Node Disposal"></a></remarks>
     [Test]
     public void Dispose() {
-      var linkedList = new LinkedList<int> {InRange = (node, next) => node.Item < next.Item};
+      var linkedList = new LinkedList<int> {InRange = (node, cursor) => node.Item < cursor.Item};
       var node2      = linkedList.Add(5);
 
       node2.Dispose();
@@ -158,7 +158,7 @@ namespace Askowl.Examples {
     public void IDisposable() {
       var linkedList = new LinkedList<DisposableInt>();
       var node       = linkedList.Add(new DisposableInt {counter = 333});
-      Assert.AreEqual(expected: 33, actual: node.Item.counter);
+      Assert.AreEqual(expected: 333, actual: node.Item.counter);
 
       node.Dispose();
       Assert.AreEqual(expected: -1, actual: node.Item.counter);
@@ -205,12 +205,12 @@ namespace Askowl.Examples {
 
       var node4 = list1.Pop();
       Assert.AreEqual(node3, node4);
-      Assert.AreEqual(node4, list1.RecycleBin.Top);
+      Assert.AreEqual(node4, list2.RecycleBin.Top);
 
       Assert.AreEqual(node2, list1.Top);
       Assert.AreEqual(node1, list1.Next);
 
-      var node5 = list1.Push(567);
+      list1.Push(567);
       Assert.AreEqual(3, list1.Count);
       var node6 = list1.Top;
       Assert.AreEqual(567, node6.Item);
@@ -219,10 +219,10 @@ namespace Askowl.Examples {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#node-walking"></a></remarks>
     [Test]
     public void WalkAll() {
-      var   list     = new LinkedList<int>();
-      var   node1    = list.Push(23);
-      var   node2    = list.Push(14);
-      var   node3    = list.Push(99);
+      var list = new LinkedList<int>();
+      list.Push(23);
+      list.Push(14);
+      list.Push(99);
       int   count    = 0;
       int[] expected = {99, 14, 23};
 
@@ -240,10 +240,10 @@ namespace Askowl.Examples {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#node-walking"></a></remarks>
     [Test]
     public void WalkTerminated() {
-      var   list     = new LinkedList<int> {InRange = (node, next) => node.Item < next.Item};
-      var   node1    = list.Push(23);
-      var   node2    = list.Push(14);
-      var   node3    = list.Push(99);
+      var list = new LinkedList<int> {InRange = (node, cursor) => node.Item < cursor.Item};
+      list.Push(23);
+      list.Push(14);
+      list.Push(99);
       int   count    = 0;
       int[] expected = {99, 14, 23};
 
@@ -264,9 +264,10 @@ namespace Askowl.Examples {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist-debugmode"></a></remarks>
     [Test]
     public void DebugMode() {
+      LinkedList<int>.DebugMode = true;
       LogAssert.Expect(LogType.Log, new Regex(".... LinkedList: Add to Tommy"));
       LogAssert.Expect(LogType.Log, new Regex(".... LinkedList: move Tommy to Freddy"));
-      LogAssert.Expect(LogType.Log, new Regex(".... LinkedList: move Freddy to Tommy Recycle Bin"));
+      LogAssert.Expect(LogType.Log, new Regex(".... LinkedList: move Freddy to Tommy Recycling Bin"));
 
       var tommy  = new LinkedList<int> {Name = "Tommy"};
       var freddy = new LinkedList<int> {Name = "Freddy"};

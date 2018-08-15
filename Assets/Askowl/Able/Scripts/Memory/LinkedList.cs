@@ -11,7 +11,6 @@ namespace Askowl {
   /// <typeparam name="T">Type of item to be stored in each node</typeparam>
   /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist-efficient-walking-movement"></a></remarks>
   public class LinkedList<T> {
-    #region Node Structure
     /// <summary>
     /// Each node in the linked list. Can b treated as a black box.
     /// </summary>
@@ -48,6 +47,7 @@ namespace Askowl {
       /// Move this node to a new list
       /// </summary>
       /// <param name="to">List target of th move</param>
+      /// <returns>node for chaining</returns>
       /// <remarks><a href="http://unitydoc.marrington.net/Able#move-node-to-another-list"></a></remarks>
       public Node MoveTo(LinkedList<T> to) => to.Insert(this);
 
@@ -61,16 +61,26 @@ namespace Askowl {
       }
 
       /// <inheritdoc />
-      public override string ToString() => Owner.Name;
+      public override string ToString() => $"{Home} // {Owner}:: {Item}";
+
+      /// <summary>
+      /// Update Node Contents
+      /// </summary>
+      /// <param name="newItem">new for old</param>
+      /// <returns>node for chaining</returns>
+      /// <remarks><a href="http://unitydoc.marrington.net/Able#update-node-contents"></a></remarks>
+      public Node Update(T newItem) {
+        Item = newItem;
+        return this;
+      }
     }
-    #endregion
 
     #region New List
     /// <summary>
     /// Name for this list - either provided or generated from the type of item.
     /// </summary>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#name"></a></remarks>
-    public string Name { get { return name ?? (name = $"{typeof(T).Name}"); } set { name = value; } }
+    public string Name { get { return name ?? (name = $"{typeof(T).Name}-{++ordinal}"); } set { name = value; } }
 
     private string name;
 
@@ -93,7 +103,7 @@ namespace Askowl {
     ///
     /// </summary>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#linked-list-with-custom-create-item"></a></remarks>
-    public Func<T> CreateItem { get; set; } = () => default(T);
+    public Func<T> CreateItem { private get; set; } = () => default(T);
 
     private bool ordered;
 
@@ -107,7 +117,8 @@ namespace Askowl {
     /// </summary>
     /// <param name="newItem"></param>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#add-an-item-to-the-current-list"></a></remarks>
-    public Node Add(T newItem) => (RecycleBin?.Empty != true) ? Insert(NewNode(newItem)) : Recycle(() => newItem);
+    public Node Add(T newItem) =>
+      RecycleBin.Empty ? Insert(NewNode(newItem)) : RecycleBin.MoveTo(this).Update(newItem);
 
     /// <summary>
     /// Fetch a node from the recycle bin. If the bin is empty, use the creator
@@ -116,7 +127,7 @@ namespace Askowl {
     /// <param name="newItemCreator">Function to create a new item</param>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#recycle-a-currently-unused-node"></a></remarks>
     public Node Recycle(Func<T> newItemCreator) =>
-      (RecycleBin?.Empty != true) ? Add(newItemCreator()) : RecycleBin.MoveTo(this);
+      RecycleBin.Empty ? Insert(NewNode(newItemCreator())) : RecycleBin.MoveTo(this);
 
     /// <summary>
     /// Fetch a node from the recycle bin. If the bin is empty, use the creator
@@ -157,34 +168,38 @@ namespace Askowl {
 
       Unlink(nodeToInsert);
       nodeToInsert.Owner = this;
-      Count++;
-      if (Empty) return Top = nodeToInsert;
+      if (Empty) return Bottom = Top = nodeToInsert;
 
-      Node next = Top;
+      Node after = Top;
 
       if (ordered) {
-        for (next = Top; InRange(next, next.Next); next = next.Next) {
-          if (next.Next == null) return next.Next = nodeToInsert;
+        after = Walk((node, _) => !InRange(nodeToInsert, node));
+
+        if (after == null) {
+          nodeToInsert.Previous = Bottom;
+          return Bottom = (Bottom.Next = nodeToInsert);
         }
       }
 
-      nodeToInsert.Next     = next;
-      nodeToInsert.Previous = next.Previous;
-      next.Previous         = nodeToInsert;
-      if (next == Top) Top = nodeToInsert;
+      nodeToInsert.Next     = after;
+      nodeToInsert.Previous = after.Previous;
+      after.Previous        = nodeToInsert;
+      if (Bottom == null) Bottom = nodeToInsert;
+      if (after  == Top) Top     = nodeToInsert;
       return nodeToInsert;
     }
 
     private void Unlink(Node node) {
-      Count--;
-
-      if (node.Previous != null) {
-        node.Previous.Next = node.Next;
-      } else {
+      if (node == node.Owner.Top) {
         node.Owner.Top = node.Next;
+      } else if (node == node.Owner.Bottom) {
+        node.Owner.Bottom = node.Previous;
+      } else if ((node.Previous == null) && (node.Next == null)) {
+        return; // Node doesn't belong to anyone
       }
 
-      if (node.Next != null) node.Next.Previous = node.Previous;
+      if (node.Previous != null) node.Previous.Next = node.Next;
+      if (node.Next     != null) node.Next.Previous = node.Previous;
 
       node.Previous = node.Next = null;
       node.Owner    = null;
@@ -199,6 +214,12 @@ namespace Askowl {
     /// </summary>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo"></a></remarks>
     public Node Top { get; private set; }
+
+    /// <summary>
+    /// The node that is in the front of the linked list or null if list is empty
+    /// </summary>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo"></a></remarks>
+    public Node Bottom { get; private set; }
 
     /// <summary>
     /// The node that is second from the front of the linked list or null if list has less than two entries
@@ -216,7 +237,13 @@ namespace Askowl {
     /// A count of the number of nodes in an active list, not including those in the recycle bin.
     /// </summary>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo"></a></remarks>
-    public int Count { get; private set; }
+    public int Count {
+      get {
+        int count = 0;
+        Walk((node, next) => ++count != 0);
+        return count;
+      }
+    }
 
     /// <summary>
     /// Push a reference to or value of an item onto the FIFO stack. <see cref="Add"/>
