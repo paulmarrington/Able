@@ -83,12 +83,12 @@ namespace Askowl {
     /// <remarks><a href="http://customassets.marrington.net#selectorcycleindex">More...</a></remarks>
     /// </summary>
 
-    public int CycleIndex { get { return cycleIndex % choices.Length; } }
+    public int CycleIndex => cycleIndex % choices.Length;
 
     private List<T> remainingSelections;
 
     /// <inheritdoc />
     /// <remarks><a href="http://customassets.marrington.net#selector">More...</a></remarks>
-    public T Pick() { return (choices.Length > 0) ? picker() : default(T); }
+    public T Pick(params T[] _) => (choices.Length > 0) ? picker() : default(T);
   }
 }

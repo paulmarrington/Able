@@ -480,9 +480,9 @@ For clarity while debugging a node name includes the home and owner lists as wel
 
 When a node is created, the list used is set as the `Home` list. When an item is recycled, it is always returned to it's home recycle bin. Each time a node is moved between lists it's `Owner` is set accordingly.
 
-##### Is then Node in Range?
+##### Node Comparison
 
-When walking the list it is sometimes good to see if the node passes or fails the range check.
+When walking the list it is sometimes good to see if the node passes or fails a range check. Every node implements <, <=, >, >=, == and !=. The all rely on a single LinkedList function, `Compare` that can be set during initialisation.
 
 ##### Move the Node to Another List
 
@@ -517,13 +517,14 @@ var numberList = new LinkedList<int>();
 Assert.AreEqual(expected: 0, actual: numberList.New());
 ```
 
-##### Linked-List with Custom Create Item
+##### Linked-List with Custom Item Create and Reactivation
 
 It is all well and good to return `default(T)`, being zeros or null references, but then the user of your list will need to know to create an item if it is not provided. As an example, consider a list of open long-lived HTTP connections.
 
 ```c#
 var connections = LinkedList<Connection>{
-  CreateItem = () => new Connection(myURL);
+    CreateItem     = () => new Connection(myURL);
+    ReactivateItem = (node) => node.Item.CheckForStaleConnections();
 };
 // ...
 using (var node = connections.Fetch()) {
@@ -533,23 +534,19 @@ using (var node = connections.Fetch()) {
 
 Yes, I know. This example is ignoring the asynchronous nature of the request and the possibility that the connection has timed out. All in good time.
 
+When a node is sent to recycling it will call `Dispose()` on the item if it is an `IDisposable`. It the item needs reactivation when retrieved for reuse, set an activation parameter as demonstrated above.
+
 ##### Ordered Linked Lists
 
 Caching state machines and the like need a list of jobs to process in priority order. Priority could also be a time, a distance or any other measure that we can compare.
 
 ```c#
 var fences = new LinkedLisk<Geofence> {
-    InRange = (node, cursor) 
-        => node.Item.Distance < cursor.Item.Distance
+    CompareNodes = (left, right) 
+        => node.Item.Distance.CompareTo(cursor.Item.Distance)
 }
-// ...
-if (fence.Active) fence.MoveTo(fences);
-// ...
-fences.Walk((node, next) => {
-    if (currentDistance > node.Item.Distance) return false;
-    Alert(Node.Item);
-    return true;
-});
+// fences nodes now implement <, <=, >, >=, == and !=
+if (fence.Active) fence.MoveTo(fences);	// injects in sorted order
 ```
 
 #### Node Creation and Movement
@@ -603,23 +600,6 @@ var result = jobs.Top.Item;
             jobs.Top.MoveToEnd(jobs);	// will never get processed
         }
 ```
-
-
-
-##### Implicit Item Creation and Activation
-
-When there are no nodes in the recycling, `Fetch` needs to create a new one. Without intervention the node item will be `default(T)`, so 0 for numbers and `null` for classes. If your class needs more help when it is created or activated, pass the functions to the LinkedList constructor.
-
-```c#
-var list = new LinkedList<Connection>{
-    CreateItem = () => new Connection(myConnectionURL);
-    ActivateItem = (node) => {
-        if (node.Item.Disconnected) node.Item.Reconnect();
-    }
-}
-```
-
-See, I told you I would show a solution.
 
 ##### Disposal of a Node
 
@@ -697,27 +677,47 @@ Sing to the melody of *Jive Walking*. Seriously, node walking is the best way of
 
 ```c#
 var tasks = new LinkedList<Task> {
-    InRange = (node, next) => node.Item.Ready <= Time.realtimeSinceStartup 
+    CompareNodes = (left, right) => left.Item.Ready <= right.Item.Ready
 }
 // ...
-tasks.Add(new Task {Ready=Time.realtimeSinceStartup + 60});	// 1 minute
+tasks.Add(new Task {Ready=Time.RealtimeSinceStartup + 60});	// 1 minute
 // ...
 void Update() {
     tasks.Walk((node, next) => {
-        if (!node.InRange) return false; // no more to do just now
+        if (node >= Time.RealtimeSinceStartup) return false;
         using (node) { Process(node.Item); }
         return true;
     });
 }
 ```
 
-The `Walk` action is called for every item in the list from `Top` to `Bottom` or until the action returns false. In this example a task is left idle for one minute before being processed and disposed of. By wrapping it in a `using` 
+The `Walk` action is called for every item in the list from `Top` to `Bottom` or until the action returns false. In this example a task is left idle for one minute before being processed and disposed of. By wrapping it in a `using` statement `Dispose` will be called even if an exception was thrown.
+
+`LinkedList` also implements the `Pick` interface. `Pick` is similar to `Pop` except that it signals the end if an item is not in range. The `Update` above can be implemented differently.
+
+```c#
+void Update() {
+    
+}
+```
+
+
 
 #### Debug Mode
+
+Because linked lists can be used in a cached state machine, knowing where a task is going can be an important part of understanding functionality.
+
 ##### Name
+
+Refers to the name of the list as provided in the constructor. It defaults to the name of the item type followed by an ordinal number.
+
 ##### DebugMode
 
+When enabled, `DebugMode` will cause a log entry for every creation or movement of a node. Because this includes stack dumps you can find out who did what where.
 
+##### Dump
+
+`Dump` returns a string with the current contents of a linked list.
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 

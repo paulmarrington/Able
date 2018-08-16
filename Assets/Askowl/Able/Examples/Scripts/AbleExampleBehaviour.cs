@@ -110,7 +110,7 @@ namespace Askowl.Examples {
 
     private class PickImplementation : Pick<string> {
       private int    count;
-      public  string Pick() => (++count).ToString();
+      public  string Pick(params string[] _) => (++count).ToString();
     }
 
     internal void PickExample() {

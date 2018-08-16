@@ -30,7 +30,7 @@ namespace Askowl.Examples {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#add-an-item-to-the-current-list">Add an Item</a></remarks>
     [Test]
     public void AddOrdered() {
-      var linkedList = new LinkedList<int> {InRange = (node, cursor) => node.Item < cursor.Item};
+      var linkedList = new LinkedList<int> {CompareNodes = (node, cursor) => node.Item.CompareTo(cursor.Item)};
       Assert.IsTrue(!string.IsNullOrWhiteSpace(linkedList.Name));
       Assert.IsTrue(linkedList.Empty);
       linkedList.Add(1);
@@ -124,7 +124,7 @@ namespace Askowl.Examples {
     [Test]
     public void OrderedMoveTo() {
       var list1 = new LinkedList<int>();
-      var list2 = new LinkedList<int> {InRange = (node, cursor) => node.Item < cursor.Item};
+      var list2 = new LinkedList<int> {CompareNodes = (node, cursor) => node.Item.CompareTo(cursor.Item)};
 
       var node21 = list1.Add(21);
       var node18 = list1.Add(18);
@@ -167,7 +167,7 @@ namespace Askowl.Examples {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#Node Disposal">Dispose of a Node</a></remarks>
     [Test]
     public void Dispose() {
-      var linkedList = new LinkedList<int> {InRange = (node, cursor) => node.Item < cursor.Item};
+      var linkedList = new LinkedList<int> {CompareNodes = (node, cursor) => node.Item.CompareTo(cursor.Item)};
       var node2      = linkedList.Add(5);
 
       node2.Dispose();
@@ -263,7 +263,7 @@ namespace Askowl.Examples {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#node-walking">Walking a list</a></remarks>
     [Test]
     public void WalkTerminated() {
-      var list = new LinkedList<int> {InRange = (node, cursor) => node.Item < cursor.Item};
+      var list = new LinkedList<int> {CompareNodes = (node, cursor) => node.Item.CompareTo(cursor.Item)};
       list.Push(23);
       list.Push(14);
       list.Push(99);
@@ -271,16 +271,57 @@ namespace Askowl.Examples {
       int[] expected = {14, 23, 99};
 
       var last = list.Walk((node, next) => {
+        if (node.Item <= 50) return false;
+
         Assert.AreEqual(expected: expected[count], actual: node.Item);
         if (next != null) Assert.AreEqual(expected: expected[count + 1], actual: next.Item);
         count += 1;
-        return node.Item <= 50;
+        return true;
       });
 
       Assert.IsNotNull(last);
       Assert.AreEqual(expected: 99, actual: last.Item);
-      Assert.AreEqual(expected: 3,  actual: count);
+      Assert.AreEqual(expected: 2,  actual: count);
       Assert.AreEqual(expected: 3,  actual: list.Count);
+      Assert.AreEqual(expected: 99, actual: list.Bottom.Item);
+    }
+
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#node-walking">Walking a list</a></remarks>
+    [Test]
+    public void PickAll() {
+      var list = new LinkedList<int>();
+      list.Push(23);
+      list.Push(14);
+      list.Push(99);
+      int   count    = 0;
+      int[] expected = {99, 14, 23};
+
+      for (var number = list.Pick(); number != 0; number = list.Pick()) {
+        Assert.AreEqual(expected: expected[count], actual: number);
+        count += 1;
+      }
+
+      Assert.AreEqual(expected: 3, actual: count);
+      Assert.AreEqual(expected: 0, actual: list.Count);
+    }
+
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#node-walking">Walking a list</a></remarks>
+    [Test]
+    public void PickInRange() {
+      var list = new LinkedList<int> {CompareNodes = (node, cursor) => node.Item.CompareTo(cursor.Item)};
+      list.Push(23);
+      list.Push(14);
+      list.Push(99);
+      int   count    = 0;
+      int[] expected = {14, 23, 99};
+
+      for (var number = list.Pick(50); number != 0; number = list.Pick(50)) {
+        Assert.AreEqual(expected: expected[count], actual: number);
+        count += 1;
+      }
+
+      Assert.AreEqual(expected: 2,  actual: count);
+      Assert.AreEqual(expected: 1,  actual: list.Count);
       Assert.AreEqual(expected: 99, actual: list.Bottom.Item);
     }
 
@@ -305,6 +346,26 @@ namespace Askowl.Examples {
     public void ToStringExample() {
       var julias = new LinkedList<int> {Name = "Julias"};
       Assert.AreEqual(expected: "Julias", actual: julias.ToString());
+    }
+
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#dump">Return list contents as a string</a></remarks>
+    [Test]
+    public void Dump() {
+      var listA = new LinkedList<int> {Name = "A", CompareNodes = (node, cursor) => node.Item.CompareTo(cursor.Item)};
+      var listB = new LinkedList<int> {Name = "B", CompareNodes = (node, cursor) => node.Item.CompareTo(cursor.Item)};
+      listA.Push(23);
+      listA.Push(14);
+      var node99 = listA.Push(99);
+
+      var expect1 = new Regex("1:	A // A:: 14\n2:	A // A:: 23\n");
+      LogAssert.Expect(LogType.Log, expect1);
+
+      Debug.Log(listA.Dump(2));
+
+      node99.MoveTo(listB);
+      var expect2 = new Regex("1:	A // B:: 99\n");
+      LogAssert.Expect(LogType.Log, expect2);
+      Debug.Log(listB.Dump());
     }
   }
 }

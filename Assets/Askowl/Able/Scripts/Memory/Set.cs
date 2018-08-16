@@ -62,13 +62,13 @@ namespace Askowl {
     }
 
     /// <inheritdoc />
-    public T Pick() { return Selector.Pick(); }
+    public T Pick(params T[] references) => Selector.Pick();
 
     /// <summary>
     /// If something has changed the underlying data we need to tell the Selector
     /// that it is now out of date.
     /// </summary>
-    public void Reset() { selector = null; }
+    public void Reset() => selector = null;
 
     /// <summary>
     /// Detector used to pick an element from the set
