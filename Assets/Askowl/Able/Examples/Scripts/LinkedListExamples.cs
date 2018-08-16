@@ -286,45 +286,6 @@ namespace Askowl.Examples {
       Assert.AreEqual(expected: 99, actual: list.Bottom.Item);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#node-walking">Walking a list</a></remarks>
-    [Test]
-    public void PickAll() {
-      var list = new LinkedList<int>();
-      list.Push(23);
-      list.Push(14);
-      list.Push(99);
-      int   count    = 0;
-      int[] expected = {99, 14, 23};
-
-      for (var number = list.Pick(); number != 0; number = list.Pick()) {
-        Assert.AreEqual(expected: expected[count], actual: number);
-        count += 1;
-      }
-
-      Assert.AreEqual(expected: 3, actual: count);
-      Assert.AreEqual(expected: 0, actual: list.Count);
-    }
-
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#node-walking">Walking a list</a></remarks>
-    [Test]
-    public void PickInRange() {
-      var list = new LinkedList<int> {CompareNodes = (node, cursor) => node.Item.CompareTo(cursor.Item)};
-      list.Push(23);
-      list.Push(14);
-      list.Push(99);
-      int   count    = 0;
-      int[] expected = {14, 23, 99};
-
-      for (var number = list.Pick(50); number != 0; number = list.Pick(50)) {
-        Assert.AreEqual(expected: expected[count], actual: number);
-        count += 1;
-      }
-
-      Assert.AreEqual(expected: 2,  actual: count);
-      Assert.AreEqual(expected: 1,  actual: list.Count);
-      Assert.AreEqual(expected: 99, actual: list.Bottom.Item);
-    }
-
     /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist-debugmode">Debugging</a></remarks>
     [Test]
     public void DebugMode() {

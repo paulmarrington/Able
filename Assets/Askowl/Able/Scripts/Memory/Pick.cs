@@ -6,11 +6,11 @@ namespace Askowl {
   /// </summary>
   /// <typeparam name="T">Type of result returned by the picker.</typeparam>
   /// <remarks><a href="http://customassets.marrington.net#pickt">More...</a></remarks>
-  public interface Pick<T> {
+  public interface Pick<out T> {
     /// <summary>
     /// Method to call to return the selection
     /// </summary>
-    /// <remarks><a href="http://customassets.marrington.net#pickt">More...</a></remarks>
-    T Pick(params T[] references);
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#pickcs-interface-to-choose-from-options">Pick Interface</a></remarks>
+    T Pick();
   }
 }

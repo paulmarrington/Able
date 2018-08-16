@@ -9,13 +9,13 @@ using UnityEngine;
 namespace Askowl {
   /// <inheritdoc cref="Pick" />
   /// <summary>
-  /// Set of any serialised type as a custom asset.
+  /// Set of any serialised type to use in a component or custom asset
   /// </summary>
-  /// <remarks><a href="http://customassets.marrington.net#custom-asset-sets">More...</a></remarks>
+  /// <remarks><a href="http://unitydoc.marrington.net/Able#setcs-unity-component-implementing-a-selector">Sets</a></remarks>
   [Serializable]
   public class Set<T> : Pick<T> {
-    #region Configuration
-    [SerializeField] private List<T> elements;
+    #region Inspector Fields
+    [SerializeField] public List<T> Elements;
 
     [SerializeField, Tooltip("true for sequential, false for random")]
     internal bool Cycle;
@@ -26,24 +26,19 @@ namespace Askowl {
     #endregion
 
     #region Access
-    /// <summary>
-    /// Elements that make up the set
-    /// </summary>
-    public List<T> Elements { get { return elements; } set { elements = value; } }
-
     /// <summary>See if a set contains a specific element.</summary>
-    /// <remarks><a href="http://customassets.marrington.net#containsentry">More...</a></remarks>
     /// <param name="entry">Element that may or may not be in the set</param>
     /// <returns>True if the element supplied is in this set</returns>
-    public bool Contains(T entry) { return Elements.Contains(entry); }
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#containsentry">Contains(entry)</a></remarks>
+    public bool Contains(T entry) => Elements.Contains(entry);
 
     /// <summary>Return the number of entries in the Set</summary>
-    /// <remarks><a href="http://customassets.marrington.net#count">More...</a></remarks>
-    public int Count { get { return Elements.Count; } }
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#count">Count</a></remarks>
+    public int Count => Elements.Count;
 
     /// <summary>Call an action on every entry in the set. Order is from last to first so that items can be removed safely.</summary>
     /// <param name="action">Action called with one entry from the set</param>
-    /// <remarks><a href="http://customasset.marrington.net#forall">More...</a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#foreach">ForEach</a></remarks>
     public void ForEach(Func<T, bool> action) {
       // Loop backwards since the list may change when disabling
       for (int i = Elements.Count - 1; i >= 0; i--) {
@@ -57,37 +52,34 @@ namespace Askowl {
     /// If the contents have changed we will need to rebuild the selector. This is normally
     /// at the next Pick() call. It can be overridden by more complex Set types.
     /// </summary>
-    protected virtual void BuildSelector() {
-      selector = new Selector<T>(Elements.ToArray()) {IsRandom = !Cycle, ExhaustiveBelow = ExhaustiveBelow};
-    }
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#build-the-selector">Build the Selector</a></remarks>
+    protected virtual Selector<T> BuildSelector() =>
+      selector = new Selector<T> {Choices = Elements.ToArray(), IsRandom = !Cycle, ExhaustiveBelow = ExhaustiveBelow};
 
     /// <inheritdoc />
-    public T Pick(params T[] references) => Selector.Pick();
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#pick-from-selector">Pick an Item</a></remarks>
+    public T Pick() => Selector.Pick();
 
     /// <summary>
     /// If something has changed the underlying data we need to tell the Selector
     /// that it is now out of date.
     /// </summary>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#reset">Force a Selector Rebuild</a></remarks>
     public void Reset() => selector = null;
 
     /// <summary>
     /// Detector used to pick an element from the set
     /// </summary>
-    protected Selector<T> Selector {
-      get {
-        if (selector == null) BuildSelector();
-        return selector;
-      }
-    }
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#set-selector">Selector in Use</a></remarks>
+    protected Selector<T> Selector => selector ?? BuildSelector();
 
     private Selector<T> selector;
     #endregion
 
     #region Mutable
     /// <summary>Add an entry if one does not exist already - and trigger a change event.</summary>
-    /// <remarks><a href="http://customassets.marrington.net#addentry">More...</a></remarks>
     /// <param name="entry">Element to add if it isn't in the list</param>
-// ReSharper disable once UnusedMember.Global
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#saddentry">Add an Entry</a></remarks>
     protected void Add(T entry) {
       if (Elements.Contains(entry)) return;
 
@@ -96,9 +88,8 @@ namespace Askowl {
     }
 
     /// <summary>Remove an entry if it exists - and trigger a change event.</summary>
-    /// <remarks><a href="http://customassets.marrington.net#removeentry">More...</a></remarks>
     /// <param name="entry">Element to remove if it is in the list</param>
-// ReSharper disable once UnusedMember.Global
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#removeentry">Remove an Entry</a></remarks>
     protected void Remove(T entry) {
       if (!Elements.Contains(entry)) return;
 

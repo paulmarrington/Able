@@ -108,21 +108,6 @@ namespace Askowl.Examples {
       Debug.Log("CreateComponent passed");
     }
 
-    private class PickImplementation : Pick<string> {
-      private int    count;
-      public  string Pick(params string[] _) => (++count).ToString();
-    }
-
-    internal void PickExample() {
-      PickImplementation nose = new PickImplementation();
-
-      if ((nose.Pick() != "1") || (nose.Pick() != "2") || (nose.Pick() != "3")) {
-        Debug.LogErrorFormat("Pick<T> failed to perform as expected");
-      }
-
-      Debug.Log("PickExample passed");
-    }
-
     [SerializeField, RangeBounds(10, 20)] private Range range = new Range(min: 12, max: 18);
 
     internal void RangeExample() {
@@ -136,85 +121,6 @@ namespace Askowl.Examples {
       }
 
       Debug.Log("RangeExample passed");
-    }
-
-    internal void SelectorExample() {
-      int[] ints   = {0, 1, 2, 3, 4};
-      int[] counts = {0, 0, 0, 0, 0};
-
-      // default is random
-      Selector<int> selector = new Selector<int>(choices: ints);
-
-      for (int i = 0; i < 10; i++) {
-        int pick = selector.Pick();
-        counts[pick]++;
-      }
-
-      bool failed = true;
-
-      for (int i = 0; failed && (i < counts.Length); i++) {
-        if (counts[i] != 2) failed = false;
-      }
-
-      if (failed) {
-        Debug.LogErrorFormat("Random selector too even: {0}",
-                             string.Join(", ", Array.ConvertAll(counts, i => i.ToString())));
-
-        return;
-      }
-
-      // or we can be sequential
-      selector = new Selector<int>(choices: ints) {IsRandom = false};
-
-      for (int i = 0; i < 10; i++) {
-        int pick = selector.Pick();
-
-        if (pick != i % 5) {
-          Debug.LogErrorFormat("Sequential failed with {0} on interation {1}", pick, i);
-        }
-      }
-
-      // or we can be random, but exhaust all possibilities before going round again
-      selector = new Selector<int>(choices: ints) {ExhaustiveBelow = 100};
-
-      counts = new[] {0, 0, 0, 0, 0};
-
-      for (int i = 0; i < 10; i++) {
-        int pick = selector.Pick();
-        counts[pick]++;
-      }
-
-      for (int i = 0; i < counts.Length; i++) {
-        if (counts[i] != 2) {
-          Debug.LogErrorFormat("Exhaustive Random failure: {0}",
-                               string.Join(", ", Array.ConvertAll(counts, j => j.ToString())));
-
-          return;
-        }
-      }
-
-      // Unless our number of choices are below a watermark value
-      selector = new Selector<int>(choices: ints) {ExhaustiveBelow = 4};
-
-      for (int i = 0; i < 10; i++) {
-        int pick = selector.Pick();
-        counts[pick]++;
-      }
-
-      failed = true;
-
-      for (int i = 0; failed && (i < counts.Length); i++) {
-        if (counts[i] != 2) failed = false;
-      }
-
-      if (failed) {
-        Debug.LogErrorFormat("Exhaustive Random selector below minimum too even: {0}",
-                             string.Join(", ", Array.ConvertAll(counts, i => i.ToString())));
-
-        return;
-      }
-
-      Debug.Log("SelectorExample passed");
     }
 
     internal void Error(Json json, string fmt, params object[] args) {

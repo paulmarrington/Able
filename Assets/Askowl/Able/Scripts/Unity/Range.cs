@@ -51,7 +51,7 @@ namespace Askowl {
     /// </summary>
     /// <returns>A pseudo-random number</returns>
     /// <remarks><a href="http://customassets.marrington.net#range">More...</a></remarks>
-    public float Pick(params float[] _) => Random.Range(min, max);
+    public float Pick() => Random.Range(min, max);
   }
 
   /// <summary>

@@ -1,19 +1,17 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
 using System;
-using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 
 namespace Askowl {
-  /// <inheritdoc cref="Pick" />
   /// <summary>
   /// A resource light linked list designed to recycle items rather than leave
   /// them to the garbage collector.
   /// </summary>
   /// <typeparam name="T">Type of item to be stored in each node</typeparam>
   /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist-a-different-perspective">LinkedList - a different perspective</a></remarks>
-  public class LinkedList<T> : Pick<T>, IComparer<LinkedList<T>.Node> {
+  public class LinkedList<T> {
     /// <summary>
     /// Each node in the linked list. Can be treated as a black box (mostly).
     /// </summary>
@@ -119,8 +117,6 @@ namespace Askowl {
       }
     }
 
-    int IComparer<Node>.Compare(Node left, Node right) => compare(left, right);
-
     private Func<Node, Node, int> compare = (left, right) => 0;
 
     /// <summary>
@@ -152,9 +148,6 @@ namespace Askowl {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#add-an-item-to-the-current-list">Add an Item to a List</a></remarks>
     public Node Add(T newItem) =>
       RecycleBin.Empty ? Insert(NewNode(newItem)) : RecycleBin.MoveTo(this).Update(newItem);
-
-    private Node InRecycled(T newItem) =>
-      RecycleBin.Empty ? NewNode(newItem).MoveToEndOf(RecycleBin) : RecycleBin.Top.Update(newItem);
 
     /// <summary>
     /// Fetch a node from the recycle bin. If the bin is empty, use the creator
@@ -344,22 +337,6 @@ namespace Askowl {
 
       return null;
     }
-
-    /// <inheritdoc/>
-    /// <summary>
-    /// Pick a node off the top of the stack if it is in range.
-    /// </summary>
-    /// <param name="references">First entry to compare against.</param>
-    /// <returns>Node or none if no more in range</returns>
-    public T Pick(params T[] references) {
-      if (Empty) return default(T);
-
-      if (references.Length == 0) return Pop().Item;
-
-      if (Top < InRecycled(references[0])) return Pop().Item;
-
-      return default(T);
-    }
     #endregion
 
     #region Debugging
@@ -372,11 +349,9 @@ namespace Askowl {
     public static bool DebugMode { private get; set; } = false;
 
     private void DebugMessage(Node node, string append = "") {
-      if (node.Owner == this) {
-        Debug.Log($"**** LinkedList: Add to {this}");
-      } else {
-        Debug.Log($"**** LinkedList: move {node.Owner} to {append}{this}");
-      }
+      Debug.Log(node.Owner == this
+                  ? $"**** LinkedList: Add to {this}"
+                  : $"**** LinkedList: move {node.Owner} to {append}{this}");
     }
 
     /// <summary>

@@ -15,9 +15,9 @@
 - [x] doc and test Trig
 - [x] doc and test Disposable
 - [x] doc and test Emitter
-- [ ] doc and test LinkedList
-- [ ] Doc and test Pick
-- [ ] Doc and test Selector
+- [x] doc and test LinkedList
+- [x] Doc and test Pick
+- [x] Doc and test Selector
 - [ ] doc and test Set
 - [ ] doc and test Csv
 - [ ] doc and test PlayModeController

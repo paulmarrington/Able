@@ -685,23 +685,13 @@ tasks.Add(new Task {Ready=Time.RealtimeSinceStartup + 60});	// 1 minute
 void Update() {
     tasks.Walk((node, next) => {
         if (node >= Time.RealtimeSinceStartup) return false;
-        using (node) { Process(node.Item); }
+        using (node) { Process(node.Item); } // node is discarded afterwards
         return true;
     });
 }
 ```
 
 The `Walk` action is called for every item in the list from `Top` to `Bottom` or until the action returns false. In this example a task is left idle for one minute before being processed and disposed of. By wrapping it in a `using` statement `Dispose` will be called even if an exception was thrown.
-
-`LinkedList` also implements the `Pick` interface. `Pick` is similar to `Pop` except that it signals the end if an item is not in range. The `Update` above can be implemented differently.
-
-```c#
-void Update() {
-    
-}
-```
-
-
 
 #### Debug Mode
 
@@ -719,14 +709,120 @@ When enabled, `DebugMode` will cause a log entry for every creation or movement 
 
 `Dump` returns a string with the current contents of a linked list.
 
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-
 ### Pick.cs - Interface to choose from options
+
+Interface to pick an item, probably from a list, probably random. It all depends on how you implement `Pick()`.
+
+```c#
+class PickImplementation : Pick<string> {
+  private int    count;
+  public  string Pick() => (++count).ToString();
+}
+// ...
+PickImplementation nose = new PickImplementation();
+Assert.AreEqual("1", nose.Pick());
+Assert.AreEqual("2", nose.Pick());
+Assert.AreEqual("3", nose.Pick());
+```
 
 ### Selector.cs - maintain and pick from a list
 
+1. Select a random image or sounds or actions from a list.
+2. Choose the next item from an ordered list of training steps.
+
+```C#
+Selector<int> selector = new Selector<int> {
+    Choices = new int[] { 0, 1, 2, 3, 4 };
+}
+
+for (int idx = 0; idx < 100; idx++) {
+  int at = selector.Pick();
+  Use(at);
+}
+```
+#### Selector Initialiser
+The magic is in having different pickers for different requirements. The constructor allows for three types. Add more by overriding `Pick()`.
+
+```C#
+new Selector<T> {
+    Choices             = listOfT,	// default is null
+    IsRandom            = true,   	// default is true
+    int exhaustiveBelow = 30		// default is 0
+}
+```
+
+* ***Sequential***: `isRandom` is false or;
+* ***Random***: `exhaustiveBelow` is less than the number of choices.
+* ***Exhaustive Random***: `exhaustiveBelow` is greater than the number of choices.
+
+To return in a random order, set ***Exhaustive Random***. Nothing repeats until the the list is exhausted. Each cycle is in random order.
+
+#### Exhaustive Random Selections
+
+If there are a small number of choices, the player will recognise the repeats and they won't appear random. They will particularly notice if the same item repeats immediately. The solution is to use exhaustive random selection. No item will be returned twice until all items have been returned once.
+
+Exhaustive Random is not necessary in large sets of values. Set a watermark by giving `exhaustiveBelow` a value. If the number of choices available is below this value, exhaustive random selection occurs. If it is above, true (or actually pseudo) random selection occurs.
+
+#### Selector Choices
+
+If the list of items to choose from changes, update the selector with `Choices`. The same picker is reset and used.
+
+```C#
+Selector<int> selector = new Selector<int> {Choices = { 0, 1, 2, 3, 4 }}
+selector.Choices = new int[] { 5, 6, 7, 8 };
+```
+
+#### Selector CycleIndex
+`CycleIndex` return the index in the `Choices` array of the last item returned. If we were using `Selector` to return the next training item, then we may well need the index to report progress or to go back and repeat a section.
+
 ### Set.cs - Unity component implementing selector
+
+`Set`, like `OfType` is a generic class. To instantiate it requires the set entries.
+
+```C#
+[CreateAssetMenu(menuName = "Examples/SetPicker", fileName = "SetPickerSample")]
+public sealed class SetPickerSample : Set<AudioClip> {
+  public void Play() { AudioSource.PlayClipAtPoint(clip: Pick(), position: Vector3.zero); }
+}
+```
+This example can play  a sound from the list. This is a great way to make a game sound less tedious.
+
+#### Pick from Selector
+
+All classes inheriting from `Set` have a `Pick()` method with two controlling field entries:
+* ***cycle***: True to return entries in order, false to get a random selection.
+* ***exhaustiveBelow***: If the number of entries in the set is below this value, then while `Pick()` returns a random entrywith no repeats. From a list of three, nothing appears random.
+
+These options are available in the editor when you create a custom asset from a `Set`.
+
+#### Change Contents
+
+##### Add(entry)
+
+While in most cases we use the Inspector to fill the `Set`, sometimes we need dynamic changes.
+##### Remove(entry)
+
+On occasions, a `Set` entry will expire, and it will be necessary to remove them.
+##### Contains(entry)
+
+See if a `Set` contains a specific entry.
+
+##### Count
+
+Retrieve the number of entries in a set.
+
+##### Current Set Selector
+
+#### ForEach
+Call an action for every entry in a set. If the action returns false, all is complete.
+```C#
+mySet.ForEach((s) => {return s!="Exit";});
+```
+#### The List Selector
+
+##### Build the Selector
+
+##### Reset
 
 ## Text Manipulation
 
@@ -770,45 +866,6 @@ Calling this creates a component of type T inside the provided game object.  The
 #### Components.Create&lt;T>(name)
 The overload that does not supply a gameObject creates a new one and name the same as the component. The new gameObject attaches to the root of the current hierarchy.
 
-### Selector
-
-It is useful to select one item from a list as needed from a random list of images and sounds to an ordered list of training steps.
-
-```C#
-Selector<int> selector = new Selector<int> (new int[] { 0, 1, 2, 3, 4 });
-
-for (int idx = 0; idx < 100; idx++) {
-  int at = selector.Pick();
-  Use(at);
-}
-```
-#### Selector Initialiser
-The magic is in having different pickers for different requirements. The constructor allows for three types. Add more by overriding `Pick()`.
-
-```C#
-Selector(T[] choices = null, bool isRandom = true, int exhaustiveBelow = 0);
-```
-
-* ***Sequential***: `isRandom` is false or;
-* ***Random***: `exhaustiveBelow` is less than the number of choices.
-* ***Exhaustive Random***: `exhaustiveBelow` is greater than the number of choices.
-
-To return in a random order, set ***Exhaustive Random***. Nothing repeats until the end.
-#### Selector Choices
-If the list of items to choose from changes, update the selector with `Choices`. The same picker is reset and used.
-
-```C#
-Selector<int> selector = new Selector<int> (new int[] { 0, 1, 2, 3, 4 });
-selector.Choices = new int[] { 5, 6, 7, 8 };
-```
-
-#### Selector CycleIndex
-`CycleIndex` return the index in the `Choices` array of the last item returned. If we were using `Selector` to return the next training item, then we may well need the index to report progress.
-
-### Pick&lt;T>
-`Random` is the default picker. In small lists is may appear to be favouring one or another asset.
-
-There is are NUnit Editor tests in ***Examples/Scripts*** that show all the pickers.
 
 ### Preview Custom Editor
 
