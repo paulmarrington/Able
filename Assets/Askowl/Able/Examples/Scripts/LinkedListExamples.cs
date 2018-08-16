@@ -271,7 +271,7 @@ namespace Askowl.Examples {
       int[] expected = {14, 23, 99};
 
       var last = list.Walk((node, next) => {
-        if (node.Item <= 50) return false;
+        if (node.Item > 50) return false;
 
         Assert.AreEqual(expected: expected[count], actual: node.Item);
         if (next != null) Assert.AreEqual(expected: expected[count + 1], actual: next.Item);
@@ -331,7 +331,7 @@ namespace Askowl.Examples {
       LinkedList<int>.DebugMode = true;
       LogAssert.Expect(LogType.Log, new Regex(".... LinkedList: Add to Tommy"));
       LogAssert.Expect(LogType.Log, new Regex(".... LinkedList: move Tommy to Freddy"));
-      LogAssert.Expect(LogType.Log, new Regex(".... LinkedList: move Freddy to Tommy Recycling Bin"));
+      LogAssert.Expect(LogType.Log, new Regex(".... LinkedList: move Freddy to end of Tommy Recycling Bin"));
 
       var tommy  = new LinkedList<int> {Name = "Tommy"};
       var freddy = new LinkedList<int> {Name = "Freddy"};
@@ -339,6 +339,7 @@ namespace Askowl.Examples {
       var node = tommy.Add(1972);
       node.MoveTo(freddy);
       node.Dispose();
+      LinkedList<int>.DebugMode = false;
     }
 
     /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist-tostring">Debugging</a></remarks>

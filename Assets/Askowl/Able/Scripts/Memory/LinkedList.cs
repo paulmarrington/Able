@@ -51,27 +51,6 @@ namespace Askowl {
       /// <remarks><a href="http://unitydoc.marrington.net/Able#node-comparison">NodeComparison Operator</a></remarks>
       public static bool operator >=(Node left, Node right) => left.Owner.compare(left, right) >= 0;
 
-      /// <remarks><a href="http://unitydoc.marrington.net/Able#node-comparison">NodeComparison Operator</a></remarks>
-      public static bool operator ==(Node left, Node right) => left?.Owner.compare(left, right) == 0;
-
-      /// <remarks><a href="http://unitydoc.marrington.net/Able#node-comparison">NodeComparison Operator</a></remarks>
-      public static bool operator !=(Node left, Node right) => left?.Owner.compare(left, right) != 0;
-
-      /// <remarks><a href="http://unitydoc.marrington.net/Able#node-comparison">NodeComparison Operator</a></remarks>
-      protected bool Equals(Node other) => Owner.compare(this, other) == 0;
-
-      /// <remarks><a href="http://unitydoc.marrington.net/Able#node-comparison">NodeComparison Operator</a></remarks>
-      public override bool Equals(object obj) {
-        if (ReferenceEquals(null, obj)) return false;
-        if (ReferenceEquals(this, obj)) return true;
-
-        return (obj.GetType() == GetType()) && Equals((Node) obj);
-      }
-
-      /// <remarks><a href="http://unitydoc.marrington.net/Able#node-comparison">NodeComparison Operator</a></remarks>
-      // ReSharper disable once NonReadonlyMemberInGetHashCode
-      public override int GetHashCode() => EqualityComparer<T>.Default.GetHashCode(Item);
-
       /// <summary>
       /// Move this node to a new list
       /// </summary>
@@ -171,14 +150,11 @@ namespace Askowl {
     /// <param name="newItem"></param>
     /// <returns>node for chained calls</returns>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#add-an-item-to-the-current-list">Add an Item to a List</a></remarks>
-    public Node Add(T newItem) {
-      Debug.Log($"**** LinkedList:175 RecycleBin.Empty={RecycleBin.Empty}"); //#DM#//
-      return RecycleBin.Empty ? Insert(NewNode(newItem)) : RecycleBin.MoveTo(this).Update(newItem);
-    }
-//      RecycleBin.Empty ? Insert(NewNode(newItem)) : RecycleBin.MoveTo(this).Update(newItem);
+    public Node Add(T newItem) =>
+      RecycleBin.Empty ? Insert(NewNode(newItem)) : RecycleBin.MoveTo(this).Update(newItem);
 
     private Node InRecycled(T newItem) =>
-      RecycleBin.Empty ? NewNode(newItem).MoveToEndOf(recycleBin) : RecycleBin.Top.Update(newItem);
+      RecycleBin.Empty ? NewNode(newItem).MoveToEndOf(RecycleBin) : RecycleBin.Top.Update(newItem);
 
     /// <summary>
     /// Fetch a node from the recycle bin. If the bin is empty, use the creator
@@ -211,7 +187,7 @@ namespace Askowl {
     /// <param name="to">List to move to</param>
     /// <returns>node for chained calls</returns>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#move-the-first-node-to-another-list">Move Node Between Lists</a></remarks>
-    public Node MoveToEndOf(LinkedList<T> to) => Top.MoveToEndOf(to); //#TBD#
+    public Node MoveToEndOf(LinkedList<T> to) => Top.MoveToEndOf(to);
 
     /// <summary>
     /// Call Item.Dispose if the item is IDisposable, then move it to the recycle bin.
@@ -225,12 +201,6 @@ namespace Askowl {
       return node;
     }
 
-    /// <summary>
-    /// Every linked list has a recycle bin.
-    /// </summary>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#node-creation-and-movement">List for Unused Nodes</a></remarks>
-    public LinkedList<T> RecycleBin => recycleBin ?? (recycleBin = new LinkedList<T> {Name = $"{Name} Recycling Bin"});
-
     private Node Insert(Node nodeToInsert) {
       if (DebugMode) DebugMessage(nodeToInsert);
 
@@ -241,7 +211,7 @@ namespace Askowl {
       Node after = Top;
 
       if (ordered) {
-        after = Walk((node, _) => nodeToInsert < node);
+        after = Walk((node, _) => nodeToInsert >= node);
 
         if (after == null) {
           nodeToInsert.Previous = Bottom;
@@ -286,6 +256,14 @@ namespace Askowl {
       node.Owner    = null;
     }
 
+    /// <summary>
+    /// Every linked list has a recycle bin.
+    /// </summary>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#node-creation-and-movement">List for Unused Nodes</a></remarks>
+    public LinkedList<T> RecycleBin => recycleBin ?? (recycleBin = isRecycleBin ? null : newRecycleBin);
+
+    private LinkedList<T> newRecycleBin => new LinkedList<T> {isRecycleBin = true, Name = $"{Name} Recycling Bin"};
+    private bool          isRecycleBin;
     private LinkedList<T> recycleBin;
     #endregion
 
@@ -294,13 +272,13 @@ namespace Askowl {
     /// The node that is in the front of the linked list or null if list is empty
     /// </summary>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo">First Node in List</a></remarks>
-    public Node Top { get; private set; }
+    public Node Top;
 
     /// <summary>
     /// The node that is in the front of the linked list or null if list is empty
     /// </summary>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo">Last Node in List</a></remarks>
-    public Node Bottom { get; private set; }
+    public Node Bottom;
 
     /// <summary>
     /// The node that is second from the front of the linked list or null if list has less than two entries
@@ -373,8 +351,15 @@ namespace Askowl {
     /// </summary>
     /// <param name="references">First entry to compare against.</param>
     /// <returns>Node or none if no more in range</returns>
-    public T Pick(params T[] references) =>
-      ((references.Length > 0) && (compare(Top, InRecycled(references[0])) < 0)) ? Pop().Item : default(T);
+    public T Pick(params T[] references) {
+      if (Empty) return default(T);
+
+      if (references.Length == 0) return Pop().Item;
+
+      if (Top < InRecycled(references[0])) return Pop().Item;
+
+      return default(T);
+    }
     #endregion
 
     #region Debugging
