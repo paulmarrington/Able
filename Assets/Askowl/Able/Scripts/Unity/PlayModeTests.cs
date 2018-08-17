@@ -41,7 +41,7 @@ namespace Askowl.Examples {
       T component = Components.Find<T>(path);
 
       Assert.AreNotEqual(expected: default(T), actual: component,
-                         message: "For button " + Csv<string>.Instance(path));
+                         message: "For button " + Csv.ToString(path));
 
       return component;
     }

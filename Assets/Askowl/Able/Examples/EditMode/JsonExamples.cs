@@ -1,153 +1,143 @@
-﻿#if UNITY_EDITOR && Able
+﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
+
 using System;
-using System.Linq;
-using UnityEngine;
-using UnityEngine.UI;
+using NUnit.Framework;
 
 namespace Askowl.Examples {
-  /// <inheritdoc />
-  public class AbleExampleBehaviour : MonoBehaviour {
-    internal void FindDisabledObject() {
-      MeshFilter[] cubes = Objects.Find<MeshFilter>("Disabled Cube");
+  /// <remarks><a href="http://unitydoc.marrington.net/Able#jsoncs-parse-any-json-to-dictionary">Json Parser</a></remarks>
+  public class JsonExamples {
+    private Json json = new Json();
 
-      if (cubes.Length != 1) {
-        Debug.LogErrorFormat("Found {0} matching game objects.", cubes.Length);
-        return;
-      }
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#jsoncs-parse-any-json-to-dictionary">Json Parser</a></remarks>
+    [Test]
+    public void Parse() {
+      bool error = json.Parse(@"{""Not my age"":23}").Error;
+      Assert.IsFalse(error);
 
-      if (cubes.Length == 0) return;
+      // root braces are optional ...
+      error = json.Parse(@"""Not my age"":23").Error;
+      Assert.IsFalse(error);
 
-      cubes[0].gameObject.SetActive(!cubes[0].gameObject.activeInHierarchy);
-      Debug.LogFormat("Cube is now {0}abled", cubes[0].gameObject.activeInHierarchy ? "En" : "Dis");
-      Debug.Log("FindDisabledObject passed");
+      // .. but invalid JSON isn't
+      error = json.Parse(@"{""Not my age"":23").Error;
+      Assert.IsTrue(error);
     }
 
-    internal void FindGameObjectsAndReturnPath() {
-      GameObject[] texts = Objects.FindGameObjects("Text 2");
+    public void Here() { }
 
-      if (texts.Length != 1) {
-        Debug.LogErrorFormat("Found {0} matching text game objects.", texts.Length);
-        return;
-      }
+    [Test]
+    public void IsA() {
+      bool stringAtRoot = json.Parse(jsonSampler).IsA<string>();
 
-      string path = Objects.Path(texts[0]);
+      Assert.IsTrue(stringAtRoot);
 
-      if (path != "Canvas/FindGameObjectsAndPath/Text 2") {
-        Debug.LogErrorFormat("Is at path '{0}'.", path);
-        return;
-      }
+      // You can use `IsA` on a retrieved node
+      json.Walk("items.item.0.magic");
+      bool isInt = json.IsA<int>(json[2]);
 
-      Debug.Log("FindGameObjectsAndReturnPath passed");
+      Assert.IsTrue(isInt);
     }
 
-    internal void FindComponentGlobal() {
-      Text text = Components.Find<Text>("Canvas", "Text 2");
+    [Test]
+    public void IsNode() {
+      json.Parse(@"{""A"":194, ""B"": {3 : 4}");
 
-      if (text == null) {
-        Debug.LogErrorFormat("Component 'Text 2' not found");
-        return;
-      }
+      var isNode = json.Walk("A").IsNode;
 
-      GameObject textObject = Objects.FindGameObject("Text 2");
+      Assert.IsFalse(isNode);
 
-      if (textObject == null) {
-        Debug.LogErrorFormat("Objects.FindGameObject 'Text 2' not found");
-        return;
-      }
+      isNode = json.Walk("B").IsNode;
 
-      if (text.gameObject != textObject) {
-        Debug.LogErrorFormat(
-          @"Components and Objects finds did not return the same object\n{0}\n{1}",
-          Objects.Path(text.gameObject), Objects.Path(textObject));
-
-        return;
-      }
-
-      Debug.Log("findComponentGlobal passed");
+      Assert.IsTrue(isNode);
     }
 
-    internal void FindComponentLocal() {
-      GameObject textObject = Objects.FindGameObject("Canvas");
-      Text       text2      = Components.Find<Text>(textObject, "Text 2");
+    [Test]
+    public void IsArray() {
+      json.Parse(@"{""A"":[194,286,3], ""B"": {3 : 4}");
 
-      if (text2 == null) {
-        Debug.LogErrorFormat("Failed to find the game object text component with a local search");
-        return;
-      }
+      var isArray = json.Walk("A").IsArray;
 
-      Text textGlobal = Components.Find<Text>("Canvas", "Text 2");
+      Assert.IsTrue(isArray);
 
-      if (text2 != textGlobal) {
-        Debug.LogErrorFormat("Found incorrect game object with a local search");
-        return;
-      }
+      isArray = json.Walk("B").IsArray;
 
-      Debug.Log("findComponentGlobal passed");
+      Assert.IsFalse(isArray);
     }
 
-    internal void CreateComponent() {
-      if (Objects.Find<Text>("Created GameObject").Length != 0) {
-        Debug.LogErrorFormat("Can't create what is already there");
-        return;
-      }
+    [Test]
+    public void NodeType() {
+      json.Parse(@"{""A"":[194,286,3], ""B"": {3 : 4}");
 
-      Text newText = Components.Create<Text>("Created GameObject");
+      Type nodeType = json.Walk("A", 1).NodeType;
 
-      Text[] created = Objects.Find<Text>("Created GameObject");
-
-      if (created.Length != 1) {
-        Debug.LogErrorFormat("Components.Create failed");
-        return;
-      }
-
-      if (created[0] != newText) {
-        Debug.LogErrorFormat("Components.Create returns an incorrect component");
-        return;
-      }
-
-      Debug.Log("CreateComponent passed");
+      Assert.AreEqual(typeof(long), nodeType);
     }
 
-    [SerializeField, RangeBounds(10, 20)] private Range range = new Range(min: 12, max: 18);
+    [Test]
+    public void ErrorMessage() {
+      var errorMessage = json.Parse(@"{""Not my age"":23}").ErrorMessage;
 
-    internal void RangeExample() {
-      for (int i = 0; i < 10; i++) {
-        int value = (int) range.Pick();
+      Assert.IsNull(errorMessage);
 
-        if ((value < 12) || (value > 18)) {
-          Debug.LogError($"{value} is not in range");
-          return;
-        }
-      }
+      errorMessage = json.Parse("").ErrorMessage;
 
-      Debug.Log("RangeExample passed");
+      Assert.IsFalse(string.IsNullOrEmpty(errorMessage));
     }
 
-    internal void Error(Json json, string fmt, params object[] args) {
-      Debug.LogErrorFormat("{0} - {1}", string.Format(fmt, args), json.ErrorMessage);
+    [Test]
+    public void Error() {
+      bool error = json.Parse("").Error;
+
+      Assert.IsTrue(json.Error);
     }
 
-    internal void JsonExample() {
-      Debug.LogFormat("Using JSON: {0}", jsonSampler);
-
-      // We cah pass in json for parsing...
-      Json json = new Json(jsonSampler);
-      // ... or use Reset later to change the string.
+    [Test]
+    public void Get() { //#TBD#
       json.Parse(jsonSampler);
-
-      // You can also check the type of here
-      if (json.IsA<string>()) Error(json, "IsA failed to work for root");
-
       // If you know the structure of your JSON you can retrieve a leaf directly
       string id = json.Get<string>("items", "item", 0, "id");
-      if (id != "0001") Error(json, "Expecting an ID of '0001', not {0}", id);
+      Assert.AreEqual("0001", id);
+      Assert.IsFalse(json.Error);
 
-      // If you provide the wrong type the default<T> is returned - 0 for an int
+      // If you provide the wrong type then default<T> is returned - 0 for an int
       int iid = json.Get<int>("items", "item", "0", "id");
-      if (iid != 0) Error(json, "Expecting a failure in kind, not {0}", iid);
-      // If this is a problem, use IsA<>
-      if (json.IsA<int>()) Error(json, "Expecting a failure in kind, not {0}", iid);
+      Assert.AreEqual(0, iid);
+      Assert.IsTrue(json.Error);
 
+      // If this is a problem, use IsA<>
+      Assert.IsFalse(json.IsA<int>());
+    }
+
+    [Test]
+    public void Walk() { //#TBD#
+      json.Parse(jsonSampler);
+      // You can separate walking the tree and retrievaly using Walk, WalkOn, IsA and Here
+      Assert.IsTrue(json.Walk("items.item.0.type"));
+
+      Assert.IsTrue(json.IsA<string>());
+
+      string donut = json.Here<string>();
+      Assert.AreEqual("donut", donut);
+
+      // //#TBD# Walk<T>
+    }
+
+    [Test]
+    public void WalkOn() { } //#TBD#
+
+    [Test]
+    public void AnchorAndDispose() { } //#TBD#
+
+    [Test]
+    public void Fetch() { } //#TBD#
+
+    [Test]
+    public void ArrayAccess() { } //#TBD#
+
+    [Test]
+    public void Enumerable() { } //#TBD#
+
+    internal void JsonExample() {
       // You can separate walking the tree and retrievaly using Walk, WalkOn, IsA and Here
       if (!json.Walk("items.item.0.type")) Error(json, "Can't find the donut");
       if (!json.IsA<string>()) Error(json,             "Expecting Donut to be a string");
@@ -188,14 +178,6 @@ namespace Askowl.Examples {
         Error(json, "Whole number mismatch {0} == {1} == {2} == {3}", lqty, iqty, fqty, dqty);
       }
 
-      // Sometimes we need to look around to see the lay of the land
-      json.Walk("items");
-      if (!json.IsNode) Error(json, "Expecting a Node");
-      json.WalkOn("item");
-      if (!json.IsArray) Error(json, "Expecting an Array");
-      json.WalkOn("0.qty");
-      if (json.NodeType != typeof(long)) Error(json, "Expecting a whole number");
-
       // When a node is a leaf of type Node we may want fetch an individual child using [] or generic Fetch
       json.Walk("items.item.0");
 
@@ -215,10 +197,6 @@ namespace Askowl.Examples {
       } else if (((long) json[2]) != 333) Error(json, "Expecting 333, not '{0}'", json[2]);
 
       if (json.Fetch<int>(3) != 4444) Error(json, "expecting 4444, not '{0}'", json[3]);
-
-      // You can use `IsA` or a retrieved node
-      json.Walk("items.item.0.magic");
-      if (!json.IsA<int>(json[2])) Error(json, "Testing IsA(object)");
 
       // json is also an iterator for processing children of tree nodes
       json.Walk("items.item.0");
@@ -273,7 +251,7 @@ namespace Askowl.Examples {
       Debug.Log("JsonExample passed");
     }
 
-    [SerializeField, Multiline] private string jsonSampler = @"{
+    private string jsonSampler = @"{
   ""items"":
     {
       ""item"":
@@ -313,4 +291,3 @@ namespace Askowl.Examples {
 ";
   }
 }
-#endif

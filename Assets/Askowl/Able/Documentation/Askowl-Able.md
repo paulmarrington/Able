@@ -775,6 +775,43 @@ selector.Choices = new int[] { 5, 6, 7, 8 };
 #### Selector CycleIndex
 `CycleIndex` return the index in the `Choices` array of the last item returned. If we were using `Selector` to return the next training item, then we may well need the index to report progress or to go back and repeat a section.
 
+
+## Text Manipulation
+
+### Csv.cs - serialization of comma-separated lists
+
+##### Static Line Serialisation
+
+`ToString(params <T> list)` takes a list of parameters or a single array and uses `ToString` on each then joins them with commas.
+
+```c#
+      expected = "1,3,5,7,9";
+      actual   = Csv.ToString(new[] {1, 3, 5, 7, 9});
+      Assert.AreEqual(expected, actual);
+
+      expected = "One,Two,Three,Four,Five";
+      actual   = Csv.ToString("One", "Two", "Three", "Four", "Five");
+      Assert.AreEqual(expected, actual);
+```
+
+### Json.cs - parse any JSON to dictionary
+
+## Unity Support
+
+### Components.cs - find or create components
+
+### ConditionalHideAttribute.cs
+
+### Log.cs - pluggable logging function
+
+### Object.cs - find game objects
+
+### PlayModeController.cs - control app for live testing
+
+### PlayModeTests.cs - adding asserts to controller
+
+### Range.cs - inspector tool to set high and low bounds
+
 ### Set.cs - Unity component implementing selector
 
 `Set`, like `OfType` is a generic class. To instantiate it requires the set entries.
@@ -824,29 +861,17 @@ mySet.ForEach((s) => {return s!="Exit";});
 
 ##### Reset
 
-## Text Manipulation
-
-### Csv.cs - serialization of comma-separated lists
-
-### Json.cs - parse any JSON to dictionary
-
-## Unity Support
-
-### Components.cs - find or create components
-
-### ConditionalHideAttribute.cs
-
-### Log.cs - pluggable logging function
-
-### Object.cs - find game objects
-
-### PlayModeController.cs - control app for live testing
-
-### PlayModeTests.cs - adding asserts to controller
-
-### Range.cs - inspector tool to set high and low bounds
-
 ### ValueAttribute.cs - change name of inspector field
+
+
+
+
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+
+
 
 ### Components
 

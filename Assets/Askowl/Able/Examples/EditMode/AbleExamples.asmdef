@@ -1,7 +1,8 @@
 {
-    "name": "AbleTests",
+    "name": "AbleExamples",
     "references": [
-        "Able"
+        "Able",
+        "AbleEditor"
     ],
     "optionalUnityReferences": [
         "TestAssemblies"

@@ -1,16 +1,16 @@
 ﻿using System;
 
 namespace Askowl {
-  public class Csv<T> {
-    private T[] array;
-
-    public static Csv<T> Instance(T[] seed) { return new Csv<T>().Seed(seed); }
-
-    public Csv<T> Seed(T[] seedCsv) {
-      array = seedCsv;
-      return this;
-    }
-
-    public override string ToString() { return string.Join(",", Array.ConvertAll(array, x => x.ToString())); }
+  /// <summary>
+  /// Data serialisation to CSV (comma separated variable).
+  /// </summary>
+  public static class Csv {
+    /// <summary>
+    /// Convert a list directly to a CsV line
+    /// </summary>
+    /// <param name="list">List to serialise</param>
+    /// <returns>CSV representation</returns>
+    public static string ToString<T>(params T[] list) =>
+      string.Join(separator: ",", value: Array.ConvertAll(array: list, converter: x => x.ToString()));
   }
 }

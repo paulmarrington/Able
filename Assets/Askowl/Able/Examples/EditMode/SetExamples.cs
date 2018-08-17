@@ -1,10 +1,17 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
+using System;
+using UnityEngine;
 using UnityEngine.TestTools;
 
 namespace Askowl.Examples {
   /// <remarks><a href="http://unitydoc.marrington.net/Able#setcs-unity-component-implementing-a-selector">Sets</a></remarks>
-  public class SetExamples {
+  public class SetExamples : MonoBehaviour {
+    [Serializable]
+    public class StringSet : Set<string> { }
+
+    [SerializeField] private StringSet stringSet;
+
     /// <remarks><a href="http://unitydoc.marrington.net/Able#pick-from-selector">Pick an Item</a></remarks>
     [UnityTest]
     public void Pick() { }
@@ -35,6 +42,6 @@ namespace Askowl.Examples {
 
     /// <remarks><a href="http://unitydoc.marrington.net/Able#reset">Force a Selector Rebuild</a></remarks>
     [UnityTest]
-    public void Reset() { }
+    public void ResetExample() { }
   }
 }
