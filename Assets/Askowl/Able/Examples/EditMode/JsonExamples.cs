@@ -112,99 +112,120 @@ namespace Askowl.Examples {
     public void Walk() { //#TBD#
       json.Parse(jsonSampler);
       // You can separate walking the tree and retrievaly using Walk, WalkOn, IsA and Here
-      Assert.IsTrue(json.Walk("items.item.0.type"));
+      bool isString = json.Walk("items.item.0.type").IsA<string>();
 
-      Assert.IsTrue(json.IsA<string>());
+      Assert.IsTrue(isString);
 
       string donut = json.Here<string>();
-      Assert.AreEqual("donut", donut);
 
-      // //#TBD# Walk<T>
+      Assert.AreEqual("donut", donut);
     }
 
     [Test]
-    public void WalkOn() { } //#TBD#
+    public void WalkOn() {
+      json.Parse(jsonSampler).Walk("items.item");
+
+      // Walk is absolute, but you can use WalkOn to get where you want in steps
+      var donut = json.WalkOn(0, "type").Here<string>();
+
+      Assert.AreEqual("donut", donut);
+    }
+
+    [Test]
+    public void FloatingPoint() {
+      json.Parse(@"""A"": 12.34").Walk("A");
+
+      // A floating point can be retrieved as a double or float
+      double ppu = json.Here<double>();
+      Assert.AreEqual(12.34, ppu, 1e5);
+
+      float fppu = json.Here<float>();
+      Assert.AreEqual(12.34f, fppu, 1e5f);
+    }
+
+    [Test]
+    public void Integer() {
+      json.Parse(@"""A"": 83").Walk("A");
+
+      // A whole number can be retrieved as an int, long, float or double
+      int iqty = json.Here<int>();
+      Assert.AreEqual(83, iqty);
+
+      long lqty = json.Here<long>();
+      Assert.AreEqual(83, lqty);
+
+      float fqty = json.Here<float>();
+      Assert.AreEqual(83f, fqty, 1e5f);
+
+      double dqty = json.Here<double>();
+      Assert.AreEqual(83, dqty, 1e5);
+    }
 
     [Test]
     public void AnchorAndDispose() { } //#TBD#
 
     [Test]
-    public void Fetch() { } //#TBD#
+    public void NodeChildren() {
+      json.Parse(@"""A"": {""One"": 1, ""Two"": 2, ""Three"": 3, }").Walk("A");
+
+      string expected = "One=1 Two=2 Three=3 ";
+      string actual   = "";
+
+      for (var child = json.Children(); child.More(); child.Next()) {
+        actual += $"{child.Name}={child.Value()} ";
+      }
+
+      Assert.AreEqual(expected, actual);
+    }
+
+    [Test]
+    public void ArrayChildren() {
+      json.Parse(@"""A"": [23,195,67]").Walk("A");
+
+      string expected = "0=23 1=195 2=67 ";
+      string actual   = "";
+
+      for (var child = json.Children(); child.More(); child.Next()) {
+        actual += $"{child.Name}={child.Value()} ";
+      }
+
+      Assert.AreEqual(expected, actual);
+    }
+
+    [Test]
+    public void OneChild() {
+      json.Parse(@"""A"": 567").Walk("A");
+
+      string expected = "567";
+      string actual   = "";
+
+      for (var child = json.Children(); child.More(); child.Next()) {
+        actual += child.Value();
+      }
+
+      Assert.AreEqual(expected, actual);
+    }
+
+    [Test]
+    public void ChildrenValueT() { }
 
     [Test]
     public void ArrayAccess() { } //#TBD#
 
-    [Test]
-    public void Enumerable() { } //#TBD#
-
     internal void JsonExample() {
-      // You can separate walking the tree and retrievaly using Walk, WalkOn, IsA and Here
-      if (!json.Walk("items.item.0.type")) Error(json, "Can't find the donut");
-      if (!json.IsA<string>()) Error(json,             "Expecting Donut to be a string");
-      string donut = json.Here<string>();
-      if (donut != "donut") Error(json, "Expecting 'donut', not '{0}'", donut);
-
-      // Walk is absolute, but you can use WalkOn to get where you want in steps
-      if (!json.Walk("items.item")) Error(json, "Can't find the first item");
-      if (!json.WalkOn(0, "type")) Error(json,  "Can't walk on to the donut");
-      donut = json.Here<string>();
-      if (donut != "donut") Error(json, "Expecting 'donut', not '{0}'", donut);
-
-      // Because walking to a leave and expecting a certain type of data is common, we can combine them
-      if (!json.Walk<double>("items", "item", 0, "ppu")) Error(json, "Can't walk to ppu");
-
-      // A floating point can be retrieved as a double or float
-      double ppu = json.Here<double>();
-      if (json.ErrorMessage != null) Error(json, "Can't get double '{0}'", ppu);
-      float fppu = json.Here<float>();
-      if (json.ErrorMessage != null) Error(json, "Can't get float '{0}'", fppu);
-
-      if ((Math.Abs(ppu - fppu) > 1e5) || (Math.Abs(ppu - 0.55) > 1e5)) {
-        Error(json, "Retrieving double and float failed since {0} != {1}", ppu, fppu);
-      }
-
-      // A whole number can be retrieved as an int, long, float or double
-      if (!json.Walk("items", "item", 0, "qty")) Error(json, "Can't walk to qty");
-      long lqty = json.Here<long>();
-      if (json.ErrorMessage != null) Error(json, "Can't get long '{0}'", lqty);
-      int iqty = json.Get<int>("items.item.0.qty");
-      if (json.ErrorMessage != null) Error(json, "Can't get int '{0}'", iqty);
-      float fqty = json.Get<float>("items.item.0.qty");
-      if (json.ErrorMessage != null) Error(json, "Can't get float '{0}'", fqty);
-      double dqty = json.Get<double>("items.item.0.qty");
-      if (json.ErrorMessage != null) Error(json, "Can't get double '{0}'", dqty);
-
-      if ((lqty != iqty) || (Math.Abs(fqty - iqty) > 1e5) || (Math.Abs(dqty - iqty) > 1e5)) {
-        Error(json, "Whole number mismatch {0} == {1} == {2} == {3}", lqty, iqty, fqty, dqty);
-      }
-
-      // When a node is a leaf of type Node we may want fetch an individual child using [] or generic Fetch
-      json.Walk("items.item.0");
-
-      if (json["name"] == null) {
-        Error(json, "No key `name`");
-      } else if (json["name"].ToString() != "Cake") {
-        Error(json, "Expecting Cake");
-      }
-
-      if (json.Fetch<string>("id") != "0001") Error(json, "Expecting id of 0001");
+//      if (json.Fetch<string>("id") != "0001") Error(json, "Expecting id of 0001");
 
       // When a node is a leaf of type Array we may want fetch an individual element using [] or generic Fetch
       json.Walk("items.item.0.magic");
-
-      if (json[2] == null) {
-        Error(json, "No index 2");
-      } else if (((long) json[2]) != 333) Error(json, "Expecting 333, not '{0}'", json[2]);
-
-      if (json.Fetch<int>(3) != 4444) Error(json, "expecting 4444, not '{0}'", json[3]);
+//      if (json.Fetch<int>(3) != 4444) Error(json, "expecting 4444, not '{0}'", json[3]);
 
       // json is also an iterator for processing children of tree nodes
       json.Walk("items.item.0");
       string keys = "id,type,name,ppu,qty,magic,batters,topping";
 
-      foreach (string key in json.Where(key => keys.IndexOf(key, StringComparison.Ordinal) == -1)) {
-        Error(json, "Unexpected key '{0}'", key);
-      }
+//      foreach (string key in json.Where(key => keys.IndexOf(key, StringComparison.Ordinal) == -1)) {
+//        Error(json, "Unexpected key '{0}'", key);
+//      }
 
       // json is also an iterator for processing entries in array
       // `As` returns default(T) if it cannot be case or converted

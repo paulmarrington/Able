@@ -9,7 +9,7 @@ namespace Askowl {
   /// <summary>
   /// Parse JSON of unknown format to a dictionary and provide access methods
   /// </summary>
-  public class Json : IEnumerable<string>, IDisposable {
+  public class Json : IDisposable {
     #region PublicInterface
     /// <summary>
     /// Change the JSON to process on an existing Json instance. Recycling is good.
@@ -30,7 +30,7 @@ namespace Askowl {
     /// <summary>
     /// Parsing the JSON creates a tree of nodes, arrays and leaf objects. You should not need to get to a Node, but it is here for if I a wrong.
     /// </summary>
-    private class Node : Dictionary<string, object> { };
+    internal class Node : Dictionary<string, object> { };
 
     /// <summary>
     /// Returns the node at the location we have walked to in the tree - if it is of the type expected.
@@ -115,24 +115,6 @@ namespace Askowl {
     }
 
     /// <summary>
-    /// Shortcut to walk to a node and check the node is of the type expected.
-    /// </summary>
-    /// <remarks>It will fill <see cref="ErrorMessage"/> if there is a fault.</remarks>
-    /// <param name="path">
-    /// Path to the target node either as a list of objects or a single string with nodes separated by '.'.
-    /// Array indexes can be numbers or strings that convert to numbers.
-    /// <example>"root", "level1", 0, "level 3"</example>
-    /// <example>"root.level1.0.level 3"</example>
-    /// </param>
-    /// <returns>false if path does not exist or the type of the destination node is not that expected</returns>
-    public Json Walk<T>(params object[] path) {
-      here         = root;
-      ErrorMessage = null;
-      WalkOn<T>(path);
-      return me;
-    }
-
-    /// <summary>
     /// Use to take a stroll down JSON lane - from where our last call to Walk or WalkOn
     /// </summary>
     /// <remarks>It will fill <see cref="ErrorMessage"/> if there is a fault.</remarks>
@@ -150,7 +132,7 @@ namespace Askowl {
       }
 
       for (int i = 0; i < path.Length; i++) {
-        if (!Stepper(path[i])) break;
+        if (!Step(path[i])) break;
       }
 
       return me;
@@ -188,100 +170,80 @@ namespace Askowl {
       }
     }
 
+    public struct ChildWalker {
+      public Func<bool> More;
+
+      public Action Next;
+
+      public bool IsA<T>() => ValueObject is T;
+
+      public T Value<T>() => (ValueObject is T) ? (T) ValueObject : default(T);
+
+      public string Value() => ValueObject.ToString();
+
+      public string Name;
+      public object ValueObject;
+    }
+
+    public ChildWalker Children() {
+      var node = here as Node;
+      if (node != null) return Children(node);
+
+      var array = here as object[];
+      if (array != null) return Children(array);
+
+      return OneChild();
+    }
+
+    private ChildWalker Children(Node node) {
+      var childWalker = new ChildWalker();
+      int cursor      = 0;
+      int length      = node.Count;
+
+      childWalker.Next = () => {
+        var element = node.ElementAt(cursor++);
+        childWalker.Name        = element.Key;
+        childWalker.ValueObject = element.Value;
+      };
+
+      childWalker.More = () => cursor <= length;
+
+      childWalker.Next();
+
+      return childWalker;
+    }
+
+    private ChildWalker Children(object[] array) {
+      var childWalker = new ChildWalker();
+      int cursor      = 0;
+
+      childWalker.Next = () => {
+        childWalker.Name        = $"[{cursor}]";
+        childWalker.ValueObject = array[cursor++];
+      };
+
+      childWalker.More = () => cursor <= array.Length;
+      childWalker.Next();
+      return childWalker;
+    }
+
+    private ChildWalker OneChild() {
+      var more = true;
+
+      var childWalker = new ChildWalker {
+        Name        = "Here",
+        ValueObject = here,
+        Next        = () => more = false,
+        More        = () => more
+      };
+
+      return childWalker;
+    }
+
     /// <inheritdoc />
     public void Dispose() { here = anchor; }
 
     private object anchor;
-
-    /// <summary>
-    /// Retrieve an array entry of a required type
-    /// </summary>
-    /// <param name="index">Index into the array</param>
-    /// <typeparam name="T">Type of entry expected. Use `object` for anything</typeparam>
-    /// <returns>value of element or default&lt;T> and sets <see cref="ErrorMessage"/> if unavailable</returns>
-    public T Fetch<T>(int index) {
-      ErrorMessage = null;
-      object value = null;
-      Fetch(index, ref value);
-      return Convert<T>(value);
-    }
-
-    /// <summary>
-    /// Retrieve an tree node entry of a required type
-    /// </summary>
-    /// <param name="next">key to entry in node tree</param>
-    /// <typeparam name="T">Type of entry expected. Use `object` for anything</typeparam>
-    /// <returns>value of node or default&lt;T> and sets <see cref="ErrorMessage"/> if unavailable</returns>
-    public T Fetch<T>(string next) {
-      ErrorMessage = null;
-      object value = null;
-      Fetch(next, ref value);
-      return Convert<T>(value);
-    }
-
-    /// <summary>
-    /// Retrieve the value by key in the children of the current dictionary node
-    /// </summary>
-    /// <param name="key">Name of child node</param>
-    public object this[string key] => Fetch<object>(key);
-
-    /// <summary>
-    /// Retrive the value by index in the children of the current array node
-    /// </summary>
-    /// <param name="i">Index into array node</param>
-    public object this[int i] => Fetch<object>(i);
-
-    /// <summary>
-    /// Use enumerator to iterate through all children in a node. Use on leaf nodes to retrieve keys or array items.
-    /// Use with active nodes to process all children. If all the children are of one type, use <see cref="As{T}()"/>.
-    /// </summary>
-    /// <code>
-    /// json.Walk("to.tree.leaf");
-    /// foreach(object key in json) process(key, json[key]);
-    /// </code>
-    /// <returns></returns>
-    IEnumerator IEnumerable.GetEnumerator() => GetEnumerable().GetEnumerator();
-
-    private IEnumerable GetEnumerable() => IsNode ? ((Node) here).Keys : IsArray ? (IEnumerable) here : OneNode();
-
-    private IEnumerable OneNode() { yield return here; }
-
-    /// <summary>
-    /// Use enumerator to iterate through all children as strings. Most useful to retrieve node keys or leaf nodes when you only want strings.
-    /// </summary>
-    /// <code>
-    /// json.Walk("to.tree.leaf");
-    /// foreach(string key in json) print(key + "=" + json[key]);
-    /// </code>
-    /// <returns></returns>
-    IEnumerator<string> IEnumerable<string>.GetEnumerator() => As<string>(GetEnumerable()).GetEnumerator();
-
-    /// <summary>
-    /// Used to convert each item of an enumeration into a known type
-    /// </summary>
-    /// <code>
-    /// json.Walk("to.tree.arrayLeaf");
-    /// var there = json.Here&lt;json.Node>();
-    /// foreach(int count in json.As&lt;int>(there)) sum += count;
-    /// </code>
-    /// <typeparam name="T">Type of items needed</typeparam>
-    /// <returns>Converted object or default(T) if it can't be found</returns>
-    public IEnumerable<T> As<T>(IEnumerable enumerable) {
-      foreach (object item in enumerable) yield return Convert<T>(item);
-    }
-
-    /// <summary>
-    /// Used to convert each item of an enumeration of the current node into a known type
-    /// </summary>
-    /// <code>
-    /// json.Walk("to.tree.arrayLeaf");
-    /// foreach(int count in json.As&lt;int>()) sum += count;
-    /// </code>
-    /// <typeparam name="T">Type of items needed</typeparam>
-    /// <returns>Converted object or default(T) if it can't be found</returns>
-    public IEnumerable<T> As<T>() {
-      foreach (object item in GetEnumerable()) yield return Convert<T>(item);
-    }
     #endregion
     #endregion
 
@@ -294,10 +256,10 @@ namespace Askowl {
     #endregion
 
     #region AccessSupport
-    private bool Stepper(object next) {
-      if (IsNode) return Step(next.ToString());
-      if (!IsArray) return AccessFailure($"Expecting array for {next}");
-      if (next is int) return Step((int) next);
+    private bool Step(object next) {
+      if (IsNode) return (here as Node)?.ContainsKey(next.ToString()) == true;
+      if (!IsArray) return AccessFailure($"Expecting node or array for {next}");
+      if (next is int) return ((int) next) >= ((object[]) here).Length;
 
       int index;
 
@@ -305,35 +267,7 @@ namespace Askowl {
         return AccessFailure($"Expecting array index '{next}'");
       }
 
-      return Step(index);
-    }
-
-    private bool Fetch(int index, ref object value) {
-      if (!IsArray) return AccessFailure($"Not an Array (is {NodeType}) for {index}");
-
-      var array = (object[]) here;
-
-      if (index >= array.Length) {
-        return AccessFailure($"Array[{array.Length}] out of bounds for {index}");
-      }
-
-      value = array[index];
-      return true;
-    }
-
-    private bool Step(int index) => Fetch(index, ref here);
-
-    private bool Step(string next) => Fetch(next, ref here);
-
-    private bool Fetch(string next, ref object value) {
-      if (!IsNode) return AccessFailure($"Not a node for {next}");
-
-      Node node = here as Node;
-
-      if (node?.ContainsKey(next) != true) return AccessFailure($"No node '{next}'");
-
-      value = node[next];
-      return true;
+      return index >= ((object[]) here).Length;
     }
     #endregion
 
@@ -478,8 +412,13 @@ namespace Askowl {
       if (here == null) {
         ErrorMessage = $"No `here` reference: {message}";
       } else {
-        string nodeText = (here is Node) ? string.Join(", ", this.ToArray()) : "";
+        List<string> texts = new List<string>();
 
+        for (var child = Children(); child.More(); child.Next()) {
+          texts.Append($"{child.Name}={child.Value()}");
+        }
+
+        string nodeText = string.Join(separator: ",", values: texts);
         ErrorMessage = $"JSON Access Failure: {message} -  at {here.GetType().Name}  [[{nodeText}]]";
       }
 
