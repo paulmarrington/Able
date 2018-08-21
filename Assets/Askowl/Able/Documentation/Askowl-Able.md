@@ -47,7 +47,7 @@ Convert back from Epoch UTC time to local time, C# style.
 
 ### Compare.cs - equality and almost equality
 
-### AlmostEqual for Floating Point
+#### AlmostEqual for Floating Point
 
 Comparing floating point numbers can be a hit or miss affair. Every mathematical operation is subject to rounding to fit into the number of bits. A single precision 32 bit float has around 7 digits of accuracy.  Even trivial calculations may not compare equal.
 
@@ -67,7 +67,7 @@ IsFalse(Compare.AlmostEqual(a: 123.45678, b: 123.45679));
 IsTrue(Compare.AlmostEqual(a: 123.456789, b: 123.45679));
 ```
 
-### AlmostEqual for Integers
+#### AlmostEqual for Integers
 
 Integers don't suffer from rounding problems. Sometimes it is useful to see if two values are close.
 
@@ -86,6 +86,19 @@ IsTrue(Compare.AlmostEqual(a: 1,  b: 3, minimumChange: 4));
 
 IsFalse(Compare.AlmostEqual(a: 1, b: 4));
 IsTrue(Compare.AlmostEqual(a: 1,  b: 2));
+```
+
+#### IsDigitsOnly
+
+Check the contents of a string and return true if it only has digits.
+
+```
+Assert.IsTrue(Compare.isDigitsOnly("123987654"));
+
+Assert.IsFalse(Compare.isDigitsOnly("12no shoe"));
+Assert.IsFalse(Compare.isDigitsOnly("1.4"));
+Assert.IsFalse(Compare.isDigitsOnly("-66"));
+Assert.IsFalse(Compare.isDigitsOnly(""));
 ```
 
 ### [ExponentialMovingAverage.cs](https://en.wikipedia.org/wiki/Moving_average#Exponential_moving_average)
@@ -380,20 +393,40 @@ AreEqual(expected, actual);
 
 ## Data Structures
 
+### Caching Objects
+
+#### Cache Entry Maintenance
+
+##### CreateItem
+
+##### DeactivateItem
+
+##### ReactivateItem
+
+##### Disposable Cached Item
+
+##### Using a Cached Item Safely
+
+#### Caching for Sealed Classes
+
+#### Make a Class Cached
+
+##### Cache Awareness
+
+##### Fetch a New Cache Aware Instance
+
+##### Cache with Inheritance
+
 ### Disposable.cs - helper for IDisposable.Dispose()
 
-With closures and anonymous functions `using(...){...}` can be implemented where it is needed without creating a new class to manage it.
+With closures and anonymous functions `using(...){...}` can be implemented where it is needed without creating a new class to manage it. Don't be put off by the `new`. `Disposable` is a struct so it will not be involved directly in garbage collection.
 
 ```c#
     [Test]
     public void DisposableExample() {
-      Assert.AreEqual(expected: 0, actual: numberOfMonsters);
-
       using (Ephemeral()) {
         numberOfMonsters += 2;
-        Assert.AreEqual(expected: 2, actual: numberOfMonsters);
       }
-
       Assert.AreEqual(expected: 0, actual: numberOfMonsters);
     }
 
@@ -402,6 +435,57 @@ With closures and anonymous functions `using(...){...}` can be implemented where
 
     private int numberOfMonsters;
   }
+```
+
+#### Disposable with Payload
+
+If we want to dispose of an object we do not have direct access we need to add a payload.
+
+```c#
+public static Disposable<TreeContainer> DisposableInstance {
+  get {
+    var node = trees.Fetch();	// from a cache of objects in a LinkedList
+
+    return new Disposable<TreeContainer> {
+      Action = (tree) => {
+        tree.Root();	// so all the branches are disposed of correctly
+        node.Dispose();	// calls LinkList Dispose
+      },
+      Payload = node.Item
+    };
+  }
+}
+// ...
+using (var treeDisposable = TreeContainer.DisposableInstance) {
+    var tree = treeDisposable.tree;
+    // ... work with tree ...
+} // Implicit dispose
+```
+
+There are two ways to use `Disposable<T>`that can be combined to make three useful approaches.
+
+1. ***Setting `Action`*** as above. Useful for sealed classes that do not have a `IDisposable` interface but need some cleaning up.
+2. ***`IDisposable` Interface*** when the `PayLoad` has one. Calling `Dispose()` on the `Disposable` automatically calls it for the `PayLoad` if it too has the interface.
+3. ***Both*** can be used together. Think of a situation where the `PayLoad` implements `IDisposable` but it is part of a parent object that needs to be informed of the change in state.
+
+```c#
+  public void DisposableTWithDisposeAndAction() {
+    var myClass = new Myclass();
+
+    using (new Disposable<Myclass> {Payload = myClass, Action = Action}) {
+      Assert.AreEqual("morning", myClass.howdie);
+      myClass.howdie = "hi";
+    }
+    Assert.AreEqual("hi from me too", myClass.howdie);
+  }
+
+  void Action(Myclass myClass) { myClass.howdie += " too"; }
+}
+
+class Myclass : IDisposable {
+  public string howdie = "morning";
+  public void   Dispose() { howdie += " from me"; }
+}
 ```
 
 ### Emitter.cs - the observer pattern
@@ -548,6 +632,15 @@ var fences = new LinkedLisk<Geofence> {
 // fences nodes now implement <, <=, >, >=, == and !=
 if (fence.Active) fence.MoveTo(fences);	// injects in sorted order
 ```
+
+#### List Disposal
+
+Linked lists are mostly used as statics to keep lists of reusable elements. Sometimes they have a limited life, so need to be cleared for disposal or recycling in a parent linked list. There are two levels of cleanliness.
+
+1. `Dispose()` will dispose of any active elements, placing them in the recycle bin for later use. Use when you want to keep the linked list, but remove any outstanding elements. It will be implicitly called if it is an Item in a parent LinkedList.
+2. `Discard()` removes items from the recycle bin as well so that the linked list can be safe for the garbage collector to pick up.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 #### Node Creation and Movement
 
@@ -795,6 +888,50 @@ selector.Choices = new int[] { 5, 6, 7, 8 };
 ```
 
 ### Json.cs - parse any JSON to dictionary
+
+#### Parse
+
+#### Current Location
+
+##### Here
+
+##### NodeName
+
+#### Error Processing
+
+##### Error
+
+##### ErrorMessage
+
+#### Tree Traversal
+
+##### Walking a Tree of Known Nodes
+
+###### Walk
+
+###### WalkOn
+
+##### Child Enumeration
+
+###### Count
+
+###### Children
+
+###### NextSibling
+
+#### Anchor
+
+#### Information Retrieval
+
+##### IsA
+
+##### IsNode
+
+##### IsArray
+
+##### NodeType
+
+##### Get
 
 ## Unity Support
 

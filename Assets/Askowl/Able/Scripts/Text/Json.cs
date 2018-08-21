@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
+
+using System;
 using System.Text;
 using UnityEngine;
 
@@ -9,77 +8,77 @@ namespace Askowl {
   /// <summary>
   /// Parse JSON of unknown format to a dictionary and provide access methods
   /// </summary>
+  /// <remarks><a href="http://unitydoc.marrington.net/Able#jsoncs-parse-any-json-to-dictionary">Json Parser</a></remarks>
   public class Json : IDisposable {
     #region PublicInterface
-    /// <summary>
-    /// Change the JSON to process on an existing Json instance. Recycling is good.
-    /// </summary>
-    /// <param name="jsonText">String with hopefully correctly formatted JSON</param>
-    /// <returns>false on error and sets <see cref="ErrorMessage"/></returns>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#parse">Parse JSON from text</a></remarks>
     public Json Parse(string jsonText) {
-      if (string.IsNullOrEmpty(jsonText)) return ParseError("json input has no content");
+      if (string.IsNullOrEmpty(jsonText)) {
+        ParseError("json input has no content");
+        return this;
+      }
 
-      json         = jsonText;
-      idx          = 0;
-      ErrorMessage = null;
-      here         = root = new Node();
-      if (CheckToken('{')) ParseToNode(root);
-      return me;
+      tree = TreeContainer.Instance;
+      json = jsonText;
+      idx  = 0;
+      return CheckToken('{').ParseToNode();
     }
 
-    /// <summary>
-    /// Parsing the JSON creates a tree of nodes, arrays and leaf objects. You should not need to get to a Node, but it is here for if I a wrong.
-    /// </summary>
-    internal class Node : Dictionary<string, object> { };
+    public static Json Instance => new Json();
+    private Json() { }
 
-    /// <summary>
-    /// Returns the node at the location we have walked to in the tree - if it is of the type expected.
-    /// </summary>
-    /// <remarks>It will fill <see cref="ErrorMessage"/> if there is a fault.</remarks>
+    /// <inheritdoc />
+    public void Dispose() { tree.Dispose(); }
+
+    public String Name => tree.Name;
+
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#current-location">Here - The Current Location</a></remarks>
+    public T Here<T>() => Convert<T>(tree.Leaf());
+
     /// <typeparam name="T">The type we anticipate this node to be</typeparam>
-    /// <returns>The requested node in the correct form for (T) or default&lt;T> if it can't be accessed</returns>
-    public T Here<T>() => Convert<T>(here);
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#information-retrieval">Retrieve Value at Current Location</a></remarks>
+    public bool IsA<T>() => CheckIsA<T>(tree.Leaf());
 
     /// <summary>
     /// Checks to see if we can cast the node type to that provided.
     /// </summary>
     /// <remarks>It will fill <see cref="ErrorMessage"/> if there is a fault.</remarks>
     /// <typeparam name="T">The type we anticipate this node to be</typeparam>
-    public bool IsA<T>() => CheckIsA<T>(here);
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#information-retrieval">Retrieve Value at Current Location</a></remarks>
+//    public bool IsA<T>(object node) => CheckIsA<T>(node);
 
-    /// <summary>
-    /// Checks to see if we can cast the node type to that provided.
-    /// </summary>
-    /// <remarks>It will fill <see cref="ErrorMessage"/> if there is a fault.</remarks>
-    /// <typeparam name="T">The type we anticipate this node to be</typeparam>
-    public bool IsA<T>(object node) => CheckIsA<T>(node);
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#information-retrieval">Retrieve Value at Current Location</a></remarks>
+    public bool IsNode => tree.Leaf() == null;
 
-    /// <summary>
-    /// See if we have walked to a tree node, being a list of nodes accessed by name
-    /// </summary>
-    public bool IsNode => here is Node;
-
-    /// <summary>
-    /// See if we have walked to an Array node, being a list of nodes accessed by index
-    /// </summary>
-    public bool IsArray => here is Array;
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#information-retrieval">Retrieve Value at Current Location</a></remarks>
+    public bool IsArray => tree.HasAnonymousChildren;
 
     /// <summary>
     /// When completely lost, ask for the node type. It could be Node, Array, object, double, long, bool or null
     /// </summary>
-    public Type NodeType => here.GetType();
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#information-retrieval">Retrieve Value at Current Location</a></remarks>
+//    public Type NodeType => tree.Leaf().GetType();
 
-    /// <summary>
-    /// If we fail to parse the json, or later fail to retrieve a node by name, this will be set. When there are no errors it will be null.
-    /// </summary>
-    public string ErrorMessage { get; private set; }
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#error-processing">Error Indication and Message</a></remarks>
+    public string ErrorMessage => tree.ErrorMessage;
 
-    /// <summary>
-    /// True if the last parsing call failed.
-    /// </summary>
-    public bool Error => ErrorMessage != null;
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#error-processing">Error Indication and Message</a></remarks>
+    public bool Error => tree.ErrorMessage != null;
 
     #region AccessNodes
+    public Json Root {
+      get {
+        tree.Root();
+        return this;
+      }
+    }
+
+    public bool IsRoot => tree.IsRoot;
+
+    public Json Parent() {
+      tree.Parent();
+      return this;
+    }
     /// <summary>
     /// Use Get if you know exactly what you are looking for.
     /// </summary>
@@ -92,50 +91,35 @@ namespace Askowl {
     /// </param>
     /// <typeparam name="T">The type we anticipate this node to be</typeparam>
     /// <returns>what you asked for or default&lt;T> if not found</returns>
-    public T Get<T>(params object[] path) {
-      Walk(path);
-      return Here<T>();
-    }
+//    public T Get<T>(params object[] path) {
+//      Walk(path);
+//      return Here<T>();
+//    }
 
-    /// <summary>
-    /// Use to take a stroll down JSON lane - from the root/start.
-    /// </summary>
-    /// <remarks>It will fill <see cref="ErrorMessage"/> if there is a fault.</remarks>
     /// <param name="path">
     /// Path to the target node either as a list of objects or a single string with nodes separated by '.'.
     /// Array indexes can be numbers or strings that convert to numbers.
     /// <example>"root", "level1", 0, "level 3"</example>
     /// <example>"root.level1.0.level 3"</example>
     /// </param>
-    /// <returns>false if path does not exist</returns>
-    public Json Walk(params object[] path) {
-      here         = root;
-      ErrorMessage = null;
-      return WalkOn(path);
-    }
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#tree-traversal">Traversing the JSON Node Tree</a></remarks>
+//    public Json Walk(params object[] path) {
+//      here         = root;
+//      NodeName     = "Root";
+//      ErrorMessage = null;
+//      return WalkOn(path);
+//    }
 
-    /// <summary>
-    /// Use to take a stroll down JSON lane - from where our last call to Walk or WalkOn
-    /// </summary>
-    /// <remarks>It will fill <see cref="ErrorMessage"/> if there is a fault.</remarks>
     /// <param name="path">
     /// Path to the target node either as a list of objects or a single string with nodes separated by '.'.
     /// Array indexes can be numbers or strings that convert to numbers.
     /// <example>0, "level 3"</example>
     /// <example>"0.level 3"</example>
     /// </param>
-    /// <returns>false if path does not exist</returns>
-    public Json WalkOn(params object[] path) {
-      if ((path.Length == 1) && (path[0] is string)) {
-        string[] split = ((string) path[0]).Split('.');
-        path = Array.ConvertAll(split, x => (object) x);
-      }
-
-      for (int i = 0; i < path.Length; i++) {
-        if (!Step(path[i])) break;
-      }
-
-      return me;
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#tree-traversal">Traversing the JSON Node Tree</a></remarks>
+    public Json To(params object[] path) {
+      tree.To(path);
+      return this;
     }
 
     /// <summary>
@@ -149,206 +133,119 @@ namespace Askowl {
     /// <example>"0.level 3"</example>
     /// </param>
     /// <returns>false if path does not exist</returns>
-    public bool WalkOn<T>(params object[] path) => WalkOn(path).IsA<T>();
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#tree-traversal">Traversing the JSON Node Tree</a></remarks>
+//    public bool WalkOn<T>(params object[] path) => WalkOn(path).IsA<T>();
     #endregion
 
     #region NodeEnumeration
-    /// <summary>
-    /// Retrieve a count of the number of child nodes from our location. Will return one for nodes that are not tree nodes or arrays.
-    /// </summary>
-    public int Count => (IsNode)  ? ((Node) here).Count :
-                        (IsArray) ? ((object[]) here).Length : 1;
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#tree-traversal">Traversing the JSON Node Tree</a></remarks>
+    public int ChildCount => tree.ChildCount;
+
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#tree-traversal">Traversing the JSON Node Tree</a></remarks>
+    public TreeContainer ForEach(Action action) => tree.ForEach(action);
 
     /// <summary>
     /// Use to set and return to a current location after some operations. Best for enumerations
     /// <code>using json.Anchor { json.Walk("first.one"); }</code>
     /// </summary>
-    public Json Anchor {
-      get {
-        anchor = here;
-        return me;
-      }
-    }
-
-    public struct ChildWalker {
-      public Func<bool> More;
-
-      public Action Next;
-
-      public bool IsA<T>() => ValueObject is T;
-
-      public T Value<T>() => (ValueObject is T) ? (T) ValueObject : default(T);
-
-      public string Value() => ValueObject.ToString();
-
-      public string Name;
-      public object ValueObject;
-    }
-
-    public ChildWalker Children() {
-      var node = here as Node;
-      if (node != null) return Children(node);
-
-      var array = here as object[];
-      if (array != null) return Children(array);
-
-      return OneChild();
-    }
-
-    private ChildWalker Children(Node node) {
-      var childWalker = new ChildWalker();
-      int cursor      = 0;
-      int length      = node.Count;
-
-      childWalker.Next = () => {
-        var element = node.ElementAt(cursor++);
-        childWalker.Name        = element.Key;
-        childWalker.ValueObject = element.Value;
-      };
-
-      childWalker.More = () => cursor <= length;
-
-      childWalker.Next();
-
-      return childWalker;
-    }
-
-    private ChildWalker Children(object[] array) {
-      var childWalker = new ChildWalker();
-      int cursor      = 0;
-
-      childWalker.Next = () => {
-        childWalker.Name        = $"[{cursor}]";
-        childWalker.ValueObject = array[cursor++];
-      };
-
-      childWalker.More = () => cursor <= array.Length;
-      childWalker.Next();
-      return childWalker;
-    }
-
-    private ChildWalker OneChild() {
-      var more = true;
-
-      var childWalker = new ChildWalker {
-        Name        = "Here",
-        ValueObject = here,
-        Next        = () => more = false,
-        More        = () => more
-      };
-
-      return childWalker;
-    }
-
-    /// <inheritdoc />
-    public void Dispose() { here = anchor; }
-
-    private object anchor;
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#Anchor">Mark Current Node Location</a></remarks>
+    public IDisposable Anchor => tree.Anchor;
     #endregion
     #endregion
 
     #region SupportData
-    private object here;
-    private Node   root;
-
-    private string json;
-    private int    idx;
-    #endregion
-
-    #region AccessSupport
-    private bool Step(object next) {
-      if (IsNode) return (here as Node)?.ContainsKey(next.ToString()) == true;
-      if (!IsArray) return AccessFailure($"Expecting node or array for {next}");
-      if (next is int) return ((int) next) >= ((object[]) here).Length;
-
-      int index;
-
-      if (!int.TryParse(next.ToString(), out index)) {
-        return AccessFailure($"Expecting array index '{next}'");
-      }
-
-      return index >= ((object[]) here).Length;
-    }
+    private TreeContainer tree;
+    private string        json = "";
+    private int           idx;
     #endregion
 
     #region Parsing
-    private bool CheckToken(char token) {
-      if (!SkipWhiteSpace()) return false;
+    private Json CheckToken(char token) {
+      if (!SkipWhiteSpace()) return this;
 
       if (json[idx++] != token) {
-        ParseError("Expecting token '{0}'", token);
-        return false;
+        ParseError($"Expecting token '{token}'");
+        return this;
       }
 
-      return SkipWhiteSpace();
+      SkipWhiteSpace();
+      return this;
     }
 
-    private Node ParseToNode(Node node) {
-      while (ParseOneEntryToNode(node)) {
+    private Json ParseToNode() {
+      while (ParseOneEntryToNode()) {
         if (!SkipWhiteSpace() || (json[idx] == '}')) {
           idx++;
           break;
         }
       }
 
-      return node;
+      return this;
     }
 
-    private bool ParseOneEntryToNode(Node node) {
-      if (!CheckToken('"')) return false;
+    private bool ParseOneEntryToNode() {
+      string key = CheckToken('"').ParseString();
+      if (!CheckToken(':').SkipWhiteSpace()) return false;
 
-      string key = ParseString();
-      if (!CheckToken(':')) return false;
-      if (!SkipWhiteSpace()) return false;
-
-      node.Add(key, ParseObject());
+      tree.Add(key);
+      ParseObject();
+      tree.Parent();
       return idx < json.Length;
     }
 
-    private object ParseObject() {
+    private void ParseObject() {
       char token = json[idx++];
 
       switch (token) {
         case '{':
-          return ParseNode();
+          ParseToNode();
+          return;
         case '[':
-          return ParseArray();
+          ParseArray();
+          return;
         case '"':
-          return ParseString();
+          tree.Leaf(ParseString());
+          return;
         default:
           string word = NextWord();
 
           switch (word) {
-            case "true":  return true;
-            case "false": return false;
-            case "null":  return null;
+            case "true":
+              tree.Leaf(setTo: true);
+              return;
+            case "false":
+              tree.Leaf(setTo: false);
+              return;
+            case "null":
+              tree.Leaf(setTo: null);
+              return;
+
             default:
-              long i;
-              if (long.TryParse(word, out i)) return i;
-
+              long   i;
               double d;
-              if (double.TryParse(word, out d)) return d;
 
-              ParseError("word '{0}' unknown", word);
-              return word;
+              if (long.TryParse(word, out i)) {
+                tree.Leaf(setTo: i);
+              } else if (double.TryParse(word, out d)) {
+                tree.Leaf(setTo: d);
+              } else {
+                ParseError($"word '{word}' unknown");
+              }
+
+              break;
           }
+
+          break;
       }
     }
 
-    private object ParseArray() {
-      List<object> list = new List<object>();
-
+    private void ParseArray() {
       while (SkipWhiteSpace() && (json[idx] != ']')) {
-        list.Add(ParseObject());
+        tree.AddAnonymous();
+        ParseObject();
       }
 
-      idx++;
-      return list.ToArray();
-    }
-
-    private Node ParseNode() {
-      Node node = new Node();
-      return ParseToNode(node);
+      tree.Parent();
     }
 
     private string ParseString() {
@@ -391,37 +288,23 @@ namespace Askowl {
     private static bool IsWhiteSpace(char chr) => char.IsWhiteSpace(chr) || (chr == ',');
 
     private bool SkipWhiteSpace() {
+      if (Error) return false;
+
       while ((idx < json.Length) && IsWhiteSpace(json[idx])) idx++;
       return idx < json.Length;
     }
     #endregion
 
     #region ErrorProcessing
-    private Json me => Error ? null : this;
-
-    private Json ParseError(string fmt, params object[] args) {
+    private void ParseError(string msg) {
       int    length = Mathf.Min(32, json.Length - idx);
       string part   = (length > 0) ? json.Substring(idx - 1, length) : "";
 
-      ErrorMessage = $"JSON Parsing Error: {string.Format(fmt, args)} - at {idx}, from {part}";
-
-      return null;
+      tree.ErrorMessage = $"JSON Parsing Error: {msg} - at {idx}, from {part}";
     }
 
     private bool AccessFailure(string message) {
-      if (here == null) {
-        ErrorMessage = $"No `here` reference: {message}";
-      } else {
-        List<string> texts = new List<string>();
-
-        for (var child = Children(); child.More(); child.Next()) {
-          texts.Append($"{child.Name}={child.Value()}");
-        }
-
-        string nodeText = string.Join(separator: ",", values: texts);
-        ErrorMessage = $"JSON Access Failure: {message} -  at {here.GetType().Name}  [[{nodeText}]]";
-      }
-
+      tree.ErrorMessage = $"JSON Access Failure: {message} -  at {tree.Leaf().GetType().Name}  [[{tree}]]";
       return false;
     }
 

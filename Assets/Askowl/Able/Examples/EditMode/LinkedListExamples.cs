@@ -97,7 +97,7 @@ namespace Askowl.Examples {
       var node1 = list1.Add(21);
       var node2 = list1.Add(18);
 
-      list1.MoveTo(list2);
+      list1.MoveFirstNodeTo(list2);
 
       Assert.AreEqual(expected: 1,     actual: list1.Count);
       Assert.AreEqual(expected: 1,     actual: list2.Count);
@@ -132,7 +132,7 @@ namespace Askowl.Examples {
 
       node21.MoveTo(list2);
       node44.MoveTo(list2);
-      list1.MoveTo(list2);
+      list1.MoveFirstNodeTo(list2);
 
       Assert.AreEqual(expected: 0,      actual: list1.Count);
       Assert.AreEqual(expected: 3,      actual: list2.Count);

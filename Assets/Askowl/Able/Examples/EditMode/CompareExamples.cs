@@ -38,6 +38,15 @@ namespace Askowl.Examples { //#TBD#
       Assert.IsFalse(Compare.AlmostEqual(a: 1, b: 4));
       Assert.IsTrue(Compare.AlmostEqual(a: 1,  b: 2));
     }
+
+    public void IsDigitsOnly() {
+      Assert.IsTrue(Compare.isDigitsOnly("123987654"));
+
+      Assert.IsFalse(Compare.isDigitsOnly("12no shoe"));
+      Assert.IsFalse(Compare.isDigitsOnly("1.4"));
+      Assert.IsFalse(Compare.isDigitsOnly("-66"));
+      Assert.IsFalse(Compare.isDigitsOnly(""));
+    }
   }
 }
 #endif

@@ -5,7 +5,7 @@ using NUnit.Framework;
 namespace Askowl.Examples {
   /// <remarks><a href="http://unitydoc.marrington.net/Able#Csvcs-serialization-of-commaseparated-lists">Serialise List to CSV</a></remarks>
   public class CsvExamples {
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#tocsv">Use iDisposable for Greater Good</a></remarks>
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#tocsv">Convert an array to a CSV string</a></remarks>
     [Test]
     public void ToCsv() {
       var expected = "1,3,5,7,9";

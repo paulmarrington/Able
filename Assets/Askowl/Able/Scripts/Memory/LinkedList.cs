@@ -11,15 +11,12 @@ namespace Askowl {
   /// </summary>
   /// <typeparam name="T">Type of item to be stored in each node</typeparam>
   /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist-a-different-perspective">LinkedList - a different perspective</a></remarks>
-  public class LinkedList<T> {
+  public class LinkedList<T> : IDisposable {
     /// <summary>
-    /// Each node in the linked list. Can be treated as a black box (mostly).
+    /// Each node in the linked list is one of these. Can be treated as a black box (mostly).
     /// </summary>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#nodes">LinkedList node</a></remarks>
     public class Node : IDisposable {
-      /// <summary>
-      /// Links to nodes on each side - null for end of list
-      /// </summary>
       /// <remarks><a href="http://unitydoc.marrington.net/Able#nodes">LinkedList node</a></remarks>
       public Node Previous, Next;
 
@@ -32,7 +29,7 @@ namespace Askowl {
       public LinkedList<T> Owner, Home;
 
       /// <summary>
-      /// The item you are storing in each node. Can be value type or object
+      /// It can be value type (int, float ... struct) or object (class instance)
       /// </summary>
       /// <remarks><a href="http://unitydoc.marrington.net/Able#nodes">LinkedList node</a></remarks>
       public T Item;
@@ -49,29 +46,20 @@ namespace Askowl {
       /// <remarks><a href="http://unitydoc.marrington.net/Able#node-comparison">NodeComparison Operator</a></remarks>
       public static bool operator >=(Node left, Node right) => left.Owner.compare(left, right) >= 0;
 
-      /// <summary>
-      /// Move this node to a new list
-      /// </summary>
-      /// <param name="to">List target of the move</param>
-      /// <returns>node for chaining</returns>
       /// <remarks><a href="http://unitydoc.marrington.net/Able#move-node-to-another-list">Move Node to Another List</a></remarks>
       public Node MoveTo(LinkedList<T> to) => to.Insert(this);
 
-      /// <summary>
-      /// Move this node to the end of the specified list
-      /// </summary>
-      /// <param name="to">List target of the move</param>
-      /// <returns>node for chaining</returns>
       /// <remarks><a href="http://unitydoc.marrington.net/Able#move-node-to-another-list">Move Node to Another List</a></remarks>
       public Node MoveToEndOf(LinkedList<T> to) => to.Append(this);
 
       /// <summary>
-      /// Call Item.Dispose if the item is IDisposable, then move it to the recycle bin.
+      /// Calls Item.Dispose if the item is IDisposable, then move it to the recycle bin.
       /// </summary>
       /// <remarks><a href="http://unitydoc.marrington.net/Able#dispose-of-this-node">Dispose of a Node</a></remarks>
       public Node Discard() {
-        (Item as IDisposable)?.Dispose();
+        Home.DeactivateItem(this);
         MoveToEndOf(Home.RecycleBin);
+
         return this;
       }
 
@@ -82,11 +70,6 @@ namespace Askowl {
       /// <remarks><a href="http://unitydoc.marrington.net/Able#node-name">Node Naming Convention</a></remarks>
       public override string ToString() => $"{Home} // {Owner}:: {Item}";
 
-      /// <summary>
-      /// Update Node Contents
-      /// </summary>
-      /// <param name="newItem">new for old</param>
-      /// <returns>node for chaining</returns>
       /// <remarks><a href="http://unitydoc.marrington.net/Able#update-node-contents">Update Node Contents</a></remarks>
       public Node Update(T newItem) {
         Item = newItem;
@@ -95,19 +78,12 @@ namespace Askowl {
     }
 
     #region New List
-    /// <summary>
-    /// Name for this list - either provided or generated from the type of item.
-    /// </summary>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#name">Linked List Name</a></remarks>
     public string Name { get { return name ?? (name = $"{typeof(T).Name}-{++ordinal}"); } set { name = value; } }
 
     private string name;
 
-    /// <summary>
-    /// Given the current and next nodes, return true if the current node is in range.<br/>
-    ///
     /// <code>new LinkedList&lt;int> {InRange = (node, next) => node.Item &lt; next.Item};</code>
-    /// </summary>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#ordered-linked-lists">Node Comparison</a></remarks>
     public Func<Node, Node, int> CompareNodes {
       get { return compare; }
@@ -120,8 +96,7 @@ namespace Askowl {
     private Func<Node, Node, int> compare = (left, right) => 0;
 
     /// <summary>
-    /// Create an instance of T, doing whatever is necessary to prepare it for
-    /// life in a Linked List
+    /// Create an instance of T, doing whatever is necessary to prepare (i.e. open connection)
     /// </summary>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#linked-list-with-custom-create-item">For Implicit Default Item Creation</a></remarks>
     public Func<T> CreateItem { private get; set; } = () => default(T);
@@ -133,6 +108,26 @@ namespace Askowl {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#linked-list-with-custom-create-item">For Implicit Default Item Creation</a></remarks>
     public Action<Node> ReactivateItem { private get; set; } = (node) => { };
 
+    public Action<Node> DeactivateItem { private get; set; } = (node) => (node.Item as IDisposable)?.Dispose();
+
+    /// <inheritdoc />
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#linked-listdisposal">For the rare times we need to clear a linked list</a></remarks>
+    public void Discard() {
+      Dispose();
+      if (recycleBin == null) return;
+
+      for (Node node = recycleBin.Top, next = null; node != null; node = next, next = node.Next) {
+        node.Home     = node.Owner = null;
+        node.Previous = node.Next  = null;
+        (node.Item as IDisposable)?.Dispose();
+      }
+    }
+
+    /// <remarks><a href="http://unitydoc.marrington.net/Able#linked-listdisposal">For the rare times we need to clear a linked list</a></remarks>
+    public void Dispose() {
+      while (Top != null) Top.Dispose();
+    }
+
     private bool ordered;
 
     // ReSharper disable once StaticMemberInGenericType
@@ -141,13 +136,11 @@ namespace Askowl {
 
     #region Node Creation and Movement
     /// <summary>
-    /// Give a new item, fetch a node from recycling or create it then insert into the linked list
+    /// Give a new item, fetch a node from recycling or create it then insert into the linked list.
     /// </summary>
-    /// <param name="newItem"></param>
-    /// <returns>node for chained calls</returns>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#add-an-item-to-the-current-list">Add an Item to a List</a></remarks>
     public Node Add(T newItem) =>
-      RecycleBin.Empty ? Insert(NewNode(newItem)) : RecycleBin.MoveTo(this).Update(newItem);
+      RecycleBin.Empty ? Insert(NewNode(newItem)) : RecycleBin.MoveFirstNodeTo(this).Update(newItem);
 
     /// <summary>
     /// Fetch a node from the recycle bin. If the bin is empty, use the creator
@@ -158,34 +151,23 @@ namespace Askowl {
     /// </summary>
     /// <returns>node for chained calls</returns>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#recycle-a-currently-unused-node">Get a recycled or new node</a></remarks>
-    public Node Fetch() =>
-      RecycleBin.Empty ? Insert(NewNode(CreateItem())) : Reactivator(RecycleBin.MoveTo(this));
+    public Node Fetch() {
+      if (RecycleBin.Empty) return Insert(NewNode(CreateItem()));
 
-    private Node Reactivator(Node node) {
+      var node = RecycleBin.MoveFirstNodeTo(this);
       ReactivateItem(node);
       return node;
     }
 
-    /// <summary>
-    /// Moves the first node of this list to another.
-    /// </summary>
-    /// <param name="to">List to move to</param>
-    /// <returns>node for chained calls</returns>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#move-the-first-node-to-another-list">Move Node Between Lists</a></remarks>
-    public Node MoveTo(LinkedList<T> to) => Top.MoveTo(to);
+    public Node MoveFirstNodeTo(LinkedList<T> to) => Top.MoveTo(to);
 
-    /// <summary>
-    /// Move the first node in this list to the end of another list
-    /// </summary>
-    /// <param name="to">List to move to</param>
-    /// <returns>node for chained calls</returns>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#move-the-first-node-to-another-list">Move Node Between Lists</a></remarks>
-    public Node MoveToEndOf(LinkedList<T> to) => Top.MoveToEndOf(to);
+    public Node MoveFirstNodeToEndOf(LinkedList<T> to) => Top.MoveToEndOf(to);
 
     /// <summary>
     /// Call Item.Dispose if the item is IDisposable, then move it to the recycle bin.
     /// </summary>
-    /// <returns>node for chained calls</returns>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#disposal-of-a-node">Dispose a Node</a></remarks>
     public Node Discard(Node node) => node.Discard();
 
@@ -249,9 +231,6 @@ namespace Askowl {
       node.Owner    = null;
     }
 
-    /// <summary>
-    /// Every linked list has a recycle bin.
-    /// </summary>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#node-creation-and-movement">List for Unused Nodes</a></remarks>
     public LinkedList<T> RecycleBin => recycleBin ?? (recycleBin = isRecycleBin ? null : newRecycleBin);
 
@@ -262,13 +241,13 @@ namespace Askowl {
 
     #region FiFo Stack
     /// <summary>
-    /// The node that is in the front of the linked list or null if list is empty
+    /// The node that is in the front/start of the linked list or null if list is empty
     /// </summary>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo">First Node in List</a></remarks>
     public Node Top;
 
     /// <summary>
-    /// The node that is in the front of the linked list or null if list is empty
+    /// The node that is in the back/end of the linked list or null if list is empty
     /// </summary>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo">Last Node in List</a></remarks>
     public Node Bottom;
@@ -279,9 +258,6 @@ namespace Askowl {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo">Second item in the list</a></remarks>
     public Node Next => Top?.Next;
 
-    /// <summary>
-    /// Use to see if there are any nodes in the list
-    /// </summary>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo">Is list empty?</a></remarks>
     public bool Empty => (Top == null);
 
@@ -297,28 +273,15 @@ namespace Askowl {
       }
     }
 
-    /// <summary>
-    /// Push a reference to or value of an item onto the FIFO stack. <see cref="Add"/>
-    /// </summary>
-    /// <param name="item"></param>
-    /// <returns>node for chained calls</returns>
+    /// <see cref="Add"/>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo">Add an item to the list</a></remarks>
     public Node Push(T item) => Add(item);
 
-    /// <summary>
-    ///
-    /// </summary>
-    /// Push an already existing node. It could have been on the same or another list
-    /// or in a recycling bin. <see cref="MoveTo"/>
-    /// <param name="node"></param>
-    /// <returns>node for chained calls</returns>
+    /// <see cref="MoveFirstNodeTo"/>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo">Add a node to the list</a></remarks>
     public Node Push(Node node) => node.MoveTo(this);
 
-    /// <summary>
-    /// Pop a node off the top of the fifo stack. <see cref="Discard"/>
-    /// </summary>
-    /// <returns>node for chained calls</returns>
+    /// <see cref="Discard"/>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo">Retrieve the first list item</a></remarks>
     public Node Pop() => Discard(Top);
     #endregion
@@ -354,18 +317,14 @@ namespace Askowl {
                   : $"**** LinkedList: move {node.Owner} to {append}{this}");
     }
 
-    /// <summary>
-    /// Generate a string with one line for each entry.
-    /// </summary>
-    /// <param name="entries">Maximum number of entries</param>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#dump">Return list contents as a string</a></remarks>
-    public string Dump(int entries = 1000) {
+    public string Dump(int maxEntriesToDump = 1000) {
       var builder = new StringBuilder();
       int line    = 0;
 
       Walk((node, next) => {
         builder.AppendLine($"{++line}:\t{node}");
-        return --entries > 0;
+        return --maxEntriesToDump > 0;
       });
 
       return builder.ToString();

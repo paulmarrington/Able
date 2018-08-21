@@ -55,5 +55,15 @@ namespace Askowl {
     /// </summary>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#almostequal-for-integers">check if two numbers are almost the same</a></remarks>
     public static bool AlmostEqual(int a, int b) => AlmostEqual(a, b, minimumChange: 2);
+
+    public static bool isDigitsOnly(string text) {
+      if (!(text?.Length > 0)) return false;
+
+      for (int i = 0; i < text.Length; i++) {
+        if ((text[i] < '0') || (text[i] > '9')) return false;
+      }
+
+      return true;
+    }
   }
 }

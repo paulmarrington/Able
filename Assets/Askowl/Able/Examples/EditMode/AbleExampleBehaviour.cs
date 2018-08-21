@@ -122,10 +122,6 @@ namespace Askowl.Examples {
 
       Debug.Log("RangeExample passed");
     }
-
-    internal void Error(Json json, string fmt, params object[] args) {
-      Debug.LogErrorFormat("{0} - {1}", string.Format(fmt, args), json.ErrorMessage);
-    }
   }
 }
 #endif
