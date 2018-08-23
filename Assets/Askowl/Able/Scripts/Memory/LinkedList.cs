@@ -11,9 +11,9 @@ namespace Askowl {
   /// <a href="">LinkedList - a different perspective</a>
   // ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
   public class LinkedList<T> : IDisposable {
-    /// <remarks><a href="">LinkedList node</a></remarks>
+    /// <a href="">LinkedList node</a>
     public class Node : IDisposable {
-      /// <remarks><a href="">LinkedList node</a></remarks>
+      /// <a href="">LinkedList node</a>
       public Node Previous, Next;
 
       /// <summary>
@@ -21,33 +21,33 @@ namespace Askowl {
       /// Home is the list in which the node was first inserted. It is to this
       /// recycle bin it will return on Dispose().
       /// </summary>
-      /// <remarks><a href="http://unitydoc.marrington.net/Able#node-home">Node Home List</a></remarks>
+      /// <a href="http://unitydoc.marrington.net/Able#node-home">Node Home List</a>
       public LinkedList<T> Owner, Home;
 
-      /// <remarks><a href="">Item can be value type (int, float ... struct) or object (class instance)</a></remarks>
+      /// <a href="">Item can be value type (int, float ... struct) or object (class instance)</a>
       public T Item;
 
-      /// <remarks><a href="">NodeComparison Operator</a></remarks>
-      public static bool operator <(Node left, Node right) => CompareItem(left, right) < 0;
+      /// <a href="">NodeComparison Operator</a>
+      public static bool operator <(Node left, Node right) => left.Owner.CompareItem(left, right) < 0;
 
-      /// <remarks><a href="http://unitydoc.marrington.net/Able#node-comparison">NodeComparison Operator</a></remarks>
-      public static bool operator <=(Node left, Node right) => CompareItem(left, right) <= 0;
+      /// <a href="http://unitydoc.marrington.net/Able#node-comparison">NodeComparison Operator</a>
+      public static bool operator <=(Node left, Node right) => left.Owner.CompareItem(left, right) <= 0;
 
-      /// <remarks><a href="http://unitydoc.marrington.net/Able#node-comparison">NodeComparison Operator</a></remarks>
-      public static bool operator >(Node left, Node right) => CompareItem(left, right) > 0;
+      /// <a href="http://unitydoc.marrington.net/Able#node-comparison">NodeComparison Operator</a>
+      public static bool operator >(Node left, Node right) => left.Owner.CompareItem(left, right) > 0;
 
-      /// <remarks><a href="http://unitydoc.marrington.net/Able#node-comparison">NodeComparison Operator</a></remarks>
-      public static bool operator >=(Node left, Node right) => CompareItem(left, right) >= 0;
+      /// <a href="http://unitydoc.marrington.net/Able#node-comparison">NodeComparison Operator</a>
+      public static bool operator >=(Node left, Node right) => left.Owner.CompareItem(left, right) >= 0;
 
-      /// <remarks><a href="http://unitydoc.marrington.net/Able#move-node-to-another-list">Move Node to Another List</a></remarks>
+      /// <a href="http://unitydoc.marrington.net/Able#move-node-to-another-list">Move Node to Another List</a>
       public Node MoveTo(LinkedList<T> to) => to.Insert(this);
 
-      /// <remarks><a href="http://unitydoc.marrington.net/Able#move-node-to-another-list">Move Node to Another List</a></remarks>
+      /// <a href="http://unitydoc.marrington.net/Able#move-node-to-another-list">Move Node to Another List</a>
       public Node MoveToEndOf(LinkedList<T> to) => to.Append(this);
 
-      /// <remarks><a href="http://unitydoc.marrington.net/Able#dispose-of-this-node">Dispose of a Node Forever</a></remarks>
+      /// <a href="http://unitydoc.marrington.net/Able#dispose-of-this-node">Dispose of a Node Forever</a>
       public void Destroy() {
-        DeactivateItem(this);
+        Owner.DeactivateItem(this);
         Item = default(T);
         Home.Unlink(this);
         Home = null;
@@ -55,7 +55,7 @@ namespace Askowl {
 
       /// <a href="http://unitydoc.marrington.net/Able#dispose-of-this-node">Calls Item.Dispose if the item is IDisposable, then move it to the recycle bin</a>
       public Node Recycle() {
-        DeactivateItem(this);
+        Owner.DeactivateItem(this);
         MoveToEndOf(Home.RecycleBin);
 
         return this;
@@ -65,10 +65,10 @@ namespace Askowl {
       public void Dispose() => Recycle();
 
       /// <inheritdoc />
-      /// <remarks><a href="http://unitydoc.marrington.net/Able#node-name">Node Naming Convention</a></remarks>
+      /// <a href="http://unitydoc.marrington.net/Able#node-name">Node Naming Convention</a>
       public override string ToString() => $"{Home} // {Owner}:: {Item}";
 
-      /// <remarks><a href="http://unitydoc.marrington.net/Able#update-node-contents">Update Node Contents</a></remarks>
+      /// <a href="http://unitydoc.marrington.net/Able#update-node-contents">Update Node Contents</a>
       public Node Update(T newItem) {
         Item = newItem;
         return this;
@@ -82,14 +82,6 @@ namespace Askowl {
       if (constructor == null) return null;
 
       return () => (T) constructor.Invoke(parameters: null);
-    }
-
-    private static Func<T> DefaultCreateItem() {
-      var flags  = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
-      var method = typeof(T).GetMethod("CreateItem", flags, null, CallingConventions.Standard, Type.EmptyTypes, null);
-      if (method != null) return () => (T) method.Invoke(null, null);
-
-      return CallConstructor() ?? (() => default(T));
     }
 
     private static MethodInfo DefaultMethod(string name, Type[] parameters) {
@@ -106,72 +98,87 @@ namespace Askowl {
       return node => method.Invoke(node.Item, null);
     }
 
-    private static Func<Node, Node, int> DefaultComparison() {
+    private static Func<Node, Node, int> GetDefaultCompareItem() {
       var method = DefaultMethod("CompareItem", ComparisonParameters);
-      if (method == null) return null;
+      if (method == null) return (node, other) => 0;
 
       ordered = true;
       return (node, other) => (int) method.Invoke(node.Item, new object[] {other.Item});
     }
 
-    private static Action<Node> DefaultDeactivateItem() =>
+    private static Func<T> GetDefaultCreateItem() {
+      var flags  = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+      var method = typeof(T).GetMethod("CreateItem", flags, null, CallingConventions.Standard, Type.EmptyTypes, null);
+      if (method != null) return () => (T) method.Invoke(null, null);
+
+      return CallConstructor() ?? (() => default(T));
+    }
+
+    private static Action<Node> GetDefaultDeactivateItem() =>
       DefaultActivation("DeactivateItem") ?? (node => (node.Item as IDisposable)?.Dispose());
 
-    private static Action<Node> DefaultReactivateItem() =>
+    private static Action<Node> GetDefaultReactivateItem() =>
       DefaultActivation("ReactivateItem") ?? (node => { });
-
-    private static Func<Node, Node, int> DefaultCompareItem() =>
-      DefaultComparison() ?? ((Node, other) => 0);
 
     private static bool ordered;
     private static int  ordinal;
     #endregion
 
     #region Public List Creation and Destruction
-    /// <remarks><a href="">Get an instance of this type of linked list</a></remarks>
-    public static LinkedList<T> Instance(string name) {
-      var list = new LinkedList<T>();
-      list.Name = string.IsNullOrWhiteSpace(name) ? $"{typeof(T).Name}-{++ordinal}" : name;
-      return list;
-    }
+    /// <a href="">Get an instance of this type of linked list</a>
+    public LinkedList(string name) { Name = string.IsNullOrWhiteSpace(name) ? $"{typeof(T).Name}-{++ordinal}" : name; }
 
-    /// <remarks><a href="">Linked List Name</a></remarks>
-    public string Name { get; private set; }
+    /// <a href="">Linked List Name</a>
+    public string Name { get; }
 
-    /// <remarks><a href="">Item Creation and Preparation when new() is not enough</a></remarks>
-    public static Func<T> CreateItem { private get; set; } = DefaultCreateItem();
+    /// <a href="">Item Creation and Preparation when new() is not enough</a>
+    public static readonly Func<T> CreateItemStatic = GetDefaultCreateItem();
+
+    /// <a href="">Item Creation and Preparation when new() is not enough</a>
+    public Func<T> CreateItem { private get; set; } = CreateItemStatic;
+
+    /// <a href=""></a>
+    public static readonly Action<Node> ReactivateItemStatic = GetDefaultReactivateItem();
 
     /// <a href="">Prepare an idle item for reuse</a>
-    public static Action<Node> ReactivateItem { private get; set; } = DefaultReactivateItem();
+    public Action<Node> ReactivateItem { private get; set; } = ReactivateItemStatic;
 
-    /// <remarks><a href="">For Deactivation when Dispose() is not enough</a></remarks>
-    public static Action<Node> DeactivateItem { private get; set; } = DefaultDeactivateItem();
+    /// <a href=""></a>
+    public static readonly Action<Node> DeactivateItemStatic = GetDefaultDeactivateItem();
 
-    /// <remarks><a href="">For Deactivation when Dispose() is not enough</a></remarks>
-    public static Func<Node, Node, int> CompareItem { private get; set; } = DefaultCompareItem();
+    /// <a href="">For Deactivation when Dispose() is not enough</a>
+    public Action<Node> DeactivateItem { private get; set; } = DeactivateItemStatic;
 
-    /// <remarks><a href="">For the rare times we need to clear a linked list</a></remarks>
+    /// <a href=""></a>
+    public static readonly Func<Node, Node, int> CompareItemStatic = GetDefaultCompareItem();
+
+    /// <a href="">For Deactivation when Dispose() is not enough</a>
+    public Func<Node, Node, int> CompareItem { private get; set; } = CompareItemStatic;
+
+    /// <a href="">For the rare times we need to clear a linked list</a>
     public void Destroy() {
       Dispose();
       while (recycleBin.Top != null) recycleBin.Top.Destroy();
     }
 
-    /// <remarks><a href="">For the rare times we need to clear a linked list</a></remarks>
+    /// <a href="">For the rare times we need to clear a linked list</a>
     public void Dispose() {
       while (Top != null) Top.Dispose();
     }
     #endregion
 
     #region Node Creation and Movement
-    /// <remarks><a href="t">Default comparison where everything is equal</a></remarks>
-    protected virtual int Compare(Node left, Node right) => 0;
+    /// <a href="">Add an Item to a List</a>
+    public Node Add(params T[] newItems) {
+      Node node = null;
+      int  idx  = 0;
 
-    /// <summary>
-    /// Give a new item, fetch a node from recycling or create it then insert into the linked list.
-    /// </summary>
-    /// <remarks><a href="t">Add an Item to a List</a></remarks>
-    public Node Add(T newItem) =>
-      RecycleBin.Empty ? Insert(NewNode(newItem)) : RecycleBin.Top.MoveTo(this).Update(newItem);
+      if (RecycleBin.Empty && (newItems.Length > 0)) node = Insert(NewNode(newItems[idx++]));
+
+      while (idx < newItems.Length) node = RecycleBin.Top.MoveTo(this).Update(newItems[idx++]);
+
+      return node;
+    }
 
     /// <summary>
     /// Fetch a node from the recycle bin. If the bin is empty, use the creator
@@ -181,7 +188,7 @@ namespace Askowl {
     /// if needed.
     /// </summary>
     /// <returns>node for chained calls</returns>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#recycle-a-currently-unused-node">Get a recycled or new node</a></remarks>
+    /// <a href="http://unitydoc.marrington.net/Able#recycle-a-currently-unused-node">Get a recycled or new node</a>
     public Node Fetch() {
       if (RecycleBin.Empty) return Insert(NewNode(CreateItem()));
 
@@ -250,31 +257,30 @@ namespace Askowl {
       node.Owner    = null;
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#node-creation-and-movement">List for Unused Nodes</a></remarks>
+    /// <a href="http://unitydoc.marrington.net/Able#node-creation-and-movement">List for Unused Nodes</a>
     public LinkedList<T> RecycleBin =>
       recycleBin ?? (recycleBin = isRecycleBin ? null : newRecycleBin);
 
-    private LinkedList<T> newRecycleBin => new LinkedList<T>
-      {isRecycleBin = true, Name = $"{Name} Recycling Bin"};
+    private LinkedList<T> newRecycleBin => new LinkedList<T>($"{Name} Recycling Bin") {isRecycleBin = true};
 
     private bool          isRecycleBin;
     private LinkedList<T> recycleBin;
     #endregion
 
     #region FiFo Stack
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo">First Node in List or null</a></remarks>
+    /// <a href="http://unitydoc.marrington.net/Able#fifo">First Node in List or null</a>
     public Node Top;
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo">Last Node in List or null</a></remarks>
+    /// <a href="http://unitydoc.marrington.net/Able#fifo">Last Node in List or null</a>
     public Node Bottom;
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo">Second item in the list or null</a></remarks>
+    /// <a href="http://unitydoc.marrington.net/Able#fifo">Second item in the list or null</a>
     public Node Next => Top?.Next;
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo">Is list empty?</a></remarks>
+    /// <a href="http://unitydoc.marrington.net/Able#fifo">Is list empty?</a>
     public bool Empty => (Top == null);
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo">Calculate number of items in a list</a></remarks>
+    /// <a href="http://unitydoc.marrington.net/Able#fifo">Calculate number of items in a list</a>
     public int Count {
       get {
         int count = 0;
@@ -284,13 +290,13 @@ namespace Askowl {
     }
 
     /// <see cref="Add"/>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo">Add an item to the list</a></remarks>
+    /// <a href="http://unitydoc.marrington.net/Able#fifo">Add an item to the list</a>
     public Node Push(T item) => Add(item);
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo">Add a node to the list</a></remarks>
+    /// <a href="http://unitydoc.marrington.net/Able#fifo">Add a node to the list</a>
     public Node Push(Node node) => node.MoveTo(this);
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#fifo">Retrieve the first list item - <see cref="Node.Recycle"/></a></remarks>
+    /// <a href="http://unitydoc.marrington.net/Able#fifo">Retrieve the first list item - <see cref="Node.Recycle"/></a>
     public Node Pop() => Top?.Recycle();
     #endregion
 
@@ -300,7 +306,7 @@ namespace Askowl {
     /// </summary>
     /// <param name="action">Do something with node. Stop walking if returns false</param>
     /// <returns>node that returned false in the action or null if all done</returns>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#walk-all-nodes">Node Walking</a></remarks>
+    /// <a href="http://unitydoc.marrington.net/Able#walk-all-nodes">Node Walking</a>
     public Node Walk(Func<Node, Node, bool> action) {
       for (Node next, node = Top; node != null; node = next) {
         if (!action(node, next = node.Next)) return node;
@@ -311,7 +317,7 @@ namespace Askowl {
     #endregion
 
     #region Debugging
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#debug-mode">Debug mode logs changes</a></remarks>
+    /// <a href="http://unitydoc.marrington.net/Able#debug-mode">Debug mode logs changes</a>
     // ReSharper disable once StaticMemberInGenericType
     public static bool DebugMode { private get; set; } = false;
 
@@ -321,7 +327,7 @@ namespace Askowl {
                   : $"**** LinkedList: move {node.Owner} to {append}{this}");
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#dump">Return list contents as a string</a></remarks>
+    /// <a href="http://unitydoc.marrington.net/Able#dump">Return list contents as a string</a>
     public string Dump(int maxEntriesToDump = 1000) {
       var builder = new StringBuilder();
       int line    = 0;
