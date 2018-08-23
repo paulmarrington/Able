@@ -28,7 +28,7 @@ namespace Askowl.Examples {
     public void DisposableT() {
       var sealedClass = new SealedClass();
 
-      using (new Disposable<SealedClass> {Payload = sealedClass}) {
+      using (new Disposable<SealedClass> {Value = sealedClass}) {
         Assert.AreEqual("g'day", sealedClass.howdie);
         sealedClass.howdie = "hi";
       }
@@ -41,7 +41,7 @@ namespace Askowl.Examples {
     public void DisposableTWithAction() {
       var sealedClass = new SealedClass();
 
-      using (new Disposable<SealedClass> {Payload = sealedClass, Action = Action}) {
+      using (new Disposable<SealedClass> {Value = sealedClass, Action = Action}) {
         Assert.AreEqual("g'day", sealedClass.howdie);
         sealedClass.howdie = "hi";
         Assert.AreEqual("hi", sealedClass.howdie);
@@ -57,7 +57,7 @@ namespace Askowl.Examples {
     public void DisposableTWithDispose() {
       var sealedClass = new SealedClassWithDispose();
 
-      using (new Disposable<SealedClassWithDispose> {Payload = sealedClass}) {
+      using (new Disposable<SealedClassWithDispose> {Value = sealedClass}) {
         Assert.AreEqual("morning", sealedClass.howdie);
         sealedClass.howdie = "hi";
         Assert.AreEqual("hi", sealedClass.howdie);
@@ -71,7 +71,7 @@ namespace Askowl.Examples {
     public void DisposableTWithDisposeAndAction() {
       var sealedClass = new SealedClassWithDispose();
 
-      using (new Disposable<SealedClassWithDispose> {Payload = sealedClass, Action = Action2}) {
+      using (new Disposable<SealedClassWithDispose> {Value = sealedClass, Action = Action2}) {
         Assert.AreEqual("morning", sealedClass.howdie);
         sealedClass.howdie = "hi";
         Assert.AreEqual("hi", sealedClass.howdie);

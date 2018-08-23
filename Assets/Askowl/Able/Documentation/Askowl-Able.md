@@ -393,7 +393,7 @@ AreEqual(expected, actual);
 
 ## Data Structures
 
-### Caching Objects
+### Caching Instances
 
 #### Cache Entry Maintenance
 
@@ -402,8 +402,6 @@ AreEqual(expected, actual);
 ##### DeactivateItem
 
 ##### ReactivateItem
-
-##### Disposable Cached Item
 
 ##### Using a Cached Item Safely
 
@@ -570,7 +568,7 @@ When walking the list it is sometimes good to see if the node passes or fails a 
 
 ##### Move the Node to Another List
 
-Moving nodes provides the core difference between this linked list implementation and others. Moving nodes between lists provides the basic mechanism for a caching state machine. Used in conjunction with ordered lists to feed them to a state in priority order.
+Moving nodes provides the core difference between this linked list implementation and others. Moving nodes between lists provides the basic mechanism for a caching state machine. Used in conjunction with ordered lists to feed them to a state in priority order. `MoveTo` moves the current node to the sorted location or top of the target list, while `MoveToEndOf` moves it to the bottom. The latter is used when disposing of a node so that the recycling list is used oldest first.
 
 ##### Update Node Contents
 
@@ -578,7 +576,7 @@ In a statement oriented world we would use `node.Item = value`, but sometimes a 
 
 ##### Dispose of this Node
 
-When you are done with a node, call `Discard()` or wrap in a `using` compound statement. Each node implements the `IDisposable`  interface. Being a green class, the trash is put into a recycling list rather than left hanging for the garbage collector.
+When you are done with a node, call `Recycle()` or wrap in a `using` compound statement. Each node implements the `IDisposable`  interface. Being a green class, the trash is put into a recycling list rather than left hanging for the garbage collector.
 
 ```c#
 using (var node = taskList.Top) {
@@ -586,7 +584,13 @@ using (var node = taskList.Top) {
 } // node sent to recycling
 ```
 
+To set a node adrift call `Destroy` instead. It will deactivate the held item and then forget the node ever existed. As soon as all references in your code go out of scope the garbage collector is free to reused the heap space.
 
+```c#
+taskList.Top.Destroy();
+```
+
+Calling `Destroy` on the LinkedList will destroy all entries in both active and recycle bin lists.
 
 #### Create a New Linked List
 
@@ -601,7 +605,7 @@ var numberList = new LinkedList<int>();
 Assert.AreEqual(expected: 0, actual: numberList.New());
 ```
 
-##### Linked-List with Custom Item Create and Reactivation
+##### Linked-List with Custom Item Create, Deactivation and Reactivation
 
 It is all well and good to return `default(T)`, being zeros or null references, but then the user of your list will need to know to create an item if it is not provided. As an example, consider a list of open long-lived HTTP connections.
 
@@ -609,6 +613,7 @@ It is all well and good to return `default(T)`, being zeros or null references, 
 var connections = LinkedList<Connection>{
     CreateItem     = () => new Connection(myURL);
     ReactivateItem = (node) => node.Item.CheckForStaleConnections();
+    DeactivateItem = (node) => mode.Item.SetLowPowerState();
 };
 // ...
 using (var node = connections.Fetch()) {
@@ -619,6 +624,8 @@ using (var node = connections.Fetch()) {
 Yes, I know. This example is ignoring the asynchronous nature of the request and the possibility that the connection has timed out. All in good time.
 
 When a node is sent to recycling it will call `Dispose()` on the item if it is an `IDisposable`. It the item needs reactivation when retrieved for reuse, set an activation parameter as demonstrated above.
+
+`DeactivateItem(node)` is called before the node is placed in the recycle bin.
 
 ##### Ordered Linked Lists
 
@@ -633,14 +640,14 @@ var fences = new LinkedLisk<Geofence> {
 if (fence.Active) fence.MoveTo(fences);	// injects in sorted order
 ```
 
+When an item is created or moved to an ordered list it will be placed on sorted order rather than just at the top.
+
 #### List Disposal
 
 Linked lists are mostly used as statics to keep lists of reusable elements. Sometimes they have a limited life, so need to be cleared for disposal or recycling in a parent linked list. There are two levels of cleanliness.
 
-1. `Dispose()` will dispose of any active elements, placing them in the recycle bin for later use. Use when you want to keep the linked list, but remove any outstanding elements. It will be implicitly called if it is an Item in a parent LinkedList.
-2. `Discard()` removes items from the recycle bin as well so that the linked list can be safe for the garbage collector to pick up.
-
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+1. `Discard()` will dispose of any active elements, placing them in the recycle bin for later use. Use when you want to keep the linked list, but remove any outstanding elements. It will be implicitly called if it is an Item in a parent LinkedList.
+2. `Dispose()` removes items from the recycle bin as well so that the linked list can be safe for the garbage collector to pick up.
 
 #### Node Creation and Movement
 
@@ -649,18 +656,18 @@ Linked lists are mostly used as statics to keep lists of reusable elements. Some
 If you have an item that has not been on a list, use `Add` to correct that oversight.
 
 ```c#
-fences.Add(newFence);
+var node = fences.Add(newFence);
 ```
 
 It will return a reference to the parent node if you need it for chaining.
 
 ##### Recycle a Currently Unused Node
 
-If you require a node where the contents are initialised elsewhere, use `Fetch`. It will pick one from the recycling heap. If the recycling is empty it will create a new item and matching node for you.
+If you require a node where the contents are initialised elsewhere, use `Fetch`. It will pick one from the recycling heap. If the recycling is empty it will create a new item and matching node for you. If `CreateItem` has not been set the item will be `default<T>`.
 
 ```c#
 using (node = weatherEvents.Fetch()) {
-    node.Item.activate();
+    node.Item.UseMe();
 }
 ```
 
@@ -687,11 +694,11 @@ There is also a function to move to the end of a list. It is used with the recyc
 
 ```c#
 var result = jobs.Top.Item;
-        if (result == null) {
-            jobs.Top.Discard(); // could have used Pop()
-        } else if (jobs.IHateThisPerson) {
-            jobs.Top.MoveToEnd(jobs);	// will never get processed
-        }
+if (result == null) {
+    jobs.Top.Discard(); // could have used Pop()
+} else if (jobs.IHateThisPerson) {
+    jobs.Top.MoveToEnd(jobs);	// will never get processed
+}
 ```
 
 ##### Disposal of a Node
@@ -722,12 +729,14 @@ For the uninitiated, ***Lifo*** is an acronym for *Last in first out*. A linked 
 ```c#
 var working = new LinkedList<MyWorld>();
 // ...
-var node = readyList.Top.MoveTo(working);
-yield return WaitForWorld(node);
-node.Dispose();
+var node = readyList.Top?.MoveTo(working);
+if (node != null) {
+    yield return WaitForWorld(node);
+    node.Dispose();
+}
 ```
 
-
+`Top?.MoveTo` ensures that the readyList only provides a node if it is not empty.
 
 ##### Next
 
@@ -737,21 +746,41 @@ node.Dispose();
 
 Bottom is the other less visited end of the stack/linked list. It is used a lot internally, but I can't think where I would use it elsewhere. It will come to me. Great for anyone who likes burning the candle from both ends. There is a `MoveToEnd` method that will make a node the new Bottom.
 
-##### Push
+##### Empty
 
-`Push` is another way of moving a node.
+The example above for `Top` is not how I would do it. A better method would be
 
 ```c#
-public Node Push(Node node) => node.MoveTo(this);
+var working = new LinkedList<MyWorld>();
 // ...
-dispatchList.Push(job);
+if (! readyList.Empty) {
+    using (var node = readyList.Top.MoveTo(working)) {
+        yield return WaitForWorld(node);
+    }
+}
 ```
 
+For this example, both methods are identical because `yield` does not pass back exceptions, so `using` has no benefit over a manual `dispose`.
 
+##### Count
+
+`Count` walks a linked list to see how many nodes there are. It is more expensive because the value is not stored.
+
+##### Push
+
+`Push` is another way of moving a node. You can push an item or a node onto a stack.
+
+```c#
+var node = idleList.Pop();
+dispatchList.Push(node);
+// ...
+var myItem = new MyItem();
+dispatchList.Push(myItem);
+```
 
 ##### Pop
 
-And, of course, for every push there has to be a pop. But what do we do about node conservation. Easy, put it in the recycle bin. Remember to finish with it or move it somewhere safe before the next implicit or explicit yield. You don't need to dispose of the node since it is already indisposed.
+And, of course, for every push there has to be a pop. But what do we do about node conservation? Easy, put it in the recycle bin. Remember to finish with it or move it somewhere safe before the next implicit or explicit yield. You don't need to dispose of the node since it is already indisposed.
 
 ```c#
 using (var node = taskList.Top) {
@@ -800,7 +829,7 @@ When enabled, `DebugMode` will cause a log entry for every creation or movement 
 
 ##### Dump
 
-`Dump` returns a string with the current contents of a linked list.
+`Dump` returns the current contents of a linked list as a multi-line formatted string.
 
 ### Pick.cs - Interface to choose from options
 
@@ -1171,6 +1200,7 @@ Sometimes we need to look at some UI text. We use regular expressions for that.
     CheckPattern(@"^Direct Event heard at \d\d/\d\d/\d\d\d\d \d\d:\d\d:\d\d", results.text);
 ```
 ### A Sample Play Mode Test
+
 Because we sent the slider with a quote, we need to test a range to make sure all is as it should be.
 ```C#
 [UnityTest]

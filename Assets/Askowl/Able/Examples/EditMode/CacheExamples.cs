@@ -1,45 +1,110 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-using System;
 using NUnit.Framework;
 
 namespace Askowl.Examples {
-  /// <remarks><a href="http://unitydoc.marrington.net/Able#cache"><see cref="Cache"/></a></remarks>
   public class CacheExamples {
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#createitem">Using <see cref="Cache{T}"/></a></remarks>
-    [Test]
-    public void CreateItem() { }
+//    // ReSharper disable once ClassNeverInstantiated.Global
+//    public sealed class SealedClass  {
+//      public string State { get; set; } = "New";
+//    }
+//
+//    public sealed class SealedClassProcessed  {
+//      public string State { get; set; } = "New";
+//    }
+//
+//    private struct MyStruct  {
+//      public string State { get; set; }
+//
+//      // A struct is useless in a cache if not initialised
+//      // ReSharper disable once UnusedMember.Local
+//      private static MyStruct CreateItem() => new MyStruct {State = "StructCreated"};
+//    }
+//
+//    // ReSharper disable once ClassNeverInstantiated.Local
+//    private class MyClassRaw : Cached<MyClassRaw> {
+//      public string State { get; set; }
+//    }
+//
+//    // ReSharper disable UnusedMember.Local
+//    private class MyClassProcessed : Cached<MyClassProcessed> {
+//      private new static MyClassProcessed CreateItem()     => new MyClassProcessed {State = "Created"};
+//      private new        void             DeactivateItem() => State = "Deactivated";
+//      private new        void             ReactivateItem() => State += "Reactivated";
+//
+//      public string State { get; set; }
+//    }
+//    // ReSharper restore UnusedMember.Local
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#deactivateitem">Using <see cref="Cache{T}"/></a></remarks>
     [Test]
-    public void DeactivateItem() { }
+    public void StructCreate() {
+      LinkedList<MyStruct>.DebugMode = true;
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#reactivateitem">Using <see cref="Cache{T}"/></a></remarks>
-    [Test]
-    public void ReactivateItem() { }
+      // can be used for value type and sealed classes.
+      using (var myStruct = Cache<MyStruct>.Disposable) {
+        Assert.AreEqual("StructCreated", myStruct.Value.State);
+      }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#disposable-cached-item">Using <see cref="Cache{T}.Disposable"/></a></remarks>
-    [Test]
-    public void Disposable() { }
+      Cache<MyStruct>.CleanCache(); //#TBD# Not working
+    }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#using-a-cached-item-safely">Using <see cref="Cache{T}.Use"/></a></remarks>
     [Test]
-    public void Use() { }
+    public void RawCreate() {
+      // and as a base class for objects we want to cache
+      using (var myClass = MyClassRaw.Instance) {
+        Assert.IsNull(myClass.State);
+        myClass.State = "using";
+      }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#caching-for-sealed-classes">Using <see cref="Cache"/></a></remarks>
-    [Test]
-    public void CachingForASealedClass() { }
+      // will pull instance from recyle bin, so will have State set from last time
+      using (var myClass = MyClassRaw.Instance) {
+        Assert.AreEqual(myClass.State, "using");
+      }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#cache-awareness">Using <see cref="Cache.Aware"/></a></remarks>
-    [Test]
-    public void CacheAwareness() { }
+      MyClassRaw.CleanCache();
+    }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#fetch-a-new-cache-aware-instance">Using <see cref="Cache.New{T}"/></a></remarks>
     [Test]
-    public void FetchANewCacheAwareInstance() { }
+    public void ProcessedCreateDeactivateReactivate() {
+      using (var myClass = MyClassProcessed.Instance) {
+        Assert.AreEqual("Created", myClass.State);
+        myClass.State = "using";
+      }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#cache-with-inheritance">Using <see cref="Cached{T}"/></a></remarks>
+      // will pull instance from recyle bin, with it's processing
+      using (var myClass = MyClassProcessed.Instance) {
+        Assert.AreEqual(myClass.State, "DeactivatedReactivated");
+      }
+
+      MyClassProcessed.CleanCache();
+    }
+
     [Test]
-    public void CacheWithInheritance() { }
+    public void Use() {
+      Cache<MyStruct>.Use((myStruct) => Assert.AreEqual("StructCreated", myStruct.State));
+
+      Cache<MyStruct>.CleanCache();
+    }
+
+    [Test]
+    public void CachingForASealedClass() {
+      Cache<SealedClass>.Use((sealedClassInstance) => Assert.AreEqual("New", sealedClassInstance.State));
+
+      var sealedContainer = Cache<SealedClassProcessed>.Disposable;
+      var sealedClass     = sealedContainer.Value;
+      Assert.AreEqual("CreateItem", sealedClass.State);
+      sealedContainer.Dispose();
+      Assert.AreEqual("DeactivateItem ReactivateItem", sealedClass.State);
+
+      Cache<SealedClass>.CleanCache();
+      Cache<SealedClassProcessed>.CleanCache();
+    }
+
+//
+//    static CacheExamples() {
+//      Cache<SealedClassProcessed>.CreateItem     = () => new SealedClassProcessed {State = "CreateItem"};
+//      Cache<SealedClassProcessed>.DeactivateItem = (seal) => seal.State =  "DeactivateItem";
+//      Cache<SealedClassProcessed>.ReactivateItem = (seal) => seal.State += " ReactivateItem";
+//    }
   }
 }

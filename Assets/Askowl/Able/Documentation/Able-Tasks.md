@@ -3,6 +3,8 @@
 ## Release 201?-??
 
 - [ ] Add JSON writer
+- [ ] Update Cache to have a clean old option - `PurgeRecycleBin(Func<Item,bool>)`
+- [ ] Update Json to parse in blocks
 
 ## Release 2018-08
 
@@ -15,9 +17,11 @@
 - [x] doc and test Trig
 - [x] doc and test Disposable
 - [x] doc and test Emitter
-- [x] doc and test LinkedList
+- [ ] doc and test LinkedList
 - [x] Doc and test Pick
 - [x] Doc and test Selector
+- [ ] Doc and test Cache
+- [ ] Doc and test TreeContainer
 - [ ] doc and test Set
 - [ ] doc and test Csv
 - [ ] doc and test PlayModeController

@@ -25,12 +25,12 @@ namespace Askowl {
     public Action<T> Action;
 
     /// <remarks><a href="http://unitydoc.marrington.net/Able#disposable-with-payload">Use Disposable for Greater Good</a></remarks>
-    public T Payload;
+    public T Value;
 
     /// <inheritdoc />
     public void Dispose() {
-      Action?.Invoke(Payload);
-      (Payload as IDisposable)?.Dispose();
+      Action?.Invoke(Value);
+      (Value as IDisposable)?.Dispose();
     }
   }
 }

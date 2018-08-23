@@ -76,7 +76,6 @@ namespace Askowl {
     private TreeContainer() { anchors = new Anchors {Stack = new LinkedList<Node>(), tree = this}; }
 
     static TreeContainer() {
-      CreateItem     = () => new TreeContainer();
       DeactivateItem = (tree) => tree.Root(); // so all the branches are disposed of correctly
       ReactivateItem = (tree) => tree.anchors.tree = tree;
     }
