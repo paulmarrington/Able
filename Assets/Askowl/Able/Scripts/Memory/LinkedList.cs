@@ -66,13 +66,22 @@ namespace Askowl {
 
       /// <inheritdoc />
       /// <a href="http://unitydoc.marrington.net/Able#node-name">Node Naming Convention</a>
-      public override string ToString() => $"{Home} // {Owner}:: {Item}";
+      public override string ToString() => $"{Owner} << {Home}:: {Item}";
 
-      /// <a href="http://unitydoc.marrington.net/Able#update-node-contents">Update Node Contents</a>
+      /// <a href=""></a>
       public Node Update(T newItem) {
         Item = newItem;
         return this;
       }
+
+      /// <a href=""></a>
+      public Node Fetch() => Home.Fetch().MoveTo(Owner);
+
+      /// <a href=""></a>
+      public Node Add(params T[] ts) => Owner.Add(newItems: ts);
+
+      /// <a href=""></a>
+      public int Count => Owner.Count;
     }
 
     #region Private create, deactivation and activation support
@@ -132,25 +141,25 @@ namespace Askowl {
     public string Name { get; }
 
     /// <a href="">Item Creation and Preparation when new() is not enough</a>
-    public static readonly Func<T> CreateItemStatic = GetDefaultCreateItem();
+    public static Func<T> CreateItemStatic = GetDefaultCreateItem();
 
     /// <a href="">Item Creation and Preparation when new() is not enough</a>
     public Func<T> CreateItem { private get; set; } = CreateItemStatic;
 
     /// <a href=""></a>
-    public static readonly Action<Node> ReactivateItemStatic = GetDefaultReactivateItem();
+    public static Action<Node> ReactivateItemStatic = GetDefaultReactivateItem();
 
     /// <a href="">Prepare an idle item for reuse</a>
     public Action<Node> ReactivateItem { private get; set; } = ReactivateItemStatic;
 
     /// <a href=""></a>
-    public static readonly Action<Node> DeactivateItemStatic = GetDefaultDeactivateItem();
+    public static Action<Node> DeactivateItemStatic = GetDefaultDeactivateItem();
 
     /// <a href="">For Deactivation when Dispose() is not enough</a>
     public Action<Node> DeactivateItem { private get; set; } = DeactivateItemStatic;
 
     /// <a href=""></a>
-    public static readonly Func<Node, Node, int> CompareItemStatic = GetDefaultCompareItem();
+    public static Func<Node, Node, int> CompareItemStatic = GetDefaultCompareItem();
 
     /// <a href="">For Deactivation when Dispose() is not enough</a>
     public Func<Node, Node, int> CompareItem { private get; set; } = CompareItemStatic;
@@ -258,8 +267,7 @@ namespace Askowl {
     }
 
     /// <a href="http://unitydoc.marrington.net/Able#node-creation-and-movement">List for Unused Nodes</a>
-    public LinkedList<T> RecycleBin =>
-      recycleBin ?? (recycleBin = isRecycleBin ? null : newRecycleBin);
+    public LinkedList<T> RecycleBin => isRecycleBin ? null : recycleBin ?? (recycleBin = newRecycleBin);
 
     private LinkedList<T> newRecycleBin => new LinkedList<T>($"{Name} Recycling Bin") {isRecycleBin = true};
 

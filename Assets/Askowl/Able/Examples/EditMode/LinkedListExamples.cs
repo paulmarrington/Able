@@ -14,12 +14,12 @@ namespace Askowl.Examples {
   /// <remarks><a href="http://unitydoc.marrington.net/Able#linkedlist-a-different-perspective">LinkedList - a different perspective</a></remarks>
   public class LinkedListExamples {
     #region Test Classes
-    public sealed class SealedClass {
-      public string State { get; set; } = "New";
+    public sealed class SealedClassRaw {
+      public string State { get; set; } = "InConstructor";
     }
 
     public sealed class SealedClassProcessed {
-      public string State { get; set; } = "New";
+      public string State { get; set; } = "InConstructor";
     }
 
     private struct MyStruct {
@@ -29,15 +29,23 @@ namespace Askowl.Examples {
       private static MyStruct CreateItem() => new MyStruct {State = "StructCreated"};
     }
 
+    private struct MyStructProcessed {
+      public string State { get; set; }
+    }
+
     private class MyClassRaw {
       public string State { get; set; }
     }
 
     private class MyClassProcessed {
-      private static MyClassProcessed CreateItem() => new MyClassProcessed {State = "Created"};
+      public string State { get; set; }
+    }
 
-      private void DeactivateItem()                    => State = "Deactivated";
-      private void ReactivateItem()                    => State += "Reactivated";
+    private class MyClassInherited {
+      private static MyClassInherited CreateItem() => new MyClassInherited {State = "CreateInherited"};
+
+      private void DeactivateItem()                    => State += " Deactivated";
+      private void ReactivateItem()                    => State += " Reactivated";
       private int  CompareItem(MyClassProcessed other) => State.CompareTo(other);
 
       public string State { get; set; }
@@ -47,12 +55,12 @@ namespace Askowl.Examples {
       Cache<SealedClassProcessed>.CreateItem =
         () => new SealedClassProcessed {State = "CreateItem"};
 
-      Cache<SealedClassProcessed>.DeactivateItem = (seal) => seal.State =  "DeactivateItem";
+      Cache<SealedClassProcessed>.DeactivateItem = (seal) => seal.State =  " DeactivateItem";
       Cache<SealedClassProcessed>.ReactivateItem = (seal) => seal.State += " ReactivateItem";
     }
     #endregion
 
-    #region Node tests
+    #region Node Tests
     ///<a href=""></a>
     [Test]
     public void NodePrevious() {
@@ -228,62 +236,229 @@ namespace Askowl.Examples {
       var node  = list1.Add(789);
       node.MoveTo(list2);
 
-      var expected = "NodeToString2 // NodeToString1:: 789";
+      var expected = "NodeToString2 << NodeToString1:: 789";
+      var actual   = node.ToString();
+      Assert.AreEqual(expected, actual);
     }
 
     ///<a href=""></a>
     [Test]
-    public void NodeUpdate() { }
+    public void NodeUpdate() {
+      var list = new LinkedList<int>("NodeUpdate");
+      list.Add(11, 12, 13);
+      var node = list.Add(14);
+      list.Add(15, 16, 17);
+
+      node.Item = 33; // will get overwritten in the next statement.
+      node.Update(99).MoveToEndOf(list);
+
+      Assert.AreEqual(expected: 99,   actual: list.Bottom.Item);
+      Assert.AreEqual(expected: node, actual: list.Bottom);
+      Assert.AreEqual(expected: 6,    actual: list.Count);
+    }
+
+    ///<a href=""></a>
+    [Test]
+    public void NodeAdd() {
+      var list1 = new LinkedList<int>("NodeAdd1");
+      var list2 = new LinkedList<int>("NodeAdd2");
+      var node  = list1.Add(123);
+
+      node.Add(456, 789);
+      node.MoveTo(list2);
+      node.Add(987, 654);
+
+      Assert.AreEqual(expected: 2,   actual: list1.Count);
+      Assert.AreEqual(expected: 3,   actual: list1.Count);
+      Assert.AreEqual(expected: 789, actual: list1.Top);
+      Assert.AreEqual(expected: 123, actual: list2.Bottom);
+      Assert.AreEqual(expected: 654, actual: list2.Top);
+    }
+
+    ///<a href=""></a>
+    [Test]
+    public void NodeFetch() {
+      var list1 = new LinkedList<int>("NodeFetch1");
+      var list2 = new LinkedList<int>("NodeFetch2");
+      var node  = list1.Add(123);
+
+      node.Add(456, 789);
+      node.MoveTo(list2);
+      node.Add(987, 654);
+
+      Assert.AreEqual(expected: 2,   actual: list1.Count);
+      Assert.AreEqual(expected: 3,   actual: list1.Count);
+      Assert.AreEqual(expected: 789, actual: list1.Top);
+      Assert.AreEqual(expected: 123, actual: list2.Bottom);
+      Assert.AreEqual(expected: 654, actual: list2.Top);
+    }
+
+    ///<a href=""></a>
+    [Test]
+    public void NodeCount() {
+      var list1 = new LinkedList<int>("NodeCount1");
+      var list2 = new LinkedList<int>("NodeCount2");
+      var node  = list1.Add(975, 310, 864);
+
+      Assert.AreEqual(expected: list1.Count, actual: node.Count);
+
+      node.MoveTo(list2);
+      Assert.AreNotEqual(expected: list1.Count, actual: node.Count);
+      Assert.AreEqual(expected: list2.Count, actual: node.Count);
+    }
     #endregion
 
     #region Public List Creation and Destruction
     ///<a href=""></a>
     [Test]
-    public void New() { }
+    public void NewList() {
+      var list = new LinkedList<int>("NewList");
+      Assert.NotNull(list);
+    }
 
     ///<a href=""></a>
     [Test]
-    public void Name() { }
+    public void Name() {
+      var list = new LinkedList<int>("Name");
+      Assert.AreEqual("Name", list.Name);
+    }
 
     ///<a href=""></a>
     [Test]
-    public void CreateItem() { }
+    public void CreateItemRaw() {
+      var list = new LinkedList<SealedClassRaw>("CreateItemRaw");
+
+      var fetched = list.Fetch();
+
+      Assert.AreEqual("InConstructor", fetched.Item);
+    }
 
     ///<a href=""></a>
     [Test]
-    public void CreateItemStatic() { }
+    public void CreateItemStatic() {
+      // Normally is static constructor
+      LinkedList<MyStructProcessed>.CreateItemStatic = () => new MyStructProcessed {State = "Static"};
+
+      var list = new LinkedList<MyStructProcessed>("CreateItemStatic");
+
+      var fetched = list.Fetch();
+
+      Assert.AreEqual("Static", fetched.Item);
+    }
 
     ///<a href=""></a>
     [Test]
-    public void CreateItemDefault() { }
+    public void CreateItemInstance() {
+      var list = new LinkedList<MyStructProcessed>("CreateItemInstance");
+
+      list.CreateItem = () => new MyStructProcessed {State = "Instance"};
+
+      var fetched = list.Fetch();
+
+      Assert.AreEqual("Instance", fetched.Item);
+    }
 
     ///<a href=""></a>
     [Test]
-    public void ReactivateItem() { }
+    public void CreateItemInherited() {
+      var list = new LinkedList<MyClassProcessed>("CreateItemInherited");
+
+      var fetched = list.Fetch();
+
+      Assert.AreEqual("CreateInherited", fetched.Item);
+    }
 
     ///<a href=""></a>
     [Test]
-    public void ReactivateItemStatic() { }
+    public void ReactivateItemRaw() {
+      var list = new LinkedList<SealedClassRaw>("ReactivateItemRaw");
+
+      list.Add(new SealedClassRaw {State = "New Item Raw"}).Recycle();
+      var reactivated = list.Fetch();
+
+      Assert.AreEqual(expected: "New Item Raw", actual: reactivated.Item.State);
+    }
 
     ///<a href=""></a>
     [Test]
-    public void ReactivateItemDefault() { }
+    public void ReactivateItemStatic() {
+      // Normally is static constructor
+      LinkedList<MyClassProcessed>.ReactivateItemStatic = (node) =>
+        node.Item.State = "Reactivate Static";
+
+      var list = new LinkedList<MyClassProcessed>("ReactivateItemStatic");
+
+      list.Add(new MyClassProcessed {State = "New Item Raw"}).Recycle();
+      var reactivated = list.Fetch();
+
+      Assert.AreEqual(expected: "Reactivate Static", actual: reactivated.Item.State);
+    }
 
     ///<a href=""></a>
     [Test]
-    public void DeactivateItem() { }
+    public void ReactivateItemInstance() {
+      var list = new LinkedList<MyClassProcessed>("ReactivateItemInstance")
+        {ReactivateItem = (node) => node.Item.State = "Reactivate Instance"};
+
+
+      list.Add(new MyClassProcessed {State = "New Item Raw"}).Recycle();
+      var reactivated = list.Fetch();
+
+      Assert.AreEqual(expected: "Reactivate Instance", actual: reactivated.Item.State);
+    }
+
+    ///<a href=""></a>
+    public void ReactivateItemInherited() {
+      var list = new LinkedList<MyClassInherited>("ReactivateItemInstance");
+
+      list.Fetch().Recycle();
+      var reactivated = list.Fetch();
+
+      Assert.AreEqual(expected: "CreateInherited Deactivated Reactivated", actual: reactivated.Item.State);
+    }
 
     ///<a href=""></a>
     [Test]
-    public void DeactivateItemStatic() { }
+    public void DeactivateItemRaw() {
+      var list = new LinkedList<SealedClassRaw>("DeactivateItemRaw");
+
+      var deactivated = list.Add(new SealedClassRaw {State = "New Item Raw"}).Recycle();
+
+      Assert.AreEqual(expected: "New Item Raw", actual: deactivated.Item.State);
+    }
 
     ///<a href=""></a>
     [Test]
-    public void DeactivateItemDefault() { }
+    public void DeactivateItemStatic() { // Normally is static constructor
+      LinkedList<MyClassProcessed>.DeactivateItemStatic = (node) =>
+        node.Item.State = "Deactivate Static";
+
+      var list = new LinkedList<MyClassProcessed>("DeactivateItemStatic");
+
+      var deactivated = list.Add(new MyClassProcessed {State = "New Item Raw"}).Recycle();
+
+      Assert.AreEqual(expected: "Deactivate Static", actual: deactivated.Item.State);
+    }
 
     ///<a href=""></a>
     [Test]
-    public void CompareItem() { }
+    public void DeactivateItemInstance() {
+      var list = new LinkedList<MyClassProcessed>("DeactivateItemInstance")
+        {DeactivateItem = (node) => node.Item.State = "Deactivate Instance"};
+
+
+      var deactivated = list.Add(new MyClassProcessed {State = "New Item Raw"}).Recycle();
+
+      Assert.AreEqual(expected: "Deactivate Instance", actual: deactivated.Item.State);
+    }
+
+    ///<a href=""></a>
+    [Test]
+    public void DeactivateItemInherited() { }
+
+    ///<a href=""></a>
+    [Test]
+    public void CompareItemRaw() { }
 
     ///<a href=""></a>
     [Test]
@@ -291,7 +466,11 @@ namespace Askowl.Examples {
 
     ///<a href=""></a>
     [Test]
-    public void CompareItemDefault() { }
+    public void CompareItemDInstance() { }
+
+    ///<a href=""></a>
+    [Test]
+    public void CompareItemInherited() { }
 
     ///<a href=""></a>
     [Test]
@@ -436,12 +615,9 @@ namespace Askowl.Examples {
     [Test]
     public void AddOrderedSealed() {
       var linkedList = new LinkedList<int>("AddOrderedSealed");
-
       linkedList.CompareItem = (node, other) => node.Item.CompareTo(other.Item);
-
       linkedList.Add(1);
       linkedList.Add(3);
-
       Assert.AreEqual(expected: 1, actual: linkedList.Top.Item);
       Assert.AreEqual(expected: 3, actual: linkedList.Next.Item);
     }
@@ -451,9 +627,11 @@ namespace Askowl.Examples {
     public void AddOrderedUnsealed() {
       var linkedList = LinkedList<MyClassProcessed>.Instance("AddOrderedUnsealed");
 
-      linkedList.Add(new MyClassProcessed {State = "First Added"});
-      linkedList.Fetch().Item.State = "Second uses Fetch";
+      linkedList.Add(new MyClassProcessed {
+        State = "First Added"
+      });
 
+      linkedList.Fetch().Item.State = "Second uses Fetch";
       Assert.AreEqual(expected: "Second uses Fetch", actual: linkedList.Top.Item.State);
       Assert.AreEqual(expected: "First Added",       actual: linkedList.Next.Item.State);
     }
@@ -466,7 +644,11 @@ namespace Askowl.Examples {
       node.Dispose();
       Assert.IsTrue(linkedList.Empty);
       Assert.AreEqual(expected: 1, actual: linkedList.RecycleBin.Count);
-      linkedList.Add(new MyClassRaw {State = "First Added"});
+
+      linkedList.Add(new MyClassRaw {
+        State = "First Added"
+      });
+
       Assert.IsTrue(linkedList.RecycleBin.Empty);
       Assert.AreEqual(expected: 1,             actual: linkedList.Count);
       Assert.AreEqual(expected: "First Added", actual: linkedList.Top.Item.State);
@@ -495,7 +677,11 @@ namespace Askowl.Examples {
     [Test]
     public void RecycleWithActivator() {
       var list = LinkedList<MyClassProcessed>.Instance("RecycleWithActivator");
-      list.Add(new MyClassProcessed {State = "RecycleWithActivator"}).Recycle();
+
+      list.Add(new MyClassProcessed {
+        State = "RecycleWithActivator"
+      }).Recycle();
+
       var reactivated = list.Fetch();
       Assert.AreEqual(expected: "DeactivateItem ReactivateItem", actual: reactivated.Item.State);
     }
