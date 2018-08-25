@@ -66,7 +66,7 @@ namespace Askowl {
 
       /// <inheritdoc />
       /// <a href="http://unitydoc.marrington.net/Able#node-name">Node Naming Convention</a>
-      public override string ToString() => $"{Owner} << {Home}:: {Item}";
+      public override string ToString() => $"{Owner,25}  <<  {Home,-25}::  {Item}";
 
       /// <a href=""></a>
       public Node Update(T newItem) {
@@ -82,6 +82,15 @@ namespace Askowl {
 
       /// <a href=""></a>
       public int Count => Owner.Count;
+
+      /// <a href=""></a>
+      public Node Push(T t) => Home.Push(item: t).MoveTo(Owner);
+
+      /// <a href=""></a>
+      public Node Push(Node node) => Owner.Push(node);
+
+      /// <a href=""></a>
+      public Node Pop() => Owner.Pop();
     }
 
     #region Private create, deactivation and activation support
@@ -98,10 +107,10 @@ namespace Askowl {
       return typeof(T).GetMethod(name, flags, null, CallingConventions.HasThis, parameters, null);
     }
 
-    private static Type[] ActivationParameters = {typeof(T)}, ComparisonParameters = {typeof(T), typeof(T)};
+    private static Type[] ComparisonParameters = {typeof(T), typeof(T)};
 
     private static Action<Node> DefaultActivation(string name) {
-      var method = DefaultMethod(name, ActivationParameters);
+      var method = DefaultMethod(name, Type.EmptyTypes);
       if (method == null) return null;
 
       return node => method.Invoke(node.Item, null);
@@ -111,8 +120,8 @@ namespace Askowl {
       var method = DefaultMethod("CompareItem", ComparisonParameters);
       if (method == null) return (node, other) => 0;
 
-      ordered = true;
-      return (node, other) => (int) method.Invoke(node.Item, new object[] {other.Item});
+      orderedDynamic = true;
+      return (node, other) => (int) method.Invoke(node.Item, new object[] {node.Item, other.Item});
     }
 
     private static Func<T> GetDefaultCreateItem() {
@@ -129,7 +138,9 @@ namespace Askowl {
     private static Action<Node> GetDefaultReactivateItem() =>
       DefaultActivation("ReactivateItem") ?? (node => { });
 
-    private static bool ordered;
+    private static bool orderedStatic;
+    private static bool orderedDynamic;
+    private        bool ordered = orderedStatic || orderedDynamic;
     private static int  ordinal;
     #endregion
 
@@ -159,20 +170,36 @@ namespace Askowl {
     public Action<Node> DeactivateItem { private get; set; } = DeactivateItemStatic;
 
     /// <a href=""></a>
-    public static Func<Node, Node, int> CompareItemStatic = GetDefaultCompareItem();
+    public static Func<Node, Node, int> CompareItemStatic {
+      private get { return compareItemStatic; }
+      set {
+        orderedStatic     = true;
+        compareItemStatic = value;
+      }
+    }
 
-    /// <a href="">For Deactivation when Dispose() is not enough</a>
-    public Func<Node, Node, int> CompareItem { private get; set; } = CompareItemStatic;
+    private static Func<Node, Node, int> compareItemStatic = GetDefaultCompareItem();
+
+    /// <a href=""></a>
+    public Func<Node, Node, int> CompareItem {
+      private get { return compareItem; }
+      set {
+        orderedDynamic = ordered = true;
+        compareItem    = value;
+      }
+    }
+
+    private Func<Node, Node, int> compareItem = compareItemStatic;
 
     /// <a href="">For the rare times we need to clear a linked list</a>
     public void Destroy() {
       Dispose();
-      while (recycleBin.Top != null) recycleBin.Top.Destroy();
+      while (recycleBin.First != null) recycleBin.First.Destroy();
     }
 
     /// <a href="">For the rare times we need to clear a linked list</a>
     public void Dispose() {
-      while (Top != null) Top.Dispose();
+      while (First != null) First.Dispose();
     }
     #endregion
 
@@ -182,9 +209,9 @@ namespace Askowl {
       Node node = null;
       int  idx  = 0;
 
-      if (RecycleBin.Empty && (newItems.Length > 0)) node = Insert(NewNode(newItems[idx++]));
+      while (!RecycleBin.Empty && (idx < newItems.Length)) node = RecycleBin.First.MoveTo(this).Update(newItems[idx++]);
 
-      while (idx < newItems.Length) node = RecycleBin.Top.MoveTo(this).Update(newItems[idx++]);
+      while (idx < newItems.Length) node = Insert(NewNode(newItems[idx++]));
 
       return node;
     }
@@ -201,7 +228,7 @@ namespace Askowl {
     public Node Fetch() {
       if (RecycleBin.Empty) return Insert(NewNode(CreateItem()));
 
-      var node = RecycleBin.Top.MoveTo(this);
+      var node = RecycleBin.First.MoveTo(this);
       ReactivateItem(node);
       return node;
     }
@@ -213,51 +240,59 @@ namespace Askowl {
 
     private Node Insert(Node nodeToInsert) {
       if (DebugMode) DebugMessage(nodeToInsert);
-
+      Count++;
       Unlink(nodeToInsert);
-      nodeToInsert.Owner = this;
-      if (Empty) return Bottom = Top = nodeToInsert;
 
-      Node after = Top;
+      nodeToInsert.Owner = this;
+      if (Empty) return Last = First = nodeToInsert;
+
+      Node after = First;
 
       if (ordered) {
-        after = Walk((node, _) => nodeToInsert >= node);
-
-        if (after == null) {
-          nodeToInsert.Previous = Bottom;
-          return Bottom = (Bottom.Next = nodeToInsert);
+        while (nodeToInsert > after) {
+          if ((after = after.Next) == null) {
+            nodeToInsert.Previous = Last;
+            Last.Next             = nodeToInsert;
+            return Last = nodeToInsert;
+          }
         }
       }
 
       nodeToInsert.Next     = after;
       nodeToInsert.Previous = after.Previous;
-      after.Previous        = nodeToInsert;
-      if (Bottom == null) Bottom = nodeToInsert;
-      if (after  == Top) Top     = nodeToInsert;
+
+      if (after.Previous != null) after.Previous.Next = nodeToInsert;
+      after.Previous = nodeToInsert;
+
+      if (Last  == null) Last   = nodeToInsert;
+      if (after == First) First = nodeToInsert;
       return nodeToInsert;
     }
 
     private Node Append(Node nodeToAppend) {
       if (DebugMode) DebugMessage(nodeToAppend, "end of ");
-
+      Count++;
       Unlink(nodeToAppend);
-      nodeToAppend.Owner = this;
-      if (Empty) return Bottom = Top = nodeToAppend;
 
-      nodeToAppend.Previous = Bottom;
-      Bottom.Next           = nodeToAppend;
-      Bottom                = nodeToAppend;
+      nodeToAppend.Owner = this;
+      if (Empty) return Last = First = nodeToAppend;
+
+      nodeToAppend.Previous = Last;
+      Last.Next             = nodeToAppend;
+      Last                  = nodeToAppend;
       return nodeToAppend;
     }
 
     private void Unlink(Node node) {
-      if (node == node.Owner.Top) {
-        node.Owner.Top = node.Next;
-      } else if (node == node.Owner.Bottom) {
-        node.Owner.Bottom = node.Previous;
+      if (node == node.Owner.First) {
+        node.Owner.First = node.Next;
+      } else if (node == node.Owner.Last) {
+        node.Owner.Last = node.Previous;
       } else if ((node.Previous == null) && (node.Next == null)) {
         return; // Node doesn't belong to anyone
       }
+
+      node.Owner.Count--;
 
       if (node.Previous != null) node.Previous.Next = node.Next;
       if (node.Next     != null) node.Next.Previous = node.Previous;
@@ -277,25 +312,19 @@ namespace Askowl {
 
     #region FiFo Stack
     /// <a href="http://unitydoc.marrington.net/Able#fifo">First Node in List or null</a>
-    public Node Top;
+    public Node First;
 
     /// <a href="http://unitydoc.marrington.net/Able#fifo">Last Node in List or null</a>
-    public Node Bottom;
+    public Node Last;
 
     /// <a href="http://unitydoc.marrington.net/Able#fifo">Second item in the list or null</a>
-    public Node Next => Top?.Next;
+    public Node Second => First?.Next;
 
     /// <a href="http://unitydoc.marrington.net/Able#fifo">Is list empty?</a>
-    public bool Empty => (Top == null);
+    public bool Empty => (First == null);
 
     /// <a href="http://unitydoc.marrington.net/Able#fifo">Calculate number of items in a list</a>
-    public int Count {
-      get {
-        int count = 0;
-        Walk((node, next) => ++count != 0);
-        return count;
-      }
-    }
+    public int Count { get; private set; }
 
     /// <see cref="Add"/>
     /// <a href="http://unitydoc.marrington.net/Able#fifo">Add an item to the list</a>
@@ -305,23 +334,7 @@ namespace Askowl {
     public Node Push(Node node) => node.MoveTo(this);
 
     /// <a href="http://unitydoc.marrington.net/Able#fifo">Retrieve the first list item - <see cref="Node.Recycle"/></a>
-    public Node Pop() => Top?.Recycle();
-    #endregion
-
-    #region Traversal
-    /// <summary>
-    /// Walk all nodes - or until the action says otherwise
-    /// </summary>
-    /// <param name="action">Do something with node. Stop walking if returns false</param>
-    /// <returns>node that returned false in the action or null if all done</returns>
-    /// <a href="http://unitydoc.marrington.net/Able#walk-all-nodes">Node Walking</a>
-    public Node Walk(Func<Node, Node, bool> action) {
-      for (Node next, node = Top; node != null; node = next) {
-        if (!action(node, next = node.Next)) return node;
-      }
-
-      return null;
-    }
+    public Node Pop() => First?.Recycle();
     #endregion
 
     #region Debugging
@@ -340,16 +353,18 @@ namespace Askowl {
       var builder = new StringBuilder();
       int line    = 0;
 
-      Walk((node, next) => {
+      for (var node = First; (node != null) && (maxEntriesToDump-- > 0); node = node.Next) {
         builder.AppendLine($"{++line}:\t{node}");
-        return --maxEntriesToDump > 0;
-      });
+      }
 
       return builder.ToString();
     }
 
     /// <inheritdoc />
-    public override string ToString() => Name;
+    public override string ToString() {
+      var count = (recycleBin != null) ? $"({Count}/{recycleBin.Count})" : $"({Count})";
+      return $"{Name} {count,8}";
+    }
     #endregion
   }
 }

@@ -20,6 +20,7 @@
 - [ ] doc and test LinkedList
 - [x] Doc and test Pick
 - [x] Doc and test Selector
+- [ ] Write, doc and test Map
 - [ ] Doc and test Cache
 - [ ] Doc and test TreeContainer
 - [ ] doc and test Set

@@ -33,19 +33,19 @@ namespace Askowl {
 
   /// <remarks><a href="">The parent and worker for caching</a></remarks>
   public class Cache<T> {
-    internal static readonly LinkedList<T> Entries = new LinkedList<T>();
+    internal static readonly LinkedList<T> Entries = new LinkedList<T>($"{typeof(T)} Cache");
 
     /// <remarks><a href="http://bit.ly">Destroy everything in cache - including recycling</a></remarks>
     public static void CleanCache() => Entries.Destroy();
-
-    /// <remarks><a href="http://bit.ly">Anything you need to do before recycling?</a></remarks>
-    public static Func<T> CreateItem { set { LinkedList<T>.CreateItem = value; } }
-
-    /// <remarks><a href="http://bit.ly">To create an entry when none are available</a></remarks>
-    public static Action<T> DeactivateItem { set { LinkedList<T>.DeactivateItem = (node) => value(node.Item); } }
-
-    /// <remarks><a href="http://bit.ly">What to do when an old item is restored from recycling</a></remarks>
-    public static Action<T> ReactivateItem { set { LinkedList<T>.ReactivateItem = (node) => value(node.Item); } }
+//
+//    /// <remarks><a href="http://bit.ly">Anything you need to do before recycling?</a></remarks> //#TBD#
+//    public static Func<T> CreateItem { set { LinkedList<T>.CreateItem = value; } }
+//
+//    /// <remarks><a href="http://bit.ly">To create an entry when none are available</a></remarks>
+//    public static Action<T> DeactivateItem { set { LinkedList<T>.DeactivateItem = (node) => value(node.Item); } }
+//
+//    /// <remarks><a href="http://bit.ly">What to do when an old item is restored from recycling</a></remarks>
+//    public static Action<T> ReactivateItem { set { LinkedList<T>.ReactivateItem = (node) => value(node.Item); } }
 
     /// <remarks><a href="http://bit.ly">Get entry when you will manually dispose later</a></remarks>
     public static Disposable<T> Disposable {

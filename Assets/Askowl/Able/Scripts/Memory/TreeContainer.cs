@@ -4,8 +4,9 @@ using System;
 using System.Text;
 
 namespace Askowl {
+  /// <inheritdoc cref="Cached{T}" />
   /// <remarks><a href="http://unitydoc.marrington.net/Able#tree">Non-binary Tree</a></remarks>
-  public class TreeContainer : Cached<TreeContainer>, IDisposable {
+  public class TreeContainer : Cached<TreeContainer> {
     #region Private Data
     private class Node : LinkedList<Branch>.Node { }
 
@@ -28,7 +29,7 @@ namespace Askowl {
         obj is Branch ? String.Compare(Name, ((Branch) obj).Name, StringComparison.Ordinal) : 0;
     }
 
-    private static LinkedList<Branch> branches = new LinkedList<Branch>();
+    private static LinkedList<Branch> branches = new LinkedList<Branch>("TreeContainer Branches");
 
     private Node root = (Node) branches.Add(new Branch {Name = "Root"});
     private Node here;
@@ -73,15 +74,18 @@ namespace Askowl {
       Array.Sort(parent.Children);
     }
 
-    private TreeContainer() { anchors = new Anchors {Stack = new LinkedList<Node>(), tree = this}; }
+    private TreeContainer() {
+      anchors = new Anchors {Stack = new LinkedList<Node>("TreeContainer Anchor Stack"), tree = this};
+    }
 
     static TreeContainer() {
-      DeactivateItem = (tree) => tree.Root(); // so all the branches are disposed of correctly
-      ReactivateItem = (tree) => tree.anchors.tree = tree;
+//      DeactivateItem = (tree) => tree.Root(); // so all the branches are disposed of correctly //#TBD#
+//      ReactivateItem = (tree) => tree.anchors.tree = tree;
     }
     #endregion
 
     #region Public Interface
+    /// <a href=""></a>
     public TreeContainer Add(string name) {
       var node = (Node) branches.Add(new Branch {Name = name, Leaf = null, Parent = here, Children = null});
       AddChild(here, node);
@@ -89,17 +93,20 @@ namespace Askowl {
       return this;
     }
 
+    /// <a href=""></a>
     public TreeContainer AddAnonymous() => Add(null);
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#tree-traversal">Traversing the Tree</a></remarks>
+    /// <a href=""></a>
     public TreeContainer Root() {
       ErrorMessage = null;
       here         = root;
       return this;
     }
 
+    /// <a href=""></a>
     public bool IsRoot => here == root;
 
+    /// <a href=""></a>
     public TreeContainer Parent() {
       if (here.Item.Parent != null) here = here.Item.Parent;
       return this;
@@ -128,8 +135,10 @@ namespace Askowl {
       return this;
     }
 
+    /// <a href=""></a>
     public string Name => here.Item.Name;
 
+    /// <inheritdoc />
     public override string ToString() {
       stringBuilder.Clear();
       HereToString(indent: "");
@@ -138,25 +147,34 @@ namespace Askowl {
 
     private StringBuilder stringBuilder = new StringBuilder();
 
+    /// <a href=""></a>
     public TreeContainer Leaf<T>(T setTo) {
       here.Item.Leaf = setTo;
       return this;
     }
 
+    /// <a href=""></a>
     public TreeContainer Leaf(object setTo) {
       here.Item.Leaf = setTo;
       return this;
     }
 
-    public bool HasLeaf  => here.Item.Leaf != null;
+    /// <a href=""></a>
+    public bool HasLeaf => here.Item.Leaf != null;
+
+    /// <a href=""></a>
     public bool IsA<T>() => here.Item.Leaf is T;
 
+    /// <a href=""></a>
     public T Leaf<T>() => (here.Item.Leaf is T) ? (T) here.Item.Leaf : default(T);
 
+    /// <a href=""></a>
     public object Leaf() => here.Item.Leaf;
 
+    /// <a href=""></a>
     public bool HasAnonymousChildren => (here.Item.NumberOfChildren > 0) && (here.Item.Children[0].Item.Name == null);
 
+    /// <a href=""></a>
     public int ChildCount => here.Item.NumberOfChildren;
 
     /// <summary>
@@ -176,8 +194,10 @@ namespace Askowl {
       return this;
     }
 
-    public void Dispose() { Root().DisposeHere(); }
+    /// <a href=""></a>
+    public override void Dispose() { Root().DisposeHere(); }
 
+    /// <a href=""></a>
     public void DisposeHere() {
       var children = here.Item.Children;
 
@@ -237,11 +257,12 @@ namespace Askowl {
       return false;
     }
 
-    private char[] charsToTrim = {',', ' '};
+//    private char[] charsToTrim = {',', ' '};
 
+    // ReSharper disable once UnusedParameter.Local
     private void HereToString(string indent) {
       stringBuilder.Append(Name).Append(":");
-      if (here.Item.Leaf != null) stringBuilder.Append(" ").Append(here.Item.Leaf.ToString());
+      if (here.Item.Leaf != null) stringBuilder.Append(" ").Append(here.Item.Leaf);
       stringBuilder.AppendLine();
 
       ForEach(() => HereToString($"{indent}  "));
