@@ -887,6 +887,10 @@ When enabled, `DebugMode` will cause a log entry for every creation or movement 
 
 Returns a string containing the list name and counts for it and the attached recycle bin.
 
+### Map - A Simplistic Alternative to Dictionary
+
+
+
 ### Pick.cs - Interface to choose from options
 
 Interface to pick an item, probably from a list, probably random. It all depends on how you implement `Pick()`.

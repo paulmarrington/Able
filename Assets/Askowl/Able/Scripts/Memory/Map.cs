@@ -15,21 +15,22 @@ namespace Askowl {
       var length = (Count < 4) ? 4 : Count;
       keys   = new object[length];
       values = new object[length];
-      Add(keyValuePairs);
+      Add(keyValuePairs: keyValuePairs);
     }
 
     /// <a href=""></a>
     public Map Set(params object[] newKeys) {
       var oldCount = Count;
-      Count += keys.Length;
+      Count += newKeys.Length;
 
-      if (keys.Length < Count) Resize(Count);
+      if (keys.Length < Count) Resize(to: Count);
 
       for (int i = oldCount, j = 0; i < Count; i++) {
-        keys[i]   = keys[j++];
+        keys[i]   = newKeys[j++];
         values[i] = null;
       }
 
+      Array.Sort(keys: keys, items: values, index: 0, length: Count);
       return this;
     }
 
@@ -38,38 +39,44 @@ namespace Askowl {
       var oldCount = Count;
       Count += keyValuePairs.Length / 2;
 
-      if (keys.Length < Count) Resize(Count);
+      if (keys.Length < Count) Resize(to: Count);
 
       for (int i = oldCount, j = 0; i < Count; i++) {
         keys[i]   = keyValuePairs[j++];
         values[i] = keyValuePairs[j++];
       }
 
+      Array.Sort(keys: keys, items: values, index: 0, length: Count);
       return this;
     }
 
     /// <a href=""></a>
     public bool Contains(object key) {
-      Closest = Array.BinarySearch(array: keys, value: Key = key);
+      closest = Array.BinarySearch(array: keys, value: Key = key);
+      Found   = closest >= 0;
 
-      if (Closest >= 0) {
-        Value = values[Closest];
+      if (Found) {
+        Value = values[closest];
         return true;
       }
 
-      Closest = ~Closest;
+      closest = ~closest;
+      Key     = ((closest >= 0) && (closest < keys.Length)) ? keys[closest] : "";
       Value   = null;
       return false;
     }
 
     /// <a href=""></a>
-    public bool IsA<T>(object key) => Contains(key) && (Value is T);
+    public bool IsA<T>(object key) => Contains(key: key) && (Value is T);
 
     /// <a href=""></a>
-    public T Get<T>(object key) where T : class => Contains(key) ? (Value as T) : null;
+    public T Get<T>(object key) => IsA<T>(key: key) ? ((T) Value) : default(T);
 
     /// <a href=""></a>
-    public int Closest { get; private set; }
+    private int closest;
+
+    /// <a href=""></a>
+    public bool Found { get; private set; }
 
     /// <a href=""></a>
     public object Key { get; private set; }
