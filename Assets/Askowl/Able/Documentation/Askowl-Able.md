@@ -545,10 +545,12 @@ C#/.Net provides an excellent LinkList implementation. It is, by necessity gener
 
 1. Reduce garbage collection by keeping unused nodes in a recycling list.
 2. Ordered lists by providing a comparator.
-3. State management by making it easy to move nodes between lists.
-4. Fifo implementation.
-5. Walk the list without creating new or temporary object.
-6. Debugging support by logging node movements.
+3. Manage state with create, deactivate and reactivate.
+4. All four support functions above can be inherited or injected for class or instance.
+5. State management by making it easy to move nodes between lists.
+6. Fifo implementation.
+7. Walk the list without creating new or temporary object.
+8. Debugging support by logging node movements.
 
 #### Nodes
 
@@ -592,6 +594,14 @@ taskList.Top.Destroy();
 
 Calling `Destroy` on the LinkedList will destroy all entries in both active and recycle bin lists.
 
+##### Fetch a New Node from `Home`
+
+A new (or recycled) node is fetched from the current node's `Home` list then moved to `Owner`. If that is not your requirement, use `node.Home.Fetch()` or `node.Owner.Fetch()`.
+
+##### Push an Item to `Owner`
+
+Given a reference to an entry item, create a node where it's `Home` is the same as the current node. It is pushed onto the `Owner` list for processing.
+
 #### Create a New Linked List
 
 Creation defines how the linked list will behave.
@@ -613,7 +623,7 @@ It is all well and good to return `default(T)`, being zeros or null references, 
 var connections = LinkedList<Connection>{
     CreateItem     = () => new Connection(myURL);
     ReactivateItem = (node) => node.Item.CheckForStaleConnections();
-    DeactivateItem = (node) => mode.Item.SetLowPowerState();
+    DeactivateItem = (node) => node.Item.SetLowPowerState();
 };
 // ...
 using (var node = connections.Fetch()) {
@@ -627,13 +637,44 @@ When a node is sent to recycling it will call `Dispose()` on the item if it is a
 
 `DeactivateItem(node)` is called before the node is placed in the recycle bin.
 
+All three custom functions can be created in different ways, depending on need.
+
+```c#
+// 1. per-class/struct/value-type
+LinkedList<int>.CreateItemStatic     = () => -1;
+LinkedList<int>.DeactivateItemStatic = (node) => node.Item = -2;
+LinkedList<int>.ReactivateItemStatic = (node) => node.Item = -1;
+LinkedList<int>.CompareItemStatic = (a, b) => a.CompareTo(b);
+// 2. inherited
+private class MyClass {
+    private static MyClass CreateItem() => new MyClass {State = "C"};
+    private void DeactivateItem() => State = "D";
+    private void ReactivateItem() => State = "R";
+    int CompareItem(MyClass a, MyClass b) => a.State.CompareTo(b.State);
+    public int State;
+}
+// 3. per-instance control
+var numbers = LinkedList<int> {
+    CreateItem     = () => -1;
+    DeactivateItem = (node) => node.Item = -2;
+    ReactivateItem = (node) => node.Item = -1;
+    CompareItem    = (left, right) => left.CompareTo(right);
+}
+```
+
+The static methods will be active for any items of that class unless they are overridden by a per-instance invocation.
+
+Inherited methods will also be active for any items of that class unless they are overridden by a per-instance or static invocation.
+
+Per-instance invocations will only effect one instance of a linked list.
+
 ##### Ordered Linked Lists
 
 Caching state machines and the like need a list of jobs to process in priority order. Priority could also be a time, a distance or any other measure that we can compare.
 
 ```c#
 var fences = new LinkedLisk<Geofence> {
-    CompareNodes = (left, right) 
+    CompareItem = (left, right) 
         => node.Item.Distance.CompareTo(cursor.Item.Distance)
 }
 // fences nodes now implement <, <=, >, >=, == and !=
@@ -642,9 +683,11 @@ if (fence.Active) fence.MoveTo(fences);	// injects in sorted order
 
 When an item is created or moved to an ordered list it will be placed on sorted order rather than just at the top.
 
+As above, `CompareItem` can be inherited, set for a class or an instance.
+
 #### List Disposal
 
-Linked lists are mostly used as statics to keep lists of reusable elements. Sometimes they have a limited life, so need to be cleared for disposal or recycling in a parent linked list. There are two levels of cleanliness.
+Linked lists are commonly used as statics to keep lists of reusable elements. Sometimes they have a limited life, so need to be cleared for disposal or recycling in a parent linked list. There are two levels of cleanliness.
 
 1. `Discard()` will dispose of any active elements, placing them in the recycle bin for later use. Use when you want to keep the linked list, but remove any outstanding elements. It will be implicitly called if it is an Item in a parent LinkedList.
 2. `Dispose()` removes items from the recycle bin as well so that the linked list can be safe for the garbage collector to pick up.
@@ -659,7 +702,7 @@ If you have an item that has not been on a list, use `Add` to correct that overs
 var node = fences.Add(newFence);
 ```
 
-It will return a reference to the parent node if you need it for chaining.
+It will return a reference to a node holding the new item.
 
 ##### Recycle a Currently Unused Node
 
@@ -678,11 +721,11 @@ And now we get to the part where real magic happens. Different components can ow
 ```c#
 void Update() {
     if (! jobs.Empty) {
-        var result = jobs.Top.Item;
+        var result = jobs.First.Item;
         if (result == null) {
-            jobs.Top.Discard(); // could have used jobs.Pop()
+            jobs.First.Discard(); // could have used jobs.Pop()
         } else {
-            jobs.Top.MoveTo(dispatcherList);
+            jobs.First.MoveTo(dispatcherList);
         }
     }
 }
@@ -693,11 +736,11 @@ In this admittedly theoretical example, once a job has been processed it is eith
 There is also a function to move to the end of a list. It is used with the recycle bin to better disperse usage (LRU - least recently used). It can also be used to move an item to the end of the list regardless of priority.
 
 ```c#
-var result = jobs.Top.Item;
+var result = jobs.First.Item;
 if (result == null) {
-    jobs.Top.Discard(); // could have used Pop()
+    jobs.First.Discard(); // could have used Pop()
 } else if (jobs.IHateThisPerson) {
-    jobs.Top.MoveToEnd(jobs);	// will never get processed
+    jobs.First.MoveToEnd(jobs);	// will never get processed
 }
 ```
 
@@ -722,14 +765,14 @@ Sometimes we do not know the lifetime of an item beforehand. In this case whoeve
 
 For the uninitiated, ***Lifo*** is an acronym for *Last in first out*. A linked list is well suited for Lifo stacks. The return stack used by most languages with functions is Lifo, so every return returns from the most recently entered function. Stack based languages such as FORTH and FICL make working with Lifo an art form of efficiency (and unreadability). We use Lifo stacks every day with the undo stack when editing or the back button on a browser.
 
-##### Top
+##### First
 
 `Top` is the standard entry to the linked list, so using Top has no overhead. `Top` will be null if the list is empty. `Top` allows access to the first item for processing before deciding what to move or discard it. Don't expect `Top` to remain when you yield or otherwise relinquish the CPU. If you need it longer, move the item to a list to which your code has exclusive access.
 
 ```c#
 var working = new LinkedList<MyWorld>();
 // ...
-var node = readyList.Top?.MoveTo(working);
+var node = readyList.First?.MoveTo(working);
 if (node != null) {
     yield return WaitForWorld(node);
     node.Dispose();
@@ -738,13 +781,13 @@ if (node != null) {
 
 `Top?.MoveTo` ensures that the readyList only provides a node if it is not empty.
 
-##### Next
+##### Second
 
-`Next` is the second entry below `Top`. It will be null if the list has one entry or is empty. Use it as a premonition of things to come. For ordered list you can tell if there is more immediate work. Can you think of any other uses?
+`Second` is the second entry below `First`. It will be null if the list has one entry or is empty. Use it as a premonition of things to come. For ordered list you can tell if there is more immediate work. Can you think of any other uses?
 
-##### Bottom
+##### Last
 
-Bottom is the other less visited end of the stack/linked list. It is used a lot internally, but I can't think where I would use it elsewhere. It will come to me. Great for anyone who likes burning the candle from both ends. There is a `MoveToEnd` method that will make a node the new Bottom.
+`Last` is the other less visited end of the stack/linked list. It is used a lot internally, but I can't think where I would use it elsewhere. It will come to me. Great for anyone who likes burning the candle from both ends. There is a `MoveToEnd` method that will make a node the new Bottom.
 
 ##### Empty
 
@@ -764,7 +807,7 @@ For this example, both methods are identical because `yield` does not pass back 
 
 ##### Count
 
-`Count` walks a linked list to see how many nodes there are. It is more expensive because the value is not stored.
+`Count` walks a linked list to see how many nodes there are.
 
 ##### Push
 
@@ -795,7 +838,7 @@ In some ways this is better because you are free to move the node without it bei
 
 #### Node Walking
 
-Sing to the melody of *Jive Walking*. Seriously, node walking is the best way of processing all or some of the items in a list. Think of a list of tasks where only tasks that have exceeded their use-by date are to be processed.
+Sing to the melody of *Jive Walking*. Seriously, node walking is the best way of processing all or some of the items in a list. 
 
 ```c#
 var tasks = new LinkedList<Task> {
@@ -805,15 +848,24 @@ var tasks = new LinkedList<Task> {
 tasks.Add(new Task {Ready=Time.RealtimeSinceStartup + 60});	// 1 minute
 // ...
 void Update() {
-    tasks.Walk((node, next) => {
-        if (node >= Time.RealtimeSinceStartup) return false;
-        using (node) { Process(node.Item); } // node is discarded afterwards
-        return true;
-    });
+    for (var node = tasks.First; node != null; node = node.Next) {
+        Check(node.Item);
+    }
 }
 ```
 
-The `Walk` action is called for every item in the list from `Top` to `Bottom` or until the action returns false. In this example a task is left idle for one minute before being processed and disposed of. By wrapping it in a `using` statement `Dispose` will be called even if an exception was thrown.
+ Think of a list of tasks where only tasks that have exceeded their use-by date are to be processed. Because we want to discard the node when done, we need to keep a reference to Next.
+
+```c#
+void Update() {
+      var next = node.Next;
+      for (node = list1.First; node != null; node = next, next = node.Next) {
+        if (node.Item.Ready >= Time.RealtimeSinceStartup) break;
+        using (node) { Process(node.Item); } // node is discarded afterwards             	}
+}
+```
+
+By wrapping it in a `using` statement `Dispose` will be called even if an exception was thrown.
 
 #### Debug Mode
 
@@ -830,6 +882,10 @@ When enabled, `DebugMode` will cause a log entry for every creation or movement 
 ##### Dump
 
 `Dump` returns the current contents of a linked list as a multi-line formatted string.
+
+##### ToString
+
+Returns a string containing the list name and counts for it and the attached recycle bin.
 
 ### Pick.cs - Interface to choose from options
 

@@ -5,6 +5,7 @@
 - [ ] Add JSON writer
 - [ ] Update Cache to have a clean old option - `PurgeRecycleBin(Func<Item,bool>)`
 - [ ] Update Json to parse in blocks
+- [ ] LinkedList needs an alert when the either main or recycle exceeds a specific size
 
 ## Release 2018-08
 
@@ -17,7 +18,7 @@
 - [x] doc and test Trig
 - [x] doc and test Disposable
 - [x] doc and test Emitter
-- [ ] doc and test LinkedList
+- [x] doc and test LinkedList
 - [x] Doc and test Pick
 - [x] Doc and test Selector
 - [ ] Write, doc and test Map

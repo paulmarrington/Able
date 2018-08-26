@@ -51,9 +51,11 @@ namespace Askowl.Examples {
     private class MyClassInherited {
       private static MyClassInherited CreateItem() => new MyClassInherited {State = "CreateInherited"};
 
-      private void DeactivateItem()                                           => State += " Deactivated";
-      private void ReactivateItem()                                           => State += " Reactivated";
-      private int  CompareItem(MyClassInherited node, MyClassInherited other) => String.Compare(node.State, other.State, StringComparison.Ordinal);
+      private void DeactivateItem() => State += " Deactivated";
+      private void ReactivateItem() => State += " Reactivated";
+
+      private int CompareItem(MyClassInherited node, MyClassInherited other) =>
+        String.Compare(node.State, other.State, StringComparison.Ordinal);
 
       public          string State      { get; set; }
       public override string ToString() => State;
@@ -220,7 +222,7 @@ namespace Askowl.Examples {
 
       Assert.AreEqual(456, list.RecycleBin.Last.Item);
 
-      var node3 = list.Add(789);
+      list.Add(789);
       Assert.AreEqual(456, list.RecycleBin.First.Item);
       Assert.AreEqual(1,   list.RecycleBin.Count);
       Assert.AreEqual(1,   list.Count);
@@ -271,71 +273,18 @@ namespace Askowl.Examples {
 
     ///<a href=""></a>
     [Test]
-    public void NodeAdd() {
-      var list1 = new LinkedList<int>("NodeAdd1");
-      var list2 = new LinkedList<int>("NodeAdd2");
-      var node  = list1.Add(123);
-
-      node.Add(456, 789);
-      node.MoveTo(list2);
-      node.Add(987, 654);
-
-      Assert.AreEqual(expected: 2,   actual: list1.Count);
-      Assert.AreEqual(expected: 3,   actual: list2.Count);
-      Assert.AreEqual(expected: 789, actual: list1.First.Item);
-      Assert.AreEqual(expected: 123, actual: list2.Last.Item);
-      Assert.AreEqual(expected: 654, actual: list2.First.Item);
-    }
-
-    ///<a href=""></a>
-    [Test]
     public void NodeFetch() {
       var list1 = new LinkedList<int>("NodeFetch1");
       var list2 = new LinkedList<int>("NodeFetch2");
       var node  = list1.Add(123);
 
-      node.Add(456, 789);
       node.MoveTo(list2);
-      node.Add(987, 654);
+      var newNode = node.Fetch();
 
-      Assert.AreEqual(expected: 2,   actual: list1.Count);
-      Assert.AreEqual(expected: 3,   actual: list2.Count);
-      Assert.AreEqual(expected: 789, actual: list1.First.Item);
-      Assert.AreEqual(expected: 123, actual: list2.Last.Item);
-      Assert.AreEqual(expected: 654, actual: list2.First.Item);
-    }
-
-    ///<a href=""></a>
-    [Test]
-    public void NodeCount() {
-      var list1 = new LinkedList<int>("NodeCount1");
-      var list2 = new LinkedList<int>("NodeCount2");
-      var node  = list1.Add(975, 310, 864);
-
-      Assert.AreEqual(expected: list1.Count, actual: node.Count);
-
-      node.MoveTo(list2);
-      Assert.AreNotEqual(expected: list1.Count, actual: node.Count);
-      Assert.AreEqual(expected: list2.Count, actual: node.Count);
-    }
-
-    ///<a href=""></a>
-    [Test]
-    public void NodePushNode() {
-      var list1 = new LinkedList<int>("NodePushNode1");
-      var list2 = new LinkedList<int>("NodePushNode2");
-      var node1 = list1.Add(123);
-      var node2 = list1.Add(456);
-
-      node2.Push(node1);
-      Assert.AreEqual(expected: 123, actual: list1.First.Item);
-
-      node1.MoveTo(list2);
-
-      // Push(node) always pushes to the Owner
-      node1.Push(node2);
-      Assert.AreEqual(expected: 456, actual: list2.First.Item);
-      Assert.AreEqual(expected: 2,   actual: list2.Count);
+      Assert.AreEqual(expected: 0,          actual: list1.Count);
+      Assert.AreEqual(expected: 2,          actual: list2.Count);
+      Assert.AreEqual(expected: node.Home,  actual: newNode.Home);
+      Assert.AreEqual(expected: node.Owner, actual: newNode.Owner);
     }
 
     ///<a href=""></a>
@@ -344,25 +293,13 @@ namespace Askowl.Examples {
       var list1 = new LinkedList<int>("NodePushItem1");
       var list2 = new LinkedList<int>("NodePushItem2");
       var node  = list1.Add(123);
-
       node.Push(444);
       Assert.AreEqual(expected: 444, actual: list1.First.Item);
-
       node.MoveTo(list2);
 
       // here the node is created on Home and moved to Owner
       node.Push(555);
       Assert.AreEqual(expected: 555, actual: list2.First.Item);
-    }
-
-    ///<a href=""></a>
-    [Test]
-    public void NodePop() {
-      var list = new LinkedList<int>("NodePop");
-      var node = list.Add(123);
-
-      node.Pop();
-      Assert.AreEqual(1, list.RecycleBin.Count);
     }
     #endregion
 
@@ -384,10 +321,8 @@ namespace Askowl.Examples {
     ///<a href=""></a>
     [Test]
     public void CreateItemRaw() {
-      var list = new LinkedList<SealedClassRaw>("CreateItemRaw");
-
+      var list    = new LinkedList<SealedClassRaw>("CreateItemRaw");
       var fetched = list.Fetch();
-
       Assert.AreEqual("InConstructor", fetched.Item.State);
     }
 
@@ -395,12 +330,12 @@ namespace Askowl.Examples {
     [Test]
     public void CreateItemStatic() {
       // Normally is static constructor
-      LinkedList<MyStructProcessed>.CreateItemStatic = () => new MyStructProcessed {State = "Static"};
+      LinkedList<MyStructProcessed>.CreateItemStatic = () => new MyStructProcessed {
+        State = "Static"
+      };
 
-      var list = new LinkedList<MyStructProcessed>("CreateItemStatic");
-
+      var list    = new LinkedList<MyStructProcessed>("CreateItemStatic");
       var fetched = list.Fetch();
-
       Assert.AreEqual("Static", fetched.Item.State);
     }
 
@@ -411,17 +346,14 @@ namespace Askowl.Examples {
         {CreateItem = () => new MyStructProcessed {State = "Instance"}};
 
       var fetched = list.Fetch();
-
       Assert.AreEqual("Instance", fetched.Item.State);
     }
 
     ///<a href=""></a>
     [Test]
     public void CreateItemInherited() {
-      var list = new LinkedList<MyClassInherited>("CreateItemInherited");
-
+      var list    = new LinkedList<MyClassInherited>("CreateItemInherited");
       var fetched = list.Fetch();
-
       Assert.AreEqual("CreateInherited", fetched.Item.State);
     }
 
@@ -430,9 +362,11 @@ namespace Askowl.Examples {
     public void ReactivateItemRaw() {
       var list = new LinkedList<SealedClassRaw>("ReactivateItemRaw");
 
-      list.Add(new SealedClassRaw {State = "New Item Raw"}).Recycle();
-      var reactivated = list.Fetch();
+      list.Add(new SealedClassRaw {
+        State = "New Item Raw"
+      }).Recycle();
 
+      var reactivated = list.Fetch();
       Assert.AreEqual(expected: "New Item Raw", actual: reactivated.Item.State);
     }
 
@@ -445,9 +379,11 @@ namespace Askowl.Examples {
 
       var list = new LinkedList<MyClassProcessed>("ReactivateItemStatic");
 
-      list.Add(new MyClassProcessed {State = "New Item Raw"}).Recycle();
-      var reactivated = list.Fetch();
+      list.Add(new MyClassProcessed {
+        State = "New Item Raw"
+      }).Recycle();
 
+      var reactivated = list.Fetch();
       Assert.AreEqual(expected: "Reactivate Static", actual: reactivated.Item.State);
     }
 
@@ -457,9 +393,11 @@ namespace Askowl.Examples {
       var list = new LinkedList<MyClassProcessed>("ReactivateItemInstance")
         {ReactivateItem = (node) => node.Item.State = "Reactivate Instance"};
 
-      list.Add(new MyClassProcessed {State = "New Item Raw"}).Recycle();
-      var reactivated = list.Fetch();
+      list.Add(new MyClassProcessed {
+        State = "New Item Raw"
+      }).Recycle();
 
+      var reactivated = list.Fetch();
       Assert.AreEqual(expected: "Reactivate Instance", actual: reactivated.Item.State);
     }
 
@@ -467,20 +405,16 @@ namespace Askowl.Examples {
     [Test]
     public void ReactivateItemInherited() {
       var list = new LinkedList<MyClassInherited>("ReactivateItemInstance");
-
       list.Fetch().Recycle();
       var reactivated = list.Fetch();
-
       Assert.AreEqual(expected: "CreateInherited Deactivated Reactivated", actual: reactivated.Item.State);
     }
 
     ///<a href=""></a>
     [Test]
     public void DeactivateItemRaw() {
-      var list = new LinkedList<SealedClassRaw>("DeactivateItemRaw");
-
+      var list        = new LinkedList<SealedClassRaw>("DeactivateItemRaw");
       var deactivated = list.Add(new SealedClassRaw {State = "New Item Raw"}).Recycle();
-
       Assert.AreEqual(expected: "New Item Raw", actual: deactivated.Item.State);
     }
 
@@ -490,10 +424,8 @@ namespace Askowl.Examples {
       LinkedList<MyClassProcessed>.DeactivateItemStatic = (node) =>
         node.Item.State = "Deactivate Static";
 
-      var list = new LinkedList<MyClassProcessed>("DeactivateItemStatic");
-
+      var list        = new LinkedList<MyClassProcessed>("DeactivateItemStatic");
       var deactivated = list.Add(new MyClassProcessed {State = "New Item Raw"}).Recycle();
-
       Assert.AreEqual(expected: "Deactivate Static", actual: deactivated.Item.State);
     }
 
@@ -504,17 +436,14 @@ namespace Askowl.Examples {
         {DeactivateItem = (node) => node.Item.State = "Deactivate Instance"};
 
       var deactivated = list.Add(new MyClassProcessed {State = "New Item Raw"}).Recycle();
-
       Assert.AreEqual(expected: "Deactivate Instance", actual: deactivated.Item.State);
     }
 
     ///<a href=""></a>
     [Test]
     public void DeactivateItemInherited() {
-      var list = new LinkedList<MyClassInherited>("DeactivateItemInherited");
-
+      var list        = new LinkedList<MyClassInherited>("DeactivateItemInherited");
       var deactivated = list.Fetch().Recycle();
-
       Assert.AreEqual(expected: "CreateInherited Deactivated", actual: deactivated.Item.State);
     }
 
@@ -536,26 +465,43 @@ namespace Askowl.Examples {
 
       var list = new LinkedList<MyClassProcessed>("CompareItemStatic");
 
-      list.Add(new MyClassProcessed {State = "Item 1"}, new MyClassProcessed {State = "Item 2"});
+      list.Add(new MyClassProcessed {
+        State = "Item 1"
+      }, new MyClassProcessed {
+        State = "Item 2"
+      });
+
       Assert.AreEqual(expected: "Item 1", actual: list.First.Item.State);
       Assert.AreEqual(expected: "Item 2", actual: list.Second.Item.State);
     }
 
     ///<a href=""></a>
     [Test]
-    public void CompareItemInstance() { //#TBD# fails first time
+    public void CompareItemInstance() {
       var list = new LinkedList<MyClassProcessed>("CompareItemInstance") {
         CompareItem = (left, right) => string.Compare(left.Item.State, right.Item.State, StringComparison.Ordinal)
       };
 
-      list.Add(new MyClassProcessed {State = "Item 1"}, new MyClassProcessed {State = "Item 2"});
+      list.Add(new MyClassProcessed {
+        State = "Item 1"
+      }, new MyClassProcessed {
+        State = "Item 2"
+      });
+
       Assert.AreEqual(expected: "Item 1", actual: list.First.Item.State);
       Assert.AreEqual(expected: "Item 2", actual: list.Second.Item.State);
 
       // does not affect another instance
       var list2 = new LinkedList<MyClassProcessed>("CompareItemInstance2");
-      list2.Add(new MyClassProcessed {State = "Item 1"});
-      list2.Add(new MyClassProcessed {State = "Item 2"});
+
+      list2.Add(new MyClassProcessed {
+        State = "Item 1"
+      });
+
+      list2.Add(new MyClassProcessed {
+        State = "Item 2"
+      });
+
       Assert.AreEqual(expected: "Item 2", actual: list2.First.Item.State);
       Assert.AreEqual(expected: "Item 1", actual: list2.Second.Item.State);
     }
@@ -565,7 +511,12 @@ namespace Askowl.Examples {
     public void CompareItemInherited() {
       var list = new LinkedList<MyClassInherited>("CompareItemInherited");
 
-      list.Add(new MyClassInherited {State = "Item 1"}, new MyClassInherited {State = "Item 2"});
+      list.Add(new MyClassInherited {
+        State = "Item 1"
+      }, new MyClassInherited {
+        State = "Item 2"
+      });
+
       Assert.AreEqual(expected: "Item 1", actual: list.First.Item.State);
       Assert.AreEqual(expected: "Item 2", actual: list.Second.Item.State);
 
@@ -575,7 +526,12 @@ namespace Askowl.Examples {
           string.Compare(right.Item.State, left.Item.State, StringComparison.Ordinal)
       };
 
-      list2.Add(new MyClassInherited {State = "Item 1"}, new MyClassInherited {State = "Item 2"});
+      list2.Add(new MyClassInherited {
+        State = "Item 1"
+      }, new MyClassInherited {
+        State = "Item 2"
+      });
+
       Assert.AreEqual(expected: "Item 2", actual: list2.First.Item.State);
       Assert.AreEqual(expected: "Item 1", actual: list2.Second.Item.State);
     }
@@ -600,13 +556,10 @@ namespace Askowl.Examples {
     [Test]
     public void Destroy() {
       var list = new LinkedList<int>("Destroy");
-
       list.Add(1, 3, 4);
       Assert.AreEqual(expected: 3, actual: list.Count);
       Assert.AreEqual(expected: 0, actual: list.RecycleBin.Count);
-
       list.Destroy();
-
       Assert.AreEqual(expected: 0, actual: list.Count);
       Assert.AreEqual(expected: 0, actual: list.RecycleBin.Count);
     }
@@ -617,9 +570,7 @@ namespace Askowl.Examples {
     [Test]
     public void Add() {
       var list = new LinkedList<int>("Add");
-
       list.Add(11, 12, 13);
-
       Assert.AreEqual(expected: 3, actual: list.Count);
     }
 
@@ -627,9 +578,7 @@ namespace Askowl.Examples {
     [Test]
     public void Fetch() {
       var list = new LinkedList<int>("Fetch");
-
       var node = list.Fetch();
-
       Assert.AreEqual(expected: 0, actual: node.Item);
       Assert.AreEqual(expected: 1, actual: list.Count);
     }
@@ -638,9 +587,7 @@ namespace Askowl.Examples {
     [Test]
     public void RecycleBin() {
       var list = new LinkedList<int>("RecycleBin");
-
       var node = list.Fetch().Recycle();
-
       Assert.AreEqual(node, list.RecycleBin.First);
     }
     #endregion
@@ -653,7 +600,6 @@ namespace Askowl.Examples {
       Assert.IsNull(list.First);
       list.Add(1);
       list.Add(3);
-
       Assert.AreEqual(expected: 3, actual: list.First.Item);
     }
 
@@ -664,7 +610,6 @@ namespace Askowl.Examples {
       Assert.IsNull(list.Last);
       list.Add(1);
       list.Add(3);
-
       Assert.AreEqual(expected: 1, actual: list.Last.Item);
     }
 
@@ -703,7 +648,6 @@ namespace Askowl.Examples {
       var list1 = new LinkedList<int>("NodePushNode1");
       var list2 = new LinkedList<int>("NodePushNode2");
       var node1 = list1.Add(123);
-
       list2.Push(node1);
       Assert.AreEqual(expected: 123, actual: list2.First.Item);
     }
@@ -714,7 +658,6 @@ namespace Askowl.Examples {
       var list1 = new LinkedList<int>("NodePushItem1");
       var list2 = new LinkedList<int>("NodePushItem2");
       var node  = list1.Add(123);
-
       list2.Push(node);
       Assert.AreEqual(expected: 123, actual: list2.First.Item);
     }
@@ -724,7 +667,6 @@ namespace Askowl.Examples {
     public void Pop() {
       var list  = new LinkedList<int>("NodePop");
       var node1 = list.Add(123);
-
       var node2 = list.Pop();
       Assert.AreEqual(node1.Item, node2.Item);
       Assert.IsNotNull(list.RecycleBin);
@@ -739,7 +681,6 @@ namespace Askowl.Examples {
       LogAssert.Expect(LogType.Log, new Regex(".... LinkedList: Add to Tommy.*0/0."));
       LogAssert.Expect(LogType.Log, new Regex(".... LinkedList: move Tommy.*1/0. to Freddy.*0."));
       LogAssert.Expect(LogType.Log, new Regex(".*: move Freddy.*1.*to end of Tommy Recycling Bin.*0."));
-
       var tommy  = new LinkedList<int>("Tommy");
       var freddy = new LinkedList<int>("Freddy");
       var node   = tommy.Add(1972);

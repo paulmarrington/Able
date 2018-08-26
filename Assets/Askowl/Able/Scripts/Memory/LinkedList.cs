@@ -78,19 +78,7 @@ namespace Askowl {
       public Node Fetch() => Home.Fetch().MoveTo(Owner);
 
       /// <a href=""></a>
-      public Node Add(params T[] ts) => Owner.Add(newItems: ts);
-
-      /// <a href=""></a>
-      public int Count => Owner.Count;
-
-      /// <a href=""></a>
       public Node Push(T t) => Home.Push(item: t).MoveTo(Owner);
-
-      /// <a href=""></a>
-      public Node Push(Node node) => Owner.Push(node);
-
-      /// <a href=""></a>
-      public Node Pop() => Owner.Pop();
     }
 
     #region Private create, deactivation and activation support
