@@ -1,10 +1,11 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
 using NUnit.Framework;
+using UnityEngine;
 
 namespace Askowl.Examples {
   public class CacheExamples {
-    // ReSharper disable once ClassNeverInstantiated.Global
+    #region Working Data
     public sealed class SealedClass {
       public string State { get; set; } = "New";
     }
@@ -14,96 +15,184 @@ namespace Askowl.Examples {
     }
 
     private struct MyStruct {
-      public string State { get; set; }
+      public string State { get; private set; }
 
       // A struct is useless in a cache if not initialised
       // ReSharper disable once UnusedMember.Local
       private static MyStruct CreateItem() => new MyStruct {State = "StructCreated"};
     }
 
-    // ReSharper disable once ClassNeverInstantiated.Local
-    private class MyClassRawCached : Cached<MyClassRawCached> {
-      public string State { get; set; }
-    }
-
     // ReSharper disable UnusedMember.Local
     private class MyClassProcessed : Cached<MyClassProcessed> {
-      private static MyClassProcessed CreateItem()     => new MyClassProcessed {State = "Created"};
-      private        void             DeactivateItem() => State = "Deactivated";
-      private        void             ReactivateItem() => State += "Reactivated";
+      private new static MyClassProcessed CreateItem()     => new MyClassProcessed {State = "Created"};
+      private new        void             DeactivateItem() => State = "Deactivated";
+      private new        void             ReactivateItem() => State += "Reactivated";
 
-      public string State { get; set; }
+      public string State { get; private set; }
     }
-    // ReSharper restore UnusedMember.Local
+    #endregion
 
+    #region Static Examples
+    /// <a href="">Using <see cref="Cache{T}.Instance"/></a>
     [Test]
-    public void StructCreate() {
-      LinkedList<MyStruct>.DebugMode = true;
-
-      // can be used for value type and sealed classes.
-      using (var myStruct = Cache<MyStruct>.Disposable) {
-        Assert.AreEqual("StructCreated", myStruct.Value.State);
-      }
-
+    public void InstanceStatic() {
       Cache<MyStruct>.CleanCache();
+
+      var myStruct = Cache<MyStruct>.Instance;
+
+      Assert.AreEqual("StructCreated", myStruct.State);
     }
 
+    /// <a href="">Using <see cref="Cache{T}.Dispose(T)"/></a>
     [Test]
-    public void RawCachedCreate() {
-      // and as a base class for objects we want to cache
-      using (var myClass = MyClassRawCached.Instance) {
-        Assert.IsNull(myClass.State);
-        myClass.State = "using";
-      }
+    public void DisposeStatic() {
+      Cache<MyClassProcessed>.CleanCache();
 
-      // will pull instance from recyle bin, so will have State set from last time
-      using (var myClass = MyClassRawCached.Instance) {
-        Assert.AreEqual(myClass.State, "using");
-      }
+      var myClass = Cache<MyClassProcessed>.Instance;
 
-      MyClassRawCached.CleanCache();
+      Assert.AreEqual("Created", myClass.State);
+
+      myClass.Dispose();
+
+      Assert.AreEqual("Deactivated", myClass.State);
     }
 
+    /// <a href="">Using <see cref="Cache{T}.CleanCache"/></a>
     [Test]
-    public void ProcessedCreateDeactivateReactivate() {
-      using (var myClass = MyClassProcessed.Instance) {
-        Assert.AreEqual("Created", myClass.State);
-        myClass.State = "using";
-      }
+    public void CleanCache() {
+      var unused = Cache<MyClassProcessed>.Instance;
 
-      // will pull instance from recyle bin, with it's processing
-      using (var myClass = MyClassProcessed.Instance) {
-        Assert.AreEqual(myClass.State, "DeactivatedReactivated");
-      }
+      Cache<MyClassProcessed>.CleanCache();
 
-      MyClassProcessed.CleanCache();
+      Assert.IsNull(Cache<MyClassProcessed>.Entries.First);
     }
 
+    /// <a href="">Using <see cref="Cache{T}.CreateItemStatic"/></a>
     [Test]
-    public void Use() {
-      Cache<MyStruct>.Use((myStruct) => Assert.AreEqual("StructCreated", myStruct.State));
-
-      Cache<MyStruct>.CleanCache();
-    }
-
-    [Test]
-    public void CachingForASealedClass() {
-      Cache<SealedClass>.Use((sealedClassInstance) => Assert.AreEqual("New", sealedClassInstance.State));
-
-      var sealedContainer = Cache<SealedClassProcessed>.Disposable;
-      var sealedClass     = sealedContainer.Value;
-      Assert.AreEqual("CreateItem", sealedClass.State);
-      sealedContainer.Dispose();
-      Assert.AreEqual("DeactivateItem ReactivateItem", sealedClass.State);
-
-      Cache<SealedClass>.CleanCache();
+    public void CreateItemStatic() {
       Cache<SealedClassProcessed>.CleanCache();
+
+      // This would normally be in a static constructor. It only need be run once
+      Cache<SealedClassProcessed>.CreateItemStatic = () => new SealedClassProcessed {State = "CreateItemStatic"};
+
+      var sealedClass = Cache<SealedClassProcessed>.Instance;
+
+      using (Cache<SealedClassProcessed>.Disposable(sealedClass)) {
+        Assert.AreEqual("CreateItemStatic", sealedClass.State);
+      }
     }
 
-    static CacheExamples() {
-      Cache<SealedClassProcessed>.CreateItemStatic     = () => new SealedClassProcessed {State = "CreateItem"};
-      Cache<SealedClassProcessed>.DeactivateItemStatic = (seal) => seal.State =  "DeactivateItem";
-      Cache<SealedClassProcessed>.ReactivateItemStatic = (seal) => seal.State += " ReactivateItem";
+    /// <a href="">Using <see cref="Cache{T}.DeactivateItemStatic"/></a>
+    [Test]
+    public void DeactivateItemStatic() {
+      Cache<SealedClassProcessed>.CleanCache();
+      // This would normally be in a static constructor. It only need be run once
+      LinkedList<SealedClassProcessed>.CreateItemStatic     = () => new SealedClassProcessed {State = "CreateStatic"};
+      LinkedList<SealedClassProcessed>.DeactivateItemStatic = (seal) => seal.Item.State =  "SealedDeactivateItem";
+      LinkedList<SealedClassProcessed>.ReactivateItemStatic = (seal) => seal.Item.State += " SealedReactivateItem";
+
+      var sealedClass = Cache<SealedClassProcessed>.Instance;
+
+      using (Cache<SealedClassProcessed>.Disposable(sealedClass)) {
+        Assert.AreEqual("CreateStatic", sealedClass.State);
+      }
+
+      Assert.AreEqual("SealedDeactivateItem", sealedClass.State);
     }
+
+    /// <a href="">Using <see cref="Cache{T}.ReactivateItemStatic"/></a>
+    [Test]
+    public void ReactivateItemStatic() {
+      Cache<SealedClassProcessed>.CleanCache();
+      // This would normally be in a static constructor. It only need be run once
+      LinkedList<SealedClassProcessed>.CreateItemStatic     = () => new SealedClassProcessed {State = "CreateStatic"};
+      LinkedList<SealedClassProcessed>.DeactivateItemStatic = (seal) => seal.Item.State =  "SealedDeactivateItem";
+      LinkedList<SealedClassProcessed>.ReactivateItemStatic = (seal) => seal.Item.State += " SealedReactivateItem";
+
+      var sealedClass = Cache<SealedClassProcessed>.Instance;
+
+      using (Cache<SealedClassProcessed>.Disposable(sealedClass)) {
+        Assert.AreEqual("CreateStatic", sealedClass.State);
+      }
+
+      sealedClass = Cache<SealedClassProcessed>.Instance;
+
+      Assert.AreEqual("SealedDeactivateItem SealedReactivateItem", sealedClass.State);
+    }
+
+    /// <a href="">Using <see cref="Cache{T}.Disposable(T)"/></a>
+    [Test]
+    public void DisposableStatic() {
+      Cache<MyClassProcessed>.CleanCache();
+      var myClass = Cache<MyClassProcessed>.Instance;
+
+      using (Cache<MyClassProcessed>.Disposable(myClass)) {
+        Assert.AreEqual("Created", myClass.State);
+      }
+
+      Assert.AreEqual("Deactivated", myClass.State);
+    }
+    #endregion
+
+    #region Instance Examples
+    /// <a href="">Using <see cref="Cached{T}.Dispose()"/></a>
+    [Test]
+    public void Dispose() {
+      Cache<MyClassProcessed>.CleanCache();
+      var myClass = MyClassProcessed.Instance;
+
+      Assert.AreEqual("Created", myClass.State);
+
+      myClass.Dispose();
+
+      Assert.AreEqual("Deactivated", myClass.State);
+    }
+
+    /// <a href="">Using <see cref="Cached{T}.Disposable()"/></a>
+    [Test]
+    public void Disposable() {
+      Cache<MyClassProcessed>.CleanCache();
+      var myClass = MyClassProcessed.Instance;
+
+      using (myClass.Disposable()) {
+        Assert.AreEqual("Created", myClass.State);
+      }
+
+      Assert.AreEqual("Deactivated", myClass.State);
+    }
+
+    /// <a href="">Using <see cref="Cached{T}.CreateItem"/></a>
+    [Test]
+    public void CreateItem() {
+      Cache<MyClassProcessed>.CleanCache();
+
+      var myClass = MyClassProcessed.Instance;
+
+      Assert.AreEqual("Created", myClass.State);
+    }
+
+    /// <a href="">Using <see cref="Cached{T}.DeactivateItem"/></a>
+    [Test]
+    public void DeactivateItem() {
+      Cache<MyClassProcessed>.CleanCache();
+      var myClass = MyClassProcessed.Instance;
+
+      myClass.Dispose();
+
+      Assert.AreEqual("Deactivated", myClass.State);
+    }
+
+    /// <a href="">Using <see cref="Cached{T}.ReactivateItem"/></a>
+    [Test]
+    public void ReactivateItem() {
+      Cache<MyClassProcessed>.CleanCache();
+      var myClass = MyClassProcessed.Instance;
+
+      myClass.Dispose();
+      myClass = MyClassProcessed.Instance;
+
+      Assert.AreEqual("DeactivatedReactivated", myClass.State);
+    }
+    #endregion
   }
 }

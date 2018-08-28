@@ -195,7 +195,7 @@ namespace Askowl {
     }
 
     /// <a href=""></a>
-    public override void Dispose() { Root().DisposeHere(); }
+//    public override void Dispose() { Root().DisposeHere(); } //#TBD#
 
     /// <a href=""></a>
     public void DisposeHere() {

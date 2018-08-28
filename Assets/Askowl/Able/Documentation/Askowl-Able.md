@@ -395,6 +395,23 @@ AreEqual(expected, actual);
 
 ### Caching Instances
 
+Even if premature optimisation is evil, the garbage collector can still be your enemy. If you target VR or mobile platforms, garbage collection runs will degrade the gaming for your players. Even for PC/Mac/Linux machines, your players may have lower powered machines. Yes, I know, not the serious gamers. But, casual gamers? Even the simple `ForEach` allocates a tiny amount of memory each loop. In some ways, this is the worst. A few areas allocating large chunks then lots of tiny chunks adds up to frequent collection runs with a lot of fragmented memory to investigate. And let's not even talk about coroutines just now.
+
+What can we do about it without slowing down development or our game? When we are writing code we can (usually) see where objects are being allocated/discarded a lot. If they can be safely deactivated, cache them for reuse.
+
+
+
+Oh, so you want examples? Try these for size.
+
+1. Nodes in tree structures
+2. JSON, XML and CSV encoding and decoding
+3. Events and emitters
+4. Temporary instances use in loops
+
+You get the idea. Feel free to add to the list.
+
+Look at `new` carefully. It appears the same for classes and structs, but the latter uses the stack and does not allocate memory.
+
 #### Cache Entry Maintenance
 
 ##### CreateItem

@@ -144,19 +144,19 @@ namespace Askowl {
     public static Func<T> CreateItemStatic = GetDefaultCreateItem();
 
     /// <a href="">Item Creation and Preparation when new() is not enough</a>
-    public Func<T> CreateItem { private get; set; } = CreateItemStatic;
+    public Func<T> CreateItem { private get; set; } = () => CreateItemStatic();
 
     /// <a href=""></a>
     public static Action<Node> ReactivateItemStatic = GetDefaultReactivateItem();
 
     /// <a href="">Prepare an idle item for reuse</a>
-    public Action<Node> ReactivateItem { private get; set; } = ReactivateItemStatic;
+    public Action<Node> ReactivateItem { private get; set; } = (node) => ReactivateItemStatic(node);
 
     /// <a href=""></a>
     public static Action<Node> DeactivateItemStatic = GetDefaultDeactivateItem();
 
     /// <a href="">For Deactivation when Dispose() is not enough</a>
-    public Action<Node> DeactivateItem { private get; set; } = DeactivateItemStatic;
+    public Action<Node> DeactivateItem { private get; set; } = (node) => DeactivateItemStatic(node);
 
     /// <a href=""></a>
     public static Func<Node, Node, int> CompareItemStatic {
@@ -177,18 +177,22 @@ namespace Askowl {
       }
     }
 
-    private Func<Node, Node, int> compareItem = compareItemStatic;
+    private Func<Node, Node, int> compareItem = (left, right) => compareItemStatic(left, right);
 
     /// <a href="">For the rare times we need to clear a linked list</a>
     public void Destroy() {
       Dispose();
+      if (recycleBin == null) return;
+
       while (recycleBin.First != null) recycleBin.First.Destroy();
+      recycleBin.First = recycleBin.Last = null;
     }
 
     /// <a href="">For the rare times we need to clear a linked list</a>
     public void Dispose() {
       reverseLookup = null;
       while (First != null) First.Dispose();
+      First = Last = null;
     }
     #endregion
 
@@ -223,22 +227,23 @@ namespace Askowl {
     }
 
     /// <a href="bit.ly/">Node Dispose using reverse lookup</a>
-    public Node ReverseLookup(T item) => reverseLookup?[item].As<Node>();
-
-    /// <a href="bit.ly/">Node Dispose using reverse lookup</a>
-    public void Dispose(T item) => reverseLookup?[item].As<Node>()?.Dispose();
-
-    private static Map reverseLookup;
-
-    private Node NewNode(T item) {
-      Node newNode = new Node() {Item = item, Owner = this, Home = this};
-
+    public Node ReverseLookup(T item) {
       if (reverseLookup == null) {
         reverseLookup = new Map();
         for (var node = First; node != null; node = node.Next) reverseLookup.Add(node.Item, node);
       }
 
-      reverseLookup.Add(item, newNode);
+      return reverseLookup?[item].As<Node>();
+    }
+
+    /// <a href="bit.ly/">Node Dispose using reverse lookup</a>
+    public void Dispose(T item) => ReverseLookup(item)?.Dispose();
+
+    private static Map reverseLookup;
+
+    private Node NewNode(T item) {
+      Node newNode = new Node() {Item = item, Owner = this, Home = this};
+      reverseLookup?.Add(item, newNode);
       return newNode;
     }
 
