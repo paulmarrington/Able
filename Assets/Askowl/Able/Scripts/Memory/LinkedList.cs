@@ -50,10 +50,11 @@ namespace Askowl {
         Owner.DeactivateItem(this);
         Item = default(T);
         Home.Unlink(this);
+        reverseLookup?.Remove(this);
         Home = null;
       }
 
-      /// <a href="http://unitydoc.marrington.net/Able#dispose-of-this-node">Calls Item.Dispose if the item is IDisposable, then move it to the recycle bin</a>
+      /// <a href=""></a>
       public Node Recycle() {
         Owner.DeactivateItem(this);
         MoveToEndOf(Home.RecycleBin);
@@ -64,8 +65,8 @@ namespace Askowl {
       /// <inheritdoc />
       public void Dispose() => Recycle();
 
+      /// <a href="">Node Naming Convention</a>
       /// <inheritdoc />
-      /// <a href="http://unitydoc.marrington.net/Able#node-name">Node Naming Convention</a>
       public override string ToString() => $"{Owner,25}  <<  {Home,-25}::  {Item}";
 
       /// <a href=""></a>
@@ -159,7 +160,6 @@ namespace Askowl {
 
     /// <a href=""></a>
     public static Func<Node, Node, int> CompareItemStatic {
-      private get { return compareItemStatic; }
       set {
         orderedStatic     = true;
         compareItemStatic = value;
@@ -187,6 +187,7 @@ namespace Askowl {
 
     /// <a href="">For the rare times we need to clear a linked list</a>
     public void Dispose() {
+      reverseLookup = null;
       while (First != null) First.Dispose();
     }
     #endregion
@@ -221,9 +222,24 @@ namespace Askowl {
       return node;
     }
 
+    /// <a href="bit.ly/">Node Dispose using reverse lookup</a>
+    public Node ReverseLookup(T item) => reverseLookup?[item].As<Node>();
+
+    /// <a href="bit.ly/">Node Dispose using reverse lookup</a>
+    public void Dispose(T item) => reverseLookup?[item].As<Node>()?.Dispose();
+
+    private static Map reverseLookup;
+
     private Node NewNode(T item) {
-      Node node = new Node() {Item = item, Owner = this, Home = this};
-      return node;
+      Node newNode = new Node() {Item = item, Owner = this, Home = this};
+
+      if (reverseLookup == null) {
+        reverseLookup = new Map();
+        for (var node = First; node != null; node = node.Next) reverseLookup.Add(node.Item, node);
+      }
+
+      reverseLookup.Add(item, newNode);
+      return newNode;
     }
 
     private Node Insert(Node nodeToInsert) {

@@ -887,9 +887,182 @@ When enabled, `DebugMode` will cause a log entry for every creation or movement 
 
 Returns a string containing the list name and counts for it and the attached recycle bin.
 
-### Map - A Simplistic Alternative to Dictionary
+### Map - A Dictionary Wrapper for Conceptual Change
 
+Underneath, a `Map` is still a C# `Dictionary` with undifferentiated object references for keys and values. This allows for mixed types that can be converted on retrieval.
 
+My limited tests show that `Dictionary` is faster than `SortedList`. The latter uses `Array.BinarySearch` to find entries. I have read other performance tests that report binary searches to be faster for small numbers of keys. I checked this on my MacBook Pro - and the Dictionary approach was twice as fast with 10 keys and  hundreds of times faster will 1000 or more keys. That is not to say that the results would be the same on other hardware - an Android phone for example.
+
+For `Map`, the `Hashtable` class would have made the perfect base, but in more tests `Dictionary` was consistently faster. Interestingly, on the tests I created, `Map` can be up to a third again faster than `Dictionary`.
+
+#### Creating a New Map
+
+It is possible to seed a new `Map` by passing in key-value pairs. The keys do not have to be strings. If either strings or values are primitives theyw ill be auto-boxed.
+
+```c#
+var map1 = new Map();
+var map2 = new Map("One", 1, "Two", "Twice", "Three", "Thrice");
+var map3 = new Map(keyValuePairArray);
+```
+
+#### Add: Adding Entries
+
+You can add as many entries as you like by passing in key-value pairs. `Add` returns a reference to the `Map` for chaining.
+
+```c#
+var map  = new Map("One", 1, "Two", 2, "Three", 3);
+var more = new object[] {"Six", 6, "Seven", 7};
+map.Add("Four", 4, "Five", 5).Add(more);
+```
+
+#### Set: Creating or Updating a Set
+
+A `Set` is a convenience method to fill a `Map` with keys referencing null values.
+
+```c#
+var set = new Map().Set(1, 3, 5, 7, 9);
+set.Set(11, 13, 15);
+```
+
+#### Remove: For the Truly Destructive
+
+`Remove` will cause `Map` to completely forget one or more entries.
+
+```c#
+var map = new Map("One", 1, "Two", 2, "Three", 3);
+map.Remove("Two", "One");
+Assert.AreEqual(1, map.Count);
+```
+
+#### Retrieve a Key/Value Pair
+
+The core method for search and rescue is an array override. It attempts to retrieve the value for the supplied key and sets some class instance values. It then returns a reference to `Map` for chaining.
+
+```c#
+var map = new Map("One", 1, "Four", 4, "Three", 3, "Five", 5, "Two", 2);
+Assert.IsTrue(map["Three"].Found);
+Assert.IsFalse(map["Seven"].Found);
+```
+
+##### Found
+
+We will always need to know if a search was successful. We can't rely on `Value` being `null` since that may be a valid result.
+
+```c#
+var set = new Map().Set(1, 3, "Five", 7, 9);
+if (set[7].Found || set["Seven"].Found) Debug.Log("We have sevens");
+```
+
+##### Key
+
+For completeness, `Map` saves the last key searched - whether it is successful or not. It means you can pass the map around without having to search for an entry again.
+
+```c#
+var map = new Map("One", 111, "Two", "2", "Three", new Map());
+
+if (map["Three"].Found) Debug.Log($"Found '{map.Key}'");
+```
+
+##### Value
+
+Value is either null if the last retrieval failed or it is an `object`.
+
+```c#
+var map = new Map("One", 111, "Two", "2", "Three", new Map());
+Assert.AreEqual(expected: "2", actual: map["Two"].Value);
+Assert.IsNull(map["TryMe"].Value);
+```
+
+##### Return a  Value of a Specific Type
+
+If you know what you have as a type for a value you can retrieve it with the generic `As<T>`. If you are wrong it will return default(T), which is null for objects, 0 for numbers and empty structs.
+
+```c#
+var map = new Map("One", 111, "Two", "2", "Three", new Map());
+Assert.AreEqual(expected: "2", actual: map["Two"].As<string>());
+Assert.AreEqual(expected: 0,   actual: map["Two"].As<int>());
+```
+
+##### IsA: Check Map for Key of a Specific Type
+
+If you need confirmation on whether the value is of a specific type, use `IsA`.
+
+```c#
+var map = new Map("One", 1, "Two", "2", "Three", new Map());
+Assert.IsTrue(map["Two"].IsA<string>());
+Assert.IsTrue(map["Three"].IsA<Map>());
+Assert.IsFalse(map["Two"].IsA<int>());
+```
+
+##### TypeOf: For Code that Doesn't Have a Clue
+
+If the map comes from an external source and the values could be anything then you have two choices. You can use `ToString` to get a (hopefully) readable representation or you can use `TypeOf`. It is considered bad form to have to stoop to this approach, but if you have unknown data, what else can you do? It is not as bad as it looks. If the data was parsed from JSON, for example, it can only be a string, a number, a boolean or `null`.
+
+```c#
+Map types = new Map(typeof(long), 'l', typeof(string), 's', typeof(double), 'd');
+
+switch ((types[jsonNode[0].TypeOf].As<char>())) {
+  case 'l': return Process(jsonNode[0].As<long>())
+  case 'd': return Process(jsonNode[0].As<double>())
+  case 's': return Process(jsonNode[0].As<string>())
+  default:  return Process(null);
+}
+```
+
+#### Keys: Iterating Through a Map
+
+The iteration techniques here are designed to use as little of the heap as possible so as to minimum garbage collection. Both mobile and VR apps suffer if the garbage collector is kept busy.
+
+There is one other important distinguishing feature. By default, the keys are returned in the same order as they were added. This is valuable if they are coming from structured data such as XML or JSON.
+
+##### Count: of Items in a Map
+
+`Count` will always tell you how many items are in the `Map`. It can be used to check if the map is empty or in an expected size range. It is also used for object key iteration below.
+
+##### When all Keys are Strings
+
+Because `string` keys are the most common, the get special treatment.
+
+```c#
+for (var key = map.First; key != null; key = map.Next) {
+  Process(key, map.As<string>);
+}
+```
+
+##### For Object Keys
+
+Object keys are even more basic. As well as `Count`, `Map` allows access to keys with an integer array index.
+
+```c#
+for (int i = 0; i < map.Count; i++) {
+  Process(key, map[i].Value);
+}
+```
+
+##### Sorting
+
+As mentioned above, without intervention the order of the keys for either iteration method is the order that they were inserted into the map in the first place. This is useful for data where the order matters, such as JSON and XML.
+
+When we need a different order, use one of the `Sort` functions. Without parameters, `Sort` uses the default sorting for an object. This is alphabetical for strings and numeric ascending for numbers. If you mix your keys it will be a dog's breakfast.
+
+```c#
+var    map    = new Map("One", 1, "Four", 4, "Three", 3, "Five", 5, "Two", 2);
+string actual = "";
+for (var key = map.Sort().First; key != null; key = map.Next) actual += key;
+Assert.AreEqual("FiveFourOneThreeTwo", actual);
+```
+
+For more interesting cases, `Sort` can be provided with a comparison lambda.
+
+```c#
+var    map    = new Map("One", 1, "Four", 4, "Three", 3, "Five", 5, "Two", 2);
+string actual = "";
+map.Sort((x, y) => map[x].As<int>().CompareTo(map[y].As<int>()));
+for (var key = map.First; key != null; key = map.Next) actual += key;
+Assert.AreEqual("OneTwoThreeFourFive", actual);
+```
+
+In this example we are sorting the keys by the value, not the key.
 
 ### Pick.cs - Interface to choose from options
 

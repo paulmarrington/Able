@@ -3,6 +3,7 @@
 #if UNITY_EDITOR && Able
 
 using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using NUnit.Framework;
 using UnityEngine;
@@ -589,6 +590,41 @@ namespace Askowl.Examples {
       var list = new LinkedList<int>("RecycleBin");
       var node = list.Fetch().Recycle();
       Assert.AreEqual(node, list.RecycleBin.First);
+    }
+
+    /// <a href="">Using <see cref="LinkedList{T}.ReverseLookup"/></a>
+    [Test]
+    public void ReverseLookupT() {
+      var list   = new LinkedList<string>("Add");
+      var node11 = list.Add("11");
+      var node12 = list.Add("12");
+      // first access will generate a reverse lookup Map
+      Assert.AreEqual(node11, list.ReverseLookup("11"));
+      Assert.AreEqual(node12, list.ReverseLookup("12"));
+
+      var node13 = list.Add("13");
+      Assert.AreEqual(node13, list.ReverseLookup("13"));
+    }
+
+    /// <a href="">Using <see cref="LinkedList{T}.Dispose(T)"/></a>
+    [Test]
+    public void DisposeT() {
+      var list = new LinkedList<string>("Add");
+      list.Add("11");
+      list.Add("12");
+      list.Add("13");
+      // Note the need to wrap integers or they will use the wrong []
+      Assert.AreEqual(3, list.Count);
+      Assert.AreEqual(0, list.RecycleBin.Count);
+      list.Dispose("13");
+      Assert.AreEqual(2, list.Count);
+      Assert.AreEqual(1, list.RecycleBin.Count);
+      list.Dispose("11");
+      Assert.AreEqual(1, list.Count);
+      Assert.AreEqual(2, list.RecycleBin.Count);
+      list.Dispose("12");
+      Assert.AreEqual(0, list.Count);
+      Assert.AreEqual(3, list.RecycleBin.Count);
     }
     #endregion
 

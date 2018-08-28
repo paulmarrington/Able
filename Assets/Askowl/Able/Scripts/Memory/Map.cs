@@ -1,100 +1,104 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace Askowl {
   /// <a href=""></a>
   public class Map {
-    private object[] keys, values;
+    private readonly Dictionary<object, object> map = new Dictionary<object, object>();
 
     /// <a href=""></a>
-    public int Count { get; private set; }
+    private readonly ArrayList keys = new ArrayList();
+
+    /// <a href="bit.ly/">Map</a>
+    public Map(params object[] keyValuePairs) { Add(keyValuePairs); }
 
     /// <a href=""></a>
-    public Map(params object[] keyValuePairs) {
-      var length = (Count < 4) ? 4 : Count;
-      keys   = new object[length];
-      values = new object[length];
-      Add(keyValuePairs: keyValuePairs);
+    public Map Add(params object[] keyValuePairs) {
+      for (int j = 0; j < keyValuePairs.Length; j += 2) {
+        keys.Add(keyValuePairs[j]);
+        map[keyValuePairs[j]] = keyValuePairs[j + 1];
+      }
+
+      return this;
     }
 
     /// <a href=""></a>
     public Map Set(params object[] newKeys) {
-      var oldCount = Count;
-      Count += newKeys.Length;
-
-      if (keys.Length < Count) Resize(to: Count);
-
-      for (int i = oldCount, j = 0; i < Count; i++) {
-        keys[i]   = newKeys[j++];
-        values[i] = null;
+      for (int j = 0; j < newKeys.Length; j++) {
+        keys.Add(newKeys[j]);
+        map[newKeys[j]] = null;
       }
 
-      Array.Sort(keys: keys, items: values, index: 0, length: Count);
       return this;
     }
 
     /// <a href=""></a>
-    public Map Add(params object[] keyValuePairs) {
-      var oldCount = Count;
-      Count += keyValuePairs.Length / 2;
-
-      if (keys.Length < Count) Resize(to: Count);
-
-      for (int i = oldCount, j = 0; i < Count; i++) {
-        keys[i]   = keyValuePairs[j++];
-        values[i] = keyValuePairs[j++];
+    public Map Remove(params object[] oldKeys) {
+      for (int j = 0; j < oldKeys.Length; j++) {
+        keys.Remove(oldKeys[j]);
+        map.Remove(oldKeys[j]);
       }
 
-      Array.Sort(keys: keys, items: values, index: 0, length: Count);
       return this;
     }
 
     /// <a href=""></a>
-    public bool Contains(object key) {
-      closest = Array.BinarySearch(array: keys, value: Key = key);
-      Found   = closest >= 0;
+    public bool IsA<T>() => Found && (Value is T);
 
-      if (Found) {
-        Value = values[closest];
-        return true;
+    /// <a href="bit.ly/">First</a>
+    public string First => (Count > 0) ? keys[index = 0] as string : null;
+
+    /// <a href="bit.ly/">First</a>
+    public string Next => (++index < Count) ? keys[index] as string : null;
+
+    private int index;
+
+    /// <a href="bit.ly/">[</a>
+    public object this[int i] => keys[i];
+
+    /// <a href="bit.ly/">Keys</a>
+    public object[] Keys => keys.ToArray();
+
+    /// <a href="bit.ly/">Sort</a>
+    public Map Sort() {
+      keys.Sort();
+      return this;
+    }
+
+    /// <a href="bit.ly/">Sort</a>
+    public Map Sort(Comparison<object> comparison) {
+      keys.Sort(Comparer<object>.Create(comparison));
+      return this;
+    }
+
+    /// <a href="bit.ly/">[</a>
+    public Map this[object key] {
+      get {
+        Value = null;
+        Found = map.TryGetValue(Key = key, out Value);
+        return this;
       }
-
-      closest = ~closest;
-      Key     = ((closest >= 0) && (closest < keys.Length)) ? keys[closest] : "";
-      Value   = null;
-      return false;
     }
 
-    /// <a href=""></a>
-    public bool IsA<T>(object key) => Contains(key: key) && (Value is T);
+    /// <a href="bit.ly/">Count</a>
+    public int Count => keys.Count;
 
     /// <a href=""></a>
-    public T Get<T>(object key) => IsA<T>(key: key) ? ((T) Value) : default(T);
+    public bool Found;
 
     /// <a href=""></a>
-    private int closest;
+    public object Key;
 
     /// <a href=""></a>
-    public bool Found { get; private set; }
+    public object Value;
 
     /// <a href=""></a>
-    public object Key { get; private set; }
+    public T As<T>() => IsA<T>() ? ((T) Value) : default(T);
 
     /// <a href=""></a>
-    public object Value { get; private set; }
-
-    private void Resize(int to) {
-      var length              = keys.Length * 2;
-      if (length < to) length = to;
-      keys   = Resize(from: keys,   length: length);
-      values = Resize(from: values, length: length);
-    }
-
-    private object[] Resize(object[] from, int length) {
-      var larger = new object[length];
-      Array.Copy(sourceArray: from, destinationArray: larger, length: from.Length);
-      return larger;
-    }
+    public Type TypeOf => Value?.GetType();
   }
 }
