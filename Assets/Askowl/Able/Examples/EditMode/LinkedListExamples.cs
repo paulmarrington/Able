@@ -220,13 +220,14 @@ namespace Askowl.Examples {
 
       Assert.IsTrue(list.Empty);
       Assert.IsFalse(list.RecycleBin.Empty);
+      Assert.AreEqual(2, list.RecycleBin.Count); // 123 456
 
       Assert.AreEqual(456, list.RecycleBin.Last.Item);
 
-      list.Add(789);
-      Assert.AreEqual(456, list.RecycleBin.First.Item);
+      list.Fetch();
       Assert.AreEqual(1,   list.RecycleBin.Count);
       Assert.AreEqual(1,   list.Count);
+      Assert.AreEqual(456, list.RecycleBin.First.Item);
     }
 
     ///<a href=""></a>
@@ -251,26 +252,26 @@ namespace Askowl.Examples {
       var node  = list1.Add(789);
       node.MoveTo(list2);
 
-      var expected = "   NodeToString2      (1)  <<  NodeToString1    (0/0)   ::  789";
+      var expected = "   NodeToString2      (1)  <<  NodeToString1      (0)   ::  789";
       var actual   = node.ToString();
       Assert.AreEqual(expected, actual);
     }
-
-    ///<a href=""></a>
-    [Test]
-    public void NodeUpdate() {
-      var list = new LinkedList<int>("NodeUpdate");
-      list.Add(11, 12, 13);
-      var node = list.Add(14);
-      list.Add(15, 16, 17);
-
-      node.Item = 33; // will get overwritten in the next statement.
-      node.Update(99).MoveToEndOf(list);
-
-      Assert.AreEqual(expected: 99,   actual: list.Last.Item);
-      Assert.AreEqual(expected: node, actual: list.Last);
-      Assert.AreEqual(expected: 7,    actual: list.Count);
-    }
+//
+//    ///<a href=""></a> //#TBD#
+//    [Test]
+//    public void NodeUpdate() {
+//      var list = new LinkedList<int>("NodeUpdate");
+//      list.Add(11, 12, 13);
+//      var node = list.Add(14);
+//      list.Add(15, 16, 17);
+//
+//      node.Item = 33; // will get overwritten in the next statement.
+//      node.Update(99).MoveToEndOf(list);
+//
+//      Assert.AreEqual(expected: 99,   actual: list.Last.Item);
+//      Assert.AreEqual(expected: node, actual: list.Last);
+//      Assert.AreEqual(expected: 7,    actual: list.Count);
+//    }
 
     ///<a href=""></a>
     [Test]
@@ -479,29 +480,19 @@ namespace Askowl.Examples {
     ///<a href=""></a>
     [Test]
     public void CompareItemInstance() {
-      var list = new LinkedList<MyClassProcessed>("CompareItemInstance") {
+      var list = new LinkedList<MyClassRaw>("CompareItemInstance") {
         CompareItem = (left, right) => string.Compare(left.Item.State, right.Item.State, StringComparison.Ordinal)
       };
 
-      list.Add(new MyClassProcessed {
-        State = "Item 1"
-      }, new MyClassProcessed {
-        State = "Item 2"
-      });
+      list.Add(new MyClassRaw {State = "Item 1"}, new MyClassRaw {State = "Item 2"});
 
       Assert.AreEqual(expected: "Item 1", actual: list.First.Item.State);
       Assert.AreEqual(expected: "Item 2", actual: list.Second.Item.State);
 
       // does not affect another instance
-      var list2 = new LinkedList<MyClassProcessed>("CompareItemInstance2");
+      var list2 = new LinkedList<MyClassRaw>("CompareItemInstance2");
 
-      list2.Add(new MyClassProcessed {
-        State = "Item 1"
-      });
-
-      list2.Add(new MyClassProcessed {
-        State = "Item 2"
-      });
+      list2.Add(new MyClassRaw {State = "Item 1"}, new MyClassRaw {State = "Item 2"});
 
       Assert.AreEqual(expected: "Item 2", actual: list2.First.Item.State);
       Assert.AreEqual(expected: "Item 1", actual: list2.Second.Item.State);
@@ -714,8 +705,8 @@ namespace Askowl.Examples {
     [Test]
     public void DebugMode() {
       LinkedList<int>.DebugMode = true;
-      LogAssert.Expect(LogType.Log, new Regex(".... LinkedList: Add to Tommy.*0/0."));
-      LogAssert.Expect(LogType.Log, new Regex(".... LinkedList: move Tommy.*1/0. to Freddy.*0."));
+      LogAssert.Expect(LogType.Log, new Regex(".... LinkedList: Add to Tommy.*0."));
+      LogAssert.Expect(LogType.Log, new Regex(".... LinkedList: move Tommy.*1. to Freddy.*0."));
       LogAssert.Expect(LogType.Log, new Regex(".*: move Freddy.*1.*to end of Tommy Recycling Bin.*0."));
       var tommy  = new LinkedList<int>("Tommy");
       var freddy = new LinkedList<int>("Freddy");
@@ -745,11 +736,11 @@ namespace Askowl.Examples {
 
       listA.Add(23, 14);
       var node99  = listA.Push(99);
-      var expect1 = new Regex("1:.*A.*3/0.*<<.*A.*3/0.*::.*14\n2:.*A.*3/0.*<<.*A.*3/0.*::.*23.*");
+      var expect1 = new Regex("1:.*A.*3.*<<.*A.*3.*::.*14\n2:.*A.*3.*<<.*A.*3.*::.*23.*");
       LogAssert.Expect(LogType.Log, expect1);
       Debug.Log(listA.Dump(2));
       node99.MoveTo(listB);
-      var expect2 = new Regex("1:.*B.*1.*<<.*A.*2/0.*::.*99\n");
+      var expect2 = new Regex("1:.*B.*1.*<<.*A.*2.*::.*99\n");
       LogAssert.Expect(LogType.Log, expect2);
       Debug.Log(listB.Dump());
     }

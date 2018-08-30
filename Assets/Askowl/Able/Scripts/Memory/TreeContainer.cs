@@ -6,7 +6,8 @@ using System.Text;
 namespace Askowl {
   /// <inheritdoc cref="Cached{T}" />
   /// <remarks><a href="http://unitydoc.marrington.net/Able#tree">Non-binary Tree</a></remarks>
-  public class TreeContainer : Cached<TreeContainer> {
+  public class TreeContainer { //}: Cached<TreeContainer> {
+
     #region Private Data
     private class Node : LinkedList<Branch>.Node { }
 
@@ -149,13 +150,13 @@ namespace Askowl {
 
     /// <a href=""></a>
     public TreeContainer Leaf<T>(T setTo) {
-      here.Item.Leaf = setTo;
+//      here.Item.Leaf = setTo;
       return this;
     }
 
     /// <a href=""></a>
     public TreeContainer Leaf(object setTo) {
-      here.Item.Leaf = setTo;
+//      here.Item.Leaf = setTo;
       return this;
     }
 
@@ -204,8 +205,8 @@ namespace Askowl {
       for (int i = 0; i < here.Item.NumberOfChildren; i++) children[i].Dispose();
 
       if (here == root) {
-        root.Item.Children = null;
-        root.Item.Leaf     = null;
+//        root.Item.Children = null;
+//        root.Item.Leaf     = null;
       } else {
         var parent = here.Item.Parent;
         here.Dispose();

@@ -399,38 +399,159 @@ Even if premature optimisation is evil, the garbage collector can still be your 
 
 What can we do about it without slowing down development or our game? When we are writing code we can (usually) see where objects are being allocated/discarded a lot. If they can be safely deactivated, cache them for reuse.
 
-
-
 Oh, so you want examples? Try these for size.
 
 1. Nodes in tree structures
 2. JSON, XML and CSV encoding and decoding
 3. Events and emitters
-4. Temporary instances use in loops
+4. Temporary instances used in loops
 
-You get the idea. Feel free to add to the list.
+You get the idea. Feel free to add to the list. Then there is when not to cache.
+
+1. Classes that are only instantiated once or occasionally.
+2. Classes you cannot reset for reuse. IEnumerable is one of those unfortunately, so no caching coroutines.
+3. Classes with larger data sets where you instantiate a lot at once, but in very infrequent batches. Judgement is needed. A `Dictionary` or `Map` with 100 entries each with a payload of 100 bytes and an average key length of 5 will only take about 64k. Not much in the modern scheme of things. In this case cache the payloads, not the `Dictionary`.
 
 Look at `new` carefully. It appears the same for classes and structs, but the latter uses the stack and does not allocate memory.
 
+The `Cache` class is completely static. It can be used on any class. We call classes that don't know they are being cached as *Cache Agnostic*. You can also use *Cache Aware* classes that are more convenient and readable. For the impatient here are full examples of each.
+
+#### Cache Agnostic Usage
+
+Agnostic usage is quite compact. It is a little harder to read because if the static `Cache<Agnostic>` references.
+
+```c#
+// This would normally be in a static constructor. It only need be run once
+Cache<Agnostic>.CreateItem     = () =>  new Agnostic {State = "Created"};
+Cache<Agnostic>.DeactivateItem = (item) => item.State =  "Deactivated";
+Cache<Agnostic>.ReactivateItem = (item) => item.State += " Reactivated";
+
+var agnostic = Cache<Agnostic>.Instance;
+using (Cache<Agnostic>.Disposable(agnostic)) {
+  Assert.AreEqual("Created", agnostic.State);
+}
+Assert.AreEqual("Deactivated", agnostic.State);
+agnostic = Cache<Agnostic>.Instance;	// will retrieve recycled version
+Assert.AreEqual("Deactivated Reactivated", agnostic.State);
+
+var second = new Agnostic();
+Cache<Agnostic>.Add(second);		// Add to cache after use
+second = Cache<Agnostic>.Instance;	// Retrieve one again
+Cache<Agnostic>.Dispose();			// and send it back again
+```
+
+#### Cache Aware Usage
+
+Once a class is made cache aware, the resulting code is clearer. If you want to cache an unsealed class you can even subclass it and add the functionality below.
+
+```c#
+private class Aware : IDisposable {
+  private static Aware CreateItem()     => new Aware {State = "Created"};
+  private        void             DeactivateItem() => State = "Deactivated";
+  private        void             ReactivateItem() => State += " Reactivated";
+
+  private Aware() { }
+  public static Aware Instance => Cache<Aware>.Instance;
+
+  public string State { get; private set; }
+
+  public void Dispose() { Cache<Aware>.Dispose(this); }
+}
+// ...
+var aware = Aware.Instance;
+using (aware) {
+  Assert.AreEqual("Created", aware.State);
+}
+Assert.AreEqual("Deactivated", aware.State);
+agnostic = Aware.Instance;	// will retrieve recycled version
+Assert.AreEqual("Deactivated Reactivated", Aware.State);
+aware.Dispose();
+```
+
 #### Cache Entry Maintenance
+
+If the instance does not hold state, or you choose to deactivate state in your code, then the class can be cached without any further work. Just create it with the `Cache<T>.Instance` command rather than `new`. Like any resource, disposal is important. If the class implements the `IDisposable` interface then the `using` statement is your best friend. If not, your code will need to use `Cache<T>.Dispose(instance)` or wrap in `using (Cache<T>.Disposable(instance)){}`.   Cached items that are not disposed will constitute a memory leak.
+
+As with the underlying [`LinkedList`](#linked-lists), The [`CreateItem`](#create-a-new-linked-list), [`DeactivatItem`](#create-a-new-linked-list) and [`ReactivateItem`](#create-a-new-linked-list) come in three flavours. The can be added as methods to a class (private or public), attached to a class so that all instances can use them, or attached to an instance. In the latter case, only that specific instance will have the methods. Now for the precedence.
+
+1. A class without any actions attached will run the default as listed below, unless;
+2. A class defines instance methods with the action name and signature, they will be called, unless;
+3. An instance action has been set with a static call.
 
 ##### CreateItem
 
+1. If no action is set then the class being cached must have an empty constructor.
+2. The class has a method `static ClassName CreateItem(){}`
+3. Set `Cache<T>.CreateItem` to a function without parameters that returns a new item.
+
+```c#
+public sealed class SealedClass {public int index;}
+// Choice 1
+var sealedClass1 = Cache<SealedClass>.Instance;	// sets index to 0
+// Choice 2
+public sealed class UnsealedClass {
+    public int index;
+    UnsealedClass CreateItem() => new UnsealedClass {index = 14};
+}
+var unsealedClass1 = Cache<UnsealedClass>.Instance;	// sets index to 14
+// Choice 3
+Cache<SealedClass>.CreateItem = () => new SealedClass {index=23};
+var sealedClass2 = Cache<SealedClass>.Instance;	// sets index to 23
+```
+
 ##### DeactivateItem
+
+Sometimes disposing an item is not the right thing when it is but back in the recycle bin. Perhaps it contains a server connection that needs to be closed, or a reference to a prefab that has to be stopped.
+
+1. If the payload is an `IDisposable`, call `Dispose()` otherwise do nothing
+2. The class has a method `static ClassName DeactivateItem(){doSomething();}`
+3. Set `Cache<T>.DeactivateItem = (item) => item.doSomething()`
 
 ##### ReactivateItem
 
-##### Using a Cached Item Safely
+And of course, you will want to reverse the action when the item is reactivated. Reopen the connection, restart the prefab or whatever. The actions are the same as above with R replacing D.
 
-#### Caching for Sealed Classes
+#### Using a Cached Item Safely
 
-#### Make a Class Cached
+A Cache is only as good as it's housekeeping. If a cached item gets forgotten about it will not return to recycling for later use and it will not be available for garbage disposal because it will be on an active list. There does not appear to be a safe way using the garbage collector that does not end up making more garbage. Prove me wrong. I would be overjoyed.
 
-##### Cache Awareness
+If you code can be made sequential (even waiting for Coroutines meets this criterion), the wrapping said code in `using` is the best option.
 
-##### Fetch a New Cache Aware Instance
+```c#
+var agnostic = Cache<Agnostic>.Instance;
+using (Cache<Agnostic>.Disposable(agnostic)) {
+  // ... work here ...
+}
+using (var aware = Aware.Instance) {
+  // ... work here ...
+}
+```
 
-##### Cache with Inheritance
+Otherwise it is your responsibility to call dispose whithout any opportunity of it being skipped. Remember exceptions.
+
+```c#
+Agnostic agnostic;
+void StartWork() {agnostic = Cache<Agnostic>.Instance;}
+void EndWork() {Cache<Agnostic>.Dispose();}
+
+Aware aware;
+void StartWork() {aware = Aware.Instance;}
+void EndWork() {aware.Dispose();}
+```
+
+If you used a cache item in a body of work, but not outside, you can use `ClearCache()` to send all remaining active items to the recycle bin. It is probably what you should do at the end of a scene anyway. This example shows the difference between CleanCache and Clea**r**Cache.
+
+```c#
+Cache<Agnostic>.Instance;
+Cache<Agnostic>.ClearCache();
+Assert.IsNull(Cache<Agnostic>.Entries.First);
+Assert.IsNotNull(Cache<Agnostic>.Entries.RecycleBin.First);
+
+Cache<Agnostic>.Instance;
+Cache<Agnostic>.CleanCache();
+Assert.IsNull(Cache<Agnostic>.Entries.First);
+Assert.IsNull(Cache<Agnostic>.Entries.RecycleBin.First);
+```
 
 ### Disposable.cs - helper for IDisposable.Dispose()
 
@@ -556,7 +677,7 @@ private struct Observer3 : IObserver<int> {
 
 While an ***Emitter*** provides some extra facilities to the built-in ***event*** delegates, it does not improve decoupling. It does pave the way for decoupled events using [***CustomAssets***](/CustomAssets), an extension of ***ScriptableObjects***.
 
-### LinkedList - a different perspective
+### Linked Lists
 
 C#/.Net provides an excellent LinkList implementation. It is, by necessity generic. My implementation has different goals.
 
@@ -632,7 +753,7 @@ var numberList = new LinkedList<int>();
 Assert.AreEqual(expected: 0, actual: numberList.New());
 ```
 
-##### Linked-List with Custom Item Create, Deactivation and Reactivation
+##### Linked Lists with Custom Item Create, Deactivation and Reactivation
 
 It is all well and good to return `default(T)`, being zeros or null references, but then the user of your list will need to know to create an item if it is not provided. As an example, consider a list of open long-lived HTTP connections.
 

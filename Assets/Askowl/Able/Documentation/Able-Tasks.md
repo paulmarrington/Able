@@ -6,6 +6,7 @@
 - [ ] Update Cache to have a clean old option - `PurgeRecycleBin(Func<Item,bool>)`
 - [ ] Update Json to parse in blocks
 - [ ] LinkedList needs an alert when the either main or recycle exceeds a specific size
+- [ ] Cache needs a high water mark. More entries that this will log an alert
 
 ## Release 2018-08
 
@@ -21,7 +22,7 @@
 - [x] doc and test LinkedList
 - [x] Doc and test Pick
 - [x] Doc and test Selector
-- [ ] Write, doc and test Map
+- [x] Write, doc and test Map
 - [ ] Doc and test Cache
 - [ ] Doc and test TreeContainer
 - [ ] doc and test Set
