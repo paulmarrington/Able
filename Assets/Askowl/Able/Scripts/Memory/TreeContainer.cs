@@ -1,101 +1,123 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Askowl {
-  /// <inheritdoc cref="Cached{T}" />
-  /// <remarks><a href="http://unitydoc.marrington.net/Able#tree">Non-binary Tree</a></remarks>
-  public class TreeContainer { //}: Cached<TreeContainer> {
+  /// <a href="">Tree Data Storage Container</a>
+  public class TreeContainer : IDisposable {
+    #region Private Functionality
+    internal struct Node : IDisposable { //, IComparable {
+      internal interface IValue : IDisposable, IComparable { }
 
-    #region Private Data
-    private class Node : LinkedList<Branch>.Node { }
-
-    private struct Branch : IDisposable, IComparable {
-      internal string Name;
-      internal object Leaf;
-      internal Node   Parent;
-      internal Node[] Children;
-      internal int    NumberOfChildren;
-
-      public void Dispose() {
-        (Leaf as IDisposable)?.Dispose();
-
-        while (NumberOfChildren > 0) {
-          Children[NumberOfChildren--].Dispose();
-        }
+      internal struct LeafNode : IValue {
+        public object Value;
+        public void   Dispose()               { (Value as IDisposable)?.Dispose(); }
+        public int    CompareTo(object other) => Compare(this, other);
       }
 
-      public int CompareTo(object obj) =>
-        obj is Branch ? String.Compare(Name, ((Branch) obj).Name, StringComparison.Ordinal) : 0;
+      internal struct BranchNode : Map, IValue {
+        public Map Value;
+        public void Dispose() { Value.Dispose(); }
+        public int    CompareTo(object other)  => Compare(this, other);
+        public Node   Add(Node         node)   => Value.Add(node.Name, node).As<Node>();
+      }
+
+      internal struct ArrayNode : IValue {
+        public List<Node> Value;
+
+        public void Dispose() {
+          for (int i = 0; i < Value.Count; i++) {
+            (Value[i] as IDisposable)?.Dispose();
+          }
+        }
+
+        public int CompareTo(object other) {
+          var otherArray = other as object[];
+          if (otherArray == null) return 1;
+
+          for (int i = 0; i < Value.Count; i++) {
+            if (i >= otherArray.Length) return 1;
+
+            var result = Compare(Value[i], otherArray[i]);
+            if (result != 0) return result;
+          }
+
+          return (otherArray.Length > List.Count) ? -1 : 0;
+        }
+
+        public Node Get(int    index) => (index < 0) || (index > List.Count) ? IsError : List[index];
+        public Node Get(string key)   => IsError;
+
+        public Node Add(Node node) {
+          List.Add(node);
+          return node;
+        }
+
+        public T Get<T>() where T : class => List as T;
+      }
+
+      internal string     Name;
+      internal object     Parent;
+      internal LeafNode   Leaf;
+      internal BranchNode Branch;
+      internal ArrayNode  Array;
+      internal string     ErrorMessage;
+
+      public bool Error                   => ErrorMessage != null;
+      public void Dispose()               => Value.Dispose();
+      public int  CompareTo(object other) => Value.CompareTo(other);
+
+      public bool HasError => (Value == null) || ((Name == null) && (Parent == null) && (Value == null));
     }
 
-    private static LinkedList<Branch> branches = new LinkedList<Branch>("TreeContainer Branches");
+    private static int Compare(object left, object right) =>
+      (left as IComparable)?.CompareTo(right) ?? Comparer<object>.Default.Compare(left, right);
+    #endregion
 
-    private Node root = (Node) branches.Add(new Branch {Name = "Root"});
-    private Node here;
+    private Node root = new Node(), here;
 
-    private bool StepIn(int index) {
-      if (Error || (here.Item.Children == null) || (index >= here.Item.Children.Length)) {
-        return AccessFailure($"Node '{index}' in '{here.Item.Name}' not found.");
-      }
+    #region Private Methods
+    private bool Stepped(Node there, string message) {
+      if (there.HasError) return AccessFailure($"Node '{message}' in '{here.Name}' not found.");
 
-      here = here.Item.Children[index];
+      here = there;
       return true;
     }
 
-    private bool StepIn(object step) {
-      if (step is int) return StepIn((int) step);
+    private bool StepIn(int index) => Stepped(here.Value.Get(index), index.ToString());
 
+    private bool StepIn(object step) {
       string key = step.ToString();
 
-      if (Compare.isDigitsOnly(key)) return StepIn(int.Parse(key));
+      if (Askowl.Compare.isDigitsOnly(key)) return StepIn(int.Parse(key));
 
-      int index = Array.BinarySearch(array: here.Item.Children, value: key);
-
-      if (index >= 0) StepIn(index);
-
-      index = ~index;
-      var closest = (index < here.Item.Children.Length) ? $" Closest is '{here.Item.Children[index]}'." : "";
-      AccessFailure($"Node named '{key}' in '{here.Item.Name}' not found.{closest}");
-      return false;
-    }
-
-    private void AddChild(Node parentNode, Node childNode) {
-      var parent                                   = parentNode.Item;
-      if (parent.Children == null) parent.Children = new Node[4];
-
-      if (parent.NumberOfChildren >= parent.Children.Length) {
-        Node[] newChildren = new Node[parent.Children.Length * 2];
-        Array.Copy(parent.Children, newChildren, parent.Children.Length);
-        parent.Children = newChildren;
-      }
-
-      parent.Children[parent.NumberOfChildren++] = childNode;
-      Array.Sort(parent.Children);
+      return Stepped(here.Value.Get(key), key);
     }
 
     private TreeContainer() {
       anchors = new Anchors {Stack = new LinkedList<Node>("TreeContainer Anchor Stack"), tree = this};
     }
 
-    static TreeContainer() {
-//      DeactivateItem = (tree) => tree.Root(); // so all the branches are disposed of correctly //#TBD#
-//      ReactivateItem = (tree) => tree.anchors.tree = tree;
+    private TreeContainer Add(string name, Node.IValue value) {
+      var node = new Node {Name = name, Parent = here, Value = value};
+      here.Value.Add(node);
+      here = node;
+      return this;
     }
     #endregion
 
     #region Public Interface
     /// <a href=""></a>
-    public TreeContainer Add(string name) {
-      var node = (Node) branches.Add(new Branch {Name = name, Leaf = null, Parent = here, Children = null});
-      AddChild(here, node);
-      here = node;
-      return this;
-    }
+    public TreeContainer AddLeaf(string name, object value) => Add(name, new Node.Leaf {Value = value});
 
     /// <a href=""></a>
-    public TreeContainer AddAnonymous() => Add(null);
+    public TreeContainer AddBranch(string name) => Add(name, new Node.Branch {Value = new Map()});
+
+    /// <a href=""></a>
+    public TreeContainer AddArray(string name) => Add(name, new Node.Leaf {Value = new List<Node>()});
 
     /// <a href=""></a>
     public TreeContainer Root() {
@@ -105,22 +127,15 @@ namespace Askowl {
     }
 
     /// <a href=""></a>
-    public bool IsRoot => here == root;
+    public bool IsRoot => here.Value == root.Value;
 
     /// <a href=""></a>
     public TreeContainer Parent() {
-      if (here.Item.Parent != null) here = here.Item.Parent;
+      if (here.Parent != null) here = (Node) here.Parent;
       return this;
     }
 
-    /// <param name="path">
-    /// Path to the target node either as a list of objects or a single string with nodes separated by '.'.
-    /// Array indexes can be numbers or strings that convert to numbers.
-    /// <example>0, "level 3"</example>
-    /// <example>"0.level 3"</example>
-    /// </param>
-    /// <returns>false if path does not exist</returns>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#tree-traversal">Traversing the Tree</a></remarks>
+    /// <a href=""></a>
     public TreeContainer To(params object[] path) {
       if ((path.Length == 1) && (path[0] is string)) {
         string[] split = ((string) path[0]).Split('.');
@@ -137,66 +152,19 @@ namespace Askowl {
     }
 
     /// <a href=""></a>
-    public string Name => here.Item.Name;
+    public string Name => here.Name;
 
-    /// <inheritdoc />
-    public override string ToString() {
-      stringBuilder.Clear();
-      HereToString(indent: "");
-      return stringBuilder.ToString();
+    /// <a href=""></a>
+    public bool IsA<T>() => here.Value.Value is T;
+
+    /// <a href=""></a>
+    public T Leaf<T>() => (here.Value.Value is T) ? (T) here.Value.Value : default(T);
+
+    /// <a href=""></a>
+    public void Dispose() {
+      Root().DisposeHere();
+      anchors.Dispose();
     }
-
-    private StringBuilder stringBuilder = new StringBuilder();
-
-    /// <a href=""></a>
-    public TreeContainer Leaf<T>(T setTo) {
-//      here.Item.Leaf = setTo;
-      return this;
-    }
-
-    /// <a href=""></a>
-    public TreeContainer Leaf(object setTo) {
-//      here.Item.Leaf = setTo;
-      return this;
-    }
-
-    /// <a href=""></a>
-    public bool HasLeaf => here.Item.Leaf != null;
-
-    /// <a href=""></a>
-    public bool IsA<T>() => here.Item.Leaf is T;
-
-    /// <a href=""></a>
-    public T Leaf<T>() => (here.Item.Leaf is T) ? (T) here.Item.Leaf : default(T);
-
-    /// <a href=""></a>
-    public object Leaf() => here.Item.Leaf;
-
-    /// <a href=""></a>
-    public bool HasAnonymousChildren => (here.Item.NumberOfChildren > 0) && (here.Item.Children[0].Item.Name == null);
-
-    /// <a href=""></a>
-    public int ChildCount => here.Item.NumberOfChildren;
-
-    /// <summary>
-    /// After calling `action` for each child branch it will return here to the parent.
-    /// No need for an explicit `using(Anchor)`
-    /// </summary>
-    public TreeContainer ForEach(Action action) {
-      using (Anchor) {
-        var parent = here.Item;
-
-        for (int i = 0; i < parent.NumberOfChildren; i++) {
-          here = parent.Children[i];
-          action();
-        }
-      }
-
-      return this;
-    }
-
-    /// <a href=""></a>
-//    public override void Dispose() { Root().DisposeHere(); } //#TBD#
 
     /// <a href=""></a>
     public void DisposeHere() {
@@ -236,6 +204,15 @@ namespace Askowl {
     #endregion
 
     #region Error Processing
+    /// <inheritdoc />
+    public override string ToString() {
+      stringBuilder.Clear();
+      HereToString(indent: "");
+      return stringBuilder.ToString();
+    }
+
+    private StringBuilder stringBuilder = new StringBuilder();
+
     /// <remarks><a href="http://unitydoc.marrington.net/Able#tree-error-processing">Error Indication and Message</a></remarks>
     public string ErrorMessage { get; set; }
 

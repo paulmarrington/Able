@@ -211,13 +211,13 @@ namespace Askowl {
 
           switch (word) {
             case "true":
-              tree.Leaf(setTo: true);
+              tree.Leaf(value: true);
               return;
             case "false":
-              tree.Leaf(setTo: false);
+              tree.Leaf(value: false);
               return;
             case "null":
-              tree.Leaf(setTo: null);
+              tree.Leaf(value: null);
               return;
 
             default:
@@ -225,9 +225,9 @@ namespace Askowl {
               double d;
 
               if (long.TryParse(word, out i)) {
-                tree.Leaf(setTo: i);
+                tree.Leaf(value: i);
               } else if (double.TryParse(word, out d)) {
-                tree.Leaf(setTo: d);
+                tree.Leaf(value: d);
               } else {
                 ParseError($"word '{word}' unknown");
               }

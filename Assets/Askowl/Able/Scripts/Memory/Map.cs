@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Askowl {
   /// <a href=""></a>
-  public class Map {
+  public class Map : IDisposable {
     private readonly Dictionary<object, object> map = new Dictionary<object, object>();
 
     /// <a href=""></a>
@@ -19,7 +19,7 @@ namespace Askowl {
     public Map Add(params object[] keyValuePairs) {
       for (int j = 0; j < keyValuePairs.Length; j += 2) {
         keys.Add(keyValuePairs[j]);
-        map[keyValuePairs[j]] = keyValuePairs[j + 1];
+        map[keyValuePairs[j]] = Value = keyValuePairs[j + 1];
       }
 
       return this;
@@ -39,6 +39,7 @@ namespace Askowl {
     public Map Remove(params object[] oldKeys) {
       for (int j = 0; j < oldKeys.Length; j++) {
         keys.Remove(oldKeys[j]);
+        (map[oldKeys[j]] as IDisposable)?.Dispose();
         map.Remove(oldKeys[j]);
       }
 
@@ -100,5 +101,12 @@ namespace Askowl {
 
     /// <a href=""></a>
     public Type TypeOf => Value?.GetType();
+
+    /// <a href=""></a>
+    public void Dispose() {
+      for (int i = 0; i < Count; i++) (keys[i] as IDisposable)?.Dispose();
+      keys.Clear();
+      map.Clear();
+    }
   }
 }

@@ -185,6 +185,23 @@ namespace Askowl.Examples {
       Assert.AreEqual("OneTwoThreeFourFive", actual);
     }
 
+    private static int disposals;
+
+    struct Disposable : IDisposable {
+      public void Dispose() { disposals += 1; }
+    }
+
+    /// <a href="">Using <see cref="Map.Dispose"/></a>
+    [Test]
+    public void Dispose() {
+      Disposable[] values = new Disposable[3];
+      var          map    = new Map("One", values[0], "Two", values[1], "Three", values[2]);
+      disposals = 0;
+      map.Dispose();
+      Assert.AreEqual(3, disposals);
+      Assert.AreEqual(0, map.Count);
+    }
+
     /// <a href="">Using <see cref="Map"/></a>
     [Test]
     public void SpeedCheck() {
