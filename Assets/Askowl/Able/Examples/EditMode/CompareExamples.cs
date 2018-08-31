@@ -40,12 +40,12 @@ namespace Askowl.Examples { //#TBD#
     }
 
     public void IsDigitsOnly() {
-      Assert.IsTrue(Compare.isDigitsOnly("123987654"));
+      Assert.IsTrue(Compare.IsDigitsOnly("123987654"));
 
-      Assert.IsFalse(Compare.isDigitsOnly("12no shoe"));
-      Assert.IsFalse(Compare.isDigitsOnly("1.4"));
-      Assert.IsFalse(Compare.isDigitsOnly("-66"));
-      Assert.IsFalse(Compare.isDigitsOnly(""));
+      Assert.IsFalse(Compare.IsDigitsOnly("12no shoe"));
+      Assert.IsFalse(Compare.IsDigitsOnly("1.4"));
+      Assert.IsFalse(Compare.IsDigitsOnly("-66"));
+      Assert.IsFalse(Compare.IsDigitsOnly(""));
     }
   }
 }

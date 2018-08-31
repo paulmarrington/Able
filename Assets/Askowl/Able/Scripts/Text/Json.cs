@@ -18,7 +18,7 @@ namespace Askowl {
         return this;
       }
 
-      tree = TreeContainer.Instance;
+//      tree = TreeContainer.Instance;
       json = jsonText;
       idx  = 0;
       return CheckToken('{').ParseToNode();
@@ -33,11 +33,11 @@ namespace Askowl {
     public String Name => tree.Name;
 
     /// <remarks><a href="http://unitydoc.marrington.net/Able#current-location">Here - The Current Location</a></remarks>
-    public T Here<T>() => Convert<T>(tree.Leaf());
+//    public T Here<T>() => Convert<T>(tree.Leaf);
 
     /// <typeparam name="T">The type we anticipate this node to be</typeparam>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#information-retrieval">Retrieve Value at Current Location</a></remarks>
-    public bool IsA<T>() => CheckIsA<T>(tree.Leaf());
+//    public bool IsA<T>() => CheckIsA<T>(tree.Leaf());
 
     /// <summary>
     /// Checks to see if we can cast the node type to that provided.
@@ -48,10 +48,10 @@ namespace Askowl {
 //    public bool IsA<T>(object node) => CheckIsA<T>(node);
 
     /// <remarks><a href="http://unitydoc.marrington.net/Able#information-retrieval">Retrieve Value at Current Location</a></remarks>
-    public bool IsNode => tree.Leaf() == null;
+//    public bool IsNode => tree.Leaf() == null;
 
     /// <remarks><a href="http://unitydoc.marrington.net/Able#information-retrieval">Retrieve Value at Current Location</a></remarks>
-    public bool IsArray => tree.HasAnonymousChildren;
+//    public bool IsArray => tree.HasAnonymousChildren;
 
     /// <summary>
     /// When completely lost, ask for the node type. It could be Node, Array, object, double, long, bool or null
@@ -60,15 +60,15 @@ namespace Askowl {
 //    public Type NodeType => tree.Leaf().GetType();
 
     /// <remarks><a href="http://unitydoc.marrington.net/Able#error-processing">Error Indication and Message</a></remarks>
-    public string ErrorMessage => tree.ErrorMessage;
+//    public string ErrorMessage => tree.ErrorMessage;
 
     /// <remarks><a href="http://unitydoc.marrington.net/Able#error-processing">Error Indication and Message</a></remarks>
-    public bool Error => tree.ErrorMessage != null;
+//    public bool Error => tree.ErrorMessage != null;
 
     #region AccessNodes
     public Json Root {
       get {
-        tree.Root();
+//        tree.Root();
         return this;
       }
     }
@@ -76,7 +76,7 @@ namespace Askowl {
     public bool IsRoot => tree.IsRoot;
 
     public Json Parent() {
-      tree.Parent();
+//      tree.Parent();
       return this;
     }
     /// <summary>
@@ -139,10 +139,10 @@ namespace Askowl {
 
     #region NodeEnumeration
     /// <remarks><a href="http://unitydoc.marrington.net/Able#tree-traversal">Traversing the JSON Node Tree</a></remarks>
-    public int ChildCount => tree.ChildCount;
+//    public int ChildCount => tree.ChildCount;
 
     /// <remarks><a href="http://unitydoc.marrington.net/Able#tree-traversal">Traversing the JSON Node Tree</a></remarks>
-    public TreeContainer ForEach(Action action) => tree.ForEach(action);
+//    public TreeContainer ForEach(Action action) => tree.ForEach(action);
 
     /// <summary>
     /// Use to set and return to a current location after some operations. Best for enumerations
@@ -154,9 +154,9 @@ namespace Askowl {
     #endregion
 
     #region SupportData
-    private TreeContainer tree;
-    private string        json = "";
-    private int           idx;
+    private Trees  tree;
+    private string json = "";
+    private int    idx;
     #endregion
 
     #region Parsing
@@ -187,9 +187,9 @@ namespace Askowl {
       string key = CheckToken('"').ParseString();
       if (!CheckToken(':').SkipWhiteSpace()) return false;
 
-      tree.Add(key);
+//      tree.Add(key);
       ParseObject();
-      tree.Parent();
+//      tree.Parent();
       return idx < json.Length;
     }
 
@@ -204,20 +204,20 @@ namespace Askowl {
           ParseArray();
           return;
         case '"':
-          tree.Leaf(ParseString());
+//          tree.Leaf(ParseString());
           return;
         default:
           string word = NextWord();
 
           switch (word) {
             case "true":
-              tree.Leaf(value: true);
+//              tree.Leaf(value: true);
               return;
             case "false":
-              tree.Leaf(value: false);
+//              tree.Leaf(value: false);
               return;
             case "null":
-              tree.Leaf(value: null);
+//              tree.Leaf(value: null);
               return;
 
             default:
@@ -225,9 +225,9 @@ namespace Askowl {
               double d;
 
               if (long.TryParse(word, out i)) {
-                tree.Leaf(value: i);
+//                tree.Leaf(value: i);
               } else if (double.TryParse(word, out d)) {
-                tree.Leaf(value: d);
+//                tree.Leaf(value: d);
               } else {
                 ParseError($"word '{word}' unknown");
               }
@@ -241,11 +241,11 @@ namespace Askowl {
 
     private void ParseArray() {
       while (SkipWhiteSpace() && (json[idx] != ']')) {
-        tree.AddAnonymous();
+//        tree.AddAnonymous();
         ParseObject();
       }
 
-      tree.Parent();
+//      tree.Parent();
     }
 
     private string ParseString() {
@@ -288,7 +288,7 @@ namespace Askowl {
     private static bool IsWhiteSpace(char chr) => char.IsWhiteSpace(chr) || (chr == ',');
 
     private bool SkipWhiteSpace() {
-      if (Error) return false;
+//      if (Error) return false;
 
       while ((idx < json.Length) && IsWhiteSpace(json[idx])) idx++;
       return idx < json.Length;
@@ -300,11 +300,11 @@ namespace Askowl {
       int    length = Mathf.Min(32, json.Length - idx);
       string part   = (length > 0) ? json.Substring(idx - 1, length) : "";
 
-      tree.ErrorMessage = $"JSON Parsing Error: {msg} - at {idx}, from {part}";
+//      tree.ErrorMessage = $"JSON Parsing Error: {msg} - at {idx}, from {part}";
     }
 
     private bool AccessFailure(string message) {
-      tree.ErrorMessage = $"JSON Access Failure: {message} -  at {tree.Leaf().GetType().Name}  [[{tree}]]";
+//      tree.ErrorMessage = $"JSON Access Failure: {message} -  at {tree.Leaf().GetType().Name}  [[{tree}]]";
       return false;
     }
 
