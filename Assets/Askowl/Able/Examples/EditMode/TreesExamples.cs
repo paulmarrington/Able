@@ -18,13 +18,13 @@ namespace Askowl.Examples {
       var tree = Trees.Instance.To("OneOffRoot");
       Assert.IsFalse(tree.Has("OneOffRoot"));
 
-      Assert.IsTrue(tree.Root.Has("OneOffRoot"));
+      Assert.IsTrue(tree.Root().Has("OneOffRoot"));
     }
 
     /// Using <see cref="Trees.IsRoot"/>
     [Test]
     public void IsRoot() {
-      var tree = Trees.Instance.To("OneOffRoot");
+      var tree = Trees.Instance;
 
       Assert.IsTrue(tree.IsRoot);
 
@@ -38,15 +38,33 @@ namespace Askowl.Examples {
     public void Parent() {
       var tree = Trees.Instance.To("OneOffRoot");
       Assert.IsFalse(tree.IsRoot);
-      Assert.IsTrue(tree.Parent.IsRoot);
+      Assert.IsTrue(tree.Parent().IsRoot);
     }
 
     /// Using <see cref="Trees.To"/>
     [Test]
     public void To() {
       var tree = Trees.Instance.To("A.B.C");
-      tree.Root.To("A", "B");
 
+      tree.To("A", "B");
+      Assert.IsTrue(tree.Has("C"));
+
+      tree.To("A.B");
+      Assert.IsTrue(tree.Has("C"));
+
+      tree.To("A").To(".B");
+      Assert.IsTrue(tree.Has("C"));
+    }
+
+    /// Using <see cref="Trees.Next"/>
+    [Test]
+    public void Next() {
+      var tree = Trees.Instance.To("A.B.C");
+
+      tree.To("A").Next("B");
+      Assert.IsTrue(tree.Has("C"));
+
+      tree.To("A").To(".B");
       Assert.IsTrue(tree.Has("C"));
     }
 
@@ -55,7 +73,7 @@ namespace Askowl.Examples {
     public void Has() {
       var tree = Trees.Instance.To("IamHere");
 
-      Assert.IsTrue(tree.Root.Has("IamHere"));
+      Assert.IsTrue(tree.Root().Has("IamHere"));
       Assert.IsFalse(tree.To("IamHere").Has("IamHere"));
     }
 
@@ -66,7 +84,7 @@ namespace Askowl.Examples {
 
       Assert.AreEqual("IamHere", tree.Name);
 
-      Assert.AreEqual("~ROOT~", tree.Root.Name);
+      Assert.AreEqual("~ROOT~", tree.Root().Name);
     }
 
     /// Using <see cref="Trees.IsA{T}"/>
@@ -93,7 +111,7 @@ namespace Askowl.Examples {
       var tree = Trees.Instance.To("IamHere");
       tree.Leaf = 222;
 
-      Assert.AreEqual(222, tree.IsA<int>());
+      Assert.AreEqual(222, tree.As<int>());
     }
 
     /// Using <see cref="Trees.Dispose"/>
@@ -109,7 +127,7 @@ namespace Askowl.Examples {
     [Test]
     public void DisposeHere() {
       var tree = Trees.Instance.To("A.B.C");
-      Assert.IsTrue(tree.Root.To("A").Has("B"));
+      tree.To("A.B");
       tree.DisposeHere();
       Assert.AreEqual("A", tree.Name);
       Assert.IsFalse(tree.Has("B"));
@@ -120,8 +138,8 @@ namespace Askowl.Examples {
     public void Anchor() {
       var tree = Trees.Instance.To("A.B.C");
 
-      using (tree.Anchor) {
-        tree.Root.To("A");
+      using (tree.Anchor()) {
+        tree.To("A");
       }
 
       Assert.AreEqual("C", tree.Name);
@@ -130,8 +148,8 @@ namespace Askowl.Examples {
     /// Using <see cref="Trees.Count"/>
     [Test]
     public void Count() {
-      var tree = Trees.Instance.To("A.B.4").Parent.To(2);
-      Assert.AreEqual(4, tree.To("A.B").Count);
+      var tree = Trees.Instance.To("A.B.4").Parent(2);
+      Assert.AreEqual(5, tree.Root().To("A.B").Count);
     }
 
     /// Using <see cref="Trees.ToString"/>

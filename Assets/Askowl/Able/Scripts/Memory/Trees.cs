@@ -2,12 +2,12 @@
 
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Askowl {
   /// <a href="">Tree Data Storage Container</a>
   public class Trees : IDisposable {
     #region Private Functionality
-    #region Nodes
     // ReSharper disable once ClassNeverInstantiated.Global
     internal class Node : IDisposable {
       private Node() { }
@@ -79,25 +79,29 @@ namespace Askowl {
         branchNode = new BranchNode();
         arrayNode  = new ArrayNode();
         Parent     = null;
+        Name       = null;
       }
 
       public override string ToString() => Name;
     }
-    #endregion
 
-    private Node root, here;
+    private readonly Node root;
+    private          Node here;
 
     private struct Anchors : IDisposable {
       public LinkedList<Node> Stack;
       public Trees            tree;
-      public void             Dispose() { tree.here = Stack.Pop().Item; }
+
+      public void Dispose() { tree.here = Stack.Pop().Item; }
+
+      static Anchors() { LinkedList<Node>.DeactivateItemStatic = (node) => { }; }
     }
 
     private Anchors anchors;
 
     private Trees() {
       root    = here = Node.New("~ROOT~", null);
-      anchors = new Anchors {Stack = new LinkedList<Node>("TreeContainer Anchor Stack"), tree = this};
+      anchors = new Anchors {Stack = new LinkedList<Node>("Trees Anchor Stack"), tree = this};
     }
     #endregion
 
@@ -106,32 +110,26 @@ namespace Askowl {
     public static Trees Instance => new Trees();
 
     /// <a href=""></a>
-    public Trees Root {
-      get {
-        here = root;
-        return this;
-      }
+    public Trees Root() {
+      here = root;
+      return this;
     }
 
     /// <a href=""></a>
     public bool IsRoot => here == root;
 
     /// <a href=""></a>
-    public Trees Parent {
-      get {
-        if (here.Parent != null) here = here.Parent;
-        return this;
-      }
+    public Trees Parent(params object[] path) {
+      if (here.Parent != null) here = here.Parent;
+      return Next(path);
     }
 
     /// <a href=""></a>
-    public Trees To(params object[] path) {
+    public Trees Next(params object[] path) {
       if ((path.Length == 1) && (path[0] is string)) {
         string[] split = ((string) path[0]).Split('.');
         path = Array.ConvertAll(split, x => (object) x);
       }
-
-      if (path.Length == 0) return this;
 
       for (int i = 0; i < path.Length; i++) {
         if (path[i] is int) {
@@ -139,15 +137,31 @@ namespace Askowl {
         } else {
           var key = path[i].ToString();
 
-          if (Has(key) || !Compare.IsDigitsOnly(key)) {
-            here = here[key];
-          } else {
-            here = here[int.Parse(key)];
+          if (!string.IsNullOrWhiteSpace(key)) {
+            if (Has(key) || !Compare.IsDigitsOnly(key)) {
+              here = here[key];
+            } else {
+              here = here[int.Parse(key)];
+            }
           }
         }
       }
 
       return this;
+    }
+
+    /// <a href=""></a>
+    public Trees To(params object[] path) {
+      if ((path.Length == 1) && path[0] is string) {
+        var text = path[0].ToString();
+        if (text.Length == 0) return this;
+
+        if (text[0] != '.') here = root;
+      } else {
+        here = root;
+      }
+
+      return Next(path);
     }
 
     /// <a href="bit.ly/">Has</a>
@@ -170,23 +184,23 @@ namespace Askowl {
 
     /// <a href=""></a>
     public void Dispose() {
-      Root.DisposeHere();
-      anchors.Dispose();
+      Root().DisposeHere();
+      anchors.Stack.Dispose();
     }
 
     /// <a href=""></a>
     public void DisposeHere() {
       var parent = here.Parent;
+      var key    = here.Name;
       here.Dispose();
       here = parent ?? root;
+      here.Branch.Remove(key);
     }
 
     /// <a href=""></a>
-    public IDisposable Anchor {
-      get {
-        anchors.Stack.Push(here);
-        return anchors;
-      }
+    public IDisposable Anchor() {
+      anchors.Stack.Push(here);
+      return anchors;
     }
 
     /// <inheritdoc />

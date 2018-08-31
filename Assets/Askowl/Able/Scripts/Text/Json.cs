@@ -149,12 +149,13 @@ namespace Askowl {
     /// <code>using json.Anchor { json.Walk("first.one"); }</code>
     /// </summary>
     /// <remarks><a href="http://unitydoc.marrington.net/Able#Anchor">Mark Current Node Location</a></remarks>
-    public IDisposable Anchor => tree.Anchor;
+//    public IDisposable Anchor => tree.Anchor;
     #endregion
     #endregion
 
     #region SupportData
-    private Trees  tree;
+    private Trees tree;
+
     private string json = "";
     private int    idx;
     #endregion

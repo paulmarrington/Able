@@ -38,9 +38,11 @@ namespace Askowl {
     /// <a href=""></a>
     public Map Remove(params object[] oldKeys) {
       for (int j = 0; j < oldKeys.Length; j++) {
-        keys.Remove(oldKeys[j]);
-        (map[oldKeys[j]] as IDisposable)?.Dispose();
-        map.Remove(oldKeys[j]);
+        if (map.ContainsKey(oldKeys[j])) {
+          keys.Remove(oldKeys[j]);
+          (map[oldKeys[j]] as IDisposable)?.Dispose();
+          map.Remove(oldKeys[j]);
+        }
       }
 
       return this;

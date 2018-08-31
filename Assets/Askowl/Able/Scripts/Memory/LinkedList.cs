@@ -1,4 +1,4 @@
-﻿﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
+﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
 using System;
 using System.Reflection;
@@ -25,7 +25,6 @@ namespace Askowl {
       public LinkedList<T> Owner, Home;
 
       /// <a href="">Item can be value type (int, float ... struct) or object (class instance)</a>
-//      public T Item; //#TBD#
       public T Item { get; protected internal set; }
 
       /// <a href="">NodeComparison Operator</a>
@@ -69,12 +68,6 @@ namespace Askowl {
       /// <a href="">Node Naming Convention</a>
       /// <inheritdoc />
       public override string ToString() => $"{Owner,25}  <<  {Home,-25}::  {Item}";
-// //#TBD#
-//      /// <a href=""></a>
-//      public Node Update(T newItem) {
-//        Item = newItem;
-//        return this;
-//      }
 
       /// <a href=""></a>
       public Node Fetch() => Home.Fetch().MoveTo(Owner);
@@ -203,10 +196,7 @@ namespace Askowl {
       Node node = null;
       int  idx  = 0;
 
-//      while (!RecycleBin.Empty && (idx < newItems.Length)) node = RecycleBin.First.MoveTo(this).Update(newItems[idx++]); //#TBD#
-
       while (idx < newItems.Length) node = Insert(NewNode(newItems[idx++]));
-
       return node;
     }
 
