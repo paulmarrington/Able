@@ -171,7 +171,7 @@ namespace Askowl.Examples {
     public void Count() {
       var tree = Trees.Instance.Add("A.B.4..2");
       // Number of slots in array - 0 for anything else
-      Assert.AreEqual(5, tree.To("A.B").Count);
+      Assert.AreEqual(2x, tree.To("A.B").Count);
     }
 
     /// Using <see cref="Trees.Children"/>

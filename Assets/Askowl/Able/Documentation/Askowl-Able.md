@@ -1230,7 +1230,7 @@ Assert.IsTrue(tree.Has("C"));
 
 All the tree walking methods can be given a path to travel up or down the tree. The question is, which way is up? If we are using a tree from nature the root is down and we go up to branches and leaves. Then again we represent tree structures on the page and screen with the root on the left with branches and leaves to the right.
 
-Most provide a path to follow. It can be a single string with a `.`  separating nodes or a list of object for non-string keys.
+Most provide a path to follow. It can be a single string with a `.`  separating nodes or a list of object for non-string keys. You can walk back towards the root with `..` with each additional dot being another step back.
 
 ```c#
 
@@ -1247,10 +1247,19 @@ A tree instance keeps it's location as internal state but often we have a path f
 `To` will search from the root along the specified path. It will return null if a node does not exist. In this case `Failure` will be set and the tree will reference the last node on the path that was found.
 
 ```c#
-
+var type = tree.To("Authors.Books.Type")?.Leaf;
+Assert .IsFalse(tree.Failure)
 ```
 
 ###### Next(params object[] path)
+
+Next is identical to To except that it starts from the current location in the tree without going back to the root.
+
+```c#
+tree.To("Authors")
+var type = tree.Next("Books.Type")?.Leaf;
+Assert .IsFalse(tree.Failure)
+```
 
 ###### Parent(params object[] path)
 
