@@ -23,7 +23,8 @@
 - [x] Doc and test Pick
 - [x] Doc and test Selector
 - [x] Write, doc and test Map
-- [ ] Doc and test Cache
+- [x] Doc and test Cache
+- [ ] Update LinkedList documentation - to not dispose must to explicit DeactivateItem ()=>{}
 - [ ] Doc and test TreeContainer
 - [ ] doc and test Set
 - [ ] doc and test Csv

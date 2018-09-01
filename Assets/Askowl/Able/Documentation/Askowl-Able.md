@@ -1202,6 +1202,68 @@ Assert.AreEqual("OneTwoThreeFourFive", actual);
 
 In this example we are sorting the keys by the value, not the key.
 
+### Tree.cs - Tree Container for Varied Structured Data
+
+#### Creating a Tree Container
+
+For no particularly good reason a new database is created with a static property. `Trees` is type agnostic, so no additional information is required. The tree contains state including the current branch, array or leaf node. It starts by pointing at the root node.
+
+```c#
+var tree = Trees.Instance;
+Assert.IsTrue(tree.IsRoot);
+```
+
+#### Tree Navigation
+
+The tree root is the known starting point. You can return to it explicitly with `tree.Root()` or implicitly with `To`. Moving back to root from the current node is implemented with `Parent(path)` or with ***..*** in the path.
+
+```c#
+var tree = Trees.Instance.To("A.B.C");
+tree.To("A.B");
+Assert.IsTrue(tree.Has("C"));
+Assert.IsTrue(tree.Parent().Parent().Parent().IsRoot);
+tree.To("A.B.C...B");	// A->B->C<-B<-A
+Assert.IsTrue(tree.Has("C"));
+```
+
+##### Tree Walking
+
+All the tree walking methods can be given a path to travel up or down the tree. The question is, which way is up? If we are using a tree from nature the root is down and we go up to branches and leaves. Then again we represent tree structures on the page and screen with the root on the left with branches and leaves to the right.
+
+Most provide a path to follow. It can be a single string with a `.`  separating nodes or a list of object for non-string keys.
+
+```c#
+
+```
+
+All these methods, bar `Anchor` will return a reference to `Tree` for chaining.
+
+###### Root()
+
+A tree instance keeps it's location as internal state but often we have a path from the root. `Root()` is functionally identical to `To()` without parameters.
+
+###### To(params object[] path)
+
+`To` will search from the root along the specified path. It will return null if a node does not exist. In this case `Failure` will be set and the tree will reference the last node on the path that was found.
+
+```c#
+
+```
+
+###### Next(params object[] path)
+
+###### Parent(params object[] path)
+
+###### Anchor(params object[] path)
+
+#### Tree Contents
+
+#### Tree Additions and Removals
+
+###### Add(params object[] path)
+
+#### Tree Export Support
+
 ### Pick.cs - Interface to choose from options
 
 Interface to pick an item, probably from a list, probably random. It all depends on how you implement `Pick()`.

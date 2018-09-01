@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Askowl {
   /// <a href="">Tree Data Storage Container</a>
@@ -103,29 +102,12 @@ namespace Askowl {
       root    = here = Node.New("~ROOT~", null);
       anchors = new Anchors {Stack = new LinkedList<Node>("Trees Anchor Stack"), tree = this};
     }
-    #endregion
-
-    #region Public Interface
-    /// <a href=""></a>
-    public static Trees Instance => new Trees();
 
     /// <a href=""></a>
-    public Trees Root() {
-      here = root;
-      return this;
-    }
+    private Trees Walk(bool create, params object[] path) {
+      Failed = false;
+      if (path.Length == 0) return this;
 
-    /// <a href=""></a>
-    public bool IsRoot => here == root;
-
-    /// <a href=""></a>
-    public Trees Parent(params object[] path) {
-      if (here.Parent != null) here = here.Parent;
-      return Next(path);
-    }
-
-    /// <a href=""></a>
-    public Trees Next(params object[] path) {
       if ((path.Length == 1) && (path[0] is string)) {
         string[] split = ((string) path[0]).Split('.');
         path = Array.ConvertAll(split, x => (object) x);
@@ -137,35 +119,55 @@ namespace Askowl {
         } else {
           var key = path[i].ToString();
 
-          if (!string.IsNullOrWhiteSpace(key)) {
-            if (Has(key) || !Compare.IsDigitsOnly(key)) {
-              here = here[key];
-            } else {
-              here = here[int.Parse(key)];
+          if (string.IsNullOrWhiteSpace(key)) {
+            here = (i == 0) ? here : here.Parent;
+          } else if (here.Has(path[i]) || !Compare.IsDigitsOnly(key)) {
+            if (!create && !here.Has(path[i])) {
+              Failed = true;
+              return null;
             }
+
+            here = here[path[i]];
+          } else {
+            here = here[int.Parse(key)];
           }
         }
       }
 
       return this;
     }
+    #endregion
+
+    #region Public Interface
+    /// <a href=""></a>
+    public static Trees Instance => new Trees();
 
     /// <a href=""></a>
-    public Trees To(params object[] path) {
-      if ((path.Length == 1) && path[0] is string) {
-        var text = path[0].ToString();
-        if (text.Length == 0) return this;
+    public bool Failed { get; private set; }
 
-        if (text[0] != '.') here = root;
-      } else {
-        here = root;
-      }
+    /// <a href=""></a>
+    public bool IsRoot => here == root;
 
+    /// <a href=""></a>
+    public Trees Root() {
+      here = root;
+      return this;
+    }
+
+    /// <a href=""></a>
+    public Trees Parent(params object[] path) {
+      if (here.Parent != null) here = here.Parent;
       return Next(path);
     }
 
+    /// <a href=""></a>
+    public Trees To(params object[] path) => Root().Walk(create: false, path: path);
+
+    /// <a href=""></a>
+    public Trees Next(params object[] path) => Walk(create: false, path: path);
+
     /// <a href="bit.ly/">Has</a>
-    public bool Has(object key) => here.Has(key);
+    public Trees Add(params object[] path) => Walk(create: true, path: path);
 
     /// <a href=""></a>
     public string Name => here.Name;
@@ -177,7 +179,13 @@ namespace Askowl {
     public object Leaf { get { return here.Leaf; } set { here.Leaf = value; } }
 
     /// <a href=""></a>
-    public T As<T>() => here.As<T>();
+    public T As<T>() {
+      Failed = !here.IsA<T>();
+      return here.As<T>();
+    }
+
+    /// <a href="bit.ly/">Keys</a>
+    public object[] Children => here.Branch.Keys;
 
     /// <a href=""></a>
     public int Count => here.Count;
@@ -198,8 +206,9 @@ namespace Askowl {
     }
 
     /// <a href=""></a>
-    public IDisposable Anchor() {
+    public IDisposable Anchor(params object[] path) {
       anchors.Stack.Push(here);
+      Next(path);
       return anchors;
     }
 
