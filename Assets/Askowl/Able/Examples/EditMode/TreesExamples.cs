@@ -1,6 +1,7 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
 using NUnit.Framework;
+using UnityEngine;
 
 namespace Askowl.Examples {
   /// Using <see cref="Trees"/>
@@ -48,17 +49,6 @@ namespace Askowl.Examples {
       Assert.IsFalse(tree.Failed);
     }
 
-    /// Using <see cref="Trees.Parent"/>
-    [Test]
-    public void Parent() {
-      // "A" is one branch off root
-      var tree = Trees.Instance.Add("A.B");
-      Assert.IsFalse(tree.IsRoot);
-      Assert.IsTrue(tree.Parent().Parent().IsRoot);
-      // The root node has a generated name
-      Assert.AreEqual("~ROOT~", tree.Name);
-    }
-
     /// Using <see cref="Trees.To"/>
     [Test]
     public void To() {
@@ -86,9 +76,9 @@ namespace Askowl.Examples {
       var tree = Trees.Instance.Add("A.B");
       tree.Add("D");
       // `Add` is always relative to the current location
-      Assert.AreEqual("A.B.D", tree.ToString());
+      Assert.AreEqual("A.B.D", tree.Key);
       // Unless we have an explicit move to root
-      Assert.AreEqual("A.B.C", tree.Root().Add("A.B.C").ToString());
+      Assert.AreEqual("A.B.C", tree.Root().Add("A.B.C").Key);
     }
 
     /// Using <see cref="Trees.Name"/>
@@ -101,15 +91,6 @@ namespace Askowl.Examples {
       Assert.AreEqual("~ROOT~", tree.Root().Name);
     }
 
-    /// Using <see cref="Trees.IsA{T}"/>
-    [Test]
-    public void IsA() {
-      var tree = Trees.Instance.Add("IamHere");
-      tree.Leaf = "a string value";
-      // See if the leaf is of an expected type
-      Assert.IsTrue(tree.IsA<string>());
-    }
-
     /// Using <see cref="Trees.Leaf"/>
     [Test]
     public void Leaf() {
@@ -119,34 +100,24 @@ namespace Askowl.Examples {
       Assert.IsNotNull(tree.Leaf);
     }
 
-    /// Using <see cref="Trees.As{T}"/>
+    /// Using <see cref="Trees.this[object]"/>
     [Test]
-    public void As() {
-      var tree = Trees.Instance.Add("IamHere");
-      tree.Leaf = 222;
-      // Retrieve a leaf as a type, returning default(T) on failure
-      Assert.AreEqual(222, tree.As<int>());
-      // Sets Failure flag
-      Assert.IsFalse(tree.Failed);
+    public void ArrayUpdate() {
+      var tree = Trees.Instance.Add("A.B.C");
+      // Update the current node leaf
+      tree.Leaf = "Leaf Update";
+      Assert.AreEqual("Leaf Update", tree.To("A.B")["C"]);
+
+      tree["C"] = "Array Update";
+      Assert.AreEqual("Array Update", tree.To("A.B.C").Leaf);
     }
 
     /// Using <see cref="Trees.Dispose"/>
     [Test]
     public void Dispose() {
-      var tree = Trees.Instance.Add("IamHere");
-      // Drop everything in the tree
-      tree.Dispose();
-      Assert.IsTrue(tree.IsRoot);
-      Assert.IsNull(tree.To("IamHere"));
-    }
-
-    /// Using <see cref="Trees.DisposeHere"/>
-    [Test]
-    public void DisposeHere() {
       var tree = Trees.Instance.Add("A.B.C");
-      tree.To("A.B");
       // drop everything form and including the current Node
-      tree.DisposeHere();
+      tree.To("A.B").Dispose();
       Assert.AreEqual("A", tree.Name);
       Assert.IsNull(tree.To("B"));
       Assert.IsTrue(tree.Failed);
@@ -166,14 +137,6 @@ namespace Askowl.Examples {
       Assert.AreEqual("C", tree.Name);
     }
 
-    /// Using <see cref="Trees.Count"/>
-    [Test]
-    public void Count() {
-      var tree = Trees.Instance.Add("A.B.4..2");
-      // Number of slots in array - 0 for anything else
-      Assert.AreEqual(2x, tree.To("A.B").Count);
-    }
-
     /// Using <see cref="Trees.Children"/>
     [Test]
     public void Children() {
@@ -182,12 +145,21 @@ namespace Askowl.Examples {
       Assert.AreEqual("C1,C2,C3", Csv.ToString(tree.Children));
     }
 
+    /// Using <see cref="Trees.Key"/>
+    [Test]
+    public void Key() {
+      var tree = Trees.Instance.Add("A", "B", "C");
+      // The string is the path from the root to the current node
+      Assert.AreEqual("A.B.C", tree.Key);
+    }
+
     /// Using <see cref="Trees.ToString"/>
     [Test]
     public new void ToString() {
-      var tree = Trees.Instance.Add("A", "B", "C");
-      // The string is the path from the root to the current node
-      Assert.AreEqual("A.B.C", tree.ToString());
+      var tree = Trees.Instance.Add("A.B.C");
+      tree.Leaf = 333;
+      // Value of the current Leaf as a string
+      Assert.AreEqual("333", tree.To("A.B.C")?.ToString());
     }
   }
 }

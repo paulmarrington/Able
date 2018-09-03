@@ -18,8 +18,9 @@ namespace Askowl {
     /// <a href=""></a>
     public Map Add(params object[] keyValuePairs) {
       for (int j = 0; j < keyValuePairs.Length; j += 2) {
-        keys.Add(keyValuePairs[j]);
-        map[keyValuePairs[j]] = Value = keyValuePairs[j + 1];
+        SetKvp(keyValuePairs[j], keyValuePairs[j + 1]);
+        keys.Add(Key);
+        map[Key] = Value;
       }
 
       return this;
@@ -28,8 +29,9 @@ namespace Askowl {
     /// <a href=""></a>
     public Map Set(params object[] newKeys) {
       for (int j = 0; j < newKeys.Length; j++) {
-        keys.Add(newKeys[j]);
-        map[newKeys[j]] = null;
+        SetKvp(newKeys[j], null);
+        keys.Add(Key);
+        map[Key] = Value;
       }
 
       return this;
@@ -47,9 +49,6 @@ namespace Askowl {
 
       return this;
     }
-
-    /// <a href=""></a>
-    public bool IsA<T>() => Found && (Value is T);
 
     /// <a href="bit.ly/">First</a>
     public string First => (Count > 0) ? keys[index = 0] as string : null;
@@ -80,10 +79,11 @@ namespace Askowl {
     /// <a href="bit.ly/">[</a>
     public Map this[object key] {
       get {
-        Value = null;
-        Found = map.TryGetValue(Key = key, out Value);
+        SetKvp(key, null);
+        Found = map.TryGetValue(key, out Value);
         return this;
       }
+      set { map[Key = key] = Value = value; }
     }
 
     /// <a href="bit.ly/">Count</a>
@@ -99,16 +99,16 @@ namespace Askowl {
     public object Value;
 
     /// <a href=""></a>
-    public T As<T>() => IsA<T>() ? ((T) Value) : default(T);
-
-    /// <a href=""></a>
-    public Type TypeOf => Value?.GetType();
-
-    /// <a href=""></a>
     public void Dispose() {
-      for (int i = 0; i < Count; i++) (keys[i] as IDisposable)?.Dispose();
+      for (int i = 0; i < Count; i++) (map[keys[i]] as IDisposable)?.Dispose();
       keys.Clear();
       map.Clear();
+    }
+
+    private void SetKvp(object key, object value, bool found = true) {
+      Key   = key;
+      Value = value;
+      Found = found;
     }
   }
 }

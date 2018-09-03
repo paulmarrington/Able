@@ -3,166 +3,116 @@
 using NUnit.Framework;
 
 namespace Askowl.Examples {
-  /// <remarks><a href="http://unitydoc.marrington.net/Able#jsoncs-parse-any-json-to-dictionary">Json Parser</a></remarks>
+  /// Using <see cref="Json"/>
   public class JsonExamples {
     private Json json = Json.Instance;
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#parse">Parse JSON from text</a></remarks>
+    /// Using <see cref="Json.Parse"/>
     [Test]
     public void Parse() {
-//      bool error = json.Parse(@"{""Not my age"":23}").Error;
-//      Assert.IsFalse(error);
+      bool error = json.Parse(@"{""Not my age"":23}").Error;
+      Assert.IsFalse(error);
 
       // invalid JSON is not acceptable
       json.Parse(@"""Not my age"":23");
-//      Assert.IsTrue(json.Error);
+      Assert.IsTrue(json.Error);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#current-location">Here - The Current Location</a></remarks>
+    /// Using <see cref="Json"/>
     [Test]
     public void Here() {
       json.Parse(@"{""A"": 12.34}").To("A");
 
       // A floating point can be retrieved as a double or float
-//      double ppu = json.Here<double>();
-//      Assert.AreEqual(12.34, ppu, 1e5);
+      double ppu = json.Here<double>();
+      Assert.AreEqual(12.34, ppu, 1e5);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#information-retrieval">Retrieve Value at Current Location</a></remarks>
+    /// Using <see cref="Json"/>
     [Test]
     public void IsA() {
       json.Parse(@"{""A"": 12.34}").To("A");
 
       // You can use `IsA` on a retrieved node
-//      bool isFloat = json.IsA<float>();
+      bool isFloat = json.IsA<float>();
 
-//      Assert.IsTrue(isFloat);
+      Assert.IsTrue(isFloat);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#information-retrieval">Retrieve Value at Current Location</a></remarks>
-    [Test]
-    public void IsNode() {
-      json.Parse(@"{""A"":194, ""B"": {3 : 4}}");
-
-//      var isNode = json.To("A").IsNode;
-
-//      Assert.IsFalse(isNode);
-
-//      isNode = json.To("B").IsNode;
-
-//      Assert.IsTrue(isNode);
-    }
-
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#information-retrieval">Retrieve Value at Current Location</a></remarks>
-    [Test]
-    public void IsArray() {
-      json.Parse(@"{""A"":[194,286,3], ""B"": {3 : 4}}");
-
-//      var isArray = json.To("A").IsArray;
-
-//      Assert.IsTrue(isArray);
-
-//      isArray = json.To("B").IsArray;
-
-//      Assert.IsFalse(isArray);
-    }
-
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#error-processing">Error Indication and Message</a></remarks>
+    /// Using <see cref="Json"/>
     [Test]
     public void ErrorMessage() {
-//      var errorMessage = json.Parse(@"{""Not my age"":23}").ErrorMessage;
+      var errorMessage = json.Parse(@"{""Not my age"":23}").ErrorMessage;
 
-//      Assert.IsNull(errorMessage);
+      Assert.IsNull(errorMessage);
 
-//      errorMessage = json.Parse("").ErrorMessage;
+      errorMessage = json.Parse("").ErrorMessage;
 
-//      Assert.IsFalse(string.IsNullOrEmpty(errorMessage));
+      Assert.IsFalse(string.IsNullOrEmpty(errorMessage));
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#error-processing">Error Indication and Message</a></remarks>
+    /// Using <see cref="Json"/>
     [Test]
     public void Error() {
-//      bool error = json.Parse("").Error;
+      bool error = json.Parse("").Error;
 
-//      Assert.IsTrue(error);
+      Assert.IsTrue(error);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#information-retrieval">Retrieve Value at Current Location</a></remarks>
+    /// Using <see cref="Json"/>
     [Test]
     public void Get() {
       json.Parse(jsonSampler);
       // If you know the structure of your JSON you can retrieve a leaf directly
-//      string id = json.Root.To("items", "item", 0, "id").Here<string>();
-//      Assert.AreEqual("0001", id);
-//      Assert.IsFalse(json.Error);
-
-      // If you provide the wrong type then default<T> is returned - 0 for an int
-//      int iid = json.Root.To("items", "item", "0", "id").Here<int>();
-//      Assert.AreEqual(0, iid);
-//      Assert.IsTrue(json.Error);
-
-      // If this is a problem, use IsA<>
-//      Assert.IsFalse(json.IsA<int>());
+      string id = json.To("items", "item", 0, "id").Here<string>();
+      Assert.AreEqual("0001", id);
+      Assert.IsFalse(json.Error);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#tree-traversal">Traversing the JSON Node Tree</a></remarks>
-    [Test]
-    public void Walk() {
-      json.Parse(jsonSampler);
-      // You can separate walking the tree and retrievaly using Walk, WalkOn, IsA and Here
-//      bool isString = json.Root.To("items.item.0.type").IsA<string>();
-
-//      Assert.IsTrue(isString);
-
-//      string donut = json.Here<string>();
-
-//      Assert.AreEqual("donut", donut);
-    }
-
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#tree-traversal">Traversing the JSON Node Tree</a></remarks>
+    /// Using <see cref="Json"/>
     [Test]
     public void RelativeTo() {
-      json.Parse(jsonSampler).Root.To("items.item");
+      json.Parse(jsonSampler).To("items.item");
 
       // Walk is absolute, but you can use WalkOn to get where you want in steps
-//      var donut = json.To(0, "type").Here<string>();
+      var donut = json.Next(0, "type").Here<string>();
 
-//      Assert.AreEqual("donut", donut);
+      Assert.AreEqual("donut", donut);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#information-retrieval">Retrieve Value at Current Location</a></remarks>
+    /// Using <see cref="Json"/>
     [Test]
     public void FloatingPoint() {
       json.Parse(@"{""A"": 12.34}").To("A");
 
       // A floating point can be retrieved as a double or float
-//      double ppu = json.Here<double>();
-//      Assert.AreEqual(12.34, ppu, 1e5);
+      double ppu = json.Here<double>();
+      Assert.AreEqual(12.34, ppu, 1e5);
 
-//      float fppu = json.Here<float>();
-//      Assert.AreEqual(12.34f, fppu, 1e5f);
+      float fppu = json.Here<float>();
+      Assert.AreEqual(12.34f, fppu, 1e5f);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#information-retrieval">Retrieve Value at Current Location</a></remarks>
+    /// Using <see cref="Json"/>
     [Test]
     public void Integer() {
       json.Parse(@"{""A"": 83}").To("A");
 
       // A whole number can be retrieved as an int, long, float or double
-//      int iqty = json.Here<int>();
-//      Assert.AreEqual(83, iqty);
+      int iqty = json.Here<int>();
+      Assert.AreEqual(83, iqty);
 
-//      long lqty = json.Here<long>();
-//      Assert.AreEqual(83, lqty);
+      long lqty = json.Here<long>();
+      Assert.AreEqual(83, lqty);
 
-//      float fqty = json.Here<float>();
-//      Assert.AreEqual(83f, fqty, 1e5f);
+      float fqty = json.Here<float>();
+      Assert.AreEqual(83f, fqty, 1e5f);
 
-//      double dqty = json.Here<double>();
-//      Assert.AreEqual(83, dqty, 1e5);
+      double dqty = json.Here<double>();
+      Assert.AreEqual(83, dqty, 1e5);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#tree-traversal">Traversing the JSON Node Tree</a></remarks>
+    /// Using <see cref="Json"/>
     [Test]
     public void NodeChildren() {
       json.Parse(@"{""A"": {""One"": 1, ""Two"": 2, ""Three"": 3 }}").To("A");
@@ -170,12 +120,16 @@ namespace Askowl.Examples {
       string expected = "One=1 Two=2 Three=3 ";
       string actual   = "";
 
-//      json.ForEach(() => actual += $"{json.Name}={json.Here<string>()} ");
+      var children = json.Children;
+
+      for (int i = 0; i < children.Length; i++) {
+        actual += $"{json.Name}={json.Here<string>()} ";
+      }
 
       Assert.AreEqual(expected, actual);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#tree-traversal">Traversing the JSON Node Tree</a></remarks>
+    /// Using <see cref="Json"/>
     [Test]
     public void ArrayChildren() {
       json.Parse(@"{""A"": [23,195,67]}").To("A");
@@ -183,46 +137,57 @@ namespace Askowl.Examples {
       string expected = "0=23 1=195 2=67 ";
       string actual   = "";
 
-//      json.ForEach(() => actual += $"{json.Name}={json.Here<string>()} ");
+      var children = json.Children;
+
+      for (int i = 0; i < children.Length; i++) {
+        actual += $"{json.Name}={json.Here<string>()} ";
+      }
 
       Assert.AreEqual(expected, actual);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#tree-traversal">Traversing the JSON Node Tree</a></remarks>
-    [Test]
-    public void OneChild() {
-      json.Parse(@"{""A"": 567}").To("A");
-
-      string expected = "567";
-      string actual   = "";
-
-//      json.ForEach(() => actual += json.Here<string>());
-
-      Assert.AreEqual(expected, actual);
-    }
-
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#Anchor">Mark Current Node Location</a></remarks>
+    /// Using <see cref="Json"/>
     [Test]
     public void AnchorAndDispose() {
       json.Parse(jsonSampler).To("items.item.0");
 
-      string names = "";
+      string names    = "";
+      var    children = json.Children;
 
-      // If we want to keep processing from an iterator we need to set an anchor to return to
-//      json.ForEach(() => {
-      names += json.Name;
+      for (int i = 0; i < children.Length; i++) {
+        names += children[i];
 
-      if (json.Name == "magic") {
-//        using (json.Anchor) {
-//          string expected = "122333444455555";
-//          string actual   = "";
-//
-////            json.ForEach(() => actual += json.Here<string>());
-//
-//          Assert.AreEqual(expected, actual);
-//        }
+        if ((string) children[i] == "magic") {
+          using (json.Anchor()) {
+            string expected = "122333444455555";
+            string actual   = "";
+            var    magics   = json.To(children[i]).Children;
+
+            for (int j = 0; j < magics.Length; j++) {
+              actual += json.Here<string>();
+            }
+
+            Assert.AreEqual(expected, actual);
+          }
+        }
+
+        // If we want to keep processing from an iterator we need to set an anchor to return to
+        names += json.Name;
+
+        if (json.Name == "magic") {
+          using (json.Anchor()) {
+            string expected = "122333444455555";
+            string actual   = "";
+            var    magics   = json.Children;
+
+            for (int j = 0; j < magics.Length; j++) {
+              actual += json.Here<string>();
+            }
+
+            Assert.AreEqual(expected, actual);
+          }
+        }
       }
-//      });
 
       Assert.AreEqual(expected: "idtypenameppuqtymagicbatterstopping", actual: names);
     }

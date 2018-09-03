@@ -771,7 +771,7 @@ using (var node = connections.Fetch()) {
 
 Yes, I know. This example is ignoring the asynchronous nature of the request and the possibility that the connection has timed out. All in good time.
 
-When a node is sent to recycling it will call `Dispose()` on the item if it is an `IDisposable`. It the item needs reactivation when retrieved for reuse, set an activation parameter as demonstrated above.
+`DeactivateItem` will not call `Dispose()` on the item if it is an `IDisposable`. Override it if you need that functionality. If the item needs reactivation when retrieved for reuse, set an activation parameter as demonstrated above.
 
 `DeactivateItem(node)` is called before the node is placed in the recycle bin.
 
@@ -1233,7 +1233,8 @@ All the tree walking methods can be given a path to travel up or down the tree. 
 Most provide a path to follow. It can be a single string with a `.`  separating nodes or a list of object for non-string keys. You can walk back towards the root with `..` with each additional dot being another step back.
 
 ```c#
-
+var tree = Trees.Instance.Add("A.B.C1..C2..C3").To("A.B");
+Assert.AreEqual("C1,C2,C3", Csv.ToString(tree.Children));
 ```
 
 All these methods, bar `Anchor` will return a reference to `Tree` for chaining.
@@ -1261,17 +1262,82 @@ var type = tree.Next("Books.Type")?.Leaf;
 Assert .IsFalse(tree.Failure)
 ```
 
-###### Parent(params object[] path)
+##### Children
+
+When investigating a tree where you do not have full disclosure of the structure or when serialising the contents, we will need access to all values. `Children` returns an array of objects that represent the keys for this node in the tree. This is particularly useful for array nodes where the children are keyed on index.
+
+```c#
+var tree = Trees.Instance.Add("A.B.C1..C2..C3").To("A.B");
+Assert.AreEqual("C1,C2,C3", Csv.ToString(tree.Children));
+```
 
 ###### Anchor(params object[] path)
 
+Get back to where you once belong. Mark a spot on the tree to return to after a processing jaunt.
+
+```c#
+var authors = tree.To("Authors").Children;
+    for(var i = 0; i < authors.Count; i++) {
+      using (tree.Anchor) {Process(authors[i]);}
+    }
+```
+
 #### Tree Contents
+
+Every node has the ability to store a leaf as an object. Access and updates are implemented for the current node or for a child of a node.
+
+```c#
+var tree = Trees.Instance.Add("A.B.C");
+// Update the current node leaf value
+tree.Leaf = "Leaf Update";
+// Update a child node leaf value
+tree.To("A.B")["C"] = "Array Update";
+```
+
+##### Arrays
+
+Children can also be accessed by array nomenclature. Unlike tree walking, the current node does not change. The value of a named (or numbered) child node is returned. Because the same process is used for arrays and branches, integer access also checks the string counterpart.
+
+```c#
+var tree = Trees.Instance.Add("A.B.C");
+tree.To("A.B");
+tree["C"] = "Array Update";
+Assert.AreEqual(tree["C"], tree.To("A.B.C").Leaf);
+// And integer access
+tree.To("A.B");
+tree[1] = "Array Update";
+Assert.AreEqual(tree[1], tree.To("A.B.C").Leaf);
+```
 
 #### Tree Additions and Removals
 
-###### Add(params object[] path)
+While `To` or `Next` will baulk if it can't find a node on the path, `Add` will just create all of them as needed. Filling a leaf with data is a separate operation. The path for `Add` is relative.
+
+```c#
+Trees.To("A.B.C").Add("Quote.English.Comtemporary").Leaf = "Now is the time";
+```
+
+###### Dispose()
+
+`Dispose` will remove the current node and every node towards the leaves.
+
+```c#
+tree.To("A.B").Dispose();
+```
 
 #### Tree Export Support
+
+Sooner or later you will want to serialise or deserialise from or to a tree. For that purpose `Key` will return a string that represents the path from the root to the current location. From there, `Children` returns an array of keys for the current node.
+
+```c#
+void SerialiseTree(tree) {
+    Debug.Log(tree.Key);
+	var children = tree.Children;
+    for (var i = 0; i < children.Length; i++) {
+        Debug.Log(children[i].Name);
+    }
+}
+```
 
 ### Pick.cs - Interface to choose from options
 

@@ -24,8 +24,8 @@
 - [x] Doc and test Selector
 - [x] Write, doc and test Map
 - [x] Doc and test Cache
-- [ ] Update LinkedList documentation - to not dispose must to explicit DeactivateItem ()=>{}
-- [ ] Doc and test TreeContainer
+- [x] Update LinkedList documentation - to not dispose must to explicit DeactivateItem ()=>{}
+- [x] Doc and test TreeContainer
 - [ ] doc and test Set
 - [ ] doc and test Csv
 - [ ] doc and test PlayModeController

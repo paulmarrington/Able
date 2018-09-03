@@ -56,39 +56,6 @@ namespace Askowl.Examples {
       Assert.AreEqual(1, map.Count);
     }
 
-    /// <a href="">Using <see cref="Map"/></a>
-    [Test]
-    public void Finder() {
-      var map = new Map("One", 1, "Four", 4, "Three", 3, "Five", 5, "Two", 2);
-
-      Assert.IsTrue(map["One"].Found);
-      Assert.IsTrue(map["Three"].Found);
-      Assert.IsTrue(map["Five"].Found);
-      Assert.IsFalse(map["Seven"].Found);
-    }
-
-    /// <a href="">Using <see cref="Map.IsA{T}"/></a>
-    [Test]
-    public void IsA() {
-      var map = new Map("One", 1, "Two", "2", "Three", new Map());
-
-      Assert.IsTrue(map["One"].IsA<int>());
-      Assert.IsTrue(map["Two"].IsA<string>());
-      Assert.IsTrue(map["Three"].IsA<Map>());
-      Assert.IsFalse(map["Two"].IsA<int>());
-    }
-
-    /// <a href="">Using <see cref="Map.As{T}"/></a>
-    [Test]
-    public void AsT() {
-      var map = new Map("One", 111, "Two", "2", "Three", new Map());
-
-      Assert.AreEqual(expected: 111, actual: map["One"].As<int>());
-      Assert.AreEqual(expected: "2", actual: map["Two"].As<string>());
-      Assert.AreEqual(expected: 0,   actual: map["Three"].As<Map>().Count);
-      Assert.AreEqual(expected: 0,   actual: map["Two"].As<int>());
-    }
-
     /// <a href="">Using <see cref="Map.Found"/></a>
     [Test]
     public void Found() {
@@ -143,25 +110,6 @@ namespace Askowl.Examples {
       Assert.AreEqual("OneTwoThree", keys);
     }
 
-    /// <a href="">Using <see cref="Map.TypeOf"/></a>
-    [Test]
-    public void TypeOf() {
-      var map = new Map("One", 111, "Two", "2", "Three", new Map());
-
-      Assert.AreEqual(typeof(int),    map["One"].TypeOf);
-      Assert.AreEqual(typeof(string), map["Two"].TypeOf);
-      Assert.AreEqual(map.GetType(),  map["Three"].TypeOf);
-
-      var types = new Map(typeof(int), 'i', typeof(string), 's', typeof(Map), 'm');
-
-      switch ((types[map["One"].TypeOf].As<char>())) {
-        case 'i': break;
-        default:
-          Assert.Fail();
-          break;
-      }
-    }
-
     /// <a href="">Using <see cref="Map.Sort()"/></a>
     [Test]
     public void Sort() {
@@ -179,15 +127,26 @@ namespace Askowl.Examples {
       var    map    = new Map("One", 1, "Four", 4, "Three", 3, "Five", 5, "Two", 2);
       string actual = "";
 
-      map.Sort((x, y) => map[x].As<int>().CompareTo(map[y].As<int>()));
+      map.Sort((x, y) => ((int) map[x].Value).CompareTo((int) map[y].Value));
       for (var key = map.First; key != null; key = map.Next) actual += key;
 
       Assert.AreEqual("OneTwoThreeFourFive", actual);
     }
 
+    /// Using <see cref="Map.this[object]"/>
+    [Test]
+    public void ArrayGet() {
+      var map = new Map("One", 1, "Four", 4, "Three", 3, "Five", 5, "Two", 2);
+
+      Assert.IsTrue(map["One"].Found);
+      Assert.IsTrue(map["Three"].Found);
+      Assert.IsTrue(map["Five"].Found);
+      Assert.IsFalse(map["Seven"].Found);
+    }
+
     private static int disposals;
 
-    struct Disposable : IDisposable {
+    private struct Disposable : IDisposable {
       public void Dispose() { disposals += 1; }
     }
 

@@ -116,7 +116,7 @@ namespace Askowl {
     }
 
     private static Action<Node> GetDefaultDeactivateItem() =>
-      DefaultActivation("DeactivateItem") ?? (node => (node.Item as IDisposable)?.Dispose());
+      DefaultActivation("DeactivateItem") ?? (node => { }); //(node.Item as IDisposable)?.Dispose());
 
     private static Action<Node> GetDefaultReactivateItem() =>
       DefaultActivation("ReactivateItem") ?? (node => { });
@@ -224,7 +224,7 @@ namespace Askowl {
         for (var node = First; node != null; node = node.Next) reverseLookup.Add(node.Item, node);
       }
 
-      return reverseLookup?[item].As<Node>();
+      return reverseLookup?[item].Value as Node;
     }
 
     /// <a href="bit.ly/">Node Dispose using reverse lookup</a>

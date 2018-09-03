@@ -21,25 +21,13 @@ namespace Askowl {
         public void Dispose() { Value?.Dispose(); }
       }
 
-      internal struct ArrayNode : IDisposable {
-        public List<Node> Value;
-
-        public void Dispose() {
-          for (int i = 0; i < Value?.Count; i++) {
-            (Value[i] as IDisposable)?.Dispose();
-          }
-        }
-      }
-
       internal string     Name;
       internal Node       Parent;
       private  LeafNode   leafNode;
       private  BranchNode branchNode;
-      private  ArrayNode  arrayNode;
 
-      internal object     Leaf   { get { return leafNode.Value; } set { leafNode.Value = value; } }
-      internal Map        Branch => branchNode.Value ?? (branchNode.Value = new Map());
-      internal List<Node> Array  => arrayNode.Value  ?? (arrayNode.Value = new List<Node>());
+      internal object Leaf   { get { return leafNode.Value; } set { leafNode.Value = value; } }
+      internal Map    Branch => branchNode.Value ?? (branchNode.Value = new Map());
 
       public static Node New(object name, Node parent) {
         var node = Cache<Node>.Instance;
@@ -48,35 +36,13 @@ namespace Askowl {
         return node;
       }
 
-      public int  Count    => (arrayNode.Value == null) ? 0 : Array.Count;
-      public T    As<T>()  => (Leaf is T) ? ((T) Leaf) : default(T);
-      public bool IsA<T>() => Leaf is T;
-
-      public Node this[int index] {
-        get {
-          while (index >= Count) Array.Add(New(index, this));
-          return Array[index];
-        }
-        set {
-          while (index >= Count) Array.Add(New(index, this));
-          Array[index] = value;
-        }
-      }
-
-      public bool Has(object key) => Branch[key].Found;
-
-      public Node this[object key] {
-        get { return Branch[key].Found ? Branch.As<Node>() : this[key] = New(key, this); }
-        set { Branch.Add(key, value); }
-      }
+      public int Count => (branchNode.Value == null) ? 0 : Branch.Count;
 
       public void Dispose() {
         leafNode.Dispose();
         branchNode.Dispose();
-        arrayNode.Dispose();
         leafNode   = new LeafNode();
         branchNode = new BranchNode();
-        arrayNode  = new ArrayNode();
         Parent     = null;
         Name       = null;
       }
@@ -114,22 +80,22 @@ namespace Askowl {
       }
 
       for (int i = 0; i < path.Length; i++) {
-        if (path[i] is int) {
-          here = here[(int) path[i]];
+        if (here == null) return null;
+
+        if (here.Branch[path[i]].Found) {
+          here = here.Branch.Value as Node;
         } else {
           var key = path[i].ToString();
 
           if (string.IsNullOrWhiteSpace(key)) {
             here = (i == 0) ? here : here.Parent;
-          } else if (here.Has(path[i]) || !Compare.IsDigitsOnly(key)) {
-            if (!create && !here.Has(path[i])) {
-              Failed = true;
-              return null;
-            }
-
-            here = here[path[i]];
+          } else if (Compare.IsDigitsOnly(key)) {
+            here = here.Branch[int.Parse(key) as object].Value as Node;
+          } else if (create) {
+            here = (Node) (here.Branch.Add(path[i], Node.New(path[i], here))).Value;
           } else {
-            here = here[int.Parse(key)];
+            Failed = true;
+            return null;
           }
         }
       }
@@ -155,12 +121,6 @@ namespace Askowl {
     }
 
     /// <a href=""></a>
-    public Trees Parent(params object[] path) {
-      if (here.Parent != null) here = here.Parent;
-      return Next(path);
-    }
-
-    /// <a href=""></a>
     public Trees To(params object[] path) => Root().Walk(create: false, path: path);
 
     /// <a href=""></a>
@@ -173,31 +133,19 @@ namespace Askowl {
     public string Name => here.Name;
 
     /// <a href=""></a>
-    public bool IsA<T>() => here.IsA<T>();
-
-    /// <a href=""></a>
     public object Leaf { get { return here.Leaf; } set { here.Leaf = value; } }
 
     /// <a href=""></a>
-    public T As<T>() {
-      Failed = !here.IsA<T>();
-      return here.As<T>();
+    public object this[object key] {
+      get { return (here.Branch[key].Value as Node)?.Leaf; }
+      set { ((Node) here.Branch[key].Value).Leaf = value; }
     }
 
     /// <a href="bit.ly/">Keys</a>
     public object[] Children => here.Branch.Keys;
 
     /// <a href=""></a>
-    public int Count => here.Count;
-
-    /// <a href=""></a>
     public void Dispose() {
-      Root().DisposeHere();
-      anchors.Stack.Dispose();
-    }
-
-    /// <a href=""></a>
-    public void DisposeHere() {
       var parent = here.Parent;
       var key    = here.Name;
       here.Dispose();
@@ -213,13 +161,18 @@ namespace Askowl {
     }
 
     /// <inheritdoc />
-    public override string ToString() {
-      if (here == null) return "No Path";
+    public override string ToString() => Leaf.ToString();
 
-      tsPath.Clear();
-      for (var there = here; there.Parent != null; there = there.Parent) tsPath.Add(there.Name);
-      tsPath.Reverse();
-      return string.Join(separator: ".", values: tsPath);
+    /// <a href=""></a>
+    public string Key {
+      get {
+        if (here == null) return "No Path";
+
+        tsPath.Clear();
+        for (var there = here; there.Parent != null; there = there.Parent) tsPath.Add(there.Name);
+        tsPath.Reverse();
+        return string.Join(separator: ".", values: tsPath);
+      }
     }
 
     private List<string> tsPath = new List<string>();
