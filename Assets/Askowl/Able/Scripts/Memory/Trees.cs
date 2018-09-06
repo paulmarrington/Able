@@ -50,8 +50,11 @@ namespace Askowl {
       public override string ToString() => Name;
     }
 
-    private readonly Node root;
-    private          Node here;
+    private readonly Node   root;
+    private          Node   here;
+    private          long   integer;
+    private          double floatingPoint;
+    private          int    isNumber;
 
     private struct Anchors : IDisposable {
       public LinkedList<Node> Stack;
@@ -71,7 +74,8 @@ namespace Askowl {
 
     /// <a href=""></a>
     private Trees Walk(bool create, params object[] path) {
-      Failed = false;
+      Failed   = false;
+      isNumber = -1;
       if (path.Length == 0) return this;
 
       if ((path.Length == 1) && (path[0] is string)) {
@@ -80,10 +84,13 @@ namespace Askowl {
       }
 
       for (int i = 0; i < path.Length; i++) {
-        if (here == null) return null;
+        if (here == null) return Failure();
 
         if (here.Branch[path[i]].Found) {
           here = here.Branch.Value as Node;
+        } else if (path[i] is int) {
+          object obj = path[i];
+          here = here.Branch[obj]?.Value as Node ?? (Node) here.Branch.Add(obj, Node.New(obj, here)).Value;
         } else {
           var key = path[i].ToString();
 
@@ -92,14 +99,18 @@ namespace Askowl {
           } else if (Compare.IsDigitsOnly(key)) {
             here = here.Branch[int.Parse(key) as object].Value as Node;
           } else if (create) {
-            here = (Node) (here.Branch.Add(path[i], Node.New(path[i], here))).Value;
+            here = (Node) here.Branch.Add(path[i], Node.New(path[i], here)).Value;
           } else {
-            Failed = true;
-            return null;
+            return Failure();
           }
         }
       }
 
+      return this;
+    }
+
+    private Trees Failure() {
+      Failed = true;
       return this;
     }
     #endregion
@@ -133,7 +144,49 @@ namespace Askowl {
     public string Name => here.Name;
 
     /// <a href=""></a>
-    public object Leaf { get { return here.Leaf; } set { here.Leaf = value; } }
+    public object Leaf {
+      get { return here.Leaf; }
+      set {
+        here.Leaf = value;
+        isNumber  = -1;
+      }
+    }
+
+    /// <a href=""></a>
+    public string Value { get { return (string) here.Leaf; } set { here.Leaf = value; } }
+
+    /// <a href="bit.ly/">IsNumber</a>
+    public bool IsNumber {
+      get {
+        if (isNumber != -1) return isNumber != 0;
+
+        var word = Value;
+
+        if (long.TryParse(word, out integer)) {
+          floatingPoint = integer;
+        } else if (double.TryParse(word, out floatingPoint)) {
+          integer = (long) floatingPoint;
+        } else {
+          Failed = true;
+          return (isNumber = 0) == 1;
+        }
+
+        Failed = false;
+        return (isNumber = 1) == 1;
+      }
+    }
+
+    /// <a href="bit.ly/">Value</a>
+    public long Long => IsNumber ? integer : 0;
+
+    /// <a href="bit.ly/">Value</a>
+    public double Double => IsNumber ? floatingPoint : 0;
+
+    /// <a href="bit.ly/">Value</a>
+    public bool Boolean => Value.ToLower()[0] == 't';
+
+    /// <a href="bit.ly/">Value</a>
+    public bool IsNull => (Value == null) || (Value.ToLower() == "null");
 
     /// <a href=""></a>
     public object this[object key] {
@@ -143,6 +196,12 @@ namespace Askowl {
 
     /// <a href="bit.ly/">Keys</a>
     public object[] Children => here.Branch.Keys;
+
+    /// <a href="bit.ly/">First</a>
+    public object FirstChild => here.Branch.First;
+
+    /// <a href="bit.ly/">First</a>
+    public object NextChild => here.Branch.Next;
 
     /// <a href=""></a>
     public void Dispose() {
@@ -156,6 +215,7 @@ namespace Askowl {
     /// <a href=""></a>
     public IDisposable Anchor(params object[] path) {
       anchors.Stack.Push(here);
+
       Next(path);
       return anchors;
     }

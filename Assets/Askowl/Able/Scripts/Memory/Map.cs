@@ -51,12 +51,12 @@ namespace Askowl {
     }
 
     /// <a href="bit.ly/">First</a>
-    public string First => (Count > 0) ? keys[index = 0] as string : null;
+    public object First => (Count > 0) ? keys[index.Start()] : null;
 
     /// <a href="bit.ly/">First</a>
-    public string Next => (++index < Count) ? keys[index] as string : null;
+    public object Next => index.Reached(Count - 1) ? null : keys[index.Next()];
 
-    private int index;
+    private CounterStack index = CounterStack.Instance;
 
     /// <a href="bit.ly/">[</a>
     public object this[int i] => keys[i];
@@ -103,6 +103,7 @@ namespace Askowl {
       for (int i = 0; i < Count; i++) (map[keys[i]] as IDisposable)?.Dispose();
       keys.Clear();
       map.Clear();
+      index.Dispose();
     }
 
     private void SetKvp(object key, object value, bool found = true) {

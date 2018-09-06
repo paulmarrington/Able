@@ -8,7 +8,7 @@
 - [ ] LinkedList needs an alert when the either main or recycle exceeds a specific size
 - [ ] Cache needs a high water mark. More entries that this will log an alert
 
-## Release 2018-08
+## Release 2018-09
 
 - [x] organise document sections
 - [x] Doc and test Clock
@@ -25,13 +25,15 @@
 - [x] Write, doc and test Map
 - [x] Doc and test Cache
 - [x] Update LinkedList documentation - to not dispose must to explicit DeactivateItem ()=>{}
-- [x] Doc and test TreeContainer
+- [x] Doc and test TreeContainer "Value" as same as leaf + IsNumber + Long + Double+Boolean+IsNull
+- [x] doc and test Stack
+- [x] doc and test CounterStack
 - [ ] doc and test Set
 - [ ] doc and test Csv
 - [ ] doc and test PlayModeController
 - [ ] doc and test PlayModeTests
 - [x] split up functionality
-- [ ] doc and test JSON
+- [x] doc and test JSON
 - [ ] doc and test objects.path(gameobject)
 - [ ] doc and test Components
 - [ ] doc and test ConditionalHideAttribute
@@ -39,7 +41,11 @@
 - [ ] doc and test range
 - [ ] doc and test ValueAttribute
 - [ ] Remove all that is not base from documentation
-- [ ] Docx - relink
+- [ ] Upload md to github
+- [ ] update index to fold when too long
+- [ ] Create bit.ly short links
+- [ ] Docx - add short links throughout
+- [ ] Generate docx and process page for incorrect links
 - [ ] Link to Wix
 
 ## ~~Release 2018-06~~

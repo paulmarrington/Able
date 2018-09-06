@@ -1,0 +1,29 @@
+﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
+
+using System;
+
+namespace Askowl {
+  /// <a href=""></a>
+  /// <inheritdoc />
+  // ReSharper disable once ClassNeverInstantiated.Global
+  public class CounterStack : Stack<int> {
+    /// <a href="bit.ly/">Instance</a>
+    public new static CounterStack Instance => Cache<CounterStack>.Instance;
+
+    /// <a href=""></a>
+    public int Start(int startingValue = 0) => Math.Abs(Push(startingValue));
+
+    /// <a href="bit.ly/">Next</a>
+    public int Next() => Math.Abs(++Top);
+
+    /// <a href="bit.ly/">Next</a>
+    public bool Reached(int bounds) {
+      var reached = (Top >= bounds);
+      if (reached) Pop();
+      return reached;
+    }
+
+    /// <inheritdoc />
+    public override void Dispose() { Cache<CounterStack>.Dispose(this); }
+  }
+}

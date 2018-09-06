@@ -1,7 +1,6 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
 using NUnit.Framework;
-using UnityEngine;
 
 namespace Askowl.Examples {
   /// Using <see cref="Trees"/>
@@ -17,7 +16,7 @@ namespace Askowl.Examples {
     [Test]
     public void Root() {
       var tree = Trees.Instance.Add("OneOffRoot");
-      Assert.IsNull(tree.Next("OneOffRoot"));
+      Assert.IsTrue(tree.Next("OneOffRoot").Failed);
 
       // Would fail if we were not back at root
       Assert.IsNotNull(tree.Root().Next("OneOffRoot"));
@@ -42,7 +41,7 @@ namespace Askowl.Examples {
     [Test]
     public void Failed() {
       var tree = Trees.Instance.Add("A.B.C");
-      Assert.IsNull(tree.To("A.C"));
+      tree.To("A.C");
       Assert.IsTrue(tree.Failed);
       Assert.IsNotNull(tree.To("A.B"));
       // Failed is always reset when we search from root
@@ -100,6 +99,84 @@ namespace Askowl.Examples {
       Assert.IsNotNull(tree.Leaf);
     }
 
+    /// Using <see cref="Trees.Value"/>
+    [Test]
+    public void Value() {
+      var tree = Trees.Instance.Add("IamHere");
+      Assert.IsNull(tree.Leaf);
+      tree.Leaf = "a string value";
+      Assert.IsNotNull(tree.Leaf);
+    }
+
+    /// Using <see cref="Trees.IsNumber"/>
+    [Test]
+    public void IsNumber() {
+      var tree = Trees.Instance.Add("IamHere");
+      tree.Leaf = "22";
+      Assert.IsTrue(tree.IsNumber);
+      tree.Leaf = "33.34";
+      Assert.IsTrue(tree.IsNumber);
+      Assert.IsFalse(tree.Failed);
+      tree.Leaf = "abc";
+      Assert.IsFalse(tree.IsNumber);
+      Assert.IsTrue(tree.Failed);
+      tree.Leaf = "44abc";
+      Assert.IsFalse(tree.IsNumber);
+    }
+
+    /// Using <see cref="Trees.Long"/>
+    [Test]
+    public void Long() {
+      var tree = Trees.Instance.Add("IamHere");
+      tree.Leaf = "22";
+      Assert.AreEqual(expected: 22, actual: tree.Long);
+      tree.Leaf = "33.34";
+      Assert.AreEqual(expected: 33, actual: tree.Long);
+      tree.Leaf = "abc";
+      Assert.AreEqual(expected: 0, actual: tree.Long);
+      tree.Leaf = "44abc";
+      Assert.AreEqual(expected: 0, actual: tree.Long);
+    }
+
+    /// Using <see cref="Trees.Double"/>
+    [Test]
+    public void Double() {
+      var tree = Trees.Instance.Add("IamHere");
+      tree.Leaf = "22";
+      Assert.AreEqual(expected: 22, actual: tree.Double);
+      tree.Leaf = "33.34";
+      Assert.AreEqual(expected: 33.34, actual: tree.Double);
+      tree.Leaf = "abc";
+      Assert.AreEqual(expected: 0, actual: tree.Double);
+    }
+
+    /// Using <see cref="Trees.Boolean"/>
+    [Test]
+    public void Boolean() {
+      var tree = Trees.Instance.Add("IamHere");
+      tree.Leaf = "false";
+      Assert.IsFalse(tree.Boolean);
+      tree.Leaf = "true";
+      Assert.IsTrue(tree.Boolean);
+      tree.Leaf = "23";
+      Assert.IsFalse(tree.Boolean);
+    }
+
+    /// Using <see cref="Trees.IsNull"/>
+    [Test]
+    public void IsNull() {
+      var tree = Trees.Instance.Add("IamHere");
+      Assert.IsTrue(tree.IsNull);
+      tree.Leaf = "null";
+      Assert.IsTrue(tree.IsNull);
+      tree.Leaf = null;
+      Assert.IsTrue(tree.IsNull);
+      tree.Leaf = "abc";
+      Assert.IsFalse(tree.IsNull);
+      tree.Leaf = "23";
+      Assert.IsFalse(tree.IsNull);
+    }
+
     /// Using <see cref="Trees.this[object]"/>
     [Test]
     public void ArrayUpdate() {
@@ -117,9 +194,9 @@ namespace Askowl.Examples {
     public void Dispose() {
       var tree = Trees.Instance.Add("A.B.C");
       // drop everything form and including the current Node
-      tree.To("A.B").Dispose();
+      tree.To("A.B")?.Dispose();
       Assert.AreEqual("A", tree.Name);
-      Assert.IsNull(tree.To("B"));
+      tree.To("B");
       Assert.IsTrue(tree.Failed);
     }
 
@@ -143,6 +220,26 @@ namespace Askowl.Examples {
       var tree = Trees.Instance.Add("A.B.C1..C2..C3").To("A.B");
       // Retrieve the names of branches, leaves and arrays under the current branch
       Assert.AreEqual("C1,C2,C3", Csv.ToString(tree.Children));
+    }
+
+    /// Using <see cref="Trees.FirstChild"/>
+    [Test]
+    public void FirstChild() {
+      var tree = Trees.Instance.Add("A.B.C1..C2..C3").To("A.B");
+      Assert.AreEqual("C1", tree.FirstChild);
+    }
+
+    /// Using <see cref="Trees.NextChild"/>
+    [Test]
+    public void NextChild() {
+      var    tree   = Trees.Instance.Add("A.B.C1..C2..C3").To("A.B");
+      string actual = "";
+
+      for (object key = tree.FirstChild; key != null; key = tree.NextChild) {
+        actual += key;
+      }
+
+      Assert.AreEqual("C1C2C3", actual);
     }
 
     /// Using <see cref="Trees.Key"/>
