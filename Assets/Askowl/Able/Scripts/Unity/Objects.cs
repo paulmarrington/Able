@@ -7,20 +7,17 @@ namespace Askowl {
   /// <a href=""></a>
   public static class Objects {
     /// <a href=""></a>
-    public static GameObject[] FindGameObjects(string name) => Find<GameObject>(name);
-
-    /// <a href=""></a>
-    public static GameObject FindGameObject(string name) {
-      GameObject[] gameObjects = FindGameObjects(name);
-      return (gameObjects.Length > 0) ? gameObjects[0] : null;
+    public static T Find<T>(string name) where T : Object {
+      T[] objects = FindAll<T>(name);
+      return (objects.Length > 0) ? objects[0] : null;
     }
 
     /// <a href=""></a>
-    public static T[] Find<T>(string name) where T : Object {
+    public static T[] FindAll<T>(string name) where T : Object {
       T[]     all     = Resources.FindObjectsOfTypeAll<T>();
       List<T> results = new List<T>();
 
-      if (name == null) return all;
+      if (string.IsNullOrEmpty(name)) return all;
 
       for (int i = 0; i < all.Length; i++) {
         if (all[i].name == name) results.Add(all[i]);

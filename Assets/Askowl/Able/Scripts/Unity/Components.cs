@@ -9,7 +9,7 @@ namespace Askowl {
     public static T Find<T>(params string[] path) where T : Component {
       if ((path = ParsePath(path)) == null) return default(T);
 
-      GameObject[] parentObjects = Objects.FindGameObjects(path[0]);
+      GameObject[] parentObjects = Objects.FindAll<GameObject>(path[0]);
 
       for (int i = 0; i < parentObjects.Length; i++) {
         T found = Find<T>(parentObjects[i], path);
@@ -20,9 +20,9 @@ namespace Askowl {
     }
 
     /// <a href=""></a>
-    public static T Find<T>(GameObject parentObject, params string[] path) where T : Component {
+    public static T Find<T>(GameObject inParentObject, params string[] path) where T : Component {
       path = ParsePath(path);
-      T[] components = parentObject.GetComponentsInChildren<T>();
+      T[] components = inParentObject.GetComponentsInChildren<T>();
       if (components.Length == 0) return default(T);
 
       for (int i = 0; i < components.Length; i++) {
@@ -33,7 +33,7 @@ namespace Askowl {
         for (int j = path.Length - 1; found && (j >= 0); j--) {
           if (path[j].Length > 0) {
             while (found && (childObject.name != path[j])) {
-              if ((childObject == parentObject)) {
+              if ((childObject == inParentObject)) {
                 found = false;
               } else {
                 childObject = childObject.transform.parent.gameObject;

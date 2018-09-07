@@ -1510,13 +1510,104 @@ Assert.AreEqual("26", json.Node["Not my age"]);
 
 ## Unity Support
 
-### Components.cs - find or create components
+### Components
+
+`Components` is a static helper class with functions to create and find Components. They are all wrappers to ***slow*** Unity procedures, so cache the results. I created these primarily for testing, since any test harness should not be coupled to the application. Since then I have found them useful to get inside prefabs from other sources. Still not a good idea in production, but sometimes better than breaking existing code.
+
+#### Components.Find&lt;T>(path...)
+
+Search the current scene for components of type `T`, then return the one with sparse game object path supplied. The path is absolute for the scene, but not all components need be entered. Just enough to make the path unique. The double-slash is optional, but I find it handy to remind me were the unmentioned part of the path is.
+
+```c#
+// No path, returns null (not found)
+var text = Components.Find<Text>();
+Assert.IsNull(text);
+// Sparse GameObject path leading to component of specified type
+text = Components.Find<Text>("Canvas", "Level");
+Assert.IsNotNull(text);
+Assert.AreEqual("Button Two", text.text);
+// path can also be a single string. // is convenience to show sparse path
+text = Components.Find<Text>("Canvas/Level//Text");
+Assert.IsNotNull(text);
+// Returns first if path is not unique enough
+text = Components.Find<Text>("Canvas//Text");
+Assert.AreEqual("Button One", text.text);
+// We don't even need to specify the root
+text = Components.Find<Text>("Level");
+Assert.AreEqual("Button Two", text.text);
+```
+
+#### Components.Find&lt;T>(inGameObject, path...)
+
+Find a component by type within a specified GameObject. As above, the path can be a list of sparse segments or a single string with a slash separated path.
+
+```c#
+// if we know the parent object we can start from there.
+var canvas = GameObject.Find("Canvas");
+var text   = Components.Find<Text>(canvas, "Text");
+Assert.AreEqual("Button One", text.text);
+```
+
+#### Components.Create&lt;T>(path...)
+
+Follow the fully qualified path, creating game objects that don't exist on the way. Add an instance of component `T` to the final game object.
+
+```c#
+// create a root GameObject with the specified name and add component
+var text = Components.Create<Text>("Canvas/New Path/Created");
+text.text = "Created Text Component";
+Assert.AreEqual("Created Text Component", Components.Find<Text>("Created").text);
+```
+
+#### Components.Establish&lt;T>(path...)
+
+Find a component if it exists or create it if it doesn't. Because of the `Create`, the path must be full, not sparse.
 
 ### ConditionalHideAttribute.cs
 
 ### Log.cs - pluggable logging function
 
-### Object.cs - find game objects
+### Objects
+
+`Objects` is a static class of helpers to find and create GameObjects and the like. They are all wrappers to ***slow*** Unity procedures, so cache the results.
+
+#### FindAll
+
+`FindAll<T>` is an extension of `Resources.FindObjectsOfTypeAll<T>`. It fill find *all* objects of the specfied type with a matching name. Objects can be  game objects, prefabs, materials, meshes, textures or similar whether they are enabled or disabled. If the name is empty or null, all resources of type T are returned.
+
+```c#
+gameObjects = Objects.FindAll<GameObject>("Text");
+Assert.AreEqual(2, gameObjects.Length);
+```
+
+#### Find
+
+`Find<T>` uses `FindAll<T>` returns the first or one and only object of a specific type and name. It is best used with unique object names for a type.
+
+```c#
+gameObject = Objects.Find<GameObject>("Text");
+Assert.AreEqual("Button Two", gameObject.transform.parent.name);
+```
+
+#### Path
+
+`Path` returns the fully qualified path to a GameObject. Use it for logging or navigation in `Components`.
+
+```c#
+var gameObject = Objects.Find<GameObject>("Text");
+var path       = Objects.Path(gameObject);
+Assert.AreEqual("Canvas/Level/Button Two/Text", path);
+```
+
+#### CreateGameObject
+
+Unity will respond to `new GameObject(name)` by creating a new game object in the root of the current scene. `CreateGameObject` builds on this by moving the game object to be the end of the path given. If it needs to create empty objecrs on the way then so be it.
+
+```c#
+var gameObject  = Objects.CreateGameObject("Canvas/Level Two/Button Three");
+var gameObject2 = Objects.Find<GameObject>("Button Three");
+Assert.AreEqual(gameObject, gameObject2);
+```
 
 ### PlayModeController.cs - control app for live testing
 
@@ -1585,28 +1676,9 @@ mySet.ForEach((s) => {return s!="Exit";});
 
 
 
-### Components
-
-`Components` is a static helper class with functions to create and find Components.
-
-#### Components.Find&lt;T>(name)
-Search the current scene for components of type `T`, then return the one with the name supplied. For a call with no name, we use the name of T.
-
-If there are no matching objects in the scene, `Find` tries to load a resource of the supplied type and name. The name can be any path inside a ***Resources*** directory.
-
-####Components.Find&lt;T>(inGameObject)
-Find a component by type within a specified GameObject. If not found, do a global Find on the type.
-
-#### Components.Create&lt;T>(gameObject, name)
-Calling this creates a component of type T inside the provided game object.  The instance of T has the name supplied or the type name if the former is null.
-
-#### Components.Create&lt;T>(name)
-The overload that does not supply a gameObject creates a new one and name the same as the component. The new gameObject attaches to the root of the current hierarchy.
-
-
 ### Preview Custom Editor
 
-Unity custom editors provide additional functionality for the Inspector panel. `PreviewEditor&lt;T>` is a generic that adds a ***Preview*** button to the bottom of the Component.
+Unity custom editors provide additional functionality for the Inspector panel. `PreviewEditor<T>` is a generic that adds a ***Preview*** button to the bottom of the Component.
 
 `AudioClipsEditor` is a custom class that plays a sound when pressing ***Preview***.
 

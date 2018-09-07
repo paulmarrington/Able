@@ -22,13 +22,15 @@ namespace Askowl.Examples {
       // Sparse GameObject path leading to component of specified type
       text = Components.Find<Text>("Canvas", "Level");
       Assert.IsNotNull(text);
-      Assert.AreEqual("Button Two", text.text);
       // path can also be a single string. // is convenience to show sparse path
       text = Components.Find<Text>("Canvas/Level//Text");
       Assert.IsNotNull(text);
       // Returns first if path is not unique enough
       text = Components.Find<Text>("Canvas//Text");
       Assert.AreEqual("Button One", text.text);
+      // We don't even need to specify the root
+      text = Components.Find<Text>("Level");
+      Assert.AreEqual("Button Two", text.text);
     }
 
     /// Using <see cref="Components.Find{T}(GameObject, string[])"/>
@@ -48,7 +50,7 @@ namespace Askowl.Examples {
       yield return LoadScene("Askowl-Able-Examples");
 
       // create a root GameObject with the specified name and add component
-      var text = Components.Create<Text>("Created Text");
+      var text = Components.Create<Text>("Canvas/New Path/Created Text");
       text.text = "Created Text Component";
       Assert.AreEqual("Created Text Component", Components.Find<Text>("Created Text").text);
     }

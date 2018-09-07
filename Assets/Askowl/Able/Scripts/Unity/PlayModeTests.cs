@@ -64,7 +64,7 @@ namespace Askowl {
     /// <typeparam name="T">Type of object to find</typeparam>
     /// <returns>Object</returns>
     protected static T FindObject<T>(string name) where T : Object {
-      T[] objects = Objects.Find<T>(name);
+      T[] objects = Objects.FindAll<T>(name);
       Assert.AreNotEqual(objects.Length, 0);
       return objects[0];
     }

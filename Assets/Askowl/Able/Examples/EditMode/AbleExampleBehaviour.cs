@@ -8,7 +8,7 @@ namespace Askowl.Examples {
   /// <inheritdoc />
   public class AbleExampleBehaviour : MonoBehaviour {
     internal void FindDisabledObject() {
-      MeshFilter[] cubes = Objects.Find<MeshFilter>("Disabled Cube");
+      MeshFilter[] cubes = Objects.FindAll<MeshFilter>("Disabled Cube");
 
       if (cubes.Length != 1) {
         Debug.LogErrorFormat("Found {0} matching game objects.", cubes.Length);
@@ -23,7 +23,7 @@ namespace Askowl.Examples {
     }
 
     internal void FindGameObjectsAndReturnPath() {
-      GameObject[] texts = Objects.FindGameObjects("Text 2");
+      GameObject[] texts = Objects.FindAll<GameObject>("Text 2");
 
       if (texts.Length != 1) {
         Debug.LogErrorFormat("Found {0} matching text game objects.", texts.Length);
@@ -48,7 +48,7 @@ namespace Askowl.Examples {
         return;
       }
 
-      GameObject textObject = Objects.FindGameObject("Text 2");
+      GameObject textObject = Objects.Find<GameObject>("Text 2");
 
       if (textObject == null) {
         Debug.LogErrorFormat("Objects.FindGameObject 'Text 2' not found");
@@ -67,7 +67,7 @@ namespace Askowl.Examples {
     }
 
     internal void FindComponentLocal() {
-      GameObject textObject = Objects.FindGameObject("Canvas");
+      GameObject textObject = Objects.Find<GameObject>("Canvas");
       Text       text2      = Components.Find<Text>(textObject, "Text 2");
 
       if (text2 == null) {
@@ -86,14 +86,14 @@ namespace Askowl.Examples {
     }
 
     internal void CreateComponent() {
-      if (Objects.Find<Text>("Created GameObject").Length != 0) {
+      if (Objects.FindAll<Text>("Created GameObject").Length != 0) {
         Debug.LogErrorFormat("Can't create what is already there");
         return;
       }
 
       Text newText = Components.Create<Text>("Created GameObject");
 
-      Text[] created = Objects.Find<Text>("Created GameObject");
+      Text[] created = Objects.FindAll<Text>("Created GameObject");
 
       if (created.Length != 1) {
         Debug.LogErrorFormat("Components.Create failed");

@@ -76,12 +76,12 @@ namespace Askowl.Examples {
 
       // Same as Objects.Find<T>(name) except that it asserts that a component was found
       Button   button3 = FindObject<Button>("FindDisabledObject");
-      Button[] button4 = Objects.Find<Button>("FindDisabledObject");
+      Button[] button4 = Objects.FindAll<Button>("FindDisabledObject");
       Assert.AreEqual(button3, button4[0]);
 
       // Same as Objects.FindGameObject(name) except asserts that one was found
       GameObject gameObject1 = FindGameObject("FindDisabledObject");
-      GameObject gameObject2 = Objects.FindGameObject("FindDisabledObject");
+      GameObject gameObject2 = Objects.Find<GameObject>("FindDisabledObject");
       Assert.AreEqual(gameObject1, gameObject2);
 
       // To check that text from the scene matches a Regex...
