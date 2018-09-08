@@ -1563,7 +1563,32 @@ Assert.AreEqual("Created Text Component", Components.Find<Text>("Created").text)
 
 Find a component if it exists or create it if it doesn't. Because of the `Create`, the path must be full, not sparse.
 
-### ConditionalHideAttribute.cs
+### ConditionalHideAttribute
+
+This tool comes straight from [http://www.brechtos.com](Brecht Lecluyse) in a [http://www.brechtos.com/hiding-or-disabling-inspector-properties-using-propertydrawers-within-unity-5/](blog from November 2015).
+
+Any reasonably complex `MonoBehaviour` can have quite a few items to display in the inspector. Often some items are only valid if another inspector-visible attribute is in a certain state.
+
+1. Booleans are true to display conditional fields
+2. A string is not empty and not just spaces
+3. A reference object has been set (gameobject, prefab, etc)
+
+```c#
+[SerializeField]private bool enableAll = true; // number and userName visible on true
+[ConditionalHide("enableAll"), SerializeField] int number;
+[ConditionalHide("enableAll"), SerializeField] string userName;
+
+[SerializeField] string aString; // hiThere only visible if string non-empty
+[ConditionalHide("aString"), SerializeField] int hiThere = 77;
+
+[SerializeField] private GameObject text;  // whatNow only displays if object set
+[ConditionalHide("text"), SerializeField] int whatNow = 33;
+```
+#### Before
+
+![ConditionalHide-disabled](ConditionalHide-disabled.png)
+#### After
+![ConditionalHide-disabled](ConditionalHide-enabled.png)
 
 ### Log.cs - pluggable logging function
 
@@ -1613,7 +1638,25 @@ Assert.AreEqual(gameObject, gameObject2);
 
 ### PlayModeTests.cs - adding asserts to controller
 
+### PreviewEditor
+
+
+
 ### Range.cs - inspector tool to set high and low bounds
+
+### ScriptableObjects Display Drawer
+
+Scriptable objects provide a valuable resource. By moving code and data out of mono behaviours we can more easily decouple and test our systems. The problem is that in the default Unity system a scriptable object in a mono behaviour shows up as a resource. You need to select it in the Project view to have the inspector show details.
+
+This script, and many thanks to [TheVastBernie](https://forum.unity.com/members/thevastbernie.589052/) for his [script](https://forum.unity.com/threads/editor-tool-better-scriptableobject-inspector-editing.484393/), displays scriptable objects in full in the inspector view of a MonoBehaviour. There is nothing for you to do. When you load ***Able*** all will happen automatically.
+
+#### Closed
+
+![ScriptableObjectDrawerClosed](ScriptableObjectDrawerClosed.png)
+
+#### Open
+
+![ScriptableObjectDrawerOpen](ScriptableObjectDrawerOpen.png)
 
 ### Set.cs - Unity component implementing selector
 

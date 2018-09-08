@@ -15,11 +15,8 @@ namespace Askowl {
    CustomEditor(inspectedType: typeof(MonoBehaviour), editorForChildClasses: true)]
   public class MonoBehaviourEditor : Editor { }
 
+  /// <a href=""></a>
   /// <inheritdoc />
-  /// <summary>
-  /// If a ScriptableObject or CustomAsset is seen in the inspector, allow it to
-  /// be exmapded out and viewed or edited in-place/
-  /// </summary>
   [CustomPropertyDrawer(type: typeof(ScriptableObject), useForChildren: true)]
   public class ScriptableObjectDrawer : PropertyDrawer {
     private static readonly Dictionary<string, bool> FoldoutByType = new Dictionary<string, bool>();
@@ -61,17 +58,10 @@ namespace Askowl {
    CustomEditor(inspectedType: typeof(ValueNameAttribute), editorForChildClasses: true)]
   public class CustomAssetEditor : Editor {
 //    public override void OnInspectorGUI() {
-//      Debug.LogWarningFormat(
-//        "**** CustomAssetDrawer:65 serializedObject={0}  #### DELETE-ME #### 21/6/18 8:04 PM",
-//        serializedObject); //#DM#//
-//
 //      var serializedProperties = serializedObject.GetIterator();
 //
 //      if (serializedProperties.NextVisible(true)) {
 //        do {
-//          Debug.LogWarningFormat(
-//            "**** CustomAssetDrawer:69 serializedProperties.name={0}  #### DELETE-ME #### 21/6/18 8:02 PM",
-//            serializedProperties.name); //#DM#//
 //        } while (serializedProperties.NextVisible(false));
 //      }
 //
@@ -84,10 +74,8 @@ namespace Askowl {
    CustomEditor(inspectedType: typeof(SerializedObject), editorForChildClasses: true)]
   public class SerializedObjectEditor : Editor { }
 
+  /// <a href=""></a>
   /// <inheritdoc />
-  /// <summary>
-  /// Change name of fields in generic components to better describe what the value means.
-  /// </summary>
   [CustomPropertyDrawer(type: typeof(ValueAttribute), useForChildren: true)]
   public class CustomAssetLabelDrawer : PropertyDrawer {
     /// <inheritdoc />

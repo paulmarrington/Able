@@ -1,7 +1,8 @@
 {
     "name": "PlayMode",
     "references": [
-        "Able"
+        "Able",
+        "AbleEditor"
     ],
     "optionalUnityReferences": [
         "TestAssemblies"
