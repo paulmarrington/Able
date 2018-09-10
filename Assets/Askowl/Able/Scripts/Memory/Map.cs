@@ -3,6 +3,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text;
 
 namespace Askowl {
   /// <a href=""></a>
@@ -111,5 +112,18 @@ namespace Askowl {
       Value = value;
       Found = found;
     }
+
+    /// <inheritdoc />
+    public override string ToString() {
+      (builder ?? (builder = new List<string>())).Clear();
+
+      for (var key = First; key != null; key = Next) {
+        builder.Add($"{key}={Value}");
+      }
+
+      return string.Join(separator: ", ", value: builder.ToArray());
+    }
+
+    private List<string> builder;
   }
 }

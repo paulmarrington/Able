@@ -6,64 +6,39 @@ using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 namespace Askowl {
-  /// <summary>
-  /// Helper code to control a running application with the goal of preparing for live testing.
-  /// </summary>
-  /// <remarks><a href="http://customassets.marrington.net#playmodecontroller">More...</a></remarks>
+  /// <a href=""></a>
   public class PlayModeController {
-    /// <summary>
-    /// Current scene as seen on the screen
-    /// </summary>
-    /// <remarks><a href="http://customassets.marrington.net#scene">More...</a></remarks>
+    /// <a href=""></a>
     protected Scene Scene = default(Scene);
 
-    /// <summary>
-    /// Load scene by name. The scene must be registered in the build for this to be successful
-    /// </summary>
-    /// <remarks><a href="http://customassets.marrington.net#loadscene">More...</a></remarks>
-    /// <param name="name">Name of scene</param>
-    /// <returns>Enumerator that will allow a delay until the scene loading is complete</returns>
+    /// <a href=""></a>
     protected virtual IEnumerator LoadScene(string name) {
       var handle = SceneManager.LoadSceneAsync(sceneName: name, mode: LoadSceneMode.Single);
-      while (!handle.isDone) yield return null;
 
-      Scene = SceneManager.GetActiveScene();
+      if (handle != null) {
+        while (!handle.isDone) yield return null;
+
+        Scene = SceneManager.GetActiveScene();
+      }
     }
 
-    /// <summary>
-    /// Given a reference to an active UI Button, provide the same functionality as a player pressing it.
-    /// </summary>
-    /// <remarks><a href="http://customassets.marrington.net#pushbutton">More...</a></remarks>
-    /// <param name="button">Reference to `Button` instance</param>
-    /// <returns>Waits one update cycle so that button actions get a chance to start</returns>
+    /// <a href=""></a>
     protected static IEnumerator PushButton(Button button) {
-      button.Select();
-      button.onClick.Invoke();
-      yield return null;
+      if (button != null) {
+        button.Select();
+        button.onClick.Invoke();
+        yield return null;
+      }
     }
 
-    /// <summary>Given the name of an active UI Button, provide the same functionality as a player pressing it.</summary>
-    /// <remarks><a href="http://customassets.marrington.net#pushbutton">More...</a></remarks>
-    /// <param name="path">Path to button as a non-contiguous / separated or string array in the project hierarchy</param>
-    /// <returns>Waits one update cycle so that button actions get a chance to start</returns>
-    protected virtual IEnumerator PushButton(params string[] path) {
-      yield return PushButton(Components.Find<Button>(path));
-    }
+    /// <a href=""></a>
+    public bool IsDisplayingInUI(RectTransform transform) {
+      if ((transform == null) || !transform.gameObject.activeInHierarchy) return false;
 
-    public bool IsDisplaying(string gameObjectPath) {
-      Renderer renderer = Components.Find<Renderer>(gameObjectPath);
-      return (renderer != null) && renderer.isVisible;
-    }
-
-    public bool IsDisplayingInUI(string gameObjectPath) {
-      RectTransform transform = Components.Find<RectTransform>(gameObjectPath);
-      if (transform == null || !transform.gameObject.activeInHierarchy) return false;
-
-      Rect screenRect = new Rect(0, 0, Screen.width, Screen.height);
-
+      Rect      screenRect    = new Rect(0, 0, Screen.width, Screen.height);
       Vector3[] objectCorners = new Vector3[4];
-      transform.GetWorldCorners(objectCorners);
-      return screenRect.Contains(objectCorners[1]);
+      transform.GetWorldCorners(fourCornersArray: objectCorners);
+      return screenRect.Contains(point: objectCorners[1]);
     }
   }
 }

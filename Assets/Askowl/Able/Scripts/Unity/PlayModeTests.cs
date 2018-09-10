@@ -8,11 +8,8 @@ using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
 namespace Askowl {
+  /// <a href=""></a>
   /// <inheritdoc />
-  /// <summary>
-  /// Base class for PlayMode Unity tests. Provides explicit `Setup` and `Teardown` functions.
-  /// </summary>
-  /// <remarks><a href="http://customassets.marrington.net#playmodetests">More...</a></remarks>
   public class PlayModeTests : PlayModeController {
     /*
      * Built-In Helpers
@@ -21,78 +18,51 @@ namespace Askowl {
      * LogAssert.Expect(LogType, Regex);
      */
 
+    /// <a href=""></a>
     /// <inheritdoc />
-    /// <remarks><a href="http://customassets.marrington.net#playmodetests">More...</a></remarks>
     protected override IEnumerator LoadScene(string name) {
       yield return base.LoadScene(name);
 
       Assert.AreEqual(name, Scene.name);
     }
 
-    /// <summary>
-    /// Override for Objects.Component to check the result for compliance. Finds an active GameObject in the scene and retrieved a component by type from it.
-    /// </summary>
-    /// <see cref="Objects"/>
-    /// <param name="path">Path to GameObject - that need only include unique elements</param>
-    /// <typeparam name="T">Type of component to retrieve</typeparam>
-    /// <returns></returns>
-    /// <remarks><a href="http://customassets.marrington.net#playmodetests">More...</a></remarks>
+    /// <a href=""></a>
     protected static T Component<T>(params string[] path) where T : Component {
       T component = Components.Find<T>(path);
 
-      Assert.AreNotEqual(expected: default(T), actual: component,
-                         message: "For button " + Csv.ToString(path));
+      Assert.IsNotNull(value: component, message: $"For button '{Csv.ToString(path)}'");
 
       return component;
     }
 
-    /// <summary>
-    /// Override for Objects.Find to check the result for compliance. Finds an active object. Used to retrieve custom assets that have been loaded into the scene elsewhere.
-    /// </summary>
-    /// <remarks><a href="http://customassets.marrington.net#playmodetests">More...</a></remarks>
-    /// <see cref="Objects"/>
-    /// <param name="name">Name of object to find</param>
-    /// <returns>GameObject</returns>
-    protected static GameObject FindGameObject(string name) { return FindObject<GameObject>(name); }
+    /// <a href=""></a>
+    protected static GameObject FindGameObject(string name) => FindObject<GameObject>(name);
 
-    /// <summary>
-    /// Override for Objects.Find to check the result for compliance. Finds an active object. Used to retrieve custom assets that have been loaded into the scene elsewhere.
-    /// </summary>
-    /// <remarks><a href="http://customassets.marrington.net#playmodetests">More...</a></remarks>
-    /// <see cref="Objects"/>
-    /// <param name="name">Name of object to find</param>
-    /// <typeparam name="T">Type of object to find</typeparam>
-    /// <returns>Object</returns>
+    /// <a href=""></a>
     protected static T FindObject<T>(string name) where T : Object {
       T[] objects = Objects.FindAll<T>(name);
-      Assert.AreNotEqual(objects.Length, 0);
-      return objects[0];
+      Assert.AreNotEqual(0, objects?.Length);
+      return (objects?.Length > 0) ? objects[0] : null;
     }
 
-    /// <summary>
-    /// Wait for a UI component to be visible or invisible to the player
-    /// </summary>
-    /// <param name="gameObjectPath">Path to the game object we want (in)visible</param>
-    /// <param name="visible">true to wait until visible, fals to wait until not visible</param>
-    /// <returns></returns>
-    public IEnumerator IsDisplayingInUI(string gameObjectPath, bool visible = true) {
-      while (base.IsDisplayingInUI(gameObjectPath) != visible) yield return null;
+    /// <a href=""></a>
+    public IEnumerator IsDisplayingInUI(string path, bool visible = true, int repeats = 300) {
+      for (var count = 0; count < repeats; count++) {
+        if (base.IsDisplayingInUI(Components.Find<RectTransform>(path)) == visible) yield break;
+
+        yield return null;
+      }
+
+      Assert.IsFalse(true, $"IsDisplayingInUI '{path}' failed to act as expected");
     }
 
-    /// <inheritdoc />
-    /// <remarks><a href="http://customassets.marrington.net#playmodetests">More...</a></remarks>
-    protected override IEnumerator PushButton(params string[] path) {
+    /// <a href=""></a>
+    protected IEnumerator PushButton(params string[] path) {
       yield return PushButton(Component<Button>(path)); // so it uses test version with assert
     }
 
-    /// <summary>
-    /// Given text extracted from the running game, check it against a regular expression and freak out if it doesn't match
-    /// </summary>
-    /// <remarks><a href="http://customassets.marrington.net#checkpattern">More...</a></remarks>
-    /// <param name="pattern">String representation of a regular expression</param>
-    /// <param name="against">String to check against the regular expression</param>
-    protected static void CheckPattern(string pattern, string against) {
-      Regex           regex   = new Regex(pattern);
+    /// <a href=""></a>
+    protected static void CheckPattern(Regex regex, string against) {
       MatchCollection matches = regex.Matches(against);
       Assert.AreEqual(matches.Count, 1, against);
     }

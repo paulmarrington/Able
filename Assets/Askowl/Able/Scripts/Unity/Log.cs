@@ -9,6 +9,7 @@ namespace Askowl {
 
     static Log() {
 #if !UNITY_EDITOR
+    // So that mobile host logs don't get too crowded to read.
     Application.SetStackTraceLogType(logType:LogType.Log,stackTraceType:StackTraceLogType.None);
 #endif
     }

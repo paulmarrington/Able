@@ -9,4 +9,6 @@ namespace Askowl.Examples {
     // ReSharper disable once NotAccessedField.Local
     [SerializeField] private AudioClip audioClip;
   }
+
+  public class AudioClips { }
 }

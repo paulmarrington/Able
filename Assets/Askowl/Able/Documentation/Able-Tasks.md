@@ -29,17 +29,17 @@
 - [x] doc and test Stack
 - [x] doc and test CounterStack
 - [ ] doc and test Set
-- [ ] doc and test Csv
+- [x] doc and test Csv
 - [ ] doc and test PlayModeController
 - [ ] doc and test PlayModeTests
 - [x] split up functionality
 - [x] doc and test JSON
-- [ ] doc and test objects.path(gameobject)
-- [ ] doc and test Components
-- [ ] doc and test ConditionalHideAttribute
+- [x] doc and test objects.path(gameobject)
+- [x] doc and test Components
+- [x] doc and test ConditionalHideAttribute
 - [ ] Doc and test Log
-- [ ] doc and test range
-- [ ] doc and test ValueAttribute
+- [x] doc and test range
+- [x] doc and test ValueAttribute
 - [ ] Remove all that is not base from documentation
 - [ ] Upload md to github
 - [ ] update index to fold when too long

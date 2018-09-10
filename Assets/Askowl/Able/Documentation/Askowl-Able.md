@@ -1590,7 +1590,25 @@ Any reasonably complex `MonoBehaviour` can have quite a few items to display in 
 #### After
 ![ConditionalHide-disabled](ConditionalHide-enabled.png)
 
-### Log.cs - pluggable logging function
+### Label Attribute
+
+One of the challenges of using generic scriptable objects is the often uninformative labels in the inspector. In this truncated example below we have a generic class with a variable that can only be set in the inspector. `Stringer` inherits from it, but by using an attribute decorator `Labels` I can rename the field to something more meaningful.
+
+In the generic class where you have ***Inspector*** fields you want to rename, give them a `[Label]` attribute. In the concrete classes, use the `Labels(before, after, ...)` class attribute decorator with entries that match the before and after label value.
+
+```c#
+  public class OfType<T> : WithEmitter { [SerializeField, Label] private T value; }
+// ...
+[Labels("Value", "Text")] public sealed class Stringer : OfType<string> {}
+// or if there is only one,a s here, the label to replace can be implied
+[Labels("Text")] public sealed class Stringer : OfType<string> {}
+```
+
+In this example we will see a ***Text*** label instead of the generic `Value` one.
+
+### Log - pluggable logging function
+
+
 
 ### Objects
 
@@ -1634,15 +1652,144 @@ var gameObject2 = Objects.Find<GameObject>("Button Three");
 Assert.AreEqual(gameObject, gameObject2);
 ```
 
-### PlayModeController.cs - control app for live testing
+### PlayMode Test Runner Support
 
-### PlayModeTests.cs - adding asserts to controller
+Askowl Custom Assets have tests for Unity editor PlayMode test-runner. Because this is the core Askowl unity package, it includes the rudimentary support for testing. See the Askowl TestAutomator package for more exhaustive support.
 
+### PlayModeController
+
+PlayModeController is a base class of protected methods used to control actions in the game. Most of the methods run in Coroutines so that control code can wait for them to complete. It uses by *PlayModeTests* and *RemoteControl* classes.
+
+#### Scene
+
+The protected reference to the loaded `Scene` object.
+
+#### LoadScene
+Load a scene by name from the scenes list in the build.
+Sometimes tests have a special scene to highlight actions difficult to reproduce in game-play. Add to the build but they will include little overhead to the release game.
+
+```C#
+  [UnityTest] public IEnumerator AccessCustomAssets() {
+    yield return LoadScene("Askowl-CustomAssets-Examples");
+    //...
+  }
+```
+
+#### PushButton
+
+At the least a player has to push a button to start the game. You can select the button by the name and path in the hierarchy or a `Button` reference. The sparse path elements are separated by one or more slashes and can have missing components. As long as it is unique. For clarity I use double-slash to indicate missing segments.
+
+```C#
+yield return PushButton("Canvas//Show Quote");
+// same as
+yield return PushButton(Objects.Component<Button>("Show Quote"));
+```
+The coroutine will return after one tick - giving time for the button events to react.
+
+#### IsDisplayingInGui
+
+By giving the sparse path to a game object that has a renderer, this method checks whether a 2D component is partially or totally withing the view-space.
+
+```c#
+var buttonTwo = Components.Find<RectTransform>("Button Two");
+Assert.IsTrue(IsDisplayingInUI(buttonTwo));
+```
+
+### PlayModeTests
+`PlayModeTests` inherits from `PlayModeController` and is the ancestor of concrete tests within Unity.
+
+It overrides functions to add assertions.
+
+* LoadScene(string name) from PlayModeController
+* PushButton(string path) from PlayModeController
+* Component<T>(string path...) from Objects.Component<T>(name)
+* FindGameObject(string name)
+* FindObject<T>(string name) from Objects.Find<T>(name)
+* FindObject<T>() from Objects.Find<T>()
+
+#### PlayModeTests.Component
+Use this static method rather than `Objects.Component` when testing to retrieve a typed component from a named `GameObject` in the current scene. It marks a failure if we cannot retrieve a component.
+
+```C#
+Text results = Component<Text>("Canvas/Results Panel/Text");
+```
+
+#### PlayModeTests.FindObject
+
+Use this static method rather than `Objects.Find` when testing to retrieve a named `GameObject` in the current scene. It marks a failure if we cannot retrieve the component.
+
+```C#
+Float currentFloat = FindObject<Float>("SampleFloatVariable");
+AudioClips  picker = FindObject<AudioClips>();
+```
+The latter example will find a GameObject called *AudioClips*.
+
+#### PlayModeTests.PushButton
+Given the text name of a game component in the scene, treat it as a button and perform the same action as when a player pushed it on the game screen.
+
+#### CheckPattern
+
+Sometimes we need to look at some UI text. We use regular expressions for that.
+```C#
+CheckPattern(@"^Direct .* at \d\d/\d\d/\d\d\d\d \d\d:\d\d:\d\d", results.text);
+```
+### A Sample Play Mode Test
+
+Because we sent the slider with a quote, we need to test a range to make sure all is as it should be.
+```C#
+[UnityTest]
+  public IEnumerator TestIntegerAsset() {
+    yield return Setup();
+
+    Slider slider = Component<Slider>("Canvas/Integer Asset/Slider");
+    slider.value = 0.77f;
+    yield return null;
+
+    int buttonValue = int.Parse(ResultsButtonText);
+    Assert.GreaterOrEqual(buttonValue, 76);
+    Assert.LessOrEqual(buttonValue, 78);
+  }
+```
 ### PreviewEditor
 
+Unity custom editors provide additional functionality for the Inspector panel. `PreviewEditor<T>` is a generic that adds a ***Preview*** button to the bottom of the Component.
 
+`AudioClipsEditor` is a custom class that plays a sound when pressing ***Preview***.
 
-### Range.cs - inspector tool to set high and low bounds
+```c#
+[CustomEditor(typeof(AudioClips))]
+public class AudioClipsEditor : PreviewEditor<AudioSource> {
+  protected override void Preview() =>
+    AudioSource.PlayClipAtPoint(clip: (AudioClips) target, position: Vector3.zero);
+}
+```
+
+### Range
+
+`Range` is a `Pick` class with serialised low and high values. Calling `Pick()` returns a random value within but inclusive of the range. By default, the range can be between 0 and 1. Using `RangeBounds` allows for different scales.
+
+```c#
+[SerializeField] private Range volume = new Range(min: 0.0f, max: 10.0f);
+// ...
+source.volume = volume.Pick();
+```
+
+In this example, the potential range is between 0.0 and 10.0 inclusive, but the sliders are both to the right at 1.0. A range drawer provides better visual editing of ranges in the Inspector.
+
+<img src="RangeDrawer.png" width="50%">
+
+Set range values with the sliders or by typing values on the boxes to the left and right.
+
+### RangeBounds Attribute
+
+For more meaningful ranges we add an attribute called `RangeBounds`.
+
+```c#
+[SerializeField, RangeBounds(0, 2)]   private Range pitch    = new Range(1, 2);
+[SerializeField, RangeBounds(0, 999)] private Range distance = new Range(110, 800);
+```
+
+The width of the range limit how many digits past the decimal point display.
 
 ### ScriptableObjects Display Drawer
 
@@ -1660,15 +1807,19 @@ This script, and many thanks to [TheVastBernie](https://forum.unity.com/members/
 
 ### Set.cs - Unity component implementing selector
 
-`Set`, like `OfType` is a generic class. To instantiate it requires the set entries.
+`Set `is a generic class that allows you to create a concrete component where you can use `Pick` to get an item from a list.
 
 ```C#
-[CreateAssetMenu(menuName = "Examples/SetPicker", fileName = "SetPickerSample")]
-public sealed class SetPickerSample : Set<AudioClip> {
-  public void Play() { AudioSource.PlayClipAtPoint(clip: Pick(), position: Vector3.zero); }
+[Serializable]
+public class SetInstance : Set<AudioClip> {
+  public void Play() {
+    AudioSource.PlayClipAtPoint(clip: Pick(), position: Vector3.zero);
+  }
 }
 ```
-This example can play  a sound from the list. This is a great way to make a game sound less tedious.
+This example can play  a sound from the list. This is a great way to make a game sound less tedious. Just add an instance as a `[SerializeField]` and fill it from the Inspector.
+
+![SetExample](SetExample.png)
 
 #### Pick from Selector
 
@@ -1678,40 +1829,9 @@ All classes inheriting from `Set` have a `Pick()` method with two controlling fi
 
 These options are available in the editor when you create a custom asset from a `Set`.
 
-#### Change Contents
+#### Set Contents
 
-##### Add(entry)
-
-While in most cases we use the Inspector to fill the `Set`, sometimes we need dynamic changes.
-##### Remove(entry)
-
-On occasions, a `Set` entry will expire, and it will be necessary to remove them.
-##### Contains(entry)
-
-See if a `Set` contains a specific entry.
-
-##### Count
-
-Retrieve the number of entries in a set.
-
-##### Current Set Selector
-
-#### ForEach
-Call an action for every entry in a set. If the action returns false, all is complete.
-```C#
-mySet.ForEach((s) => {return s!="Exit";});
-```
-#### The List Selector
-
-##### Build the Selector
-
-##### Reset
-
-### ValueAttribute.cs - change name of inspector field
-
-
-
-
+The `Elements` fields a public `List<T>`, so access it content, but for modifications, use `Add(entry)` and `Remove(entry)` as they will rebuild the selector. Overwriting the elements array will also trigger a rebuild, as will an explicit `Reset()` call.
 
 @@@@@@@@@@@@@@@@@@@@@@@@@@
 
@@ -1729,151 +1849,5 @@ Unity custom editors provide additional functionality for the Inspector panel. `
   [CustomEditor(typeof(AudioClips))]
   public class AudioClipsEditor : PreviewEditor<AudioSource> {
     protected override void Preview() { ((AudioClips) target).Play(Source); }
-  }
-```
-
-### Range
-`Range` is a `Pick` class with serialised low and high values. Calling `Pick()` returns a random value within but inclusive of the range.
-
-By default, the range can be between 0 and 1. Using `RangeBounds` below allows for different scales.
-
-```C#
-    [SerializeField]     private Range volume   = new Range(1.0f, 1.0f);
-      source.volume      = volume.Pick();
-```
-In this example, the potential range is between 0.0 and 1.0 inclusive, but the sliders are both to the right at 1.0.
-The initialiser can be empty and the values set by public `Min` and `Max` variables.
-
-A range drawer provides better visual editing of ranges in the Inspector.
-
-<img src="RangeDrawer.png" width="50%">
-
-Set range values with the sliders or by typing values on the boxes to the left and right.
-
-### RangeBounds Attribute
-For more meaningful ranges we add an attribute called `RangeBounds`.
-
-```C#
-    [SerializeField, RangeBounds(0, 2)]   private Range pitch    = new Range(1, 2);
-    [SerializeField, RangeBounds(0, 999)] private Range distance = new Range(1, 999);
-```
-The width of the range limit how many digits past the decimal point display.
-
-### Objects Helpers
-I am lazy. I hate typing the same scaffolding code. These are functions more often used in testing than production code.
-
-### Find&lt;T>
-Use `Find` to search the project for Unity Objects of a defined type with a known name. The search includes disabled items.
-
-```C#
-GameObject mainCamera = Objects.Find<GameObject>("Main Camera");
-```
-
-Often the object is unique and named after it's underlying class.
-
-```C#
-setPickerSample = Objects.Find<SetPickerSample>();
-```
-
-`Find` is resource hungry. Only use it in called methods like `Awake`, `Start` or `OnEnable`. It is never necessary for production code but is an excellent helper with play mode tests. 
-
-### Component&lt;T>
-`Component` is another tool for play mode testing. Without being part of the game, test code can retrieve a GameObject by unique name/path the then return a reference to a Component of that game object. Because we do not have a game object starting point, the name must be unique. Either a unique name within the scene or an absolute path.
-
-```C#
-    results      = Component<Text>("Canvas/Results Panel/Text");
-    results.text = "I found you";
-```
-<img src="Component1.png" width="50%">
-
-<img src="Component2.png" width="50%">
-
-## PlayMode Test Runner Support
-Askowl Custom Assets have tests for Unity editor PlayMode test-runner. Because this is the core Askowl unity package, it includes the rudimentary support for testing. See the Askowl TestAutomator package for more exhaustive support.
-
-### PlayModeController
-PlayModeController is a base class for protected methods used to control actions in the game. Most of the methods run in Coroutines so that control code can wait for them to complete. It uses by *PlayModeTests* and *RemoteControl* classes.
-
-#### Scene
-The protected reference to the loaded `Scene` object.
-
-#### LoadScene
-Load a scene by name from the scenes list in the build.
-Sometimes tests have a special scene to highlight actions difficult to reproduce in game-play. Add to the build but they will include little overhead to the release game.
-
-```C#
-  [UnityTest] public IEnumerator AccessCustomAssets() {
-    yield return LoadScene("Askowl-CustomAssets-Examples");
-    //...
-  }
-```
-
-#### PushButton
-At the least a player has to push a button to start the game. You can select the button by the name and path in the hierarchy or a `Button` reference.
-
-```C#
-yield return PushButton("Canvas/Show Quote");
-// same as
-yield return PushButton(Objects.Component<Button>("Show Quote"));
-```
-The coroutine will return after one tick - giving time for the button watchers to react.
-
-#### Log
-Typing `Debug.LogFormat()` gets tiring. For classes that inherit, you can use `Log()` instead.
-
-```C#
-Log("Entering Scene {1}", Scene.name);
-```
-
-### PlayModeTests
-`PlayModeTests` inherits from `PlayModeController` and is the ancestor of concrete tests within Unity.
-
-It overrides functions to add assertions.
-
-* LoadScene(string name) from PlayModeController
-* PushButton(string path) from PlayModeController
-* Component<T>(string name) from Objects.Component<T>(name)
-* FindObject<T>(string name) from Objects.Find<T>(name)
-* FindObject<T>() from Objects.Find<T>()
-
-#### PlayModeTests.Component
-Use this static method rather than `Objects.Component` when testing to retrieve a typed component from a named `GameObject` in the current scene. It marks a failure if we cannot retrieve a component.
-
-```C#
-Text results = Component&lt;Text>("Canvas/Results Panel/Text");
-```
-
-#### PlayModeTests.FindObject
-Use this static method rather than `Objects.Find` when testing to retrieve a named `GameObject` in the current scene. It marks a failure if we cannot retrieve the component.
-
-```C#
-Float currentFloat = FindObject&lt;Float>("SampleFloatVariable");
-AudioClips  picker = FindObject<AudioClips>();
-```
-The latter example will find a GameObject called *AudioClips*.
-
-#### PlayModeTests.PushButton
-Given the text name of a game component in the scene, treat it as a button and perform the same action as when a player pushed it on the game screen.
-
-#### CheckPattern
-Sometimes we need to look at some UI text. We use regular expressions for that.
-```C#
-    CheckPattern(@"^Direct Event heard at \d\d/\d\d/\d\d\d\d \d\d:\d\d:\d\d", results.text);
-```
-### A Sample Play Mode Test
-
-Because we sent the slider with a quote, we need to test a range to make sure all is as it should be.
-```C#
-[UnityTest]
-  public IEnumerator TestIntegerAsset() {
-    yield return Setup();
-
-    Slider slider = Component<Slider>("Canvas/Integer Asset/Slider");
-    slider.value = 0.77f;
-    yield return null;
-
-    int buttonValue = int.Parse(ResultsButtonText);
-    Assert.GreaterOrEqual(buttonValue, 76);
-    Assert.LessOrEqual(buttonValue, 78);
   }
 ```

@@ -1,7 +1,6 @@
 ﻿// With thanks to Jason Weimann  -- jason@unity3d.college
 
 using System;
-using JetBrains.Annotations;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -74,11 +73,11 @@ namespace Askowl {
     /// <summary>
     /// Used by RangeDrawer exclusively
     /// </summary>
-    public float Max { get; private set; }
+    public float Max { get; }
 
     /// <summary>
     /// Used by RangeDrawer exclusively
     /// </summary>
-    public float Min { get; private set; }
+    public float Min { get; }
   }
 }

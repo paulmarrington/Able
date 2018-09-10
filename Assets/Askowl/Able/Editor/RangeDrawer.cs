@@ -61,7 +61,7 @@ namespace Askowl {
       rangeMax = set ? ((RangeBoundsAttribute) ranges[0]).Max : 1;
       int places = (rangeMax < 10) ? 2 : (rangeMax < 100) ? 1 : 0;
 
-      boundsFormat = string.Format("F{0}", places);
+      boundsFormat = $"F{places}";
     }
   }
 }

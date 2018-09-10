@@ -55,19 +55,8 @@ namespace Askowl {
   #region ValueLabelChange
   /// <inheritdoc />
   [CanEditMultipleObjects,
-   CustomEditor(inspectedType: typeof(ValueNameAttribute), editorForChildClasses: true)]
-  public class CustomAssetEditor : Editor {
-//    public override void OnInspectorGUI() {
-//      var serializedProperties = serializedObject.GetIterator();
-//
-//      if (serializedProperties.NextVisible(true)) {
-//        do {
-//        } while (serializedProperties.NextVisible(false));
-//      }
-//
-//      base.OnInspectorGUI();
-//    }
-  }
+   CustomEditor(inspectedType: typeof(LabelsAttribute), editorForChildClasses: true)]
+  public class CustomAssetEditor : Editor { }
 
   /// <inheritdoc />
   [CanEditMultipleObjects,
@@ -76,18 +65,13 @@ namespace Askowl {
 
   /// <a href=""></a>
   /// <inheritdoc />
-  [CustomPropertyDrawer(type: typeof(ValueAttribute), useForChildren: true)]
+  [CustomPropertyDrawer(type: typeof(LabelAttribute), useForChildren: true)]
   public class CustomAssetLabelDrawer : PropertyDrawer {
     /// <inheritdoc />
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
-      var attr = property.serializedObject.targetObject.GetType()
-                         .GetCustomAttributes(typeof(ValueNameAttribute), false);
-
-      if ((attr.Length > 0) && attr[0] is ValueNameAttribute) {
-        var valueName = (ValueNameAttribute) attr[0];
-        label.text = valueName.Label;
-      }
-
+      var attributeType = property.serializedObject.targetObject.GetType();
+      var attributes    = attributeType.GetCustomAttributes(typeof(LabelsAttribute), false);
+      if ((attributes.Length > 0)) (attributes[0] as LabelsAttribute)?.Change(label);
       EditorGUI.PropertyField(position, property, label, includeChildren: true);
     }
 

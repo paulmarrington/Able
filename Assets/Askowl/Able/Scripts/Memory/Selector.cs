@@ -76,5 +76,10 @@ namespace Askowl {
     public int CycleIndex => cycleIndex % choices.Length;
 
     private List<T> remainingSelections;
+
+    /// <a href=""></a>
+    public void Reset() => choices = emptyChoices;
+
+    private T[] emptyChoices = { };
   }
 }
