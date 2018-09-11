@@ -41,7 +41,7 @@ namespace Askowl.Examples {
       FindGameObject("Button 23");
     }
 
-    /// Using <see cref="PlayModeTests.FindObject"/>
+    /// Using <see cref="PlayModeTests.FindObject{T}"/>
     [UnityTest]
     public IEnumerator FindObject() {
       yield return LoadScene("Askowl-Able-Examples");
@@ -50,9 +50,9 @@ namespace Askowl.Examples {
       LogAssert.Expect(LogType.Assert, new Regex(@".*Values are equal.*"));
     }
 
-    /// Using <see cref="PlayModeTests.IsDisplayingUI"/>
+    /// Using <see cref="PlayModeTests.IsDisplayingInUI(string, bool, int)"/>
     [UnityTest]
-    public IEnumerator IsDisplayingUI() {
+    public IEnumerator IsDisplayingInUI() {
       yield return LoadScene("Askowl-Able-Examples");
       yield return IsDisplayingInUI("Button One", visible: true, repeats: 10);
 
@@ -60,7 +60,7 @@ namespace Askowl.Examples {
       yield return IsDisplayingInUI("Button One", visible: false, repeats: 20);
     }
 
-    /// Using <see cref="PlayModeTests.PushButton"/>
+    /// Using <see cref="PlayModeTests.PushButton(string[])"/>
     [UnityTest]
     public IEnumerator PushButton() {
       yield return LoadScene("Askowl-Able-Examples");

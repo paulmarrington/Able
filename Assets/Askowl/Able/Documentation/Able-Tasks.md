@@ -28,19 +28,21 @@
 - [x] Doc and test TreeContainer "Value" as same as leaf + IsNumber + Long + Double+Boolean+IsNull
 - [x] doc and test Stack
 - [x] doc and test CounterStack
-- [ ] doc and test Set
+- [x] doc and test Set
 - [x] doc and test Csv
-- [ ] doc and test PlayModeController
-- [ ] doc and test PlayModeTests
+- [x] doc and test PlayModeController
+- [x] doc and test PlayModeTests
 - [x] split up functionality
 - [x] doc and test JSON
 - [x] doc and test objects.path(gameobject)
 - [x] doc and test Components
 - [x] doc and test ConditionalHideAttribute
 - [ ] Doc and test Log
+- [ ] Doc and test colours
 - [x] doc and test range
 - [x] doc and test ValueAttribute
-- [ ] Remove all that is not base from documentation
+- [x] Remove all that is not base from documentation
+- [ ] investigate transcripts
 - [ ] Upload md to github
 - [ ] update index to fold when too long
 - [ ] Create bit.ly short links

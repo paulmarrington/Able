@@ -1320,7 +1320,7 @@ A tree Container for Varied Structured Data.
 
 #### Creating a Tree Container
 
-For no particularly good reason a new database is created with a static property. `Trees` is type agnostic, so no additional information is required. The tree contains state including the current branch, array or leaf node. It starts by pointing at the root node.
+For no particularly good reason a new tree is created with a static property. `Trees` is type agnostic, so no additional information is required. The tree contains state including the current branch, array or leaf node. It starts by pointing at the root node.
 
 ```c#
 var tree = Trees.Instance;
@@ -1606,7 +1606,7 @@ In the generic class where you have ***Inspector*** fields you want to rename, g
 
 In this example we will see a ***Text*** label instead of the generic `Value` one.
 
-### Log - pluggable logging function
+### Log - Plug-and-play Logging
 
 
 
@@ -1832,22 +1832,3 @@ These options are available in the editor when you create a custom asset from a 
 #### Set Contents
 
 The `Elements` fields a public `List<T>`, so access it content, but for modifications, use `Add(entry)` and `Remove(entry)` as they will rebuild the selector. Overwriting the elements array will also trigger a rebuild, as will an explicit `Reset()` call.
-
-@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-
-
-
-
-### Preview Custom Editor
-
-Unity custom editors provide additional functionality for the Inspector panel. `PreviewEditor<T>` is a generic that adds a ***Preview*** button to the bottom of the Component.
-
-`AudioClipsEditor` is a custom class that plays a sound when pressing ***Preview***.
-
-```C#
-  [CustomEditor(typeof(AudioClips))]
-  public class AudioClipsEditor : PreviewEditor<AudioSource> {
-    protected override void Preview() { ((AudioClips) target).Play(Source); }
-  }
-```
