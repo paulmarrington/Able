@@ -105,10 +105,15 @@ namespace Askowl {
 
     /// <a href=""></a>
     public static string NextAction(string text, string colour = "darkblue", bool bold = false, bool italics = false) =>
-      $"{Open('b', bold)}{Open('i', italics)}<colour={colour}>{text}</colour>{Close('i', italics)}{Close('b', bold)}";
+      $"{Open('b', bold)}{Open('i', italics)}<color={colour}>{text}</color>{Close('i', italics)}{Close('b', bold)}";
 
-    private static string ToString(string component, string nextAction, string result, params object[] more) =>
-      $"{SetAction(nextAction)}: for '{component}' -- result: {result}, more: {More(more)}";
+    private static string ToString(string component, string action, string result, params object[] more) {
+      var mort = More(more);
+      mort   = (string.IsNullOrWhiteSpace(mort)) ? "" : $", more: {mort}";
+      result = (string.IsNullOrWhiteSpace(result)) ? "" : $"result: {result}";
+      action = Actions[action.ToLower()].Found ? Actions.Value.ToString() : action;
+      return $"{action}: for '{component}' -- {result}{mort}";
+    }
 
     private static void ConsoleMessage(Contents msg) {
       if (ConsoleEnabled) {
@@ -132,9 +137,6 @@ namespace Askowl {
     private static string Close(char tag, bool set) => set ? $"</{tag}>" : "";
 
     private static Object Obj(object[] more) => (more.Length != 1) ? null : more[0] as Object;
-
-    private static string SetAction(string action) =>
-      Actions[action.ToLower()].Found ? Actions.Value.ToString() : action;
 
     static Log() {
       var tbd = NextAction(text: "TBD", colour: "maroon", bold: true, italics: true);
