@@ -2,27 +2,29 @@
 
 using System.Collections;
 using System.Text.RegularExpressions;
+using Askowl.RichText;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.TestTools;
 
 namespace Askowl.Examples {
   /// Using <see cref="Log" />
+  /// <inheritdoc />
   public class LogExamples : PlayModeTests {
-    private        string              SceneName  = "Askowl-Able-Examples";
-    private static Log.MessageRecorder logMessage = Log.Messages();
-    private static Log.MessageRecorder logWarning = Log.Warnings();
-    private static Log.EventRecorder   LogEvent   = Log.Events(nextAction: "Lost Health");
-    private static Log.EventRecorder   Todo       = Log.Events(nextAction: "Todo");
-    private static Log.EventRecorder   LogError   = Log.Errors();
+    private const  string              SceneName = "Askowl-Able-Examples";
+    private static Log.MessageRecorder log       = Log.Messages();
+    private static Log.EventRecorder   warning   = Log.Warnings("Warning");
+    private static Log.EventRecorder   logEvent  = Log.Events(action: "Lost Health");
+    private static Log.EventRecorder   todo      = Log.Warnings(action: "Todo");
+    private static Log.EventRecorder   error     = Log.Errors();
 
     /// Using <see cref="Log.Messages"/>
     [UnityTest]
     public IEnumerator Messages() {
       yield return LoadScene(SceneName);
 
-      LogAssert.Expect(LogType.Log, new Regex("Run Away: .* result: all is well"));
-      logMessage(nextAction: "Run Away", message: "all is well");
+      LogAssert.Expect(LogType.Log, new Regex("Run Away: .* result=all is well.*line=.*,member="));
+      log(action: "Run Away", message: "all is well");
     }
 
     /// Using <see cref="Log.Events"/>
@@ -30,8 +32,8 @@ namespace Askowl.Examples {
     public IEnumerator Events() {
       yield return LoadScene(SceneName);
 
-      LogAssert.Expect(LogType.Log, new Regex("Lost Health: .* result: fell down well"));
-      LogEvent("fell down well");
+      LogAssert.Expect(LogType.Log, new Regex("Lost Health: .* result=fell down well"));
+      logEvent("fell down well");
     }
 
     /// Using <see cref="Log.Warnings"/>
@@ -39,8 +41,8 @@ namespace Askowl.Examples {
     public IEnumerator Warnings() {
       yield return LoadScene(SceneName);
 
-      LogAssert.Expect(LogType.Warning, new Regex("Removing old objects: .* result: Too many objects"));
-      logWarning(nextAction: "Removing old objects", message: "Too many objects");
+      LogAssert.Expect(LogType.Warning, new Regex("Warning: .* result=Too many objects"));
+      warning("Too many objects");
     }
 
     /// Using <see cref="Log.Errors"/>
@@ -48,8 +50,8 @@ namespace Askowl.Examples {
     public IEnumerator Errors() {
       yield return LoadScene(SceneName);
 
-      LogAssert.Expect(LogType.Error, new Regex("Error: .* result: we should never get here"));
-      LogError("we should never get here");
+      LogAssert.Expect(LogType.Error, new Regex("Error: .* result=we should never get here"));
+      error("we should never get here");
     }
 
     /// Using <see cref="Log.More"/>
@@ -58,22 +60,26 @@ namespace Askowl.Examples {
       yield return LoadScene(SceneName);
 
       var more = Log.More("count=", 1, "hello=", "world", "one", "two");
-      Assert.AreEqual(expected: "count=,1,hello=,world,one,two", actual: more);
+      Assert.AreEqual(expected: "count=1,hello=world,one,two", actual: more);
     }
 
-    /// Using <see cref="Log.ToMap"/>
+    /// Using <see cref="Log.ToDictionary"/>
     [UnityTest]
-    public IEnumerator ToMap() {
+    public IEnumerator ToDictionary() {
       yield return LoadScene(SceneName);
 
-      var map = Log.ToMap("Act Now", "Success", "count=", 1, "hello=", "world", "one", "two");
-      Assert.IsTrue(map["action"].Found);
-      Assert.AreEqual("Act Now", map.Value);
-      Assert.AreEqual("Success", map["result"].Value);
-      Assert.AreEqual(1,       map["count"].Value);
-      Assert.AreEqual("world",   map["hello"].Value);
-      Assert.IsTrue(map["one"].Found);
-      Assert.IsTrue(map["two"].Found);
+      var dictionary = Log.ToDictionary(new Log.Contents {
+        component = "My Component", action = "Act Now", result = "Success",
+        more      = new object[] {"count=", 1, "hello=", "world", "one", "two"}
+      });
+
+      Assert.IsTrue(dictionary.ContainsKey("action"));
+      Assert.AreEqual("Act Now", dictionary["action"]);
+      Assert.AreEqual("Success", dictionary["result"]);
+      Assert.AreEqual(1,         dictionary["count"]);
+      Assert.AreEqual("world",   dictionary["hello"]);
+      Assert.IsTrue(dictionary.ContainsKey("one"));
+      Assert.IsTrue(dictionary.ContainsKey("two"));
     }
 
     /// Using <see cref="Log.ConsoleEnabled"/>
@@ -83,7 +89,7 @@ namespace Askowl.Examples {
 
       Log.ConsoleEnabled = false;
       LogAssert.NoUnexpectedReceived();
-      LogEvent("fell down well");
+      logEvent("fell down well");
       Log.ConsoleEnabled = true;
     }
 
@@ -92,18 +98,18 @@ namespace Askowl.Examples {
     public IEnumerator Actions() {
       yield return LoadScene(SceneName);
 
-      LogAssert.Expect(LogType.Log, new Regex("<b><i><color=maroon>TBD</color></i></b>: .* result: TBD"));
-      Todo("TBD");
+      LogAssert.Expect(LogType.Warning, new Regex("<b><i><color=maroon>TO-BE-DONE</color></i></b>: .* result=TBD"));
+      todo("TBD");
     }
 
-    /// Using <see cref="Log.NextAction"/>
+    /// Using <see cref="Log.Action"/>
     [UnityTest]
     public IEnumerator NextAction() {
       yield return LoadScene(SceneName);
 
-      Log.Actions.Add("deleteme", Log.NextAction("Delete Me", RichText.Colours.Aqua, bold: true, italics: true));
+      Log.Actions.Add("deleteme", Log.Action("Delete Me", Colour.Aqua, bold: true, italics: true));
       LogAssert.Expect(LogType.Log, new Regex("<b><i><color=aqua>Delete Me</color></i></b>:"));
-      logMessage(nextAction: "DeleteMe", message: "later");
+      log(action: "DeleteMe", message: "later");
     }
   }
 }

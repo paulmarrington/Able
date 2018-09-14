@@ -1,6 +1,7 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.CompilerServices;
 using UnityEngine;
@@ -11,7 +12,7 @@ namespace Askowl {
   public class Log {
     #region Producer Interface
     /// <a href=""></a>
-    public delegate void MessageRecorder(string nextAction, string message, params object[] more);
+    public delegate void MessageRecorder(string action, string message, params object[] more);
 
     /// <a href=""></a>
     public delegate void EventRecorder(string message = "", params object[] more);
@@ -20,37 +21,42 @@ namespace Askowl {
     public static MessageRecorder Messages([CallerMemberName] string memberName = "",
                                            [CallerFilePath]   string filePath   = "",
                                            [CallerLineNumber] int    lineNumber = 0) =>
-      (nextAction, message, more) => MessageEvent(Fill(nextAction, memberName, message, filePath, lineNumber, more));
+      (action, message, more) => MessageEvent(Fill(action, memberName, message, filePath, lineNumber, more));
 
     /// <a href=""></a>
-    public static MessageRecorder Warnings([CallerMemberName] string memberName = "",
-                                           [CallerFilePath]   string filePath   = "",
-                                           [CallerLineNumber] int    lineNumber = 0) =>
-      (nextAction, message, more) => WarningEvent(Fill(nextAction, memberName, message, filePath, lineNumber, more));
+    public static EventRecorder Warnings(string                    action,
+                                         [CallerMemberName] string memberName = "",
+                                         [CallerFilePath]   string filePath   = "",
+                                         [CallerLineNumber] int    lineNumber = 0) =>
+      (message, more) => WarningEvent(Fill(action, memberName, message, filePath, lineNumber, more));
 
     /// <a href=""></a>
     public static EventRecorder Errors([CallerMemberName] string memberName = "",
                                        [CallerFilePath]   string filePath   = "",
                                        [CallerLineNumber] int    lineNumber = 0) =>
-      (message, more) => ErrorEvent(Fill(null, memberName, message, filePath, lineNumber, more));
+      (message, more) => ErrorEvent(Fill("Error", memberName, message, filePath, lineNumber, more));
 
     /// <a href=""></a>
-    public static EventRecorder Events(string                    nextAction,
+    public static EventRecorder Events(string                    action,
                                        [CallerMemberName] string memberName = "",
                                        [CallerFilePath]   string filePath   = "",
                                        [CallerLineNumber] int    lineNumber = 0) =>
-      (message, more) => MessageEvent(Fill(nextAction, memberName, message, filePath, lineNumber, more));
+      (message, more) => MessageEvent(Fill(action, memberName, message, filePath, lineNumber, more));
 
     private static Contents Fill(
-      string act, string me, string msg, string path, int line, object[] more) => new Contents {
-      component = Path.GetFileNameWithoutExtension(path), nextAction             = act, result = msg,
-      extras    = More(More(more), $"path={path},member={me},line={line}"), more = more
+      string action, string member, string message, string path, int line, object[] more) => new Contents {
+      component  = Path.GetFileNameWithoutExtension(path),
+      lineNumber = line, action = action, result = message, more = more, member = member,
+      extras     = More(More(more), $"line={line},member={member}")
     };
 
     /// <a href=""></a>
     public struct Contents {
       /// <a href=""></a>
-      public string component, nextAction, result, extras;
+      public string component, action, result, member, extras;
+
+      /// <a href=""></a>
+      public int lineNumber;
 
       /// <a href=""></a>
       public object[] more;
@@ -73,26 +79,31 @@ namespace Askowl {
     /// <a href=""></a>
     public static string More(params object[] list) {
       string[] items = Array.ConvertAll(array: list, converter: x => x.ToString());
-      return string.Join(separator: ",", value: items);
+      return string.Join(separator: ",", value: items).Trim(trimCharacters).Replace("=,", "=");
     }
 
-    /// <a href=""></a>
-    public static Map ToMap(string action, string result, params object[] more) {
-      Map map = new Map("action", action, "result", result);
+    private static char[] trimCharacters = {',', ' '};
 
-      for (int i = 0; i < more.Length; i++) {
-        string key   = more[i].ToString();
+    /// <a href=""></a>
+    public static Dictionary<string, object> ToDictionary(Contents contents) {
+      Dictionary<string, object> dictionary = new Dictionary<string, object> {
+        {"component", contents.component}, {"action", contents.action},
+        {"result", contents.result}, {"member", contents.member}
+      };
+
+      for (int i = 0; i < contents.more.Length; i++) {
+        string key   = contents.more[i].ToString();
         object value = null;
 
         if (key.EndsWith("=")) {
           key   = key.Substring(0, key.Length - 1);
-          value = more[++i];
+          value = contents.more[++i];
         }
 
-        map.Add(key, value);
+        dictionary[key] = value;
       }
 
-      return map;
+      return dictionary;
     }
     #endregion
 
@@ -104,32 +115,30 @@ namespace Askowl {
     public static readonly Map Actions;
 
     /// <a href=""></a>
-    public static string NextAction(string text, string colour = "darkblue", bool bold = false, bool italics = false) =>
+    public static string Action(string text, string colour = "darkblue", bool bold = false, bool italics = false) =>
       $"{Open('b', bold)}{Open('i', italics)}<color={colour}>{text}</color>{Close('i', italics)}{Close('b', bold)}";
 
-    private static string ToString(string component, string action, string result, params object[] more) {
-      var mort = More(more);
-      mort   = (string.IsNullOrWhiteSpace(mort)) ? "" : $", more: {mort}";
-      result = (string.IsNullOrWhiteSpace(result)) ? "" : $"result: {result}";
-      action = Actions[action.ToLower()].Found ? Actions.Value.ToString() : action;
-      return $"{action}: for '{component}' -- {result}{mort}";
+    private static string ToString(Contents contents) {
+      var result = (string.IsNullOrWhiteSpace(contents.result)) ? "" : $"result={contents.result},";
+      var action = Actions[contents.action.ToLower()].Found ? Actions.Value.ToString() : contents.action;
+      return $"{action}: for '{contents.component}' -- {result}{contents.extras}";
     }
 
-    private static void ConsoleMessage(Contents msg) {
+    private static void ConsoleMessage(Contents contents) {
       if (ConsoleEnabled) {
-        Debug.Log(ToString(msg.component, msg.nextAction, msg.result, msg.more), Obj(msg.more));
+        Debug.Log(ToString(contents), Obj(contents.more));
       }
     }
 
-    private static void ConsoleWarning(Contents msg) {
+    private static void ConsoleWarning(Contents contents) {
       if (ConsoleEnabled) {
-        Debug.LogWarning(ToString(msg.component, msg.nextAction, msg.result, msg.more), Obj(msg.more));
+        Debug.LogWarning(ToString(contents), Obj(contents.more));
       }
     }
 
-    private static void ConsoleError(Contents msg) {
+    private static void ConsoleError(Contents contents) {
       if (ConsoleEnabled) {
-        Debug.LogError(ToString(msg.component, msg.nextAction ?? "Error", msg.result, msg.more), Obj(msg.more));
+        Debug.LogError(ToString(contents), Obj(contents.more));
       }
     }
 
@@ -139,14 +148,33 @@ namespace Askowl {
     private static Object Obj(object[] more) => (more.Length != 1) ? null : more[0] as Object;
 
     static Log() {
-      var tbd = NextAction(text: "TBD", colour: "maroon", bold: true, italics: true);
-      Actions = new Map("tbd", tbd, "todo", tbd);
+      var tbd = Action(text: "TO-BE-DONE", colour: "maroon", bold: true, italics: true);
+      var fix = Action(text: "FIX-BUG",    colour: "red",    bold: true);
+
+      Actions = new Map("tbd", tbd, "todo", tbd, "later", tbd, "incomplete", tbd,
+                        "fixme", fix, "fix-me", fix, "bug", fix, "outstanding", fix);
 #if !UNITY_EDITOR
 // So that mobile host logs don't get too crowded to read.
       Application.SetStackTraceLogType(logType:LogType.Log,stackTraceType:StackTraceLogType.None);
       ConsoleEnabled = false;
 #endif
+      if (UnityEngine.Analytics.Analytics.enabled) {
+        MessageEvent += UnityAnalyticsMessage;
+        WarningEvent += UnityAnalyticsWarning;
+        ErrorEvent   += UnityAnalyticsError;
+      }
     }
+    #endregion
+
+    #region Unity Analytics Log Consumer
+    private static void UnityAnalyticsMessage(Contents contents) =>
+      UnityEngine.Analytics.Analytics.CustomEvent(contents.action, ToDictionary(contents));
+
+    private static void UnityAnalyticsWarning(Contents contents) =>
+      UnityEngine.Analytics.Analytics.CustomEvent("WARNING", ToDictionary(contents));
+
+    private static void UnityAnalyticsError(Contents contents) =>
+      UnityEngine.Analytics.Analytics.CustomEvent("ERROR", ToDictionary(contents));
     #endregion
   }
 }

@@ -8,6 +8,37 @@
 - [ ] LinkedList needs an alert when the either main or recycle exceeds a specific size
 - [ ] Cache needs a high water mark. More entries that this will log an alert
 
+## Transcripts
+
+- [ ] Math/Clock.cs
+- [ ] Math/Compare.cs
+- [ ] Math/ExponentialMovingAverage.cs
+- [ ] Math/Geodetic.cs
+- [ ] Math/Quaternions.cs
+- [ ] Math/Trig.cs
+- [ ] Memory/Cache.cs
+- [ ] Memory/CounterStack.cs
+- [ ] Memory/Disposable.cs
+- [ ] Memory/Emitter.cs
+- [ ] Memory/LinkedList.cs
+- [ ] Memory/Map.cs
+- [ ] Memory/Pick.cs
+- [ ] Memory/Selector.cs
+- [ ] Memory/Stack.cs
+- [ ] Memory/Trees.cs
+- [ ] Text/Csv.cs
+- [ ] Text/Json.cs
+- [ ] Unity/Components.cs
+- [ ] Unity/ConditionalHideAttribute.cs
+- [ ] Unity/LabelAttribute.cs
+- [ ] Unity/Log.cs
+- [ ] Unity/Objects.cs
+- [ ] Unity/PlayModeController.cs
+- [ ] Unity/PlayModeTests.cs
+- [ ] Unity/Range.cs
+- [ ] Unity/RichText.cs
+- [ ] Unity/Set.cs
+
 ## Release 2018-09
 
 - [x] organise document sections
@@ -37,14 +68,17 @@
 - [x] doc and test objects.path(gameobject)
 - [x] doc and test Components
 - [x] doc and test ConditionalHideAttribute
-- [ ] Doc and test Log
-- [ ] Doc and test colours
+- [x] Doc and test Log
+- [x] Doc and test colours
 - [x] doc and test range
 - [x] doc and test ValueAttribute
 - [x] Remove all that is not base from documentation
-- [ ] investigate transcripts
+- [x] executive summary
+- [ ] Shorten table of contents entries
+- [ ] Grammarly
+- [x] investigate transcripts
 - [ ] Upload md to github
-- [ ] update index to fold when too long
+- [x] update index to fold when too long
 - [ ] Create bit.ly short links
 - [ ] Docx - add short links throughout
 - [ ] Generate docx and process page for incorrect links
