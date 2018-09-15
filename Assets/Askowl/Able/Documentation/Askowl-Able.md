@@ -4,7 +4,7 @@
 {:toc}
 ## Executive Summary
 
-`Able` contains scripts needed by other ***Askowl*** libraries that have stand-alone value. it contains mathematics support around time conversion, comparisons and trigonometry. The data structure section helps with containers, caching, emitters, selectors, stack and trees. There are scripts to parse generic (as in unknown internal structure) CSV and JSON data. For Unity3D support there are scripts to aid testing, locate components and game objects, pluggable logging, and varied editor display and runtime components.
+`Able` contains scripts needed by other ***Askowl*** libraries that have stand-alone value. it contains mathematics support around time conversion, comparisons and trigonometry. The data structure section helps with containers, caching, emitters, selectors, stack and trees. There are scripts to parse generic (as in unknown internal structure) CSV and JSON data. For Unity3D support, there are scripts to aid testing, locate components and game objects, pluggable logging, and various editor display and runtime components.
 
 > Read the code in the Examples Folder and run the Example scene
 
@@ -19,7 +19,7 @@ Unity provides lots of great functionality, but there are always more problems t
 
 #### Epoch Time
 
-Epoch time was invented by the early Unix creators to represent time as seconds since the start of 1970 in a 32-bit integer for fast calculations. In this form, it wraps around on 2038. It also suffered some inaccuracy because it did not account for leap seconds. This conversion is not 2038 limited as it uses doubles. Leap seconds will only be an issue if you are using dates each side of one - an unlikely event with minor implications.
+Epoch time was invented by the early Unix creators to represent time as seconds since the start of 1970 in a 32-bit integer for fast calculations. In this form, it wraps around on 2038. It also suffered some inaccuracy because it did not account for leap seconds. This conversion is not 2038 limited as it uses doubles. Leap seconds are an issue if you are using dates each side of an end of year correction - an unlikely event with minor implications.
 
 ```c#
 DateTime now          = DateTime.Now;
@@ -41,7 +41,7 @@ Epoch time is always UTC.
 
 ##### double EpochTimeAt(DateTime when);
 
-Convert local time to UTC if necessary then translate to epoch time. Unlike Unix Epoch time, leap seconds are accounted for.
+Convert local time to UTC if necessary then translate to epoch time. Unlike Unix Epoch time, this result accounts for leap seconds.
 
 ##### DateTime FromEpochTime(double epochTime);
 
@@ -112,7 +112,7 @@ Assert.IsFalse(Compare.isDigitsOnly(""));
 
 > An **exponential moving average** is a way to calculate an average where old values have less impact on the average than more recent ones.
 
-It is most often used in financial calculations, but I use it mainly for IoT. Many devices can read wildly until the settle down. Then real-world interactions make then inaccurate again. A class is the compass or magnetometer. Walk past a mass of steel and they will be attracted - just like an engineer. Using an EMA and these variations will be dampened. EMA is also useful when merging IoT data.
+Financial calculations often make use of EMA, but I use it mainly for IoT. Many devices can read wildly until the settle down. Then real-world interactions make then inaccurate again. A good example is a compass or magnetometer. Walk past a mass of steel, and they are attracted - just like an engineer. EMA dampens the variations. It is also useful when merging IoT data.
 
 #### EMA Initialisation
 
@@ -132,7 +132,7 @@ The lookback value is application specific. Ask yourself how many data points ba
 
 #### EMA Average Value
 
-If you don't make `Average` calls at consistent time intervals then you will need to consider other methods to make the values equally spaced.
+If you don't make `Average` calls at consistent time intervals, then you need to consider other methods to make the values equally spaced.
 
 ```c#
 AreEqual(expected: 1f,      actual: ema.Average(value: 1));
@@ -168,7 +168,7 @@ AreEqual(expected: -1.513316f, actual: ema.AverageAngle(degrees: 364));
 
 #### Coordinates Data Structure
 
-Another data structure that contain coordinates. In the end, it is more efficient to have separate definitions than it is to burden one definition with lots of irrelevant data. It is particularly poignant when we are dealing with pass-by-value.
+Another data structure that contains coordinates. In the end, it is more efficient to have separate definitions than it is to burden one definition with lots of irrelevant data. It is particularly poignant when we are dealing with pass-by-value.
 
 In this world-view, coordinates use 64-bit double floating points for accuracy and know whether they are degrees or radians.
 
@@ -182,7 +182,7 @@ Debug.Log(same.ToString()); // -27.46850, 151.94379
 
 #### Distance Between Two Points
 
-In the geodetic parlance, the shortest distance between two points is an arc, not a straight line. This is kind of important if you don't want to tunnel through earth and dive under the sea to get anywhere.
+In the geodetic parlance, the shortest distance between two points is an arc, not a straight line. It is kind of important if you don't want to tunnel through earth and dive under the sea to get anywhere.
 
 `Kilometres(from, to)` uses the Haversine formula to calculate the distance taking into account an approximation of the earth's curvature. For display convenience there is a version, `DistanceBetween(from, to)`, that returns a string that is more friendly than the raw kilometres. If the distance is below one kilometre, it returns the value as a whole number of metres (i.e. 43 m). For distances below ten kilometres, one decimal place is provided (4.7 km). Above the kilometres are whole numbers only (23 km).
 
@@ -206,11 +206,11 @@ Geodetic.Destination(start: here, distanceKm: 1.2, bearingDegrees: 23.4);
 
 ### Quaternions.cs - adding features
 
-Unity quaternion math focusses on the needs of the game. Great, but there are a few methods needed for augmented reality that are not provided.
+Unity quaternion math focusses on the needs of the game. Great, but there are a few methods needed for augmented reality missing.
 
 #### AroundAxis
 
-Rotate a quaternion around the X, Y or Z axis by the given number of degrees. This is a useful approach for a clock face, a compass or a merry-go-round.
+Rotate a quaternion around the X, Y or Z axis by the given number of degrees. It is useful for a clock face, a compass or a merry-go-round.
 
 ```c#
 // ... A
@@ -234,7 +234,7 @@ The concept of length or magnitude for a quaternion has no visual representation
 
 #### Normalise
 
-> We can compute a fast 1/sqrt(x) by using a tangent-line approximation to the function. This is like a simple 1-step Newton-Raphson iteration, and by tuning it for our specific case, we can achieve high accuracy for cheap. (A Newton-Raphson iteration is how specialised instruction sets like 3DNow and SSE compute fast 1/sqrt).
+> We can compute a fast 1/sqrt(x) by using a tangent-line approximation to the function. It is like a simple 1-step Newton-Raphson iteration, and by tuning it for our specific case, we can achieve high accuracy for cheap. (A Newton-Raphson iteration is how specialised instruction sets like 3DNow and SSE compute fast 1/sqrt).
 
 |           http://www.cs.uky.edu/~cheng/cs633/quaternion.html |
 | -----------------------------------------------------------: |
@@ -246,7 +246,7 @@ This version is on an average 20% faster than `normalised` as provided by Unity.
 
 For rotations, quaternions hold information on the direction in 3 dimensions and the rotation of the object. Think of an aeroplane flying straight in a particular direction. Given a point of reference, you can calculate the angle on the X, Y and Z planes. Now the aeroplane dips it's wing and spins upside-down. The calculations before are the same, but the rotation has changed. Just as the Euler angles define the direction of travel, the sign of the rotation defines which way the aeroplane is spinning.
 
-Two of anything with opposite chirality cannot be superimposed on each other and yet can be otherwise identical. The choice of which rotation direction is positive is arbitrary. The gyroscope used in phones has right-hand chirality, while Unity uses left-handed.
+Two of anything with opposite chirality cannot superimposed on each other and yet can be otherwise identical. The choice of which rotation direction is positive is arbitrary. The gyroscope used in phones has right-hand chirality, while Unity uses left-handed.
 
 ```c#
 Quaternion rotateTo = Device.Attitude.RightToLeftHanded(Trig.zAxis);
@@ -262,7 +262,7 @@ var attitude = GPS.Attitude.RightToLeftHanded(Trig.zAxis);
 
 #### SwitchAxis
 
-Different IoT devices define different axes as forward. We need to pivot on the third axis by 90 degrees to correct for the difference. This reverses the chirality, but this function corrects for that.
+Different IoT devices define different axes as forward. We need to pivot on the third axis by 90 degrees to correct for the difference. It reverses the chirality, but this function corrects for that.
 
 ```c#
 // B ...
@@ -281,7 +281,7 @@ When I prefer to use *X, Y, Z* instead of *right, up, forward* I use Trig.Direct
 
 ##### X, Y and Z
 
-Integers where one is non-zero to define an axis. A direction is also recorded as it can be 1 or -1.
+Integers where one is non-zero to define an axis. It records direction as 1 or -1.
 
 ##### Name
 
@@ -293,7 +293,7 @@ Ordinal value - the same as for `Vector3` - X=0, Y=1, Z=2. The values can be acc
 
 ##### Vector
 
-When Unity provided functions want to describe a direction, they use constants inside `Vector3` such as `Vector3.up`. To provide directions as XYZ, use `Trig.Y.Vector`.
+When Unity provided functions want to describe a direction, they use constants inside `Vector3` such as `Vector3.up`. Use `Trig.Y.Vector` to provide directions as XYZ.
 
 ##### VectorName
 
@@ -301,7 +301,7 @@ Just for kicks and giggles, you can also retrieve the name of the associated vec
 
 ##### OtherAxes
 
-When we use an axis as a pivot, we will want the other axes to work with. This field refers to an array of the other two Directions. `Trig.xAxis.OtherAxes[0] == Trig.yAxis && Trig.xAxis.OtherAxes[1] == Trig.zAxis`.
+When we use an axis as a pivot, we want to work with the other axes. This field refers to an array of the other two Directions. `Trig.xAxis.OtherAxes[0] == Trig.yAxis && Trig.xAxis.OtherAxes[1] == Trig.zAxis`.
 
 ##### Negative
 
@@ -680,7 +680,7 @@ While an ***Emitter*** provides some extra facilities to the built-in ***event**
 
 ### Linked Lists
 
-C#/.Net provides an excellent LinkList implementation. It is, by necessity generic. My implementation has different goals.
+C#/.Net provides an excellent LinkedList implementation. It is, by necessity generic. My implementation has different goals.
 
 1. Reduce garbage collection by keeping remaining nodes in a recycling list.
 2. Ordered lists by providing a comparator.
@@ -756,7 +756,7 @@ Assert.AreEqual(expected: 0, actual: numberList.New());
 
 ##### Linked Lists with Custom Item Create, Deactivation and Reactivation
 
-It is all well and good to return `default(T)`, being zeros or null references, but then the user of your list neesd to know to create an item if it is not provided. As an example, consider a list of open long-lived HTTP connections.
+It is all well and good to return `default(T)`, being zeros or null references, but then the user of your list needs to know to create an item if it is not provided. As an example, consider a list of open long-lived HTTP connections.
 
 ```c#
 var connections = LinkedList<Connection>{
@@ -805,7 +805,7 @@ The static methods will be active for any items of that class unless a per-insta
 
 Inherited methods are be active for any items of that class unless a per-instance or static invocation override them.
 
-Per-instance invocations only effect one instance of a linked list.
+Per-instance invocations only affect one instance of a linked list.
 
 ##### Ordered Linked Lists
 
@@ -1487,13 +1487,13 @@ If you need to know how many branches to prepare storage, use `Children`, which 
 
 ### Json.cs - parse any JSON to dictionary
 
-And it came about that the computer was born and all was good. Then there was another computer and the need to share things. It was easy. Knowing both sides, we can send data the computer understands. But wait, now some computers see the binary world differently. OK, let's make it human readable. Computers are faster at deserialisation by then. Comma separated variable (CSV) files became popular, but they lacked depth. Enter SGML and then XML. Fifty years have passed. There are signs at the airport saying "We are an XML Company!". What does that mean? It's just a way for all machines (and some people) to be able to read the same data. XML uses a DTD (document type definition). If an XML document does not pass the DTD rules, then it is no good. Toss it out. Great for developers. If it passes the rules, then it is easy to deserialise directly into a computer readable (i.e. binary format) object. Mind you, by hiding the structure from the developers they were free to build as they liked. I have seen Windows applications where to change the state in a drop-down will cause millions of bytes to pass between client and server. And everyone was happy. Then JavaScript became more standardised and faster, and the Web App was born. Parsing XML in JavaScript was slow and difficult - even without checking it against a DTD. Unlike traditional server languages, JavaScript has dynamic data structures. You can send any structured data down the line and only work out what it contains when you need to. Some bright spark decided to send JavaScript source full of data structures. Javascript is fast at compiling itself. This method is now called JSONP. But, sending code has its risks even in a sandbox. Besides we can make the JavaScript compiler even faster if we give it a more rigid format and a subset of JavaScript. JSON was born. And all was good. Then the people who don't live flexibility said "We can't have that" and started insisting on rigid structures in JavaScript. So, now we have something like XML but without the DTD to help us get it right at both ends. Developers are now spending more time than with XML.
+And it came about that the computer was born and all was good. Then there was another computer and the need to share things. It was easy. Knowing both sides, we can send data the computer understands. But wait, now some computers see the binary world differently. OK, let's make it human readable. Computers are faster at deserialisation by then. Comma separated variable (CSV) files became popular, but they lacked depth. Enter SGML and then XML. Fifty years have passed. There are signs at the airport saying "We are an XML Company!". What does that mean? It's just a way for all machines (and some people) to be able to read the same data. XML uses a DTD (document type definition). If an XML document does not pass the DTD rules, then it is no good. Toss it out. Great for developers. If it passes the rules, then it is easy to deserialise directly into a computer readable (i.e. binary format) object. Mind you, by hiding the structure from the developers they were free to build as they liked. I have seen Windows applications that changing the state in a drop-down causes millions of bytes to pass between client and server. Everyone was happy. Then JavaScript became more standardised and faster, and the Web App was born. Parsing XML in JavaScript was slow and difficult - even without checking it against a DTD. Unlike traditional server languages, JavaScript has dynamic data structures. You can send any structured data down the line and only work out what it contains when you need to. Some bright spark decided to send JavaScript source full of data structures. Javascript is fast at compiling itself. This method is now called JSONP. However, sending code has its risks even in a sandbox. Besides we can make the JavaScript compiler even faster if we give it a more rigid format and a subset of JavaScript. JSON was born. All was good. Then the people who don't live flexibility said "We can't have that" and started insisting on rigid structures in JavaScript. So, now we have something like XML but without the DTD to help us get it right at both ends. Developers are now spending more time than with XML.
 
 We must stand up and fight. JSON for JSON. Allow me to get the data I need, not just what the suites have defined.
 
 #### Parse
 
-After the above rant it would be wrong to create a restrictive JSON reader. In the vein `Parse` does not throw any explicit errors. In attempts to create an in-memory tree structure with both keys and values as strings. Keys and values can be wrapped in quotes or not. If they are the comma between entries is optional. Arrays are just branches with keys that are integers. A search can use a string or integer key.
+After the above rant, it would be wrong to create a restrictive JSON reader. In the vein `Parse` does not throw any specific errors. In attempts to create an in-memory tree structure with both keys and values as strings. Keys and values can be wrapped in quotes or not. If they are the comma between entries is optional. Arrays are just branches with keys that are integers. A search can use a string or integer key.
 
 Once you have parsed the JSON, use the [Trees](#trees) interface to process the data using the `tree.Node` member.
 
@@ -1516,11 +1516,11 @@ Assert.AreEqual("26", json.Node["Not my age"]);
 
 ### Components
 
-`Components` is a static helper class with functions to create and find Components. They are all wrappers to ***slow*** Unity procedures, so cache the results. I created these primarily for testing since any test harness should not be coupled to the application. Since then I have found them useful to get inside prefabs from other sources. Still not a good idea in production, but sometimes better than breaking existing code.
+`Components` is a static helper class with functions to create and find Components. They are all wrappers to ***slow*** Unity procedures, so cache the results. I created these primarily for testing since we decouple every test harness. Since then I have found them useful to get inside prefabs from other sources. Still not a good idea in production, but sometimes better than breaking existing code.
 
 #### Components.Find&lt;T>(path...)
 
-Search the current scene for components of type `T`, then return the one with sparse game object path supplied. The path is absolute for the scene, but not all components need to be entered. Just enough to make the path unique. The double-slash is optional, but I find it handy to remind me of where the unmentioned part of the path is.
+Search the current scene for components of type `T`, then return the one with sparse game object path supplied. The path is absolute for the scene, but you need only supply enough segments to make it unique.  The double-slash is optional, but I find it handy to remind me of where the unmentioned part of the path is.
 
 ```c#
 // No path, returns null (not found)
@@ -1554,7 +1554,7 @@ Assert.AreEqual("Button One", text.text);
 
 #### Components.Create&lt;T>(path...)
 
-Follow the fully qualified path, creating game objects that don't exist on the way. Add an instance of component `T` to the final game object.
+Follow the fully qualified path, creating game objects that don't exist. Add an instance of component `T` to the final game object.
 
 ```c#
 // create a root GameObject with the specified name and add component
@@ -1574,8 +1574,8 @@ This tool comes straight from [http://www.brechtos.com](Brecht Lecluyse) in a [h
 Any reasonably complex `MonoBehaviour` can have quite a few items to display in the inspector. Often some items are only valid if another inspector-visible attribute is in a specific state.
 
 1. Booleans are true to display conditional fields
-2. A string is not empty and not just spaces
-3. A reference object has been set (game object, prefab, and more)
+2. A string is not empty
+3. A reference object contains a value (game object, prefab, and more)
 
 ```c#
 [SerializeField]private bool enableAll = true; // number and userName visible on true
@@ -1599,7 +1599,7 @@ Any reasonably complex `MonoBehaviour` can have quite a few items to display in 
 
 ### Label Attribute
 
-One of the challenges of using generic scriptable objects is the often uninformative labels in the inspector. In this truncated example below, we have a generic class with a variable that can only be set in the inspector. `Stringer` inherits from it, but by using an attribute decorator `Labels`, I can rename the field to something more meaningful.
+One of the challenges of using generic scriptable objects is the often uninformative labels in the inspector. In this truncated example below, we have a generic class with a variable for the inspector. `Stringer` inherits from it, but by using an attribute decorator `Labels`, I can rename the field to something more meaningful.
 
 In the generic class where you have ***Inspector*** fields you want to rename, give them a `[Label]` attribute. In the concrete classes, use the `Labels(before, after, ...)` class attribute decorator with entries that match the before and after label value.
 
@@ -1615,13 +1615,13 @@ In this example, we see a ***Text*** label instead of the generic `Value` one.
 
 ### Log - Plug-and-play Logging
 
-The Askowl `Log` class provides an easy-to-use interface to the Unity debug log that can also be used with analytics reporting. If Unity Analytics is enabled, log messages are sent there as well as to the console. Without adding any more consumers, log messages can be sent to the `Debug.Log` console and `Unity.Analytics`.
+The Askowl `Log` class provides an easy-to-use interface to the Unity debug log and analytics reporting. If Unity Analytics is enabled, log messages are sent there as well as to the console. Without adding any extra consumers, log messages display on the console and in `Unity.Analytics`.
 
-Console messages are only displayed when in the Unity editor. For other builds, you need to set `Log.ConsoleEnabled = true` explicitly.
+`Log` discards console messages when not in the Unity editor. For other builds, you need to set `Log.ConsoleEnabled = true` explicitly if you need these logs.
 
-Unity Analytics are set up as per these [Unity instructions](https://docs.unity3d.com/Manual/UnityAnalyticsSetup.html). They can then be explicitly disabled with 'UnityEngine.Analytics.Analytics.enabled' or if the target platform does not support it.
+Unity Analytics is set up as per these [Unity instructions](https://docs.unity3d.com/Manual/UnityAnalyticsSetup.html). They can then be explicitly disabled with 'UnityEngine.Analytics.Analytics.enabled' or if the target platform does not support it.
 
-Any third party analytics or logging library can easily be incorporated as documented below.
+It is simple to integrate third-party analytics or logging library as documented below.
 
 #### Basic Logging
 
@@ -1637,19 +1637,19 @@ You now have a function to call with a signature of:
 void MessageRecorder(string action, string message, params object[] more);
 ```
 
-Think of the action as what your code was doing when you needed to record a message. It is a way of grouping messages in the analytics systems. Don't group by class or file-name as the component and delegate names are already recorded.
+Think of the action as what your code was doing when you needed to record a message. It is a way of grouping messages in the analytics systems. `Log` records file and delegate names already without explicit grouping.
 
 ```c#
 log(action: "Level Completed", message: "Success", "Level=", 1, "Time=", 30.3);
 ```
 
-Or you may choose to have a different action for each level so that you can compare player performance. The output to the console takes the form:
+Alternatively, you may choose to have a different action for each level so that you can compare player performance. The output to the console takes the form:
 
 > ***Level Completed***: for 'GameStats' -- result=Success, Level=1,Time=30.3,line=14,member=log
 
 #### Log Parameter Formatting
 
-Log information is supplied to the consumer as:
+The consumer sees log information as:
 
 1. **Action or status** - supplied in call or when building an event
 2. **Component** - filename of calling method/field
@@ -1693,13 +1693,13 @@ If there is only one optional parameter and it is a `Unity.Object` then it is pa
 
 #### Actions
 
-Individual messages can be highlighted in the log by colour, bolding or italics. An RTF string can be created with the `Log.Action` method.
+Individual messages can be highlighted in the log by colour, bolding or italics. Create an RTF string with the `Log.Action` method.
 
 ```c#
 public static string Action(string text, string colour, bool bold, bool italics);
 ```
 
-You can even save these in a map called `Actions` to be used whenever an action is used. They keys should be all lower case as this is applied to actions before comparison.
+You can even save these in a map called `Actions`. The keys should be all lower case.
 
 ```c#
 Log.Actions.Add("deleteme", Log.Action("Delete Me", RichText.Colour.Aqua,
@@ -1723,7 +1723,7 @@ private static Log.EventRecorder bug         = Log.Warnings(action: "bug");
 private static Log.EventRecorder outstanding = Log.Warnings(action: "Outstanding");
 ```
 
-Sp, pick your poison.
+So, pick your poison.
 
 #### Logging Support
 
@@ -1762,7 +1762,7 @@ public struct Contents {
 Where:
 
 - **component** is the name of the file containing the calling object
-- **action** is passed in
+- **action** parameter
 - **result** is the message
 - **member** is the name of the field created to hold the delegate.
 - **extras** is a formatted string containing the other data.
@@ -1781,7 +1781,7 @@ private static void UnityAnalyticsError(Contents contents) =>
   UnityEngine.Analytics.Analytics.CustomEvent("ERROR", ToDictionary(contents));
 ```
 
-For a second step, you have a choice. You can either only log to your target or you can add to the logging so that it goes to multiple sources.
+For a second step, you have a choice. Log only to your target or add to the logging so that it goes to multiple sources.
 
 ```c#
 if (UnityEngine.Analytics.Analytics.enabled) {
@@ -1813,7 +1813,7 @@ Debug.Log((Colour.Tag(Colour.Teal, "My message")));
 
 #### FindAll
 
-`FindAll<T>` is an extension of `Resources.FindObjectsOfTypeAll<T>`. It will find *all* objects of the specified type with a matching name. Objects can be game objects, prefabs, materials, meshes, textures or similar whether they are enabled or disabled. If the name is empty or null, all resources of type T are returned.
+`FindAll<T>` is an extension of `Resources.FindObjectsOfTypeAll<T>`. It finds *all* objects of the specified type with a matching name. Objects can be game objects, prefabs, materials, meshes, textures or similar whether they are enabled or disabled. `Findall` return all resources of type T if the name is empty or null.
 
 ```c#
 gameObjects = Objects.FindAll<GameObject>("Text");
@@ -1822,7 +1822,7 @@ Assert.AreEqual(2, gameObjects.Length);
 
 #### Find
 
-`Find<T>` uses `FindAll<T>` returns the first or only object of a specific type and name. It is best used with unique object names for a type.
+`Find<T>` uses `FindAll<T>` returns the first or only object of a specific type and name.
 
 ```c#
 gameObject = Objects.Find<GameObject>("Text");
@@ -1875,7 +1875,7 @@ Sometimes tests have an exclusive scene to highlight actions challenging to repr
 
 #### PushButton
 
-At the least, a player has to push a button to start the game. You can select the button by the name and path in the hierarchy or a `Button` reference. The sparse path elements are separated by one or more slashes and can have missing components. As long as it is unique. For clarity, I use double-slash to indicate missing segments.
+At the least, a player has to push a button to start the game. You can select the button by the name and path in the hierarchy or a `Button` reference. Separate sparse path elements by one or more slashes Missing segments are acceptable. For clarity, I use double-slash to indicate missing segments.
 
 ```c#
 yield return PushButton("Canvas//Show Quote");
@@ -2025,7 +2025,7 @@ public class SetInstance : Set<AudioClip> {
 }
 ```
 
-This example can play a sound from the list. This is a great way to make a game sound less tedious. Just add an instance as a `[SerializeField]` and fill it from the Inspector.
+This example can play a sound from the list, making a game sound less tedious. Just add an instance as a `[SerializeField]` and fill it from the Inspector.
 
 ![SetExample](SetExample.png)
 
