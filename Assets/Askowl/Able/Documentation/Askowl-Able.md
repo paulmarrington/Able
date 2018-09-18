@@ -4,7 +4,7 @@
 {:toc}
 ## Executive Summary
 
-`Able` contains scripts needed by other ***Askowl*** libraries that have stand-alone value. it contains mathematics support around time conversion, comparisons and trigonometry. The data structure section helps with containers, caching, emitters, selectors, stack and trees. There are scripts to parse generic (as in unknown internal structure) CSV and JSON data. For Unity3D support, there are scripts to aid testing, locate components and game objects, pluggable logging, and various editor display and runtime components.
+`Able` contains scripts needed by other ***Askowl*** libraries that have stand-alone value. It contains mathematics support around time conversion, comparisons and trigonometry. The data structure section helps with containers, caching, emitters, selectors, stack and trees. There are scripts to parse generic (as in unknown internal structure) CSV and JSON data. For Unity3D support, there are scripts to aid testing, locate components and game objects, pluggable logging, and various editor display and runtime components.
 
 > Read the code in the Examples Folder and run the Example scene
 
@@ -15,7 +15,7 @@ Unity provides lots of great functionality, but there are always more problems t
 
 ## Maths functions
 
-### Clock.cs - time and date conversions
+### Clock.cs - time & date conversions
 
 #### Epoch Time
 
@@ -47,7 +47,7 @@ Convert local time to UTC if necessary then translate to epoch time. Unlike Unix
 
 Convert back from Epoch UTC to local time, C# style.
 
-### Compare.cs - equality and almost equality
+### Compare.cs - almost equality
 
 #### AlmostEqual for Floating Point
 
@@ -155,7 +155,7 @@ AreEqual(expected: -3.088552f, actual: ema.AverageAngle(degrees: 357));
 AreEqual(expected: -1.513316f, actual: ema.AverageAngle(degrees: 364));
 ```
 
-### Geodetic.cs - distances and bearings
+### Geodetic.cs - distances & bearings
 
 > **Geodesy**: The branch of mathematics dealing with the shape and area of the earth or substantial portions of it.
 >
@@ -168,7 +168,7 @@ AreEqual(expected: -1.513316f, actual: ema.AverageAngle(degrees: 364));
 
 #### Coordinates Data Structure
 
-Another data structure that contains coordinates. In the end, it is more efficient to have separate definitions than it is to burden one definition with lots of irrelevant data. It is particularly poignant when we are dealing with pass-by-value.
+Here lies another data structure that contains coordinates. In the end, it is more efficient to have separate definitions than it is to burden one definition with lots of irrelevant data. It is particularly poignant when we are dealing with pass-by-value.
 
 In this world-view, coordinates use 64-bit double floating points for accuracy and know whether they are degrees or radians.
 
@@ -182,11 +182,11 @@ Debug.Log(same.ToString()); // -27.46850, 151.94379
 
 #### Distance Between Two Points
 
-In the geodetic parlance, the shortest distance between two points is an arc, not a straight line. It is kind of important if you don't want to tunnel through earth and dive under the sea to get anywhere.
+In the geodetic parlance, the shortest distance between two points is an arc, not a straight line. It is important if you don't want to tunnel through earth and dive under the sea to get anywhere.
 
 `Kilometres(from, to)` uses the Haversine formula to calculate the distance taking into account an approximation of the earth's curvature. For display convenience there is a version, `DistanceBetween(from, to)`, that returns a string that is more friendly than the raw kilometres. If the distance is below one kilometre, it returns the value as a whole number of metres (i.e. 43 m). For distances below ten kilometres, one decimal place is provided (4.7 km). Above the kilometres are whole numbers only (23 km).
 
-#### Bearing from One Point to the Next
+#### Bearing from Point to Point
 
 If you were hiking, you would take a bearing between yourself and a known landmark and use that bearing to get there.
 
@@ -246,7 +246,7 @@ This version is on an average 20% faster than `normalised` as provided by Unity.
 
 For rotations, quaternions hold information on the direction in 3 dimensions and the rotation of the object. Think of an aeroplane flying straight in a particular direction. Given a point of reference, you can calculate the angle on the X, Y and Z planes. Now the aeroplane dips it's wing and spins upside-down. The calculations before are the same, but the rotation has changed. Just as the Euler angles define the direction of travel, the sign of the rotation defines which way the aeroplane is spinning.
 
-Two of anything with opposite chirality cannot superimposed on each other and yet can be otherwise identical. The choice of which rotation direction is positive is arbitrary. The gyroscope used in phones has right-hand chirality, while Unity uses left-handed.
+Two of anything with opposite chirality cannot be superimposed on each other and yet can be otherwise identical. The choice of which rotation direction is positive is arbitrary. The gyroscope used in phones has right-hand chirality, while Unity uses left-handed.
 
 ```c#
 Quaternion rotateTo = Device.Attitude.RightToLeftHanded(Trig.zAxis);
@@ -275,7 +275,7 @@ attitude.SwitchAxis(pivot: Trig.xAxis)
 
 #### Direction
 
-##### Trig.xAxis, Trig.yAxis and Trig.zAxis
+##### Trig.xAxis / yAxis / zAxis
 
 When I prefer to use *X, Y, Z* instead of *right, up, forward* I use Trig.Direction values. These are unit directions with either the X, Y or Z component set 1 one to specify the axis.
 
@@ -368,13 +368,13 @@ Convert a value in radians back to degrees. Note the need to reduce accuracy in 
 Assert.IsTrue(Compare.AlmostEqual(90, Trig.ToDegrees(1.5708), 1e5));
 ```
 
-#### Relative Position given Distance and Angle or Bearing
+#### Relative Position from Distance & Bearing
 
 Calculate a relative vector in two dimensions give the distance away and the angle or bearing.
 
 ##### RelativePositionFromAngle
 
-This is a trigonometric angle where 0 degrees in +X and 90 degrees is East or +1. Increasing angles move the result counter-clockwise.
+Return the trigonometric angle where 0 degrees is +X, and 90 degrees is East or +1. Increasing angles move the result counter-clockwise.
 
 ```c#
 expected.Set(3.3f, 0);
@@ -384,7 +384,7 @@ AreEqual(expected, actual);
 
 ##### RelativePositionFromBearing
 
-This is a compass bearing where 0 degrees in North or +Y and 90 degrees is East or +X. Increasing bearings move the result clockwise.
+Return a compass bearing where 0 degrees in North or +Y and 90 degrees is East or +X. Increasing bearings move the result clockwise.
 
 ```c#
 expected.Set(0, 3.3f);
@@ -398,7 +398,7 @@ AreEqual(expected, actual);
 
 Even if premature optimisation is evil, the garbage collector can still be your enemy. If you target VR or mobile platforms, garbage collection runs degrade the gaming for your players. Even for PC/Mac/Linux machines, your players may have lower powered machines. Yes, I know, not the serious gamers. However, casual gamers? Even the simple `ForEach` allocates a tiny amount of memory each loop. In some ways, this is the worst. A few areas allocating large chunks then lots of tiny chunks add up to frequent collection runs with much-fragmented memory to investigate. Moreover, let's not even talk about coroutines just now.
 
-What can we do about it without slowing down development or our game? When we are writing code, we can (usually) see where objects are being allocated/discarded a lot. If they can be safely deactivated, cache them for reuse.
+What can we do about it without slowing down development or our game? When we are writing code, we can (usually) see where objects are being allocated/discarded a lot. Cache them for reuse on deactivation.
 
 Oh, so you want examples? Try these for size.
 
@@ -407,15 +407,15 @@ Oh, so you want examples? Try these for size.
 3. Events and emitters
 4. Temporary instances used in loops
 
-You get the idea. Feel free to add to the list. Then there is when not to cache.
+You get the idea. Feel free to add to the list. When not to cache.
 
-1. Classes that are only instantiated once or occasionally.
+1. Classes instantiated once or occasionally.
 2. Classes you cannot reset for reuse. IEnumerable is one of those, unfortunately, so no caching coroutines.
 3. Classes with larger data sets where you instantiate a lot at once, but in very infrequent batches. Judgement is needed. A `Dictionary` or `Map` with 100 entries each with a payload of 100 bytes and an average key length of 5 take about 64k. Not much in the modern scheme of things. In this case cache the payloads, not the `Dictionary`.
 
 Look at `new` carefully. It appears the same for classes and structs, but the latter uses the stack and does not allocate memory.
 
-The `Cache` class is entirely static. It can be used in any class. We call classes that don't know they are being cached as *Cache Agnostic*. You can also use *Cache Aware* classes that are more convenient and readable. For the impatient here are full examples of each.
+The `Cache` class is entirely static. We call classes that don't know about caching *Cache Agnostic*. You can also use *Cache Aware* classes that are more convenient and readable. For the impatient here are full examples of each.
 
 #### Cache Agnostic Usage
 
@@ -471,17 +471,17 @@ aware.Dispose();
 
 #### Cache Entry Maintenance
 
-If the instance does not hold state, or you choose to deactivate state in your code, then the class can be cached without any further work. Just create it with the `Cache<T>.Instance` command rather than `new`. Like any resource, disposal is important. If the class implements the `IDisposable` interface, then the `using` statement is your best friend. If not, your code needs to use `Cache<T>.Dispose(instance)` or wrap in `using (Cache<T>.Disposable(instance)){}`.   Cached items that are not disposed of constitute a memory leak.
+If the instance does not hold state, or you choose to deactivate state in your code, then the class can be cached without any further work. Just create it with the `Cache<T>.Instance` command rather than `new`. Like any resource, disposal is important. If the class implements the `IDisposable` interface, then the `using` statement is your best friend. If not, your code needs to use `Cache<T>.Dispose(instance)` or wrap in `using (Cache<T>.Disposable(instance)){}`.   An undisposed cached item constitutes a memory leak.
 
-As with the underlying [`LinkedList`](#linked-lists), The [`CreateItem`](#create-a-new-linked-list), [`DeactivatItem`](#create-a-new-linked-list) and [`ReactivateItem`](#create-a-new-linked-list) come in three flavours. The can be added as methods to a class (private or public), attached to a class so that all instances can use them, or attached to an instance. In the latter case, only that specific instance have the methods. Now for the precedence.
+As with the underlying [`LinkedList`](#linked-lists), The [`CreateItem`](#create-a-new-linked-list), [`DeactivatItem`](#create-a-new-linked-list) and [`ReactivateItem`](#create-a-new-linked-list) come in three flavours - Added as methods to a class (private or public), attached to a class so that all instances can use them, or attached to an instance. In the latter case, only that specific instance have the methods. Now for the precedence.
 
 1. A class without any actions attached runs the default as listed below, unless;
-2. A class defines instance methods with the action name and signature; they are called, unless;
-3. An instance action has been set with a static call.
+2. A class defines instance methods with the action name and signature, unless;
+3. There is an static call instance action.
 
 ##### CreateItem
 
-1. If no action is set then the class being cached must have an empty constructor.
+1. If there is no other action, then the class being cached must have an empty constructor.
 2. The class has a method `static ClassName CreateItem(){}`
 3. Set `Cache<T>.CreateItem` to a function without parameters that returns a new item.
 
@@ -502,7 +502,7 @@ var sealedClass2 = Cache<SealedClass>.Instance;    // sets index to 23
 
 ##### DeactivateItem
 
-Sometimes disposing of an item is not the right thing when it is put back in the recycle bin. Perhaps it contains a server connection that needs to be closed, or a reference to a prefab that has to be stopped.
+Sometimes disposing of an item is not the right thing when it is put back in the recycle bin. Perhaps it contains an unclosed server connection, or a reference to a running prefab.
 
 1. If the payload is an `IDisposable`, call `Dispose()` otherwise do nothing
 2. The class has a method `static ClassName DeactivateItem(){doSomething();}`
@@ -510,7 +510,7 @@ Sometimes disposing of an item is not the right thing when it is put back in the
 
 ##### ReactivateItem
 
-You want to reverse the action when the item is reactivated. Reopen the connection, restart the prefab or whatever. The actions are the same as above with R replacing D.
+Reactivating an item may require additional activities. Reopen the connection, restart the prefab or whatever. The actions are the same as above with R replacing D.
 
 #### Using a Cached Item Safely
 
@@ -528,7 +528,7 @@ using (var aware = Aware.Instance) {
 }
 ```
 
-Otherwise, it is your responsibility to call `Dispose` without any opportunity of it being skipped. Remember exceptions.
+Otherwise, it is your responsibility to call `Dispose`  reliably. Remember exceptions.
 
 ```c#
 Agnostic agnostic;
@@ -540,7 +540,7 @@ void StartWork() {aware = Aware.Instance;}
 void EndWork() {aware.Dispose();}
 ```
 
-If you used a cache item in a body of work, but not outside, you can use `ClearCache()` to send all remaining active items to the recycle bin. It is  what you should do at the end of a scene. This example shows the difference between CleanCache and Clea**r**Cache.
+If you used a cache item in a body of work, but not outside, you can use `ClearCache()` to send all remaining active items to the recycle bin. It is what you should do at the end of a scene. This example shows the difference between CleanCache and Clea**r**Cache.
 
 ```c#
 Cache<Agnostic>.Instance;
@@ -554,9 +554,9 @@ Assert.IsNull(Cache<Agnostic>.Entries.First);
 Assert.IsNull(Cache<Agnostic>.Entries.RecycleBin.First);
 ```
 
-### Disposable.cs - helper for IDisposable.Dispose()
+### Disposable.cs for IDisposable
 
-With closures and anonymous functions `using(...){...}` can be implemented where it is needed without creating a new class to manage it. Don't be put off by the `new`. `Disposable` is a struct, so it is not involved directly in garbage collection.
+With closures and anonymous functions `using(...){...}` can be implemented without creating a new class to manage it. Don't be put off by the `new`. `Disposable` is a struct, so it is not involved directly in garbage collection.
 
 ```c#
     [Test]
@@ -603,7 +603,7 @@ There are two ways to use `Disposable<T>` that can be combined to make three use
 
 1. ***Setting `Action`*** as above. Useful for sealed classes that do not have an `IDisposable` interface but need some cleaning up.
 2. ***`IDisposable` Interface*** when the `PayLoad` has one. Calling `Dispose()` on the `Disposable` automatically calls it for the `PayLoad` if it too has the interface.
-3. ***Both*** can be used together. Think of a situation where the `PayLoad` implements `IDisposable` but it is part of a parent object that needs to be informed of the change in state.
+3. Use ***Both*** together. Think of a situation where the `PayLoad` implements `IDisposable` but it is part of a parent object wanting to know the change in state.
 
 ```c#
   public void DisposableTWithDisposeAndAction() {
@@ -627,7 +627,7 @@ class Myclass : IDisposable {
 
 ### Emitter.cs - the observer pattern
 
-*Somebody* owns a ***Emitter*** and many other somebodies can register interest in the said emitter. When anyone who has access to the emitter instance pulls the trigger, all observers are told. There is a second version ***Emitter&lt;T>*** that can pass an object between the emitter and all observers.
+*Somebody* owns a ***Emitter*** and many other somebodies can register interest in the said emitter. All observers get told when anyone who has access to the emitter instance pulls the trigger. There is a second version ***Emitter&lt;T>*** that can pass an object between the emitter and all observers.
 
 ```c#
 var emitter = new Emitter();
@@ -733,11 +733,11 @@ taskList.Top.Destroy();
 
 Calling `Destroy` on the LinkedList destroys all entries in both active and recycle bin lists.
 
-##### Fetch a New Node from `Home`
+##### Fetch a New Node
 
 A new (or recycled) node is fetched from the current node's `Home` list then moved to `Owner`. If that is not your requirement, use `node.Home.Fetch()` or `node.Owner.Fetch()`.
 
-##### Push an Item to `Owner`
+##### Push an Item to Owner
 
 Given a reference to an entry item, create a node where it's `Home` is the same as the current node. It is pushed onto the `Owner` list for processing.
 
@@ -745,7 +745,7 @@ Given a reference to an entry item, create a node where it's `Home` is the same 
 
 Creation defines how the linked list behaves.
 
-##### Unordered Linked Lists and FIFO Stacks
+##### Unordered Lists & FIFO Stacks
 
 When an item is added to the list, it always becomes the `Top` element. `Bottom` becomes the oldest entry.
 
@@ -754,7 +754,7 @@ var numberList = new LinkedList<int>();
 Assert.AreEqual(expected: 0, actual: numberList.New());
 ```
 
-##### Linked Lists with Custom Item Create, Deactivation and Reactivation
+##### Custom Create, Deactivate & Reactivate
 
 It is all well and good to return `default(T)`, being zeros or null references, but then the user of your list needs to know to create an item if it is not provided. As an example, consider a list of open long-lived HTTP connections.
 
@@ -801,7 +801,7 @@ var numbers = LinkedList<int> {
 }
 ```
 
-The static methods will be active for any items of that class unless a per-instance invocation overrides them.
+The static methods are active for any items of that class unless a per-instance invocation overrides them.
 
 Inherited methods are be active for any items of that class unless a per-instance or static invocation override them.
 
@@ -833,7 +833,7 @@ Linked lists are commonly used as statics to keep lists of reusable elements. So
 
 #### Node Creation and Movement
 
-##### Add an Item to the Current List
+##### Add an Item
 
 If you have an item that has not been on a list, use `Add` to correct that oversight.
 
@@ -841,11 +841,11 @@ If you have an item that has not been on a list, use `Add` to correct that overs
 var node = fences.Add(newFence);
 ```
 
-It will return a reference to a node holding the new item.
+It returns a reference to a node holding the new item.
 
-##### Recycle a Currently Unused Node
+##### Recycle a Node
 
-If you require a node where the contents are initialised elsewhere, use `Fetch`. It picks one from the recycling heap. If the recycling is empty, it creates a new item and matching node for you. If `CreateItem` has not been set the item is `default<T>`.
+Use `Fetch` if you require a node with contents initialised elsewhere. It picks one from the recycling heap. If the recycling is empty, it creates a new item and matching node for you. If `CreateItem` has not been set the item is `default<T>`.
 
 ```c#
 using (node = weatherEvents.Fetch()) {
@@ -870,9 +870,9 @@ void Update() {
 }
 ```
 
-In this admittedly theoretical example, once a job has been processed it is either finished or put on another job list for a dispatcher to decide what is next. Note that this example only works with small numbers of jobs, since it is only processing between 30 and 60 jobs a second. You could use `Walk`, but personally, I would use something other than Update - possibly an Emitter so we can process only when needed.
+In this admittedly theoretical example, once a job has been processed it is either finished or put on another job list for a dispatcher to decide what is next. Note that this example only works with small numbers of jobs, since it is only processing between 30 and 60 jobs a second. You could use `Walk`, but I would use something other than Update - possibly an Emitter so we can process only when needed.
 
-There is also a function to move to the end of a list. It is used with the recycle bin to better disperse usage (LRU - least recently used). It can also be used to move an item to the end of the list regardless of priority.
+There is also a function to move to the end of a list for better dispersal of usage (LRU - least recently used). It can also be used to move an item to the end of the list regardless of priority.
 
 ```c#
 var result = jobs.First.Item;
@@ -885,7 +885,7 @@ if (result == null) {
 
 ##### Disposal of a Node
 
-Disposing of a node once it has served its purpose calls `Dispose()` on the item if it is an `IDiposable`. It then moves the node to the recycle bin for where it was originally created.
+Disposing of a node once it has served its purpose calls `Dispose()` on the item if it is an `IDiposable`. It then moves the node to the recycle bin for where it was initially created.
 
 If an item has a known lifetime then by far the best way is with a `using` statement. Like `Try/Finally` it is guaranteed to be called. If the work requires waiting for resources, then put the `using` statement in a Coroutine, or it's equivalent.
 
@@ -922,7 +922,7 @@ if (node != null) {
 
 ##### Second
 
-`Second` is the second entry below `First`. It is null if the list has one entry or is empty. Use it as a premonition of things to come. For ordered list you can tell if there is more immediate work. Can you think of any other uses?
+`Second` is the second entry below `First`. It is null if the list has one entry or is empty. Use it as a premonition of things to come. For the ordered list you can tell if there is more immediate work. Can you think of any other uses?
 
 ##### Last
 
@@ -1026,7 +1026,7 @@ When enabled, `DebugMode` causes a log entry for every creation or movement of a
 
 Returns a string containing the list name and counts for it and the attached recycle bin.
 
-### Map - A Dictionary Wrapper for Conceptual Change
+### Map - A Dictionary Wrapper
 
 Underneath, a `Map` is still a C# `Dictionary` with similar object references for keys and values. This allows for mixed types that can be converted on retrieval.
 
@@ -1063,7 +1063,7 @@ var set = new Map().Set(1, 3, 5, 7, 9);
 set.Set(11, 13, 15);
 ```
 
-#### Remove: For the Truly Destructive
+#### For the Truly Destructive
 
 `Remove` causes `Map` to completely forget one or more entries.
 
@@ -1112,7 +1112,7 @@ Assert.AreEqual(expected: "2", actual: map["Two"].Value);
 Assert.IsNull(map["TryMe"].Value);
 ```
 
-##### Return a  Value of a Specific Type
+##### Values of a Specific Type
 
 If you know what you have as a type for a value you can retrieve it with the generic `As<T>`. If you are wrong, it returns default(T), which is null for objects, 0 for numbers and empty structs.
 
@@ -1122,7 +1122,7 @@ Assert.AreEqual(expected: "2", actual: map["Two"].As<string>());
 Assert.AreEqual(expected: 0,   actual: map["Two"].As<int>());
 ```
 
-##### IsA: Check Map for Key of a Specific Type
+##### Check Map for Key of a Specific Type
 
 If you need confirmation on whether the value is of a specific type, use `IsA`.
 
@@ -1133,7 +1133,7 @@ Assert.IsTrue(map["Three"].IsA<Map>());
 Assert.IsFalse(map["Two"].IsA<int>());
 ```
 
-##### TypeOf: For Code that Doesn't Have a Clue
+##### For Code that Doesn't Have a Clue
 
 If the map comes from an external source and the values could be anything, then you have two choices. You can use `ToString` to get a (hopefully) readable representation, or you can use `TypeOf`. It is considered bad form to have to stoop to this approach, but if you have unknown data, what else can you do? It is not as bad as it looks. If the data is parsed from JSON, for example, it can only be a string, a number, a boolean or `null`.
 
@@ -1203,7 +1203,7 @@ Assert.AreEqual("OneTwoThreeFourFive", actual);
 
 In this example, we are sorting the keys by the value, not the key.
 
-### Pick.cs - Interface to choose from options
+### Pick.cs - to choose from options
 
 Interface to pick an item, probably from a list, probably random. It all depends on how you implement `Pick()`.
 
@@ -1219,7 +1219,7 @@ Assert.AreEqual("2", nose.Pick());
 Assert.AreEqual("3", nose.Pick());
 ```
 
-### Selector.cs - maintain and pick from a list
+### Selector.cs - maintain & pick from a list
 
 1. Select a random image or sounds or actions from a list.
 2. Choose the next item from an ordered list of training steps.
@@ -1469,7 +1469,7 @@ If you need to know how many branches to prepare storage, use `Children`, which 
 
 ## Text Manipulation
 
-### Csv.cs - serialization of comma-separated lists
+### Csv.cs - serialize comma-separated lists
 
 ##### Static Line Serialisation
 
@@ -1485,7 +1485,7 @@ If you need to know how many branches to prepare storage, use `Children`, which 
       Assert.AreEqual(expected, actual);
 ```
 
-### Json.cs - parse any JSON to dictionary
+### Json.cs - parse to dictionary
 
 And it came about that the computer was born and all was good. Then there was another computer and the need to share things. It was easy. Knowing both sides, we can send data the computer understands. But wait, now some computers see the binary world differently. OK, let's make it human readable. Computers are faster at deserialisation by then. Comma separated variable (CSV) files became popular, but they lacked depth. Enter SGML and then XML. Fifty years have passed. There are signs at the airport saying "We are an XML Company!". What does that mean? It's just a way for all machines (and some people) to be able to read the same data. XML uses a DTD (document type definition). If an XML document does not pass the DTD rules, then it is no good. Toss it out. Great for developers. If it passes the rules, then it is easy to deserialise directly into a computer readable (i.e. binary format) object. Mind you, by hiding the structure from the developers they were free to build as they liked. I have seen Windows applications that changing the state in a drop-down causes millions of bytes to pass between client and server. Everyone was happy. Then JavaScript became more standardised and faster, and the Web App was born. Parsing XML in JavaScript was slow and difficult - even without checking it against a DTD. Unlike traditional server languages, JavaScript has dynamic data structures. You can send any structured data down the line and only work out what it contains when you need to. Some bright spark decided to send JavaScript source full of data structures. Javascript is fast at compiling itself. This method is now called JSONP. However, sending code has its risks even in a sandbox. Besides we can make the JavaScript compiler even faster if we give it a more rigid format and a subset of JavaScript. JSON was born. All was good. Then the people who don't live flexibility said "We can't have that" and started insisting on rigid structures in JavaScript. So, now we have something like XML but without the DTD to help us get it right at both ends. Developers are now spending more time than with XML.
 
@@ -2012,7 +2012,7 @@ This script and many thanks to [TheVastBernie](https://forum.unity.com/members/t
 
 ![ScriptableObjectDrawerOpen](ScriptableObjectDrawerOpen.png)
 
-### Set.cs - Unity component implementing selector
+### Set.cs - A Unity Selector
 
 `Set `is a generic class that allows you to create a concrete component where you can use `Pick` to get an item from a list.
 

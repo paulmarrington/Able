@@ -90,7 +90,7 @@ namespace Askowl {
       return typeof(T).GetMethod(name, flags, null, CallingConventions.HasThis, parameters, null);
     }
 
-    private static Type[] ComparisonParameters = {typeof(T), typeof(T)};
+    private static Type[] ComparisonParameters = { typeof(T), typeof(T) };
 
     private static Action<Node> DefaultActivation(string name) {
       var method = DefaultMethod(name, Type.EmptyTypes);
@@ -104,22 +104,25 @@ namespace Askowl {
       if (method == null) return (node, other) => 0;
 
       orderedDynamic = true;
-      return (node, other) => (int) method.Invoke(node.Item, new object[] {node.Item, other.Item});
+      return (node, other) => (int) method.Invoke(node.Item, new object[] { node.Item, other.Item });
     }
 
     private static Func<T> GetDefaultCreateItem() {
-      var flags  = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
-      var method = typeof(T).GetMethod("CreateItem", flags, null, CallingConventions.Standard, Type.EmptyTypes, null);
+      var flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
+
+      var method = typeof(T).GetMethod(
+        "CreateItem", flags, null, CallingConventions.Standard,
+        Type.EmptyTypes, null);
+
       if (method != null) return () => (T) method.Invoke(null, null);
 
       return CallConstructor() ?? (() => default(T));
     }
 
-    private static Action<Node> GetDefaultDeactivateItem() =>
-      DefaultActivation("DeactivateItem") ?? (node => { }); //(node.Item as IDisposable)?.Dispose());
+    private static Action<Node> GetDefaultDeactivateItem() => DefaultActivation("DeactivateItem") ??
+                                                              (node => { }); //(node.Item as IDisposable)?.Dispose());
 
-    private static Action<Node> GetDefaultReactivateItem() =>
-      DefaultActivation("ReactivateItem") ?? (node => { });
+    private static Action<Node> GetDefaultReactivateItem() => DefaultActivation("ReactivateItem") ?? (node => { });
 
     private static bool orderedStatic;
     private static bool orderedDynamic;
@@ -129,19 +132,20 @@ namespace Askowl {
 
     #region Public List Creation and Destruction
     /// <a href="">Get an instance of this type of linked list</a>
-    public LinkedList(string name) { Name = string.IsNullOrWhiteSpace(name) ? $"{typeof(T).Name}-{++ordinal}" : name; }
+    public LinkedList(string name = null) =>
+      Name = string.IsNullOrWhiteSpace(name) ? $"{typeof(T).Name}-{++ordinal}" : name;
 
     /// <a href="">Linked List Name</a>
     public string Name { get; }
 
     /// <a href="">Item Creation and Preparation when new() is not enough</a>
-    public static Func<T> CreateItemStatic = GetDefaultCreateItem();
+    public static readonly Func<T> CreateItemStatic = GetDefaultCreateItem();
 
     /// <a href="">Item Creation and Preparation when new() is not enough</a>
     public Func<T> CreateItem { private get; set; } = () => CreateItemStatic();
 
     /// <a href=""></a>
-    public static Action<Node> ReactivateItemStatic = GetDefaultReactivateItem();
+    public static readonly Action<Node> ReactivateItemStatic = GetDefaultReactivateItem();
 
     /// <a href="">Prepare an idle item for reuse</a>
     public Action<Node> ReactivateItem { private get; set; } = (node) => ReactivateItemStatic(node);
@@ -233,7 +237,7 @@ namespace Askowl {
     private static Map reverseLookup;
 
     private Node NewNode(T item) {
-      Node newNode = new Node() {Item = item, Owner = this, Home = this};
+      Node newNode = new Node() { Item = item, Owner = this, Home = this };
       reverseLookup?.Add(item, newNode);
       return newNode;
     }
@@ -284,11 +288,9 @@ namespace Askowl {
     }
 
     private void Unlink(Node node) {
-      if (node == node.Owner.First) {
-        node.Owner.First = node.Next;
-      } else if (node == node.Owner.Last) {
-        node.Owner.Last = node.Previous;
-      } else if ((node.Previous == null) && (node.Next == null)) {
+      if (node == node.Owner.First) { node.Owner.First = node.Next; } else if (node == node.Owner.Last
+      ) { node.Owner.Last                              = node.Previous; } else if ((node.Previous == null)
+                                                                                && (node.Next     == null)) {
         return; // Node doesn't belong to anyone
       }
 
@@ -304,7 +306,7 @@ namespace Askowl {
     /// <a href="http://unitydoc.marrington.net/Able#node-creation-and-movement">List for Unused Nodes</a>
     public LinkedList<T> RecycleBin => isRecycleBin ? null : recycleBin ?? (recycleBin = newRecycleBin);
 
-    private LinkedList<T> newRecycleBin => new LinkedList<T>($"{Name} Recycling Bin") {isRecycleBin = true};
+    private LinkedList<T> newRecycleBin => new LinkedList<T>($"{Name} Recycling Bin") { isRecycleBin = true };
 
     private bool          isRecycleBin;
     private LinkedList<T> recycleBin;
@@ -343,9 +345,10 @@ namespace Askowl {
     public static bool DebugMode { private get; set; } = false;
 
     private void DebugMessage(Node node, string append = "") {
-      Debug.Log(node.Owner == this
-                  ? $"**** LinkedList: Add to {this}"
-                  : $"**** LinkedList: move {node.Owner} to {append}{this}");
+      Debug.Log(
+        node.Owner == this
+          ? $"**** LinkedList: Add to {this}"
+          : $"**** LinkedList: move {node.Owner} to {append}{this}");
     }
 
     /// <a href="http://unitydoc.marrington.net/Able#dump">Return list contents as a string</a>

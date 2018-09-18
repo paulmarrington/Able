@@ -74,7 +74,8 @@
 - [x] doc and test ValueAttribute
 - [x] Remove all that is not base from documentation
 - [x] executive summary
-- [ ] Shorten table of contents entries 
+- [ ] check map doc for deleted methods (isa, etc)
+- [x] Shorten table of contents entries
 - [ ] Grammarly
 - [x] investigate transcripts
 - [ ] Upload md to github

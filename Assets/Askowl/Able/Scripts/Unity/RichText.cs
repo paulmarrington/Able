@@ -1,5 +1,4 @@
 ﻿namespace Askowl.RichText {
-
   /// <a href=""></a>
   /// <inheritdoc />
   public class Color : Colour { }
