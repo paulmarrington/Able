@@ -1,24 +1,21 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-using NUnit.Framework;
-using System.Collections;
-
+#if AskowlAble
 namespace Askowl.Examples {
+  using System.Collections;
+  using NUnit.Framework;
+
   public class StackExamples {
     /// Using <see cref="Stack{T}.Instance"/>
     [Test]
     public void Instance() {
-      using (var stack = Stack<int>.Instance) {
-        Assert.IsNotNull(stack);
-      }
+      using (var stack = Stack<int>.Instance) Assert.IsNotNull(stack);
     }
 
     /// Using <see cref="Stack.Count"/>
     [Test]
     public void Count() {
-      using (var stack = Stack<int>.Instance) {
-        Assert.AreEqual(expected: 0, actual: stack.Count);
-      }
+      using (var stack = Stack<int>.Instance) Assert.AreEqual(expected: 0, actual: stack.Count);
     }
 
     /// Using <see cref="Stack.Push"/>
@@ -51,3 +48,4 @@ namespace Askowl.Examples {
     }
   }
 }
+#endif

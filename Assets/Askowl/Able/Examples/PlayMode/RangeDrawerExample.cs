@@ -1,4 +1,6 @@
-﻿#if UNITY_EDITOR && Able
+﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
+
+#if AskowlAble
 using UnityEngine;
 
 namespace Askowl.Examples {

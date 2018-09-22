@@ -1,11 +1,12 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-using System.Collections;
-using NUnit.Framework;
-using UnityEngine;
-using UnityEngine.TestTools;
-
+#if AskowlAble
 namespace Askowl.Examples {
+  using System.Collections;
+  using NUnit.Framework;
+  using UnityEngine;
+  using UnityEngine.TestTools;
+
   /// <inheritdoc />
   /// Using <see cref="T:Askowl.Objects" />
   /// <inheritdoc />
@@ -61,3 +62,4 @@ namespace Askowl.Examples {
     }
   }
 }
+#endif

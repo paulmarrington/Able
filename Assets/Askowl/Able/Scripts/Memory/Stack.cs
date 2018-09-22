@@ -12,36 +12,49 @@ namespace Askowl {
     private void DeactivateItem() { pointer = 0; }
 
     /// <a href="">For subclasses that do their own caching</a>
-    protected Stack() { stack[0] = default(T); }
+    protected Stack() { }
 
     /// <a href=""></a>
     public static Stack<T> Instance => Cache<Stack<T>>.Instance;
 
     /// <a href="bit.ly/">Count</a>
-    public int Count => pointer;
+    public int Count { get => pointer; set => pointer = (value < pointer) ? value : pointer; }
 
     /// <a href="bit.ly/">Push</a>
     public T Push(T entry) {
-      if (++pointer >= stack.Length) {
+      if (pointer >= stack.Length) {
         var old = stack;
         stack = new T[old.Length * 2];
         Array.Copy(old, stack, old.Length);
       }
 
-      return stack[pointer] = entry;
+      return stack[pointer++] = entry;
     }
 
-    /// <a href="bit.ly/">Push</a>
-    public T Pop() {
-      var value = stack[pointer];
-      if (pointer > 0) pointer--;
-      return value;
+    /// <a href="bit.ly/">Pop</a>
+    public virtual T Pop() => pointer == 0 ? default : stack[--pointer];
+
+    /// <a href="bit.ly/">Pop</a>
+    public virtual Stack<T> Swap() {
+      if (pointer >= 2) {
+        T top = Top;
+        Top  = Next;
+        Next = top;
+      }
+      return this;
     }
 
     /// <a href=""></a>
-    public T Top { get { return stack[pointer]; } set { stack[pointer] = value; } }
+    public T Top { get => stack[pointer - 1]; set => stack[pointer - 1] = value; }
+
+    /// <a href=""></a>
+    public T Next { get => stack[pointer - 2]; set => stack[pointer - 2] = value; }
 
     /// <inheritdoc />
-    public virtual void Dispose() { Cache<Stack<T>>.Dispose(this); }
+    public virtual void Dispose() {
+      for (var i = 0; i < pointer; i++) (stack[i] as IDisposable)?.Dispose();
+      pointer = 0;
+      Cache<Stack<T>>.Dispose(this);
+    }
   }
 }

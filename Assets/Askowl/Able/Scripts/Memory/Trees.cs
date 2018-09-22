@@ -26,7 +26,7 @@ namespace Askowl {
       private  LeafNode   leafNode;
       private  BranchNode branchNode;
 
-      internal object Leaf   { get { return leafNode.Value; } set { leafNode.Value = value; } }
+      internal object Leaf   { get => leafNode.Value; set => leafNode.Value = value; }
       internal Map    Branch => branchNode.Value ?? (branchNode.Value = new Map());
 
       public static Node New(object name, Node parent) {
@@ -36,7 +36,7 @@ namespace Askowl {
         return node;
       }
 
-      public int Count => (branchNode.Value == null) ? 0 : Branch.Count;
+      public int Count => branchNode.Value == null ? 0 : Branch.Count;
 
       public void Dispose() {
         leafNode.Dispose();
@@ -69,7 +69,7 @@ namespace Askowl {
 
     private Trees() {
       root    = here = Node.New("~ROOT~", null);
-      anchors = new Anchors {Stack = new LinkedList<Node>("Trees Anchor Stack"), tree = this};
+      anchors = new Anchors { Stack = new LinkedList<Node>("Trees Anchor Stack"), tree = this };
     }
 
     /// <a href=""></a>
@@ -78,31 +78,26 @@ namespace Askowl {
       isNumber = -1;
       if (path.Length == 0) return this;
 
-      if ((path.Length == 1) && (path[0] is string)) {
-        string[] split = ((string) path[0]).Split('.');
+      if ((path.Length == 1) && path[0] is string s) {
+        var split = s.Split('.');
         path = Array.ConvertAll(split, x => (object) x);
       }
 
-      for (int i = 0; i < path.Length; i++) {
+      for (var i = 0; i < path.Length; i++) {
         if (here == null) return Failure();
 
-        if (here.Branch[path[i]].Found) {
-          here = here.Branch.Value as Node;
-        } else if (path[i] is int) {
-          object obj = path[i];
+        if (here.Branch[path[i]].Found) { here = here.Branch.Value as Node; } else if (path[i] is int) {
+          var obj = path[i];
           here = here.Branch[obj]?.Value as Node ?? (Node) here.Branch.Add(obj, Node.New(obj, here)).Value;
         } else {
           var key = path[i].ToString();
 
-          if (string.IsNullOrWhiteSpace(key)) {
-            here = (i == 0) ? here : here.Parent;
-          } else if (Compare.IsDigitsOnly(key)) {
+          if (string.IsNullOrWhiteSpace(key)) { here = i == 0 ? here : here.Parent; } else if (Compare.IsDigitsOnly(key)
+          ) {
             here = here.Branch[int.Parse(key) as object].Value as Node;
           } else if (create) {
             here = (Node) here.Branch.Add(path[i], Node.New(path[i], here)).Value;
-          } else {
-            return Failure();
-          }
+          } else { return Failure(); }
         }
       }
 
@@ -135,9 +130,11 @@ namespace Askowl {
     public Trees To(params object[] path) => Root().Walk(create: false, path: path);
 
     /// <a href=""></a>
+    // ReSharper disable once UnusedMethodReturnValue.Global
     public Trees Next(params object[] path) => Walk(create: false, path: path);
 
     /// <a href="bit.ly/">Has</a>
+    // ReSharper disable once UnusedMethodReturnValue.Global
     public Trees Add(params object[] path) => Walk(create: true, path: path);
 
     /// <a href=""></a>
@@ -145,7 +142,7 @@ namespace Askowl {
 
     /// <a href=""></a>
     public object Leaf {
-      get { return here.Leaf; }
+      get => here.Leaf;
       set {
         here.Leaf = value;
         isNumber  = -1;
@@ -153,7 +150,7 @@ namespace Askowl {
     }
 
     /// <a href=""></a>
-    public string Value { get { return (string) here.Leaf; } set { here.Leaf = value; } }
+    public string Value { get => (string) here.Leaf; set => here.Leaf = value; }
 
     /// <a href="bit.ly/">IsNumber</a>
     public bool IsNumber {
@@ -162,11 +159,8 @@ namespace Askowl {
 
         var word = Value;
 
-        if (long.TryParse(word, out integer)) {
-          floatingPoint = integer;
-        } else if (double.TryParse(word, out floatingPoint)) {
-          integer = (long) floatingPoint;
-        } else {
+        if (long.TryParse(word, out integer)) { floatingPoint = integer; } else if (double.TryParse(
+          word, out floatingPoint)) { integer                 = (long) floatingPoint; } else {
           Failed = true;
           return (isNumber = 0) == 1;
         }
@@ -190,8 +184,8 @@ namespace Askowl {
 
     /// <a href=""></a>
     public object this[object key] {
-      get { return (here.Branch[key].Value as Node)?.Leaf; }
-      set { ((Node) here.Branch[key].Value).Leaf = value; }
+      get => (here.Branch[key].Value as Node)?.Leaf;
+      set => ((Node) here.Branch[key].Value).Leaf = value;
     }
 
     /// <a href="bit.ly/">Keys</a>

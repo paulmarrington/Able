@@ -1,8 +1,9 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-using NUnit.Framework;
-
+#if AskowlAble
 namespace Askowl.Examples {
+  using NUnit.Framework;
+
   /// Using <see cref="Trees"/>
   public class TreesExamples {
     /// Using <see cref="Trees"/>
@@ -206,9 +207,7 @@ namespace Askowl.Examples {
       var tree = Trees.Instance.Add("A.B.C");
 
       // `using` with `Tree`
-      using (tree.Anchor()) {
-        tree.To("A");
-      }
+      using (tree.Anchor()) tree.To("A");
 
       // Restored to state before `using`
       Assert.AreEqual("C", tree.Name);
@@ -232,12 +231,10 @@ namespace Askowl.Examples {
     /// Using <see cref="Trees.NextChild"/>
     [Test]
     public void NextChild() {
-      var    tree   = Trees.Instance.Add("A.B.C1..C2..C3").To("A.B");
-      string actual = "";
+      var tree   = Trees.Instance.Add("A.B.C1..C2..C3").To("A.B");
+      var actual = "";
 
-      for (object key = tree.FirstChild; key != null; key = tree.NextChild) {
-        actual += key;
-      }
+      for (var key = tree.FirstChild; key != null; key = tree.NextChild) actual += key;
 
       Assert.AreEqual("C1C2C3", actual);
     }
@@ -260,3 +257,4 @@ namespace Askowl.Examples {
     }
   }
 }
+#endif

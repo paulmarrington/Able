@@ -1,5 +1,6 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
+#if AskowlAble
 using System;
 using NUnit.Framework;
 
@@ -106,8 +107,8 @@ namespace Askowl.Examples {
     public void DeactivateItemStatic() {
       Cache<AgnosticClassProcessed>.CleanCache();
       // This would normally be in a static constructor. It only need be run once
-      Cache<AgnosticClassProcessed>.CreateItem     = () => new AgnosticClassProcessed {State = "CreateStatic"};
-      Cache<AgnosticClassProcessed>.DeactivateItem = (item) => item.State =  "AgnosticDeactivateItem";
+      Cache<AgnosticClassProcessed>.CreateItem = () => new AgnosticClassProcessed {State = "CreateStatic"};
+      Cache<AgnosticClassProcessed>.DeactivateItem = (item) => item.State = "AgnosticDeactivateItem";
       Cache<AgnosticClassProcessed>.ReactivateItem = (item) => item.State += " AgnosticReactivateItem";
 
       var agnosticClass = Cache<AgnosticClassProcessed>.Instance;
@@ -128,7 +129,7 @@ namespace Askowl.Examples {
       Cache<AgnosticClassProcessed>.CreateItem =
         () => new AgnosticClassProcessed {State = "CreateStatic"};
 
-      Cache<AgnosticClassProcessed>.DeactivateItem = (item) => item.State =  "SealedDeactivateItem";
+      Cache<AgnosticClassProcessed>.DeactivateItem = (item) => item.State = "SealedDeactivateItem";
       Cache<AgnosticClassProcessed>.ReactivateItem = (item) => item.State += " SealedReactivateItem";
 
       var sealedClass = Cache<AgnosticClassProcessed>.Instance;
@@ -218,3 +219,4 @@ namespace Askowl.Examples {
     #endregion
   }
 }
+#endif

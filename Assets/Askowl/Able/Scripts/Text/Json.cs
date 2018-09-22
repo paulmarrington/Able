@@ -1,9 +1,9 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-using System;
-using System.Text;
-
 namespace Askowl {
+  using System;
+  using System.Text;
+
   /// <a href=""></a>
   public class Json : IDisposable {
     #region PublicInterface
@@ -20,11 +20,7 @@ namespace Askowl {
 
       if (!SkipWhiteSpace()) return this;
 
-      if (json[idx] == '{') {
-        ParseToNode();
-      } else {
-        ParseOneEntryToNode();
-      }
+      if (json[idx] == '{') { ParseToNode(); } else { ParseOneEntryToNode(); }
 
       return this;
     }
@@ -59,7 +55,7 @@ namespace Askowl {
     private bool ParseOneEntryToNode() {
       if (!SkipWhiteSpace()) return false;
 
-      string key = (json[idx++] == '"') ? ParseString() : NextWord(-1);
+      var key = json[idx++] == '"' ? ParseString() : NextWord(-1);
       if (json[idx] == ':') idx++;
 
       using (tree.Anchor()) {
@@ -73,7 +69,7 @@ namespace Askowl {
     private void ParseObject() {
       if (!SkipWhiteSpace()) return;
 
-      char token = json[idx++];
+      var token = json[idx++];
 
       switch (token) {
         case '{':
@@ -109,9 +105,7 @@ namespace Askowl {
     private string ParseString() {
       builder.Clear();
 
-      while ((idx < json.Length) && (json[idx] != '"')) {
-        builder.Append((json[idx] == '\\') ? Escape() : json[idx++]);
-      }
+      while ((idx < json.Length) && (json[idx] != '"')) builder.Append(json[idx] == '\\' ? Escape() : json[idx++]);
 
       idx++; // drop closing quote
       SkipWhiteSpace();
@@ -130,7 +124,7 @@ namespace Askowl {
     }
 
     private string NextWord(int offset = 0) {
-      int first = (idx += offset);
+      var first = idx += offset;
       while ((idx < json.Length) && ("{}[]\",:".IndexOf(json[idx]) == -1)) idx++;
       var word = json.Substring(startIndex: first, length: idx - first);
       SkipWhiteSpace();

@@ -1,13 +1,13 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-using System;
-using System.Reflection;
-using System.Text;
-using UnityEngine;
-
 // ReSharper disable StaticMemberInGenericType
 
 namespace Askowl {
+  using System;
+  using System.Reflection;
+  using System.Text;
+  using UnityEngine;
+
   /// <a href="">LinkedList - a different perspective</a>
   // ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
   public class LinkedList<T> : IDisposable {
@@ -139,13 +139,13 @@ namespace Askowl {
     public string Name { get; }
 
     /// <a href="">Item Creation and Preparation when new() is not enough</a>
-    public static readonly Func<T> CreateItemStatic = GetDefaultCreateItem();
+    public static Func<T> CreateItemStatic = GetDefaultCreateItem();
 
     /// <a href="">Item Creation and Preparation when new() is not enough</a>
     public Func<T> CreateItem { private get; set; } = () => CreateItemStatic();
 
     /// <a href=""></a>
-    public static readonly Action<Node> ReactivateItemStatic = GetDefaultReactivateItem();
+    public static Action<Node> ReactivateItemStatic = GetDefaultReactivateItem();
 
     /// <a href="">Prepare an idle item for reuse</a>
     public Action<Node> ReactivateItem { private get; set; } = (node) => ReactivateItemStatic(node);
@@ -197,10 +197,8 @@ namespace Askowl {
     #region Node Creation and Movement
     /// <a href="">Add an Item to a List</a>
     public Node Add(params T[] newItems) {
-      Node node = null;
-      int  idx  = 0;
-
-      while (idx < newItems.Length) node = Insert(NewNode(newItems[idx++]));
+      Node node                                            = null;
+      for (var idx = 0; idx < newItems.Length; idx++) node = Set(newItems[idx]);
       return node;
     }
 
@@ -218,6 +216,13 @@ namespace Askowl {
 
       var node = RecycleBin.First.MoveTo(this);
       ReactivateItem(node);
+      return node;
+    }
+
+    /// <a href=""></a>
+    public Node Set(T item) {
+      var node = Fetch();
+      node.Item = item;
       return node;
     }
 
@@ -290,7 +295,8 @@ namespace Askowl {
     private void Unlink(Node node) {
       if (node == node.Owner.First) { node.Owner.First = node.Next; } else if (node == node.Owner.Last
       ) { node.Owner.Last                              = node.Previous; } else if ((node.Previous == null)
-                                                                                && (node.Next     == null)) {
+                                                                                && (node.Next
+                                                                                 == null)) {
         return; // Node doesn't belong to anyone
       }
 

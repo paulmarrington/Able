@@ -1,13 +1,14 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-using System;
-using System.Collections;
-using UnityEngine;
-using UnityEngine.TestTools;
-using NUnit.Framework;
-using UnityEngine.UI;
-
+#if AskowlAble
 namespace Askowl.Examples {
+  using System;
+  using System.Collections;
+  using NUnit.Framework;
+  using UnityEngine;
+  using UnityEngine.TestTools;
+  using UnityEngine.UI;
+
   /// Using <see cref="T:Askowl.Components" />
   /// <inheritdoc />
   public class ComponentsExample : PlayModeTests {
@@ -40,7 +41,7 @@ namespace Askowl.Examples {
 
       // if we know the parent object we can start from there.
       var canvas = GameObject.Find("Canvas");
-      var text   = Components.Find<Text>(canvas, "Text");
+      var text = Components.Find<Text>(canvas, "Text");
       Assert.AreEqual("Button One", text.text);
     }
 
@@ -72,3 +73,4 @@ namespace Askowl.Examples {
     }
   }
 }
+#endif

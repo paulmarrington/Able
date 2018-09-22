@@ -1,8 +1,10 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-using UnityEngine;
+#if AskowlAble
 
 namespace Askowl.Examples {
+  using UnityEngine;
+
   /// Using <see cref="PreviewEditor{T}" />
   /// <inheritdoc />
   public class PreviewEditorExample : MonoBehaviour {
@@ -12,3 +14,4 @@ namespace Askowl.Examples {
 
   public class AudioClips { }
 }
+#endif

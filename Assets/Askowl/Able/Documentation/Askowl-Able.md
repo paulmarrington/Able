@@ -1,16 +1,18 @@
+---
+title: Askowl Advertising Connector for Unity3D
+description: Choose your advertising network
+---
 # [Able - Askowl Base Library Enabler](http://unitydoc.marrington.net/Able)
-
 * Table of Contents
 {:toc}
 ## Executive Summary
-
 `Able` contains scripts needed by other ***Askowl*** libraries that have stand-alone value. It contains mathematics support around time conversion, comparisons and trigonometry. The data structure section helps with containers, caching, emitters, selectors, stack and trees. There are scripts to parse generic (as in unknown internal structure) CSV and JSON data. For Unity3D support, there are scripts to aid testing, locate components and game objects, pluggable logging, and various editor display and runtime components.
 
 > Read the code in the Examples Folder and run the Example scene
 
 ## Introduction
 
-Unity provides lots of great functionality, but there are always more problems than there are solutions. All the solutions documented here were to solve problems in other Askowl libraries. They also stand on their own when simple is not so simple. There are currently four sections for Math, Data, Text and Unity. There is a lot here. All I can suggest is that you browse the table of contents.
+Unity provides lots of great functionality, but there are always more problems than there are solutions. All the solutions documented here were to solve problems in other Askowl libraries. They also stand on their own when simple is not so simple. There are four sections for Math, Data, Text and Unity. There is a lot here. All I can suggest is that you browse the table of contents.
 
 
 ## Maths functions
@@ -19,8 +21,7 @@ Unity provides lots of great functionality, but there are always more problems t
 
 #### Epoch Time
 
-Epoch time was invented by the early Unix creators to represent time as seconds since the start of 1970 in a 32-bit integer for fast calculations. In this form, it wraps around on 2038. It also suffered some inaccuracy because it did not account for leap seconds. This conversion is not 2038 limited as it uses doubles. Leap seconds are an issue if you are using dates each side of an end of year correction - an unlikely event with minor implications.
-
+For fast calculations the creators of Unix invented Epoch time to represent time as seconds since the start of 1970 in a 32-bit integer. In this form, it wraps around in the year 2038. It also suffered inaccuracy because it did not account for leap seconds. This conversion is not 2038 limited as it uses doubles. Leap seconds are an issue if you are using dates each side of an end of year correction - an unlikely event with minor implications.
 ```c#
 DateTime now          = DateTime.Now;
 double   epochTimeNow = Clock.EpochTimeNow;
@@ -41,7 +42,7 @@ Epoch time is always UTC.
 
 ##### double EpochTimeAt(DateTime when);
 
-Convert local time to UTC if necessary then translate to epoch time. Unlike Unix Epoch time, this result accounts for leap seconds.
+Convert local time to UTC then translate to epoch time. Unlike Unix Epoch time, this result accounts for leap seconds.
 
 ##### DateTime FromEpochTime(double epochTime);
 
@@ -106,13 +107,13 @@ Assert.IsFalse(Compare.isDigitsOnly(""));
 
 ***<u>From Wikipedia</u>***:
 
-> An **exponential moving average (EMA)**, also known as an **exponentially weighted moving average (EWMA)**,[[5\]](https://en.wikipedia.org/wiki/Moving_average#cite_note-5) is a first-order [infinite impulse response](https://en.wikipedia.org/wiki/Infinite_impulse_response) filter that applies weighting factors which decrease [exponentially](https://en.wikipedia.org/wiki/Exponential_decay). The weighting for each older [datum](https://en.wikipedia.org/wiki/Data) decreases exponentially, never reaching zero. The graph at right shows an example of the weight decrease.
+> An **exponential moving average (EMA)**, also known as an **exponentially weighted moving average (EWMA)**,[[5\]](https://en.wikipedia.org/wiki/Moving_average#cite_note-5) is a first-order [infinite impulse response](https://en.wikipedia.org/wiki/Infinite_impulse_response) filter that applies weighting factors which decrease [exponentially](https://en.wikipedia.org/wiki/Exponential_decay). The weighting for each older [datum](https://en.wikipedia.org/wiki/Data) decreases, never reaching zero. The graph at right shows an example of the weight decrease.
 
  ***<u>From Me (Paul Marrington):</u>***
 
 > An **exponential moving average** is a way to calculate an average where old values have less impact on the average than more recent ones.
 
-Financial calculations often make use of EMA, but I use it mainly for IoT. Many devices can read wildly until the settle down. Then real-world interactions make then inaccurate again. A good example is a compass or magnetometer. Walk past a mass of steel, and they are attracted - just like an engineer. EMA dampens the variations. It is also useful when merging IoT data.
+Financial calculations often make use of EMA, but I use it for IoT. Many devices can give jittery readings until they settle down. Then real-world interactions make then inaccurate again. A good example is a compass or magnetometer. Walk past a mass of steel, and it attracts them - just like an engineer. EMA dampens the variations. It is also useful when merging IoT data.
 
 #### EMA Initialisation
 
@@ -144,7 +145,7 @@ AreEqual(expected: 4.0336f, actual: ema.Average(value: 4));
 
 #### EMA Average Angle
 
-Using EMA with angles in degrees is the same except that the result is normalised to be between -180 and +180 degrees.
+Using EMA with angles in degrees is the same except that it normalises the result to be between -180 and +180 degrees.
 
 ```c#
 AreEqual(expected: -10f,       actual: ema.AverageAngle(degrees: -10));
@@ -157,7 +158,7 @@ AreEqual(expected: -1.513316f, actual: ema.AverageAngle(degrees: 364));
 
 ### Geodetic.cs - distances & bearings
 
-> **Geodesy**: The branch of mathematics dealing with the shape and area of the earth or substantial portions of it.
+> **Geodesy**: The branch of mathematics dealing with the shape and area of the earth or substantial portions.
 >
 > **Origin**: late 16th century: from modern Latin geodaesia, from Greek geōdaisia, from gē ‘earth’ + daiein ‘divide’.
 >
@@ -168,7 +169,7 @@ AreEqual(expected: -1.513316f, actual: ema.AverageAngle(degrees: 364));
 
 #### Coordinates Data Structure
 
-Here lies another data structure that contains coordinates. In the end, it is more efficient to have separate definitions than it is to burden one definition with lots of irrelevant data. It is particularly poignant when we are dealing with pass-by-value.
+Here lies another data structure that contains coordinates. It is more efficient to have separate definitions than it is to burden one definition with lots of irrelevant data. It is poignant when we are dealing with pass-by-value.
 
 In this world-view, coordinates use 64-bit double floating points for accuracy and know whether they are degrees or radians.
 
@@ -184,7 +185,7 @@ Debug.Log(same.ToString()); // -27.46850, 151.94379
 
 In the geodetic parlance, the shortest distance between two points is an arc, not a straight line. It is important if you don't want to tunnel through earth and dive under the sea to get anywhere.
 
-`Kilometres(from, to)` uses the Haversine formula to calculate the distance taking into account an approximation of the earth's curvature. For display convenience there is a version, `DistanceBetween(from, to)`, that returns a string that is more friendly than the raw kilometres. If the distance is below one kilometre, it returns the value as a whole number of metres (i.e. 43 m). For distances below ten kilometres, one decimal place is provided (4.7 km). Above the kilometres are whole numbers only (23 km).
+`Kilometres(from, to)` uses the Haversine formula to calculate the distance considering an approximation of the earth's curvature. For display convenience there is a version, `DistanceBetween(from, to)`, that returns a string is more friendly than the raw kilometres. If the distance is below one kilometre, it returns the value number of metres (i.e. 43 m). For distances below ten kilometres, it provides one decimal place (4.7 km). Above the kilometres are whole numbers only (23 km).
 
 #### Bearing from Point to Point
 
@@ -206,11 +207,11 @@ Geodetic.Destination(start: here, distanceKm: 1.2, bearingDegrees: 23.4);
 
 ### Quaternions.cs - adding features
 
-Unity quaternion math focusses on the needs of the game. Great, but there are a few methods needed for augmented reality missing.
+Unity quaternion math focusses on the needs of the game. Great, but methods needed for augmented reality are missing.
 
 #### AroundAxis
 
-Rotate a quaternion around the X, Y or Z axis by the given number of degrees. It is useful for a clock face, a compass or a merry-go-round.
+Rotate a quaternion around the X, Y or Z axis by the number of degrees. It is useful for a clock face, a compass or a merry-go-round.
 
 ```c#
 // ... A
@@ -221,7 +222,7 @@ attitude = attitude.AngleAxis(Trig.zAxis, compass.MagneticHeading);
 
 #### Inverse
 
-An inverse changes the direction of the rotation. If you rotate a quaternion then rotate it again using the inverse then you get back the original quaternion.
+Calling `Inverse` changed the direction of rotation. If you rotate a quaternion then rotate it again using the inverse then you get back the original quaternion.
 
 ```c#
 // C ...
@@ -244,9 +245,9 @@ This version is on an average 20% faster than `normalised` as provided by Unity.
 
 #### RightToLeftHanded
 
-For rotations, quaternions hold information on the direction in 3 dimensions and the rotation of the object. Think of an aeroplane flying straight in a particular direction. Given a point of reference, you can calculate the angle on the X, Y and Z planes. Now the aeroplane dips it's wing and spins upside-down. The calculations before are the same, but the rotation has changed. Just as the Euler angles define the direction of travel, the sign of the rotation defines which way the aeroplane is spinning.
+For rotations, quaternions hold information on the direction in 3 dimensions and the rotation of the object. Think of an aeroplane flying straight in a particular direction. Given a point of reference, you can calculate the angle on the X, Y and Z planes. Now the aeroplane dips it's wing and spins upside-down. The calculations before are the same, but the rotation has changed. The sign of the rotation defines which way the aeroplane is spinning.
 
-Two of anything with opposite chirality cannot be superimposed on each other and yet can be otherwise identical. The choice of which rotation direction is positive is arbitrary. The gyroscope used in phones has right-hand chirality, while Unity uses left-handed.
+You cannot superimpose two of anything with opposite chirality and yet can be otherwise identical. The choice of which rotation direction is positive is arbitrary. The gyroscope used in phones has right-hand chirality, while Unity uses left-handed.
 
 ```c#
 Quaternion rotateTo = Device.Attitude.RightToLeftHanded(Trig.zAxis);
@@ -254,7 +255,7 @@ Quaternion rotateTo = Device.Attitude.RightToLeftHanded(Trig.zAxis);
 
 #### RotateBy
 
-Unity is left handed using the Z-axis for the forward direction. The iOS gyroscope, for example, is right-handed. We can reverse the Chirality (a fancy word for handed) by negating the offending axis and W. This effectively reverses the direction of rotation.
+Unity uses left handed chirilaty using the Z-axis for the forward direction. The iOS gyroscope, for example, is right-handed. We can reverse the Chirality (a fancy word for handed) by negating the offending axis and W. This reverses rotation direction.
 
 ```c#
 var attitude = GPS.Attitude.RightToLeftHanded(Trig.zAxis);
@@ -396,9 +397,9 @@ AreEqual(expected, actual);
 
 ### Caching Instances
 
-Even if premature optimisation is evil, the garbage collector can still be your enemy. If you target VR or mobile platforms, garbage collection runs degrade the gaming for your players. Even for PC/Mac/Linux machines, your players may have lower powered machines. Yes, I know, not the serious gamers. However, casual gamers? Even the simple `ForEach` allocates a tiny amount of memory each loop. In some ways, this is the worst. A few areas allocating large chunks then lots of tiny chunks add up to frequent collection runs with much-fragmented memory to investigate. Moreover, let's not even talk about coroutines just now.
+Even if premature optimisation is evil, the garbage collector can still be your enemy. If you target VR or mobile platforms, garbage collection runs degrade the gaming for your players. Even for PC/Mac/Linux machines, your players may have lower powered machines. Yes, I know, not the serious gamers. However, casual gamers? Even the simple `ForEach` allocates a tiny amount of memory each loop. This is the worst. A few areas allocating large chunks then lots of tiny chunks add up to frequent collection runs with much-fragmented memory to investigate. Let's not even talk about coroutines just now.
 
-What can we do about it without slowing down development or our game? When we are writing code, we can (usually) see where objects are being allocated/discarded a lot. Cache them for reuse on deactivation.
+What can we do about it without slowing down development or our game? When we are writing code, we can see where objects are being allocated/discarded a lot. Cache them for reuse on deactivation.
 
 Oh, so you want examples? Try these for size.
 
@@ -407,22 +408,23 @@ Oh, so you want examples? Try these for size.
 3. Events and emitters
 4. Temporary instances used in loops
 
-You get the idea. Feel free to add to the list. When not to cache.
+You get the idea.
+When not to cache:
 
-1. Classes instantiated once or occasionally.
-2. Classes you cannot reset for reuse. IEnumerable is one of those, unfortunately, so no caching coroutines.
-3. Classes with larger data sets where you instantiate a lot at once, but in very infrequent batches. Judgement is needed. A `Dictionary` or `Map` with 100 entries each with a payload of 100 bytes and an average key length of 5 take about 64k. Not much in the modern scheme of things. In this case cache the payloads, not the `Dictionary`.
+1. Classes that are not often instantiated.
+2. Classes you cannot reset for reuse. IEnumerable is one of those, so no caching coroutines.
+3. Classes with larger data sets where you instantiate a lot at once, but in very infrequent batches. They need judgement calls. A `Dictionary` or `Map` with 100 entries each with a payload of 100 bytes and an average key length of 5 take about 64k. Not much in the modern scheme of things. Here cache the payloads, not the `Dictionary`.
 
-Look at `new` carefully. It appears the same for classes and structs, but the latter uses the stack and does not allocate memory.
+Look at `new`. It appears the same for classes and structs, but the latter uses the stack and does not allocate memory.
 
-The `Cache` class is entirely static. We call classes that don't know about caching *Cache Agnostic*. You can also use *Cache Aware* classes that are more convenient and readable. For the impatient here are full examples of each.
+The `Cache` class is static. We call classes that don't know about caching *Cache Agnostic*. You can also use *Cache Aware* classes that are more convenient and readable. For the impatient here are full examples of each.
 
 #### Cache Agnostic Usage
 
-Agnostic usage is quite compact. It is a little harder to read because if the static `Cache<Agnostic>` references.
+Agnostic usage is compact. It is a little harder to read because if the static `Cache<Agnostic>` references.
 
 ```c#
-// This would normally be in a static constructor. It only need be run once
+// This would be in a static constructor. Only  run once
 Cache<Agnostic>.CreateItem     = () =>  new Agnostic {State = "Created"};
 Cache<Agnostic>.DeactivateItem = (item) => item.State =  "Deactivated";
 Cache<Agnostic>.ReactivateItem = (item) => item.State += " Reactivated";
@@ -443,7 +445,7 @@ Cache<Agnostic>.Dispose();            // and send it back again
 
 #### Cache Aware Usage
 
-Once a class is made cache aware, the resulting code is more explicit. If you want to cache an unsealed class, you can even subclass it and add the functionality below.
+A cache-aware class gives code is more explicit code. If you want to cache an unsealed class, you can even subclass it and add the functionality below.
 
 ```c#
 private class Aware : IDisposable {
@@ -471,11 +473,11 @@ aware.Dispose();
 
 #### Cache Entry Maintenance
 
-If the instance does not hold state, or you choose to deactivate state in your code, then the class can be cached without any further work. Just create it with the `Cache<T>.Instance` command rather than `new`. Like any resource, disposal is important. If the class implements the `IDisposable` interface, then the `using` statement is your best friend. If not, your code needs to use `Cache<T>.Dispose(instance)` or wrap in `using (Cache<T>.Disposable(instance)){}`.   An undisposed cached item constitutes a memory leak.
+If the instance does not hold state, or you deactivate state in your code, then the class can cache with no further work. Just create it with the `Cache<T>.Instance` command rather than `new`. Like any resource, disposal is important. If the class implements the `IDisposable` interface, then the `using` statement is your best friend. If not, your code needs to use `Cache<T>.Dispose(instance)` or wrap in `using (Cache<T>.Disposable(instance)){}`.   An undisposed cached item makes a memory leak.
 
 As with the underlying [`LinkedList`](#linked-lists), The [`CreateItem`](#create-a-new-linked-list), [`DeactivatItem`](#create-a-new-linked-list) and [`ReactivateItem`](#create-a-new-linked-list) come in three flavours - Added as methods to a class (private or public), attached to a class so that all instances can use them, or attached to an instance. In the latter case, only that specific instance have the methods. Now for the precedence.
 
-1. A class without any actions attached runs the default as listed below, unless;
+1. A class with no actions attached runs the default as listed below, unless;
 2. A class defines instance methods with the action name and signature, unless;
 3. There is an static call instance action.
 
@@ -502,7 +504,7 @@ var sealedClass2 = Cache<SealedClass>.Instance;    // sets index to 23
 
 ##### DeactivateItem
 
-Sometimes disposing of an item is not the right thing when it is put back in the recycle bin. Perhaps it contains an unclosed server connection, or a reference to a running prefab.
+Item `Dispose` may not be correct when recycling. Perhaps it contains an unclosed server connection, or a reference to a running prefab.
 
 1. If the payload is an `IDisposable`, call `Dispose()` otherwise do nothing
 2. The class has a method `static ClassName DeactivateItem(){doSomething();}`
@@ -512,11 +514,11 @@ Sometimes disposing of an item is not the right thing when it is put back in the
 
 Reactivating an item may require additional activities. Reopen the connection, restart the prefab or whatever. The actions are the same as above with R replacing D.
 
-#### Using a Cached Item Safely
+#### Using a Cached Item
 
-A Cache is only as good as it's housekeeping. If a cached item gets forgotten about it won't recycle for later use, and it won't be available for garbage disposal because it remains on an active list. There does not appear to be a safe way using the garbage collector that does not end up making more garbage. Prove me wrong. I would be overjoyed.
+A Cache is only as good as it's housekeeping. If a cached item gets forgotten about it won't recycle for later use, and it won't be available for garbage disposal because it remains on an active list. There does not appear to be a safe way using the garbage collector that does not end up making more garbage. Please prove me wrong.
 
-If you code can be made sequential (even waiting for Coroutines meets this criterion), the wrapping said code in `using` is the best option.
+For sequential code (even waiting for Coroutines meets this criterion), wrapping said code in `using` is the best option.
 
 ```c#
 var agnostic = Cache<Agnostic>.Instance;
@@ -528,7 +530,7 @@ using (var aware = Aware.Instance) {
 }
 ```
 
-Otherwise, it is your responsibility to call `Dispose`  reliably. Remember exceptions.
+Otherwise, it is your responsibility to call `Dispose`. Remember exceptions.
 
 ```c#
 Agnostic agnostic;
@@ -556,7 +558,7 @@ Assert.IsNull(Cache<Agnostic>.Entries.RecycleBin.First);
 
 ### Disposable.cs for IDisposable
 
-With closures and anonymous functions `using(...){...}` can be implemented without creating a new class to manage it. Don't be put off by the `new`. `Disposable` is a struct, so it is not involved directly in garbage collection.
+You can implement closures and anonymous functions with `using(...){...}` and without creating a new class to manage it. `Disposable` is a struct, so it no garbage collection.
 
 ```c#
     [Test]
@@ -585,7 +587,7 @@ public static Disposable<TreeContainer> DisposableInstance {
 
     return new Disposable<TreeContainer> {
       Action = (tree) => {
-        tree.Root();    // so all the branches are disposed of correctly
+        tree.Root();    // to dispose of all the branches
         node.Dispose();    // calls LinkList Dispose
       },
       Payload = node.Item
@@ -599,10 +601,10 @@ using (var treeDisposable = TreeContainer.DisposableInstance) {
 } // Implicit dispose
 ```
 
-There are two ways to use `Disposable<T>` that can be combined to make three useful approaches.
+There are two ways to use `Disposable<T>`. Combine them to make three useful approaches.
 
-1. ***Setting `Action`*** as above. Useful for sealed classes that do not have an `IDisposable` interface but need some cleaning up.
-2. ***`IDisposable` Interface*** when the `PayLoad` has one. Calling `Dispose()` on the `Disposable` automatically calls it for the `PayLoad` if it too has the interface.
+1. ***Setting `Action`*** as above. Useful for sealed classes that do not have an `IDisposable` interface but need cleaning up.
+2. ***`IDisposable` Interface*** when the `PayLoad` has one. Calling `Dispose()` on the `Disposable` calls it for the `PayLoad` if it too has the interface.
 3. Use ***Both*** together. Think of a situation where the `PayLoad` implements `IDisposable` but it is part of a parent object wanting to know the change in state.
 
 ```c#
@@ -648,7 +650,7 @@ using (var subscription = emitter.Subscribe(new Observer1())) {
   // ... the counter doesn't change because we have no observers
   Assert.AreEqual(expected: 0, actual: counter);
 }
-// Outside the using - and Dispose was called implicitly but OnComplete was not called again
+// Outside the using - an implicit Dispose but no call to OnComplete again
 Assert.AreEqual(expected: 0, actual: counter);
 ```
 
@@ -659,7 +661,7 @@ private struct Observer1 : IObserver {
 }
 ```
 
-While the generic version can pass additional information.
+The generic version can pass additional information.
 
 ```c#
 var emitter = new Emitter<int>();
@@ -676,7 +678,7 @@ private struct Observer3 : IObserver<int> {
 }
 ```
 
-While an ***Emitter*** provides some extra facilities to the built-in ***event*** delegates, it does not improve decoupling. It does pave the way for decoupled events using [***CustomAssets***](/CustomAssets), an extension of ***ScriptableObjects***.
+While an ***Emitter*** provides extra facilities to the built-in ***event*** delegates, it does not improve decoupling. It paves the way for decoupled events using [***CustomAssets***](/CustomAssets), extending ***ScriptableObjects***.
 
 ### Linked Lists
 
@@ -685,46 +687,42 @@ C#/.Net provides an excellent LinkedList implementation. It is, by necessity gen
 1. Reduce garbage collection by keeping remaining nodes in a recycling list.
 2. Ordered lists by providing a comparator.
 3. Manage state with ***create***, ***deactivate*** and ***reactivate***.
-4. All four support functions above can be inherited or injected for class or instance.
+4. All four support functions above allow inheritence or injection for class or instance.
 5. State management by making it easy to move nodes between lists.
 6. Fifo implementation.
 7. Walk the list without creating a new or temporary object.
-8. Debugging support by logging node movements.
+8. Support debugging by logging node movements.
 
 #### Nodes
 
-Each item added to a list is wrapped in a node instance. The node is a class, so it resides on the heap. Because nodes are recycled, no garbage collection is required.
+A node instance wraps each item added to a list. The node is a class, so it lives on the heap. We recycle nodes, no there is no garbage collection activity.
 
 ##### Node Name
 
-For clarity, while debugging a node name includes the home and owner lists as well as whatever the held item gives `ToString()`.
+For clarity, while debugging a node name includes the home and owner lists and whatever the held item gives `ToString()`.
 
 ##### Node Owner and Home
 
-When a node is created, the list used is set as the `Home` list. When an item is recycled, it is always returned to it's home recycle bin. Each time a node is moved between lists it's `Owner` is set accordingly.
+Place it on the `Home` list when we create a node. On being recycled, return it to it's home recycle bin. Set `Owner` each time a node moves to another list.
 
 ##### Node Comparison
 
-When walking the list, it is sometimes good to see if the node passes or fails a range check. Every node implements <, <=, >, >=, == and !=. The all rely on a single LinkedList function, `Compare` that can be set during initialisation.
+When walking the list, it is sometimes good to see if the node passes or fails a range check. Every node implements <, <=, >, >=, == and !=. They all rely on a single LinkedList function, `Compare`  as set during initialisation.
 
 ##### Move the Node to Another List
 
-Moving nodes provides the core difference between this linked list implementation and others. Moving nodes between lists provide the underlying mechanism for a caching state machine. Used in conjunction with ordered lists to feed them to a state in priority order. `MoveTo` moves the current node to the sorted location or top of the target list, while `MoveToEndOf` moves it to the bottom. The latter is used when disposing of a node so that the recycling list is used oldest first.
+Moving nodes provides the core difference between this linked list implementation and others. Moving nodes between lists provide the underlying mechanism for a caching state machine. Use with ordered lists to feed them to a state in priority order. `MoveTo` moves the current node to the sorted location or top of the target list, while `MoveToEndOf` moves it to the bottom.  Older items from the recycle bin  are first to reactivate.
 
 ##### Update Node Contents
 
-In a statement oriented world we would use `node.Item = value`, but sometimes a more functional approach can be enjoyed `node.MoveTo(state3list).Update(value)`.
-
+In a statement oriented world we would use `node.Item = value`, but we can also enjoye a functional approach with `node.MoveTo(state3list).Update(value)`.
 ##### Dispose of this Node
-
-When you are done with a node, call `Recycle()` or wrap in a `using` compound statement. Each node implements the `IDisposable`  interface. Being a green class, the trash is put into a recycling list rather than left hanging for the garbage collector.
-
+Call `Recycle()` or wrap in a `using` compound statement to release a node. A node implements the `IDisposable`  interface.
 ```c#
 using (var node = taskList.Top) {
     Process(node.Item);
 } // node sent to recycling
 ```
-
 To set a node adrift call `Destroy` instead. It deactivates the held item and then forgets the node ever existed. As soon as all references in your code go out of scope, the garbage collector is free to reuse the heap space.
 
 ```c#
@@ -735,19 +733,17 @@ Calling `Destroy` on the LinkedList destroys all entries in both active and recy
 
 ##### Fetch a New Node
 
-A new (or recycled) node is fetched from the current node's `Home` list then moved to `Owner`. If that is not your requirement, use `node.Home.Fetch()` or `node.Owner.Fetch()`.
+`Fetch` pulls a new (or recycled) node iscurrent node's `Home` list then moved to `Owner`. If that is not your requirement, use `node.Home.Fetch()` or `node.Owner.Fetch()`.
 
 ##### Push an Item to Owner
-
-Given a reference to an entry item, create a node where it's `Home` is the same as the current node. It is pushed onto the `Owner` list for processing.
-
+Create a  node for the entry item provided and give it the same `Home` as the current node. It is placed on the `Owner` list of the current node.
 #### Create a New Linked List
 
 Creation defines how the linked list behaves.
 
 ##### Unordered Lists & FIFO Stacks
 
-When an item is added to the list, it always becomes the `Top` element. `Bottom` becomes the oldest entry.
+When adding an item to the list, it always becomes the `Top` element. `Bottom` is the oldest entry.
 
 ```c#
 var numberList = new LinkedList<int>();
@@ -756,7 +752,7 @@ Assert.AreEqual(expected: 0, actual: numberList.New());
 
 ##### Custom Create, Deactivate & Reactivate
 
-It is all well and good to return `default(T)`, being zeros or null references, but then the user of your list needs to know to create an item if it is not provided. As an example, consider a list of open long-lived HTTP connections.
+It is fine to return `default(T)`, being zeros or null references, but then the user of your list needs to know to create an item when necessary. As an example, consider a list of open long-lived HTTP connections.
 
 ```c#
 var connections = LinkedList<Connection>{
@@ -770,13 +766,13 @@ using (var node = connections.Fetch()) {
 }
 ```
 
-Yes, I know. This example is ignoring the asynchronous nature of the request and the possibility that the connection has timed out. All in good time.
+Yes, I know. This example is ignoring the asynchronous nature of the request and the possibility that the connection has timed out.
 
-`DeactivateItem` will not call `Dispose()` on the item if it is an `IDisposable`. Override it if you need that functionality. If the item needs reactivation when retrieved for reuse, set an activation parameter as demonstrated above.
+`DeactivateItem` will not call `Dispose()` on the item if it is an `IDisposable`. Override it if you need that functionality. If the item needs reactivation when retrieved for reuse, set an activation parameter as above.
 
-`DeactivateItem(node)` is called before the node is placed in the recycle bin.
+Before node recycling, we call `DeactivateItem(node)`.
 
-All three custom functions can be created in different ways, depending on need.
+You can create all three custom functions in different ways, depending on need.
 
 ```c#
 // 1. per-class/struct/value-type
@@ -803,13 +799,13 @@ var numbers = LinkedList<int> {
 
 The static methods are active for any items of that class unless a per-instance invocation overrides them.
 
-Inherited methods are be active for any items of that class unless a per-instance or static invocation override them.
+Inherited methods are active for any items of that class unless a per-instance or static invocation override them.
 
 Per-instance invocations only affect one instance of a linked list.
 
 ##### Ordered Linked Lists
 
-Caching state machines and the like need a list of jobs to process in priority order. Priority could also be a time, a distance or any other measure that we can compare.
+Caching state machines need a list of jobs to process in priority order. Priority could also be a time, a distance or any other measure we can compare.
 
 ```c#
 var fences = new LinkedLisk<Geofence> {
@@ -819,16 +815,12 @@ var fences = new LinkedLisk<Geofence> {
 // fences nodes now implement <, <=, >, >=, == and !=
 if (fence.Active) fence.MoveTo(fences);    // injects in sorted order
 ```
-
-When an item is created or moved to an ordered list, it is placed on sorted order rather than just at the top.
-
-As above, `CompareItem` can be inherited, set for a class or an instance.
+Newly created or moved items maintain order. Inherit `CompareItem` or set it for a class or an instance.
 
 #### List Disposal
 
-Linked lists are commonly used as statics to keep lists of reusable elements. Sometimes they have a limited life, so need to be cleared for disposal or recycling in a parent linked list. There are two levels of cleanliness.
-
-1. `Discard()` disposes of any active elements, placing them in the recycle bin for later use. Use when you want to keep the linked list, but remove any outstanding elements. It is implicitly called if it is an Item in a parent LinkedList.
+Use linked lists as statics to keep reusable elements. Clear them when they have a limited life. There are two levels of cleanliness.
+1. `Discard()` disposes of any active elements, placing them in the recycle bin for later use. Use when you want to keep the linked list, but remove any outstanding elements. Called if it is an Item in a parent LinkedList.
 2. `Dispose()` removes items from the recycle bin as well so that the linked list can be safe for the garbage collector to pick up.
 
 #### Node Creation and Movement
@@ -845,7 +837,7 @@ It returns a reference to a node holding the new item.
 
 ##### Recycle a Node
 
-Use `Fetch` if you require a node with contents initialised elsewhere. It picks one from the recycling heap. If the recycling is empty, it creates a new item and matching node for you. If `CreateItem` has not been set the item is `default<T>`.
+Use `Fetch` if you require a node with contents initialised elsewhere. It picks one from the recycling heap. If the recycling is empty, it creates a new item and matching node for you. The code does not set it if `CreateItem` is `default<T>`.
 
 ```c#
 using (node = weatherEvents.Fetch()) {
@@ -870,9 +862,9 @@ void Update() {
 }
 ```
 
-In this admittedly theoretical example, once a job has been processed it is either finished or put on another job list for a dispatcher to decide what is next. Note that this example only works with small numbers of jobs, since it is only processing between 30 and 60 jobs a second. You could use `Walk`, but I would use something other than Update - possibly an Emitter so we can process only when needed.
+In this theoretical example, once we have processed a job we mark it finished or put it on another job list for a dispatcher to decide what to do next. Note that this example only works with small numbers of jobs, since it is only processing between 30 and 60 jobs a second.
 
-There is also a function to move to the end of a list for better dispersal of usage (LRU - least recently used). It can also be used to move an item to the end of the list regardless of priority.
+There is also a function to move to the end of a list for better dispersal of usage (LRU - least used). you can also use it to move an item to the end of the list regardless of priority.
 
 ```c#
 var result = jobs.First.Item;
@@ -885,9 +877,9 @@ if (result == null) {
 
 ##### Disposal of a Node
 
-Disposing of a node once it has served its purpose calls `Dispose()` on the item if it is an `IDiposable`. It then moves the node to the recycle bin for where it was initially created.
+Disposing of a node once it has served its purpose calls `Dispose()` on the item if it is an `IDiposable`. It then moves the node to the `Home` recycle bin.
 
-If an item has a known lifetime then by far the best way is with a `using` statement. Like `Try/Finally` it is guaranteed to be called. If the work requires waiting for resources, then put the `using` statement in a Coroutine, or it's equivalent.
+If an item has a known lifetime then by far the best way is with a `using` statement. Like `Try/Finally` there is aguarantee of execution. If the work requires waiting for resources, then put the `using` statement in a Coroutine, or it's equivalent.
 
 ```c#
 IEnumerator MyCoroutine() {
@@ -895,10 +887,10 @@ IEnumerator MyCoroutine() {
         while (!node.Item.Ready) yield return null;
         Process(node.Item);
     }
-} // node will be placed back in recycling after Dispose()
+} // place back in recycling after Dispose()
 ```
 
-Sometimes we do not know the lifetime of an item beforehand. In this case, whoever does needs to call `Dispose()` manually.
+Sometimes we do not know the lifetime of an item beforehand. Here, whoever does needs to calls `Dispose()`.
 
 #### A Lifo Stack
 
@@ -1513,6 +1505,71 @@ Assert.AreEqual("26", json.Node["Not my age"]);
 ```
 
 ## Unity Support
+
+### Build Support
+
+#### Define Preprocessor Symbols
+The only way to compile code that relies on a library that may not exists is to use the preprocessor. Since we will know the availability of a package, we can tell the compiler.
+
+For this, create a class in a ***Editor*** directory and have it initialise on load and inherit from ```AddDefineSymbols```. In the static constructor run your tests and add or remove define symbols as needed.
+
+##### Symbol Definition Control
+
+There are three define symbol methods:
+
+1. `AddDefines(string defines);`
+2. `RemoveDefines(string defines);`
+3. `AddOrRemoveDefines(bool addDefines, string defines);`
+
+The last method looks unwieldy, but it is valuable for controlling compile-time actions that are build target dependent.
+
+##### HasFolder
+Provide the `HasFolder(string folder)` with the string representation of a folder under ***Assets***. `HasFolder` is the easiest way to check *unitypackage* existence.
+
+##### Target
+Even if a *unitypackage* exists, the code may not apply to the target platform. `Target` takes a list of parameters and returns true if we are compiling for one of them.
+
+Possible targets are `Android`, `iOS`, `Linux`, `Linux64`, `LinuxUniversal`, `N3DS`, `OSX`, `PS4`, `PSP2`, `Switch`, `Tizen`, `tvOS`, `WSAPlayer`, `WebGL`, `WiiU`, `Windows`, `Windows64` and `XboxOne`.
+
+```c#
+if (Target(iOS, Android)) {...}
+```
+
+##### Example
+```c#
+[InitializeOnLoad]
+public class MyDependent : AddDefineSymbols {
+  static MyDefinitions() {
+    bool ok = HasFolder("My-Unity-Package") || Target(iOS, Android);
+    AddOrRemoveDefines(ok, "myUnityPackage;myUnityPackageAvailable");
+  }
+
+class myUnityPackageImplementation : MyUnityPackageInterface {
+  #if myUnityPackage
+    // do something, so the system uses this version of the interface
+  #else
+    static myUnityPackageImplementation() {
+      Debug.LogWarning("Please install 'whatever.unitypackage' from the store");
+    }
+  #endif
+}
+```
+
+`AskowlDecoupler` uses this technology. The implementation only activates for installed external packages.
+
+#### Pre/Post Process Build
+When building for different platforms, it is often necessary to tweak native configurations either before or after the build. All the tweaks are optional. Look to ***Askowl-Lib/Resources/PostProcessBuildDefault*** in the Unity Editor for the options you can change.
+
+##### Pre-Process Build
+###### Android - Enable Multidex
+Almost any Unity3D game of any size will have more than 64,000 public methods. I know, this sounds crazy. It's all those packages you have imported. You could enable ***Proguard***. Apart from obfuscating your app it also attempts to remove all the functions not called. It is rarely fully automatic since it cannot efficiently deal with reflection. Multidex does not have that problem. It does make your app larger.
+
+##### Post-Process Build
+###### iOS - Remove Notifications
+If your app does not use Push Notifications, then you can check this option to remove the build warning.
+
+###### iOS - Plist Entries
+iOS will not be accepted if Apple does not find particular *plist* entries. Unity3D generates most of them, but occasionally they get out of sync. As of 2017, the ***NSCalendarsUsageDescription*** was missing. Add others as you need them.
 
 ### Components
 

@@ -1,22 +1,20 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using NUnit.Framework;
-using Debug = UnityEngine.Debug;
-
+#if AskowlAble
 namespace Askowl.Examples {
-  /// <a href="">Using <see cref="Map"/></a>
+  using System;
+  using System.Collections.Generic;
+  using System.Diagnostics;
+  using NUnit.Framework;
+  using Debug = UnityEngine.Debug;
+
   public class MapExamples {
-    /// <a href="">Using <see cref="Map"/></a>
     [Test]
     public void NewMap() {
       var map = new Map();
       Assert.AreEqual(expected: 0, actual: map.Count);
     }
 
-    /// <a href="">Using <see cref="Map.Count"/></a>
     [Test]
     public void Count() {
       var map = new Map("One", 1, "Two", 2, "Three", 3);
@@ -24,7 +22,6 @@ namespace Askowl.Examples {
       Assert.AreEqual(expected: 3, actual: map.Count);
     }
 
-    /// <a href="">Using <see cref="Map.Set"/></a>
     [Test]
     public void Set() {
       var set = new Map().Set(1, 3, 5, 7, 9);
@@ -36,18 +33,16 @@ namespace Askowl.Examples {
       Assert.AreEqual(expected: 8, actual: set.Count);
     }
 
-    /// <a href="">Using <see cref="Map.Add"/></a>
     [Test]
     public void Add() {
       var map  = new Map("One", 1, "Two", 2, "Three", 3);
-      var more = new object[] {"Six", 6, "Seven", 7};
+      var more = new object[] { "Six", 6, "Seven", 7 };
 
       map.Add("Four", 4, "Five", 5).Add(more);
 
       Assert.AreEqual(expected: 7, actual: map.Count);
     }
 
-    /// <a href="">Using <see cref="Map.Remove"/></a>
     [Test]
     public void Remove() {
       var map = new Map("One", 1, "Two", 2, "Three", 3);
@@ -56,7 +51,6 @@ namespace Askowl.Examples {
       Assert.AreEqual(1, map.Count);
     }
 
-    /// <a href="">Using <see cref="Map.Found"/></a>
     [Test]
     public void Found() {
       var map = new Map("One", 111, "Two", "2", "Three", new Map());
@@ -66,7 +60,6 @@ namespace Askowl.Examples {
       Assert.IsFalse(map["TryMe"].Found);
     }
 
-    /// <a href="">Using <see cref="Map.Key"/></a>
     [Test]
     public void Key() {
       var map = new Map("One", 111, "Two", "2", "Three", new Map());
@@ -74,7 +67,6 @@ namespace Askowl.Examples {
       Assert.AreEqual(expected: "Two", actual: map["Two"].Key);
     }
 
-    /// <a href="">Using <see cref="Map.Value"/></a>
     [Test]
     public void Value() {
       var map = new Map("One", 111, "Two", "2", "Three", new Map());
@@ -84,48 +76,40 @@ namespace Askowl.Examples {
       Assert.IsNull(map["TryMe"].Value);
     }
 
-    /// <a href="">Using <see cref="Map.First"/></a>
     [Test]
     public void StringKeyIteration() {
-      var    map  = new Map("One", 111, "Two", "2", "Three", new Map());
-      string keys = "";
+      var map  = new Map("One", 111, "Two", "2", "Three", new Map());
+      var keys = "";
 
-      for (var key = map.First; key != null; key = map.Next) {
-        keys += key;
-      }
+      for (var key = map.First; key != null; key = map.Next) keys += key;
 
       Assert.AreEqual("OneTwoThree", keys);
     }
 
-    /// <a href="">Using <see cref="Map.Next"/></a>
     [Test]
     public void ObjectKeyIteration() {
-      var    map  = new Map("One", 111, "Two", "2", "Three", new Map());
-      string keys = "";
+      var map  = new Map("One", 111, "Two", "2", "Three", new Map());
+      var keys = "";
 
-      for (int i = 0; i < map.Count; i++) {
-        keys += map[i];
-      }
+      for (var i = 0; i < map.Count; i++) keys += map[i];
 
       Assert.AreEqual("OneTwoThree", keys);
     }
 
-    /// <a href="">Using <see cref="Map.Sort()"/></a>
     [Test]
     public void Sort() {
-      var    map    = new Map("One", 1, "Four", 4, "Three", 3, "Five", 5, "Two", 2);
-      string actual = "";
+      var map    = new Map("One", 1, "Four", 4, "Three", 3, "Five", 5, "Two", 2);
+      var actual = "";
 
       for (var key = map.Sort().First; key != null; key = map.Next) actual += key;
 
       Assert.AreEqual("FiveFourOneThreeTwo", actual);
     }
 
-    /// <a href="">Using <see cref="Map.Sort(Comparison{object})"/></a>
     [Test]
     public void SortT() {
-      var    map    = new Map("One", 1, "Four", 4, "Three", 3, "Five", 5, "Two", 2);
-      string actual = "";
+      var map    = new Map("One", 1, "Four", 4, "Three", 3, "Five", 5, "Two", 2);
+      var actual = "";
 
       map.Sort((x, y) => ((int) map[x].Value).CompareTo((int) map[y].Value));
       for (var key = map.First; key != null; key = map.Next) actual += key;
@@ -133,7 +117,6 @@ namespace Askowl.Examples {
       Assert.AreEqual("OneTwoThreeFourFive", actual);
     }
 
-    /// Using <see cref="Map.this[object]"/>
     [Test]
     public void ArrayGet() {
       var map = new Map("One", 1, "Four", 4, "Three", 3, "Five", 5, "Two", 2);
@@ -150,42 +133,36 @@ namespace Askowl.Examples {
       public void Dispose() { disposals += 1; }
     }
 
-    /// <a href="">Using <see cref="Map.Dispose"/></a>
     [Test]
     public void Dispose() {
-      Disposable[] values = new Disposable[3];
-      var          map    = new Map("One", values[0], "Two", values[1], "Three", values[2]);
+      var values = new Disposable[3];
+      var map    = new Map("One", values[0], "Two", values[1], "Three", values[2]);
       disposals = 0;
       map.Dispose();
       Assert.AreEqual(3, disposals);
       Assert.AreEqual(0, map.Count);
     }
 
-    /// <a href="">Using <see cref="Map"/></a>
     [Test]
     public void SpeedCheck() {
-      Stopwatch stopwatch = new Stopwatch();
+      var       stopwatch = new Stopwatch();
       var       map       = new Map();
       var       dict      = new Dictionary<string, object>();
       var       keys      = new string[10];
       const int sets      = 10000;
       bool      result;
 
-      for (int i = 0; i < keys.Length; i++) {
-        keys[i] = Guid.NewGuid().ToString();
-      }
+      for (var i = 0; i < keys.Length; i++) keys[i] = Guid.NewGuid().ToString();
 
       // ReSharper disable once CoVariantArrayConversion
       map.Set(keys);
 
-      for (int i = 0; i < keys.Length; i++) {
-        dict.Add(keys[i], null);
-      }
+      for (var i = 0; i < keys.Length; i++) dict.Add(keys[i], null);
 
       stopwatch.Start();
 
-      for (int j = 0; j < sets; j++) {
-        for (int i = 0; i < keys.Length; i++) {
+      for (var j = 0; j < sets; j++) {
+        for (var i = 0; i < keys.Length; i++) {
           result = map[keys[i]].Found;
           Assert.IsTrue(result);
           Assert.IsNull(map.Value);
@@ -197,8 +174,8 @@ namespace Askowl.Examples {
       stopwatch.Reset();
       stopwatch.Start();
 
-      for (int j = 0; j < sets; j++) {
-        for (int i = 0; i < keys.Length; i++) {
+      for (var j = 0; j < sets; j++) {
+        for (var i = 0; i < keys.Length; i++) {
           result = dict.ContainsKey(keys[i]);
           Assert.IsTrue(result);
           Assert.IsNull(dict[keys[i]]);
@@ -212,3 +189,4 @@ namespace Askowl.Examples {
     }
   }
 }
+#endif

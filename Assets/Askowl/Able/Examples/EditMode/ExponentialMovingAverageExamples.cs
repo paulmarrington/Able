@@ -1,13 +1,11 @@
-﻿using UnityEngine;
-using UnityEngine.TestTools;
-using NUnit.Framework;
-using System.Collections;
+﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-namespace Askowl.Examples { //#TBD#
-  /// <remarks><a href="http://unitydoc.marrington.net/Able#exponentialmovingaveragecs">exponential moving average</a></remarks>
+#if AskowlAble
+namespace Askowl.Examples {
+  using NUnit.Framework;
+
   public class ExponentialMovingAverageExamples {
     [Test]
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#ema-average-value">EMA Average Value</a></remarks>
     public void AverageValue() {
       var ema = new ExponentialMovingAverage(lookback: 4);
 
@@ -28,9 +26,8 @@ namespace Askowl.Examples { //#TBD#
     }
 
     [Test]
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#ema-average-angle">EMA Average Angle</a></remarks>
     public void AverageAngle() {
-      var ema = new ExponentialMovingAverage(); // lookback defaults to 8
+      var ema = new ExponentialMovingAverage(); // look-back defaults to 8
 
       AreEqual(expected: -10f,       actual: ema.AverageAngle(degrees: -10));
       AreEqual(expected: -5.555555f, actual: ema.AverageAngle(degrees: 10));
@@ -45,3 +42,4 @@ namespace Askowl.Examples { //#TBD#
     }
   }
 }
+#endif

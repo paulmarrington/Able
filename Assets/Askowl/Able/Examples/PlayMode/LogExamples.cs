@@ -1,5 +1,6 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
+#if AskowlAble
 using System.Collections;
 using System.Text.RegularExpressions;
 using Askowl.RichText;
@@ -68,10 +69,11 @@ namespace Askowl.Examples {
     public IEnumerator ToDictionary() {
       yield return LoadScene(SceneName);
 
-      var dictionary = Log.ToDictionary(new Log.Contents {
-        component = "My Component", action = "Act Now", result = "Success",
-        more      = new object[] {"count=", 1, "hello=", "world", "one", "two"}
-      });
+      var dictionary = Log.ToDictionary(
+        new Log.Contents {
+          component = "My Component", action = "Act Now", result = "Success"
+        , more      = new object[] { "count=", 1, "hello=", "world", "one", "two" }
+        });
 
       Assert.IsTrue(dictionary.ContainsKey("action"));
       Assert.AreEqual("Act Now", dictionary["action"]);
@@ -113,3 +115,4 @@ namespace Askowl.Examples {
     }
   }
 }
+#endif

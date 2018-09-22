@@ -1,8 +1,9 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-using UnityEngine;
-
+#if AskowlAble
 namespace Askowl {
+  using UnityEngine;
+
   /// <a href=""></a>
   /// <inheritdoc />
   public class ConditionalHideExample : MonoBehaviour {
@@ -22,7 +23,7 @@ namespace Askowl {
     private int hiThere = 77;
 
     [Header("Test Object Reference Conditional"), SerializeField]
-    private GameObject text;
+    private GameObject text = null;
 
     [ConditionalHide("text"), SerializeField]
     private string backupContent = "blat";
@@ -31,11 +32,7 @@ namespace Askowl {
     private int whatNow = 33;
 
     private void Start() {
-      if (enableAll) {
-        number = whatNow;
-      } else {
-        userName = backupContent;
-      }
+      if (enableAll) { number = whatNow; } else { userName = backupContent; }
 
       if (text != null) {
         whatNow       = number;
@@ -45,3 +42,4 @@ namespace Askowl {
     }
   }
 }
+#endif

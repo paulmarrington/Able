@@ -1,9 +1,10 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-using System;
-using UnityEngine;
-
+#if AskowlAble
 namespace Askowl.Examples {
+  using System;
+  using UnityEngine;
+
   /// Using <see cref="Set{T}" />
   /// <inheritdoc />
   [Serializable]
@@ -17,3 +18,4 @@ namespace Askowl.Examples {
     [SerializeField] private SetInstance setInstance;
   }
 }
+#endif

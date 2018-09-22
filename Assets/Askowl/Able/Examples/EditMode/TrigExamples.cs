@@ -1,9 +1,11 @@
-﻿#if UNITY_EDITOR && Able
+﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-using NUnit.Framework;
-using UnityEngine;
+#if AskowlAble
+namespace Askowl.Examples {
+  using NUnit.Framework;
+  using UnityEngine;
 
-namespace Askowl.Examples { //#TBD#
+//#TBD#
   /// <remarks><a href="http://unitydoc.marrington.net/Able#trigcs">Trigonometry Rocks</a></remarks>
   public class TrigTests {
     /// <remarks><a href="http://unitydoc.marrington.net/Able#direction">Define axes</a></remarks>
@@ -203,8 +205,9 @@ namespace Askowl.Examples { //#TBD#
     }
 
     private void AreEqual(Vector2 expected, Vector2 actual) {
-      Assert.IsTrue(Compare.AlmostEqual(expected.x, actual.x) & Compare.AlmostEqual(expected.y, actual.y),
-                    $"expected: {expected.x:F4},{expected.y:F4}, actual: {actual.x:F4},{actual.y:F4}");
+      Assert.IsTrue(
+        Compare.AlmostEqual(expected.x, actual.x) & Compare.AlmostEqual(expected.y, actual.y),
+        $"expected: {expected.x:F4},{expected.y:F4}, actual: {actual.x:F4},{actual.y:F4}");
     }
   }
 }

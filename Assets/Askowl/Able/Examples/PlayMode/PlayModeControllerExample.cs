@@ -1,12 +1,13 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-using System.Collections;
-using NUnit.Framework;
-using UnityEngine;
-using UnityEngine.TestTools;
-using UnityEngine.UI;
-
+#if AskowlAble
 namespace Askowl.Examples {
+  using System.Collections;
+  using NUnit.Framework;
+  using UnityEngine;
+  using UnityEngine.TestTools;
+  using UnityEngine.UI;
+
   /// Using <see cref="PlayModeController" />
   /// <inheritdoc />
   public class PlayModeControllerExample : PlayModeController {
@@ -61,3 +62,4 @@ namespace Askowl.Examples {
     }
   }
 }
+#endif

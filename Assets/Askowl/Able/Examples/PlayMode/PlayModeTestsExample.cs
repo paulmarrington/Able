@@ -1,12 +1,14 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-using System.Collections;
-using System.Text.RegularExpressions;
-using UnityEngine;
-using UnityEngine.Assertions;
-using UnityEngine.TestTools;
+#if AskowlAble
 
 namespace Askowl.Examples {
+  using System.Collections;
+  using System.Text.RegularExpressions;
+  using UnityEngine;
+  using UnityEngine.Assertions;
+  using UnityEngine.TestTools;
+
   /// Using <see cref="PlayModeTests" />
   /// <inheritdoc />
   public class PlayModeTestsExample : PlayModeTests {
@@ -78,3 +80,4 @@ namespace Askowl.Examples {
     }
   }
 }
+#endif

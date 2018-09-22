@@ -1,11 +1,10 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-
 namespace Askowl {
+  using System;
+  using System.Collections;
+  using System.Collections.Generic;
+
   /// <a href=""></a>
   public class Map : IDisposable {
     private readonly Dictionary<object, object> map = new Dictionary<object, object>();
@@ -18,7 +17,7 @@ namespace Askowl {
 
     /// <a href=""></a>
     public Map Add(params object[] keyValuePairs) {
-      for (int j = 0; j < keyValuePairs.Length; j += 2) {
+      for (var j = 0; j < keyValuePairs.Length; j += 2) {
         SetKvp(keyValuePairs[j], keyValuePairs[j + 1]);
         keys.Add(Key);
         map[Key] = Value;
@@ -29,7 +28,7 @@ namespace Askowl {
 
     /// <a href=""></a>
     public Map Set(params object[] newKeys) {
-      for (int j = 0; j < newKeys.Length; j++) {
+      for (var j = 0; j < newKeys.Length; j++) {
         SetKvp(newKeys[j], null);
         keys.Add(Key);
         map[Key] = Value;
@@ -40,7 +39,7 @@ namespace Askowl {
 
     /// <a href=""></a>
     public Map Remove(params object[] oldKeys) {
-      for (int j = 0; j < oldKeys.Length; j++) {
+      for (var j = 0; j < oldKeys.Length; j++) {
         if (map.ContainsKey(oldKeys[j])) {
           keys.Remove(oldKeys[j]);
           (map[oldKeys[j]] as IDisposable)?.Dispose();
@@ -52,7 +51,7 @@ namespace Askowl {
     }
 
     /// <a href="bit.ly/">First</a>
-    public object First => (Count > 0) ? keys[index.Start()] : null;
+    public object First => Count > 0 ? keys[index.Start()] : null;
 
     /// <a href="bit.ly/">First</a>
     public object Next => index.Reached(Count - 1) ? null : keys[index.Next()];
@@ -84,7 +83,7 @@ namespace Askowl {
         Found = map.TryGetValue(key, out Value);
         return this;
       }
-      set { map[Key = key] = Value = value; }
+      set => map[Key = key] = Value = value;
     }
 
     /// <a href="bit.ly/">Count</a>
@@ -100,8 +99,8 @@ namespace Askowl {
     public object Value;
 
     /// <a href=""></a>
-    public void Dispose() {
-      for (int i = 0; i < Count; i++) (map[keys[i]] as IDisposable)?.Dispose();
+    public virtual void Dispose() {
+      for (var i = 0; i < Count; i++) (map[keys[i]] as IDisposable)?.Dispose();
       keys.Clear();
       map.Clear();
       index.Dispose();
@@ -117,9 +116,7 @@ namespace Askowl {
     public override string ToString() {
       (builder ?? (builder = new List<string>())).Clear();
 
-      for (var key = First; key != null; key = Next) {
-        builder.Add($"{key}={Value}");
-      }
+      for (var key = First; key != null; key = Next) builder.Add($"{key}={Value}");
 
       return string.Join(separator: ", ", value: builder.ToArray());
     }

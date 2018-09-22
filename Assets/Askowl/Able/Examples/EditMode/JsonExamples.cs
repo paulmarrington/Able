@@ -1,8 +1,9 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-using NUnit.Framework;
-
+#if AskowlAble
 namespace Askowl.Examples {
+  using NUnit.Framework;
+
   /// Using <see cref="Json"/>
   public class JsonExamples {
     private Json json = Json.Instance;
@@ -29,9 +30,7 @@ namespace Askowl.Examples {
       Assert.AreEqual(8, json.Node.To("items.item.0").Children.Length);
       json.Node.To("items.item.0");
 
-      using (json.Node.Anchor()) {
-        Assert.AreEqual(5, json.Node.Next("magic").Children.Length);
-      }
+      using (json.Node.Anchor()) Assert.AreEqual(5, json.Node.Next("magic").Children.Length);
 
       Assert.AreEqual("Maple", json.Node.Next("topping.6.type").Value);
     }
@@ -76,3 +75,4 @@ namespace Askowl.Examples {
 ";
   }
 }
+#endif

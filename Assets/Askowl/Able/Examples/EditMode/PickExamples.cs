@@ -1,15 +1,13 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-using NUnit.Framework;
-using UnityEngine;
-
+#if AskowlAble
 namespace Askowl.Examples {
-  /// <remarks><a href="http://unitydoc.marrington.net/Able#pickcs-interface-to-choose-from-options">Pick Interface</a></remarks>
+  using NUnit.Framework;
+
   public class PickExamples {
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#pickcs-interface-to-choose-from-options">Pick Interface</a></remarks>
     [Test]
     internal void PickExample() {
-      PickImplementation nose = new PickImplementation();
+      var nose = new PickImplementation();
 
       Assert.AreEqual("1", nose.Pick());
       Assert.AreEqual("2", nose.Pick());
@@ -22,3 +20,4 @@ namespace Askowl.Examples {
     }
   }
 }
+#endif

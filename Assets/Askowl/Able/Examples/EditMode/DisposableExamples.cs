@@ -1,5 +1,6 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
+#if AskowlAble
 using System;
 using NUnit.Framework;
 
@@ -92,3 +93,4 @@ namespace Askowl.Examples {
     public void   Dispose() { howdie = "hello"; }
   }
 }
+#endif
