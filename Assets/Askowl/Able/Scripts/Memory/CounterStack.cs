@@ -6,9 +6,9 @@ namespace Askowl {
   /// <a href=""></a>
   /// <inheritdoc />
   // ReSharper disable once ClassNeverInstantiated.Global
-  public class CounterStack : Stack<int> {
+  public class CounterFifo : Fifo<int> {
     /// <a href="bit.ly/">Instance</a>
-    public new static CounterStack Instance => Cache<CounterStack>.Instance;
+    public new static CounterFifo Instance => Cache<CounterFifo>.Instance;
 
     /// <a href=""></a>
     public int Start(int startingValue = 0) => Math.Abs(Push(startingValue));
@@ -24,6 +24,6 @@ namespace Askowl {
     }
 
     /// <inheritdoc />
-    public override void Dispose() { Cache<CounterStack>.Dispose(this); }
+    public override void Dispose() { Cache<CounterFifo>.Dispose(this); }
   }
 }

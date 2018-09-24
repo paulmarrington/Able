@@ -4,7 +4,7 @@ namespace Askowl {
   using System;
 
   /// <a href=""></a>
-  public class Stack<T> : IDisposable {
+  public class Fifo<T> : IDisposable {
     private T[] stack = new T[8];
     private int pointer;
 
@@ -12,13 +12,16 @@ namespace Askowl {
     private void DeactivateItem() { pointer = 0; }
 
     /// <a href="">For subclasses that do their own caching</a>
-    protected Stack() { }
+    protected Fifo() { }
 
     /// <a href=""></a>
-    public static Stack<T> Instance => Cache<Stack<T>>.Instance;
+    public static Fifo<T> Instance => Cache<Fifo<T>>.Instance;
+
+    /// <a href=""></a>
+    public T this[int i] => stack[i];
 
     /// <a href="bit.ly/">Count</a>
-    public int Count { get => pointer; set => pointer = (value < pointer) ? value : pointer; }
+    public int Count { get => pointer; set => pointer = value < pointer ? value : pointer; }
 
     /// <a href="bit.ly/">Push</a>
     public T Push(T entry) {
@@ -35,7 +38,7 @@ namespace Askowl {
     public virtual T Pop() => pointer == 0 ? default : stack[--pointer];
 
     /// <a href="bit.ly/">Pop</a>
-    public virtual Stack<T> Swap() {
+    public Fifo<T> Swap() {
       if (pointer >= 2) {
         T top = Top;
         Top  = Next;
@@ -54,7 +57,7 @@ namespace Askowl {
     public virtual void Dispose() {
       for (var i = 0; i < pointer; i++) (stack[i] as IDisposable)?.Dispose();
       pointer = 0;
-      Cache<Stack<T>>.Dispose(this);
+      Cache<Fifo<T>>.Dispose(this);
     }
   }
 }

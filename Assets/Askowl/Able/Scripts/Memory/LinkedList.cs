@@ -43,12 +43,13 @@ namespace Askowl {
       public Node MoveTo(LinkedList<T> to) => to.Insert(this);
 
       /// <a href="http://unitydoc.marrington.net/Able#move-node-to-another-list">Move Node to Another List</a>
+      // ReSharper disable once UnusedMethodReturnValue.Global
       public Node MoveToEndOf(LinkedList<T> to) => to.Append(this);
 
       /// <a href="http://unitydoc.marrington.net/Able#dispose-of-this-node">Dispose of a Node Forever</a>
       public void Destroy() {
         Owner.DeactivateItem(this);
-        Item = default(T);
+        Item = default;
         Home.Unlink(this);
         reverseLookup?.Remove(this);
         Home = null;
@@ -116,7 +117,7 @@ namespace Askowl {
 
       if (method != null) return () => (T) method.Invoke(null, null);
 
-      return CallConstructor() ?? (() => default(T));
+      return CallConstructor() ?? (() => default);
     }
 
     private static Action<Node> GetDefaultDeactivateItem() => DefaultActivation("DeactivateItem") ??
@@ -139,13 +140,13 @@ namespace Askowl {
     public string Name { get; }
 
     /// <a href="">Item Creation and Preparation when new() is not enough</a>
-    public static Func<T> CreateItemStatic = GetDefaultCreateItem();
+    public static readonly Func<T> CreateItemStatic = GetDefaultCreateItem();
 
     /// <a href="">Item Creation and Preparation when new() is not enough</a>
     public Func<T> CreateItem { private get; set; } = () => CreateItemStatic();
 
     /// <a href=""></a>
-    public static Action<Node> ReactivateItemStatic = GetDefaultReactivateItem();
+    public static readonly Action<Node> ReactivateItemStatic = GetDefaultReactivateItem();
 
     /// <a href="">Prepare an idle item for reuse</a>
     public Action<Node> ReactivateItem { private get; set; } = (node) => ReactivateItemStatic(node);
@@ -310,9 +311,9 @@ namespace Askowl {
     }
 
     /// <a href="http://unitydoc.marrington.net/Able#node-creation-and-movement">List for Unused Nodes</a>
-    public LinkedList<T> RecycleBin => isRecycleBin ? null : recycleBin ?? (recycleBin = newRecycleBin);
+    public LinkedList<T> RecycleBin => isRecycleBin ? null : recycleBin ?? (recycleBin = NewRecycleBin);
 
-    private LinkedList<T> newRecycleBin => new LinkedList<T>($"{Name} Recycling Bin") { isRecycleBin = true };
+    private LinkedList<T> NewRecycleBin => new LinkedList<T>($"{Name} Recycling Bin") { isRecycleBin = true };
 
     private bool          isRecycleBin;
     private LinkedList<T> recycleBin;
@@ -329,7 +330,7 @@ namespace Askowl {
     public Node Second => First?.Next;
 
     /// <a href="http://unitydoc.marrington.net/Able#fifo">Is list empty?</a>
-    public bool Empty => (First == null);
+    public bool Empty => First == null;
 
     /// <a href="http://unitydoc.marrington.net/Able#fifo">Calculate number of items in a list</a>
     public int Count { get; private set; }
@@ -348,7 +349,7 @@ namespace Askowl {
     #region Debugging
     /// <a href="http://unitydoc.marrington.net/Able#debug-mode">Debug mode logs changes</a>
     // ReSharper disable once StaticMemberInGenericType
-    public static bool DebugMode { private get; set; } = false;
+    public static bool DebugMode { get; } = false;
 
     private void DebugMessage(Node node, string append = "") {
       Debug.Log(
@@ -360,7 +361,7 @@ namespace Askowl {
     /// <a href="http://unitydoc.marrington.net/Able#dump">Return list contents as a string</a>
     public string Dump(int maxEntriesToDump = 1000) {
       var builder = new StringBuilder();
-      int line    = 0;
+      var line    = 0;
 
       for (var node = First; (node != null) && (maxEntriesToDump-- > 0); node = node.Next) {
         builder.AppendLine($"{++line}:\t{node}");
@@ -371,7 +372,7 @@ namespace Askowl {
 
     /// <inheritdoc />
     public override string ToString() {
-      var count = (recycleBin != null) ? $"({Count}/{recycleBin.Count})" : $"({Count})";
+      string count = recycleBin != null ? $"({Count}/{recycleBin.Count})" : $"({Count})";
       return $"{Name} {count,8}";
     }
     #endregion

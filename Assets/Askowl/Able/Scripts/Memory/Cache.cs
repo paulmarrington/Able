@@ -5,6 +5,7 @@
 namespace Askowl {
   using System;
 
+  /// <a href=""></a>
   public class Cache {
     /// <a href="http://bit.ly"></a>
     public interface Boxed { }
@@ -13,6 +14,7 @@ namespace Askowl {
     /// <inheritdoc cref="LinkedList{T}" />
     public class Boxed<T> : LinkedList<T>.Node, Boxed {
       /// <a href="http://bit.ly"></a>
+      // ReSharper disable once UnassignedField.Global
       public T Value;
 
       /// <a href="http://bit.ly"></a>
@@ -20,6 +22,10 @@ namespace Askowl {
 
       /// <a href="http://bit.ly"></a>
       public static Boxed Clone(Boxed<T> item) => (Boxed<T>) Cache<T>.Entries.Add(item.Value);
+
+      /// <a href=""></a>
+      /// <inheritdoc />
+      public override string ToString() => Value.ToString();
     }
   }
 

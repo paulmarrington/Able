@@ -6,6 +6,7 @@ namespace Askowl {
   using System.Collections.Generic;
 
   /// <a href=""></a>
+  // ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
   public class Map : IDisposable {
     private readonly Dictionary<object, object> map = new Dictionary<object, object>();
 
@@ -38,6 +39,7 @@ namespace Askowl {
     }
 
     /// <a href=""></a>
+    // ReSharper disable once UnusedMethodReturnValue.Global
     public Map Remove(params object[] oldKeys) {
       for (var j = 0; j < oldKeys.Length; j++) {
         if (map.ContainsKey(oldKeys[j])) {
@@ -56,7 +58,7 @@ namespace Askowl {
     /// <a href="bit.ly/">First</a>
     public object Next => index.Reached(Count - 1) ? null : keys[index.Next()];
 
-    private CounterStack index = CounterStack.Instance;
+    private CounterFifo index = CounterFifo.Instance;
 
     /// <a href="bit.ly/">[</a>
     public object this[int i] => keys[i];
@@ -83,7 +85,7 @@ namespace Askowl {
         Found = map.TryGetValue(key, out Value);
         return this;
       }
-      set => map[Key = key] = Value = value;
+//      set => map[Key = key] = Value = value;
     }
 
     /// <a href="bit.ly/">Count</a>
