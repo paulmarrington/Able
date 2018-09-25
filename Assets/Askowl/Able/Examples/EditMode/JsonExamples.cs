@@ -23,7 +23,10 @@ namespace Askowl.Examples {
       // no quotes around key
       json.Parse(@"Not my age: 26");
       Assert.AreEqual("26", json.Node["Not my age"]);
+    }
 
+    [Test]
+    public void ParseSampler() {
       json.Parse(jsonSampler);
       Assert.AreEqual(1, json.Node.To("items").Children.Length);
       Assert.AreEqual(1, json.Node.To("items.item").Children.Length);

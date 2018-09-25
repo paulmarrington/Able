@@ -6,38 +6,37 @@ namespace Askowl {
   /// <a href=""></a>
   public static class Components {
     /// <a href=""></a>
-    public static T Find<T>(params string[] path) where T : Component {
-      if ((path = ParsePath(path)) == null) return default(T);
+    public static T Find<T>(string path = "") where T : Component {
+      var split         = path.Split('/');
+      var parentObjects = Objects.FindAll<GameObject>(split[0]);
 
-      GameObject[] parentObjects = Objects.FindAll<GameObject>(path[0]);
-
-      for (int i = 0; i < parentObjects.Length; i++) {
-        T found = Find<T>(parentObjects[i], path);
+      for (var i = 0; i < parentObjects.Length; i++) {
+        var found = Find<T>(parentObjects[i], split);
         if (found != default(T)) return found;
       }
 
-      return default(T);
+      return default;
     }
 
     /// <a href=""></a>
-    public static T Find<T>(GameObject inParentObject, params string[] path) where T : Component {
-      path = ParsePath(path);
-      T[] components = inParentObject.GetComponentsInChildren<T>();
-      if (components.Length == 0) return default(T);
+    public static T Find<T>(GameObject inParentObject, string path) where T : Component =>
+      Find<T>(inParentObject, path.Split('/'));
 
-      for (int i = 0; i < components.Length; i++) {
-        bool found = true;
+    /// <a href=""></a>
+    public static T Find<T>(GameObject inParentObject, string[] path) where T : Component {
+      var components = inParentObject.GetComponentsInChildren<T>();
+      if (components.Length == 0) return default;
+
+      for (var i = 0; i < components.Length; i++) {
+        var found = true;
 
         GameObject childObject = components[i].gameObject;
 
         for (int j = path.Length - 1; found && (j >= 0); j--) {
           if (path[j].Length > 0) {
             while (found && (childObject.name != path[j])) {
-              if ((childObject == inParentObject)) {
-                found = false;
-              } else {
-                childObject = childObject.transform.parent.gameObject;
-              }
+              if (childObject == inParentObject) { found = false; }
+              else { childObject                         = childObject.transform.parent.gameObject; }
             }
           }
         }
@@ -45,24 +44,17 @@ namespace Askowl {
         if (found) return components[i];
       }
 
-      return default(T);
+      return default;
     }
 
     /// <a href=""></a>
-    public static T Create<T>(params string[] path) where T : Component {
+    public static T Create<T>(string path) where T : Component {
       GameObject gameObject = Objects.CreateGameObject(path);
       return gameObject.AddComponent<T>();
     }
 
     /// <a href=""></a>
-    public static T Establish<T>(params string[] path) where T : Component =>
+    public static T Establish<T>(string path) where T : Component =>
       Find<T>(path) ?? Create<T>(path);
-
-    private static string[] ParsePath(string[] path) {
-      if (path.Length == 0) return null;
-
-      if (path.Length == 1) path = path[0].Split('/');
-      return path;
-    }
   }
 }

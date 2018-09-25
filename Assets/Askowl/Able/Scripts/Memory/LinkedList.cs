@@ -59,7 +59,6 @@ namespace Askowl {
       public Node Recycle() {
         Owner.DeactivateItem(this);
         MoveToEndOf(Home.RecycleBin);
-
         return this;
       }
 
@@ -75,6 +74,9 @@ namespace Askowl {
 
       /// <a href=""></a>
       public Node Push(T t) => Home.Push(item: t).MoveTo(Owner);
+
+      /// <a href=""></a>
+      public Node Add(T t) => Home.Add(item: t).MoveTo(Owner);
     }
 
     #region Private create, deactivation and activation support
@@ -120,8 +122,7 @@ namespace Askowl {
       return CallConstructor() ?? (() => default);
     }
 
-    private static Action<Node> GetDefaultDeactivateItem() => DefaultActivation("DeactivateItem") ??
-                                                              (node => { }); //(node.Item as IDisposable)?.Dispose());
+    private static Action<Node> GetDefaultDeactivateItem() => DefaultActivation("DeactivateItem") ?? (node => { });
 
     private static Action<Node> GetDefaultReactivateItem() => DefaultActivation("ReactivateItem") ?? (node => { });
 
@@ -140,13 +141,13 @@ namespace Askowl {
     public string Name { get; }
 
     /// <a href="">Item Creation and Preparation when new() is not enough</a>
-    public static readonly Func<T> CreateItemStatic = GetDefaultCreateItem();
+    public static Func<T> CreateItemStatic = GetDefaultCreateItem();
 
     /// <a href="">Item Creation and Preparation when new() is not enough</a>
     public Func<T> CreateItem { private get; set; } = () => CreateItemStatic();
 
     /// <a href=""></a>
-    public static readonly Action<Node> ReactivateItemStatic = GetDefaultReactivateItem();
+    public static Action<Node> ReactivateItemStatic = GetDefaultReactivateItem();
 
     /// <a href="">Prepare an idle item for reuse</a>
     public Action<Node> ReactivateItem { private get; set; } = (node) => ReactivateItemStatic(node);
@@ -197,9 +198,10 @@ namespace Askowl {
 
     #region Node Creation and Movement
     /// <a href="">Add an Item to a List</a>
-    public Node Add(params T[] newItems) {
-      Node node                                            = null;
-      for (var idx = 0; idx < newItems.Length; idx++) node = Set(newItems[idx]);
+    public Node Add(T item) {
+      Node node = Fetch();
+      reverseLookup?.Remove(node.Item).Add(item, node);
+      node.Item = item;
       return node;
     }
 
@@ -217,13 +219,6 @@ namespace Askowl {
 
       var node = RecycleBin.First.MoveTo(this);
       ReactivateItem(node);
-      return node;
-    }
-
-    /// <a href=""></a>
-    public Node Set(T item) {
-      var node = Fetch();
-      node.Item = item;
       return node;
     }
 
@@ -294,10 +289,12 @@ namespace Askowl {
     }
 
     private void Unlink(Node node) {
-      if (node == node.Owner.First) { node.Owner.First = node.Next; } else if (node == node.Owner.Last
-      ) { node.Owner.Last                              = node.Previous; } else if ((node.Previous == null)
-                                                                                && (node.Next
-                                                                                 == null)) {
+      if (node      == node.Owner.First) { node.Owner.First = node.Next; }
+      else if (node == node.Owner.Last
+      ) { node.Owner.Last = node.Previous; }
+      else if ((node.Previous == null)
+            && (node.Next
+             == null)) {
         return; // Node doesn't belong to anyone
       }
 
@@ -349,7 +346,7 @@ namespace Askowl {
     #region Debugging
     /// <a href="http://unitydoc.marrington.net/Able#debug-mode">Debug mode logs changes</a>
     // ReSharper disable once StaticMemberInGenericType
-    public static bool DebugMode { get; } = false;
+    public static bool DebugMode = false;
 
     private void DebugMessage(Node node, string append = "") {
       Debug.Log(
@@ -363,7 +360,7 @@ namespace Askowl {
       var builder = new StringBuilder();
       var line    = 0;
 
-      for (var node = First; (node != null) && (maxEntriesToDump-- > 0); node = node.Next) {
+      for (Node node = First; (node != null) && (maxEntriesToDump-- > 0); node = node.Next) {
         builder.AppendLine($"{++line}:\t{node}");
       }
 

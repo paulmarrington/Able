@@ -13,41 +13,14 @@ namespace Askowl {
     /// <a href=""></a>
     private readonly ArrayList keys = new ArrayList();
 
-    /// <a href="bit.ly/">Map</a>
-    public Map(params object[] keyValuePairs) { Add(keyValuePairs); }
-
-    /// <a href=""></a>
-    public Map Add(params object[] keyValuePairs) {
-      for (var j = 0; j < keyValuePairs.Length; j += 2) {
-        SetKvp(keyValuePairs[j], keyValuePairs[j + 1]);
-        keys.Add(Key);
-        map[Key] = Value;
-      }
-
-      return this;
-    }
-
-    /// <a href=""></a>
-    public Map Set(params object[] newKeys) {
-      for (var j = 0; j < newKeys.Length; j++) {
-        SetKvp(newKeys[j], null);
-        keys.Add(Key);
-        map[Key] = Value;
-      }
-
-      return this;
-    }
-
     /// <a href=""></a>
     // ReSharper disable once UnusedMethodReturnValue.Global
-    public Map Remove(params object[] oldKeys) {
-      for (var j = 0; j < oldKeys.Length; j++) {
-        if (map.ContainsKey(oldKeys[j])) {
-          keys.Remove(oldKeys[j]);
-          (map[oldKeys[j]] as IDisposable)?.Dispose();
-          map.Remove(oldKeys[j]);
-        }
-      }
+    public Map Remove(object key, bool dispose = true) {
+      if ((key == null) || !map.ContainsKey(key)) return this;
+
+      keys.Remove(key);
+      if (dispose) (map[key] as IDisposable)?.Dispose();
+      map.Remove(key);
 
       return this;
     }
@@ -81,11 +54,18 @@ namespace Askowl {
     /// <a href="bit.ly/">[</a>
     public Map this[object key] {
       get {
-        SetKvp(key, null);
-        Found = map.TryGetValue(key, out Value);
+        Found = map.TryGetValue(Key = key, out Value);
         return this;
       }
-//      set => map[Key = key] = Value = value;
+    }
+
+    /// <a href=""></a>
+    public Map Add(object key, object value = null) {
+      if (key == null) return this;
+
+      if (!map.ContainsKey(key)) keys.Add(key);
+      map[Key = key] = Value = value;
+      return this;
     }
 
     /// <a href="bit.ly/">Count</a>
@@ -106,12 +86,6 @@ namespace Askowl {
       keys.Clear();
       map.Clear();
       index.Dispose();
-    }
-
-    private void SetKvp(object key, object value, bool found = true) {
-      Key   = key;
-      Value = value;
-      Found = found;
     }
 
     /// <inheritdoc />

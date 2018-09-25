@@ -39,7 +39,8 @@ namespace Askowl {
 
     /// <a href=""></a>
     public static void AddOrRemoveDefines(bool addDefines, string named) {
-      if (addDefines) { AddDefines(defines: named); } else { RemoveDefines(defines: named); }
+      if (addDefines) { AddDefines(defines: named); }
+      else { RemoveDefines(defines: named); }
     }
 
     /// <a href=""></a>
@@ -48,7 +49,7 @@ namespace Askowl {
     /// <a href=""></a>
     protected static bool HasPackage(string packageName) {
       if (json == null) json = Json.Instance.Parse(File.ReadAllText("Packages/manifest.json"));
-      return !json.Node.To("dependencies", packageName).Failed;
+      return !json.Node.To($"dependencies.{packageName}").Failed;
     }
 
     private static Json json;
@@ -59,6 +60,7 @@ namespace Askowl {
 
     protected const BuildTarget
       // ReSharper disable MissingXmlDoc
+      // ReSharper disable InconsistentNaming
       OSX            = BuildTarget.StandaloneOSX,
       Windows        = BuildTarget.StandaloneWindows,
       iOS            = BuildTarget.iOS,
@@ -73,6 +75,7 @@ namespace Askowl {
       XboxOne        = BuildTarget.XboxOne,
       tvOS           = BuildTarget.tvOS,
       Switch         = BuildTarget.Switch;
+    // ReSharper restore InconsistentNaming
     // ReSharper restore MissingXmlDoc
 
     private static List<string> Split() => PlayerSettings.GetScriptingDefineSymbolsForGroup(
@@ -94,8 +97,8 @@ namespace Askowl {
   [InitializeOnLoad]
   public sealed class SetProjectName : DefineSymbols {
     static SetProjectName() {
-      var dataPath    = Application.dataPath.Split('/');
-      var projectName = dataPath[dataPath.Length - 2];
+      var    dataPath    = Application.dataPath.Split('/');
+      string projectName = dataPath[dataPath.Length - 2];
       AddDefines(Regex.Replace(projectName,                "[^A-Za-z0-9_]", ""));
       AddDefines(Regex.Replace(PlayerSettings.productName, "[^A-Za-z0-9_]", ""));
     }

@@ -6,22 +6,20 @@ description: Choose your advertising network
 * Table of Contents
 {:toc}
 ## Executive Summary
-`Able` contains scripts needed by other ***Askowl*** libraries that have stand-alone value. It contains mathematics support around time conversion, comparisons and trigonometry. The data structure section helps with containers, caching, emitters, selectors, stack and trees. There are scripts to parse generic (as in unknown internal structure) CSV and JSON data. For Unity3D support, there are scripts to aid testing, locate components and game objects, pluggable logging, and various editor display and runtime components.
+`Able` contains scripts needed by other ***Askowl*** libraries. You will find mathematics support around time conversion, comparisons and trigonometry. The data structure section helps with containers, caching, emitters, selectors, stack and trees. We have scripts to parse generic (as in unknown internal structure) CSV and JSON data. For Unity3D support consider scripts to aid testing, locate components and game objects, pluggable logging, and various editor display and runtime components.
 
 > Read the code in the Examples Folder and run the Example scene
 
 ## Introduction
 
-Unity provides lots of great functionality, but there are always more problems than there are solutions. All the solutions documented here were to solve problems in other Askowl libraries. They also stand on their own when simple is not so simple. There are four sections for Math, Data, Text and Unity. There is a lot here. All I can suggest is that you browse the table of contents.
-
-
+Unity provides lots of great functionality, but there are always more problems than solutions. All the solutions documented here were to solve problems in other Askowl libraries. They also stand on their own when simple is not so simple. I have divide the scripts into four sections for Math, Data, Text and Unity.
 ## Maths functions
 
 ### Clock.cs - time & date conversions
 
 #### Epoch Time
 
-For fast calculations the creators of Unix invented Epoch time to represent time as seconds since the start of 1970 in a 32-bit integer. In this form, it wraps around in the year 2038. It also suffered inaccuracy because it did not account for leap seconds. This conversion is not 2038 limited as it uses doubles. Leap seconds are an issue if you are using dates each side of an end of year correction - an unlikely event with minor implications.
+For fast calculations the creators of Unix invented Epoch time to represent time as seconds since the start of 1970 in a 32-bit integer. This form wraps around in the year 2038 and suffered inaccuracy created by leap seconds. The conversion presented here is not 2038 limited. Leap seconds are an issue if you are using dates each side of an end of year correction - an unlikely event with minor implications.
 ```c#
 DateTime now          = DateTime.Now;
 double   epochTimeNow = Clock.EpochTimeNow;
@@ -42,7 +40,7 @@ Epoch time is always UTC.
 
 ##### double EpochTimeAt(DateTime when);
 
-Convert local time to UTC then translate to epoch time. Unlike Unix Epoch time, this result accounts for leap seconds.
+Convert local time to UTC before translating to epoch time. Unlike Unix Epoch time, this result accounts for leap seconds.
 
 ##### DateTime FromEpochTime(double epochTime);
 
@@ -52,7 +50,7 @@ Convert back from Epoch UTC to local time, C# style.
 
 #### AlmostEqual for Floating Point
 
-Comparing floating point numbers can be a hit or miss affair. Every mathematical operation is subject to rounding to fit into the number of bits. A single precision 32-bit float has around 7 digits of accuracy.  Even trivial calculations may not compare equal.
+Floating point number comparisons can be hit or miss. Every mathematical operation is subject to rounding to fit into the number of bits. A single precision 32-bit float has around 7 digits of accuracy.  Even trivial calculations may not compare equal.
 
 Enter `Compare.AlmostEqual`. You can specify the minimum change or use the defaults of 0.001 for single precision and 0.00001 for doubles.
 
@@ -72,7 +70,7 @@ IsTrue(Compare.AlmostEqual(a: 123.456789, b: 123.45679));
 
 #### AlmostEqual for Integers
 
-Integers don't suffer from rounding problems. Sometimes it is useful to see if two values are close.
+Integers don't suffer from rounding problems but being close can have value.
 
 ```c#
 IsFalse(Compare.AlmostEqual(a: 123L, b: 133L, minimumChange: 10L));
@@ -92,7 +90,7 @@ IsTrue(Compare.AlmostEqual(a: 1,  b: 2));
 
 #### IsDigitsOnly
 
-Check the contents of a string and return true if it only has digits.
+Check the contents of a string and return true if only digits.
 
 ```
 Assert.IsTrue(Compare.isDigitsOnly("123987654"));
@@ -113,7 +111,7 @@ Assert.IsFalse(Compare.isDigitsOnly(""));
 
 > An **exponential moving average** is a way to calculate an average where old values have less impact on the average than more recent ones.
 
-Financial calculations often make use of EMA, but I use it for IoT. Many devices can give jittery readings until they settle down. Then real-world interactions make then inaccurate again. A good example is a compass or magnetometer. Walk past a mass of steel, and it attracts them - just like an engineer. EMA dampens the variations. It is also useful when merging IoT data.
+Financial calculations often make use of EMA, but IoT has needs also. Many devices can give jittery readings until they settle down. Real-world interactions make them inaccurate again. A good example is a compass or magnetometer. Walk past a mass of steel, and a compass will swing. EMA dampens the variations. Use when merging IoT data.
 
 #### EMA Initialisation
 
@@ -133,7 +131,7 @@ The lookback value is application specific. Ask yourself how many data points ba
 
 #### EMA Average Value
 
-If you don't make `Average` calls at consistent time intervals, then you need to consider other methods to make the values equally spaced.
+If you don't make `Average` calls at consistent time intervals, you need to consider other methods to make the values equally spaced.
 
 ```c#
 AreEqual(expected: 1f,      actual: ema.Average(value: 1));
@@ -145,7 +143,7 @@ AreEqual(expected: 4.0336f, actual: ema.Average(value: 4));
 
 #### EMA Average Angle
 
-Using EMA with angles in degrees is the same except that it normalises the result to be between -180 and +180 degrees.
+EMA used with angles in degrees is the same except it normalises the result to be between -180 and +180 degrees.
 
 ```c#
 AreEqual(expected: -10f,       actual: ema.AverageAngle(degrees: -10));
@@ -169,9 +167,9 @@ AreEqual(expected: -1.513316f, actual: ema.AverageAngle(degrees: 364));
 
 #### Coordinates Data Structure
 
-Here lies another data structure that contains coordinates. It is more efficient to have separate definitions than it is to burden one definition with lots of irrelevant data. It is poignant when we are dealing with pass-by-value.
+Here lies another data structure that contains coordinates. Separate definitions can be more efficient than burdening one definition with lots of irrelevant data.
 
-In this world-view, coordinates use 64-bit double floating points for accuracy and know whether they are degrees or radians.
+In this world-view, coordinates use 64-bit double floating points for accuracy and are degrees or radians aware.
 
 ```c#
 var location = Geodetic.Coords(-27.46850, 151.94379);
@@ -183,13 +181,13 @@ Debug.Log(same.ToString()); // -27.46850, 151.94379
 
 #### Distance Between Two Points
 
-In the geodetic parlance, the shortest distance between two points is an arc, not a straight line. It is important if you don't want to tunnel through earth and dive under the sea to get anywhere.
+In the geodetic parlance, the shortest distance between two points is an arc, not a straight line. This follows the curvature of the earth.
 
-`Kilometres(from, to)` uses the Haversine formula to calculate the distance considering an approximation of the earth's curvature. For display convenience there is a version, `DistanceBetween(from, to)`, that returns a string is more friendly than the raw kilometres. If the distance is below one kilometre, it returns the value number of metres (i.e. 43 m). For distances below ten kilometres, it provides one decimal place (4.7 km). Above the kilometres are whole numbers only (23 km).
+`Kilometres(from, to)` uses the Haversine formula to calculate the distance considering an approximation of the earth's curvature. For display convenience the version, `DistanceBetween(from, to)` exists to returns a string representation. If the distance is below one kilometre, the value is the number of metres (i.e. 43 m). For distances below ten kilometres, one decimal place (4.7 km) is adequate. Above ten the kilometres are whole numbers only (23 km).
 
 #### Bearing from Point to Point
 
-If you were hiking, you would take a bearing between yourself and a known landmark and use that bearing to get there.
+If you were hiking, you would take a bearing between yourself and a known landmark and follow that bearing.
 
 ```c#
 var degrees = Geodetic.BearingDegrees(from, to);
@@ -211,7 +209,7 @@ Unity quaternion math focusses on the needs of the game. Great, but methods need
 
 #### AroundAxis
 
-Rotate a quaternion around the X, Y or Z axis by the number of degrees. It is useful for a clock face, a compass or a merry-go-round.
+Rotate a quaternion around the X, Y or Z axis by the number of degrees. Uses include a clock face, a compass or a merry-go-round.
 
 ```c#
 // ... A
@@ -222,7 +220,7 @@ attitude = attitude.AngleAxis(Trig.zAxis, compass.MagneticHeading);
 
 #### Inverse
 
-Calling `Inverse` changed the direction of rotation. If you rotate a quaternion then rotate it again using the inverse then you get back the original quaternion.
+`Inverse` changes rotation direction. If you rotate a quaternion and rotate back again using the inverse you get back the original quaternion.
 
 ```c#
 // C ...
@@ -255,7 +253,7 @@ Quaternion rotateTo = Device.Attitude.RightToLeftHanded(Trig.zAxis);
 
 #### RotateBy
 
-Unity uses left handed chirilaty using the Z-axis for the forward direction. The iOS gyroscope, for example, is right-handed. We can reverse the Chirality (a fancy word for handed) by negating the offending axis and W. This reverses rotation direction.
+Unity uses left handed chirality using the Z-axis for the forward direction. The iOS gyroscope, for example, is right-handed. We can reverse the Chirality (a fancy word for handed) by negating the offending axis and W. This reverses rotation direction.
 
 ```c#
 var attitude = GPS.Attitude.RightToLeftHanded(Trig.zAxis);
@@ -290,7 +288,7 @@ The name is a character constant, being 'X', 'Y' or 'Z'. Use it for switch state
 
 ##### Ord
 
-Ordinal value - the same as for `Vector3` - X=0, Y=1, Z=2. The values can be access by ordinal value (i.e. Trig.xAxis[0] == 1).
+Ordinal value - the same as for `Vector3` - X=0, Y=1, Z=2. The values can be access by the ordinal value (i.e. Trig.xAxis[0] == 1).
 
 ##### Vector
 
@@ -411,7 +409,7 @@ Oh, so you want examples? Try these for size.
 You get the idea.
 When not to cache:
 
-1. Classes that are not often instantiated.
+1. Classes that are rarely instantiated.
 2. Classes you cannot reset for reuse. IEnumerable is one of those, so no caching coroutines.
 3. Classes with larger data sets where you instantiate a lot at once, but in very infrequent batches. They need judgement calls. A `Dictionary` or `Map` with 100 entries each with a payload of 100 bytes and an average key length of 5 take about 64k. Not much in the modern scheme of things. Here cache the payloads, not the `Dictionary`.
 
@@ -680,6 +678,55 @@ private struct Observer3 : IObserver<int> {
 
 While an ***Emitter*** provides extra facilities to the built-in ***event*** delegates, it does not improve decoupling. It paves the way for decoupled events using [***CustomAssets***](/CustomAssets), extending ***ScriptableObjects***.
 
+### Fifo Stacks
+
+C# provides a serviceable `Stack` class. Even `LinkedList` from this package can provide a powerful stack. I think both are too heavy when we want a simple stack. This implementation is complete in under two dozen lines of code. It has unique features that make it most suitable for lightweight applications.
+
+1. Instantiate with `Fifo<T>.Instance`.
+2. It is an `IDisposable`. Cache with `Dispose()` for later - reducing garbage collection.
+3. It is easy to access and change the most recent item pushed with `Top`, making it perfect for dynamic data that needs a history.
+4. Use `Next` to retrieve or update the second-in-line.
+5. `Push` and `Pop` both return the current item. It makes data with history easier to create.
+6. `Swap` is a convenience method that swaps `Top` with `Next`.
+7. `Count` will return the number of stack entries.
+8. Set `Count` to reduce the number of entries on the stack.
+9. A protected constructor allows inherited classes to bypass caching. Useful if they cache everything themselves.
+
+The easiest way to show off the functionality is with the source to `CounterFifo`, a class that inherits from `Fifo<int>`.
+
+#### CounterFifo
+
+```c#
+public class CounterFifo : Fifo<int> {
+  public new static CounterFifo Instance => Cache<CounterFifo>.Instance;
+  public int Start(int startingValue = 0) => Math.Abs(Push(startingValue));
+  public int Next() => Math.Abs(++Top);
+  public bool Reached(int bounds) {
+    var reached = (Top >= bounds);
+    if (reached) Pop();
+    return reached;
+  }
+  public override void Dispose() { Cache<CounterStack>.Dispose(this); }
+}
+```
+
+So, thanks to `Fifo`, CounterFifo is concise. However, what does it do? Well, the name says it all - it is a stack of counters. OK, you say, but why? There are other uses, but I use it for an alternate form of iteration. We know that `foreach` causes lots of garbage to collect due to the state machine being generated by the compiler when a method returns `IEnumerator`. The problem is that these functions do not reset, creating a new one for each turn of the loop. By providing methods `First` and `Next` in a class we can implement easy-to-use iteration with minimal garbage.
+
+```c#
+for (var key = map.First; key != null; key = map.Next) {
+  Process(key, map[key]);
+}
+```
+
+Cool, huh? However, how does it work? Here is the implementation in ***Map.cs***.
+
+```c#
+public object First => (Count > 0) ? keys[index.Start()] : null;
+public object Next => index.Reached(Count - 1) ? null : keys[index.Next()];
+private CounterFifo index = CounterFifo.Instance;
+```
+
+We could have just used `int index;`. In similar instances, we have problems when one iteration occurs in another. Besides, this is easier to read.
 ### Linked Lists
 
 C#/.Net provides an excellent LinkedList implementation. It is, by necessity generic. My implementation has different goals.
@@ -736,7 +783,17 @@ Calling `Destroy` on the LinkedList destroys all entries in both active and recy
 `Fetch` pulls a new (or recycled) node iscurrent node's `Home` list then moved to `Owner`. If that is not your requirement, use `node.Home.Fetch()` or `node.Owner.Fetch()`.
 
 ##### Push an Item to Owner
-Create a  node for the entry item provided and give it the same `Home` as the current node. It is placed on the `Owner` list of the current node.
+
+Create a  node for the entry item provided and give it the same `Home` as the current node and set to `Owner` as the current node.
+
+##### Add Another Item
+
+For convenience in chaining `Node` has an `Add` method. In this example the first add is from `LinkedList` while the rest are from the inner `Node` class.
+
+```c#
+list.Add("One").Add("Two").Add("Three");
+```
+
 #### Create a New Linked List
 
 Creation defines how the linked list behaves.
@@ -815,7 +872,7 @@ var fences = new LinkedLisk<Geofence> {
 // fences nodes now implement <, <=, >, >=, == and !=
 if (fence.Active) fence.MoveTo(fences);    // injects in sorted order
 ```
-Newly created or moved items maintain order. Inherit `CompareItem` or set it for a class or an instance.
+Created or moved items maintain order. Inherit `CompareItem` or set it for a class or an instance.
 
 #### List Disposal
 
@@ -827,13 +884,11 @@ Use linked lists as statics to keep reusable elements. Clear them when they have
 
 ##### Add an Item
 
-If you have an item that has not been on a list, use `Add` to correct that oversight.
+If you have an item that has not been on a list, use `Add` to correct that oversight. It will pull an entry from the recycle bin if there is one.
 
 ```c#
-var node = fences.Add(newFence);
+var node = fences.Add(newFence).Add(anotherFence);
 ```
-
-It returns a reference to a node holding the new item.
 
 ##### Recycle a Node
 
@@ -894,7 +949,7 @@ Sometimes we do not know the lifetime of an item beforehand. Here, whoever does 
 
 #### A Lifo Stack
 
-For the uninitiated, ***Lifo*** is an acronym for *Last in first out*. A linked list is well suited for Lifo stacks. The return stack used by most languages with functions is Lifo, so every return returns from the most recently entered function. Stack-based languages such as FORTH and FICL make working with Lifo an art form of efficiency (and unreadability). We use Lifo stacks every day with the undo stack when editing or the back button on a browser.
+For the uninitiated, ***Lifo*** is an acronym for *Last in first out*. It well suits a linked list. The return stack used by most languages with functions is Lifo, so every return returns from the most recent function. Stack-based languages such as FORTH and FICL make working with Lifo an art form of efficiency (and unreadability). We use Lifo stacks every day with the undo stack when editing or the back button on a browser.
 
 ##### First
 
@@ -918,7 +973,7 @@ if (node != null) {
 
 ##### Last
 
-`Last` is the other less visited end of the stack/linked list. It is used a lot internally, but I can't think where I would use it elsewhere. Great for anyone who likes burning the candle from both ends. There is a `MoveToEnd` method that makes a node the new Bottom.
+`Last` is the other less visited end of the stack/linked list. Great for anyone who likes burning the candle from both ends. There is a `MoveToEnd` method that makes a node the new Bottom.
 
 ##### Empty
 
@@ -954,7 +1009,7 @@ dispatchList.Push(myItem);
 
 ##### Pop
 
-Also, of course, for every push, there has to be a pop. However, what do we do about node conservation? Easy, put it in the recycle bin. Remember to finish with it or move it somewhere safe before the next implicit or explicit yield. You don't need to dispose of the node since it is already indisposed.
+Also for every push, there has to be a pop. However, what do we do about node conservation? Easy, put it in the recycle bin. Remember to finish with it or move it somewhere safe before the next implicit or explicit yield. You need not dispose of the node.
 
 ```c#
 using (var node = taskList.Top) {
@@ -965,11 +1020,12 @@ node = taskList.Pop();
 Process(node.Item);
 ```
 
-In some ways, this is better because you are free to move the node without it being moved back to the recycle bin for you.
+This
+is better because you are free to move the node without it being moved back to the recycle bin for you.
 
 #### Node Walking
 
-Sing to the melody of *Jive Walking*. Seriously, node walking is the best way of processing all or some of the items in a list. 
+Sing to the melody of *Jive Walking*. Node walking is the best way of processing all or some of the items in a list. 
 
 ```c#
 var tasks = new LinkedList<Task> {
@@ -985,22 +1041,22 @@ void Update() {
 }
 ```
 
- Think of a list of tasks where only tasks that have exceeded their use-by date are to be processed. Because we want to discard the node when done, we need to keep a reference to Next.
+ Think of a list of tasks where only tasks that have exceeded their use-by date processed. Because we want to discard the node when done, we need to keep a reference to Next.
 
 ```c#
 void Update() {
       var next = node.Next;
       for (node = list1.First; node != null; node = next, next = node.Next) {
         if (node.Item.Ready >= Time.RealtimeSinceStartup) break;
-        using (node) { Process(node.Item); } // node is discarded afterwards                 }
+        using (node) { Process(node.Item); } // discarde afterwards
 }
 ```
 
-By wrapping it in a `using` statement `Dispose` is called even if an exception was thrown.
+By wrapping it in a `using` statement `Dispose` has a guarantee of execution.
 
 #### Debug Mode
 
-Because linked lists can be used in a cached state machine, knowing where a task is going can be an essential part of understanding the functionality.
+Because we can use linked lists in a cached state machine, knowing where a task is going can be an essential part of understanding the functionality.
 
 ##### Name
 
@@ -1020,57 +1076,52 @@ Returns a string containing the list name and counts for it and the attached rec
 
 ### Map - A Dictionary Wrapper
 
-Underneath, a `Map` is still a C# `Dictionary` with similar object references for keys and values. This allows for mixed types that can be converted on retrieval.
+Underneath, a `Map` is still a C# `Dictionary` with similar object references for keys and values. This allows conversion for mixed types.
 
-My limited tests show that the `Dictionary` is faster than `SortedList`. The latter uses `Array.BinarySearch` to find entries. I have read other performance tests that report binary searches to be faster for small numbers of keys. I checked this on my MacBook Pro - and the Dictionary approach was twice as fast with 10 keys and hundreds of times faster will 1000 or more keys. That is not to say that the results would be the same on other hardware - an Android phone for example.
+My limited tests show that the `Dictionary` is faster than `SortedList`. The latter uses `Array.BinarySearch` to find entries. I have read other performance tests that report binary searches to be faster for small numbers of keys. I checked this on my MacBook Pro - and the Dictionary approach was twice as fast with 10 keys and hundreds of times faster will 1000 or more keys. Not that the results would be the same on other hardware - an Android phone for example.
 
-For `Map`, the `Hashtable` class would have made the perfect base, but in more tests `Dictionary` was consistently faster. Interestingly, on the tests I created, `Map` can be up to a third again faster than `Dictionary`.
+For `Map`, the `Hashtable` class would have made the perfect base, but in more tests `Dictionary` was faster. On the tests I created, `Map` can be up to a third again faster than `Dictionary`.
 
-#### Creating a New Map
-
-It is possible to seed a new `Map` by passing in key-value pairs. The keys do not have to be strings. If either strings or values are primitives they will be auto-boxed.
-
-```c#
-var map1 = new Map();
-var map2 = new Map("One", 1, "Two", "Twice", "Three", "Thrice");
-var map3 = new Map(keyValuePairArray);
-```
-
-#### Add: Adding Entries
+#### Creating a Map and adding Entries
 
 You can add as many entries as you like by passing in key-value pairs. `Add` returns a reference to the `Map` for chaining.
 
 ```c#
-var map  = new Map("One", 1, "Two", 2, "Three", 3);
-var more = new object[] {"Six", 6, "Seven", 7};
-map.Add("Four", 4, "Five", 5).Add(more);
+var map  = new Map().Add("One", 1).Add("Two", 2).Add("Three", 3);
 ```
 
-#### Set: Creating or Updating a Set
+#### Creating or Updating a Set
 
 A `Set` is a convenience method to fill a `Map` with keys referencing null values.
 
 ```c#
-var set = new Map().Set(1, 3, 5, 7, 9);
-set.Set(11, 13, 15);
+var set = new Map().Add(1).Add(3).Add(5).Add(7).Add(9);
 ```
 
 #### For the Truly Destructive
 
-`Remove` causes `Map` to completely forget one or more entries.
+`Remove` causes `Map` to forget one or more entries.
 
 ```c#
-var map = new Map("One", 1, "Two", 2, "Three", 3);
-map.Remove("Two", "One");
+var map = new Map()).Add("One", 1).Add("Two", 2).Add("Three", 3);
+map.Remove("Two").Remove("One");
 Assert.AreEqual(1, map.Count);
 ```
 
-#### Retrieve a Key/Value Pair
-
-The core method for search and rescue is an array override. It attempts to retrieve the value for the supplied key and sets some class instance values. It then returns a reference to `Map` for chaining.
+Set will call `Dispose()` on values that implement `IDisposable`. Where this would cause awkward infinite recursion, turn it off with the `dispose` parameter.
 
 ```c#
-var map = new Map("One", 1, "Four", 4, "Three", 3, "Five", 5, "Two", 2);
+map.Remove("Three" dispose: false);
+```
+
+
+
+#### Retrieve a Key/Value Pair
+
+The core method for search and rescue is an array override. It tries to retrieve the value for the supplied key and sets class instance values. It then returns a reference to `Map` for chaining.
+
+```c#
+var map = new Map().Add("One", 1).Add("Four", 4).Add("Three", 3).Add("Five", 5);
 Assert.IsTrue(map["Three"].Found);
 Assert.IsFalse(map["Seven"].Found);
 ```
@@ -1080,7 +1131,7 @@ Assert.IsFalse(map["Seven"].Found);
 We always need to know if a search was successful. We can't rely on `Value` being `null` since that may be a valid result.
 
 ```c#
-var set = new Map().Set(1, 3, "Five", 7, 9);
+var set = new Map().Add(1).Add(3).Add("Five").Add(7).Add(9);
 if (set[7].Found || set["Seven"].Found) Debug.Log("We have sevens");
 ```
 
@@ -1089,14 +1140,14 @@ if (set[7].Found || set["Seven"].Found) Debug.Log("We have sevens");
 For completeness, `Map` saves the last key searched - whether it is successful or not. It means you can pass the map around without having to search for an entry again.
 
 ```c#
-var map = new Map("One", 111, "Two", "2", "Three", new Map());
+var map = new Map().Add("One", 111).Add("Two", "2").Add("Three", new Map());
 
 if (map["Three"].Found) Debug.Log($"Found '{map.Key}'");
 ```
 
 ##### Value
 
-Value is either null if the last retrieval failed or it is an `object`.
+Value is null if the last retrieval failed.
 
 ```c#
 var map = new Map("One", 111, "Two", "2", "Three", new Map());
@@ -1104,65 +1155,29 @@ Assert.AreEqual(expected: "2", actual: map["Two"].Value);
 Assert.IsNull(map["TryMe"].Value);
 ```
 
-##### Values of a Specific Type
-
-If you know what you have as a type for a value you can retrieve it with the generic `As<T>`. If you are wrong, it returns default(T), which is null for objects, 0 for numbers and empty structs.
-
-```c#
-var map = new Map("One", 111, "Two", "2", "Three", new Map());
-Assert.AreEqual(expected: "2", actual: map["Two"].As<string>());
-Assert.AreEqual(expected: 0,   actual: map["Two"].As<int>());
-```
-
-##### Check Map for Key of a Specific Type
-
-If you need confirmation on whether the value is of a specific type, use `IsA`.
-
-```c#
-var map = new Map("One", 1, "Two", "2", "Three", new Map());
-Assert.IsTrue(map["Two"].IsA<string>());
-Assert.IsTrue(map["Three"].IsA<Map>());
-Assert.IsFalse(map["Two"].IsA<int>());
-```
-
-##### For Code that Doesn't Have a Clue
-
-If the map comes from an external source and the values could be anything, then you have two choices. You can use `ToString` to get a (hopefully) readable representation, or you can use `TypeOf`. It is considered bad form to have to stoop to this approach, but if you have unknown data, what else can you do? It is not as bad as it looks. If the data is parsed from JSON, for example, it can only be a string, a number, a boolean or `null`.
-
-```c#
-Map types = new Map(typeof(long), 'l', typeof(string), 's', typeof(double), 'd');
-
-switch ((types[jsonNode[0].TypeOf].As<char>())) {
-  case 'l': return Process(jsonNode[0].As<long>())
-  case 'd': return Process(jsonNode[0].As<double>())
-  case 's': return Process(jsonNode[0].As<string>())
-  default:  return Process(null);
-}
-```
-
 #### Keys: Iterating Through a Map
 
-The iteration techniques here are designed to use as little of the heap as possible to minimise garbage collection. Both mobile and VR apps suffer if the garbage collector is kept busy.
+I designed the iteration techniques hereuse as little of the heap as possible to minimise garbage collection. Both mobile and VR apps suffer a busy the garbage collector.
 
-There is one other crucial distinguishing feature. By default, the keys are returned in the same order as they were added. This is valuable if they are coming from structured data such as XML or JSON.
+There is one other crucial distinguishing feature. By default, it returns the keys in the same order as it added them. This is valuable if they are coming from structured data such as XML or JSON.
 
 ##### Count: of Items in a Map
 
-`Count` can always tell you how many items are in the `Map`. It can be used to check if the map is empty or in an expected size range. It is also used for object key iteration below.
+`Count` can always tell you how many items are in the `Map`. It's used to check if the map is empty or in an expected size range. Then there is object key iteration below.
 
-##### When all Keys are Strings
+##### Using First and Next
 
 Because `string` keys are the most common, they get special treatment.
 
 ```c#
 for (var key = map.First; key != null; key = map.Next) {
-  Process(key, map.As<string>);
+  Process(key, map[key]);
 }
 ```
 
-##### For Object Keys
+##### Using Array Indexing
 
-Object keys are even more fundamental. As well as `Count`, `Map` allows access to keys with an integer array index.
+Object keys are even more fundamental. `Map` allows access to keys with an integer array index.
 
 ```c#
 for (int i = 0; i < map.Count; i++) {
@@ -1172,32 +1187,32 @@ for (int i = 0; i < map.Count; i++) {
 
 ##### Sorting
 
-As mentioned above, without intervention the order of the keys for either iteration method is the order that they were inserted into the map in the first place. This is useful for data where the order matters, such as JSON and XML.
+As mentioned above, without intervention the order of the keys for either iteration method is the order it inserted them into the map. This is useful for data where the order matters, such as JSON and XML.
 
 When we need a different order, use one of the `Sort` functions. Without parameters, `Sort` uses the default sorting for an object. This is alphabetical for strings and numeric ascending for numbers. If you mix your keys, it becomes a dog's breakfast.
 
 ```c#
-var    map    = new Map("One", 1, "Four", 4, "Three", 3, "Five", 5, "Two", 2);
+var map = new Map().Add("One", 1).Add("Four", 4).Add("Three", 3);
 string actual = "";
 for (var key = map.Sort().First; key != null; key = map.Next) actual += key;
-Assert.AreEqual("FiveFourOneThreeTwo", actual);
+Assert.AreEqual("OneThreeTwo", actual);
 ```
 
-For more interesting cases, `Sort` can be provided with a comparison lambda.
+`Sort` with a comparison lambda can provide For more interesting cases.
 
 ```c#
-var    map    = new Map("One", 1, "Four", 4, "Three", 3, "Five", 5, "Two", 2);
+var map = new Map().Add("One", 1).Add("Four", 4).Add("Three", 3);
 string actual = "";
-map.Sort((x, y) => map[x].As<int>().CompareTo(map[y].As<int>()));
+map.Sort((x, y) => (map[x] as int).CompareTo(map[y] as int));
 for (var key = map.First; key != null; key = map.Next) actual += key;
-Assert.AreEqual("OneTwoThreeFourFive", actual);
+Assert.AreEqual("OneThreeFour", actual);
 ```
 
 In this example, we are sorting the keys by the value, not the key.
 
 ### Pick.cs - to choose from options
 
-Interface to pick an item, probably from a list, probably random. It all depends on how you implement `Pick()`.
+This is an interface to pick an item from a list. `Pick()` can return random, ordered or any other selection method.
 
 ```c#
 class PickImplementation : Pick<string> {
@@ -1243,13 +1258,13 @@ new Selector<T> {
 - ***Random***: `exhaustiveBelow` is less than the number of choices.
 - ***Exhaustive Random***: `exhaustiveBelow` is greater than the number of choices.
 
-To return in a random order, set ***Exhaustive Random***. Nothing repeats until the list is exhausted. Each cycle is in random order.
+To return in a random order, set ***Exhaustive Random***. Nothing repeats until it exhausts the list. Each cycle is in random order.
 
 #### Exhaustive Random Selections
 
-If there are a small number of choices, the player recognises the repeats, and they won't appear random. If the same item repeats immediately it becomes particularly apparent. The solution is to use exhaustive random selection. No item is returned twice until all items have had a turn at being displayed.
+If there is a few choices, the player recognises the repeats, and they won't appear random. If the same item repeats at once it becomes obvious. The solution is to use exhaustive random selection. No item returns until all items have had a turn at being displayed.
 
-Exhaustive Random is not necessary for large sets of values. Set a watermark by giving `exhaustiveBelow` a value. If the number of choices available is below this value, exhaustive random selection occurs. If it is above, pseudo-random selection occurs.
+Exhaustive Random is unnecessary for large sets of values. Set a watermark by giving `exhaustiveBelow` a value. If the number of choices available is below this value, exhaustive random selection occurs. If it is above, pseudo-random selection occurs.
 
 #### Selector Choices
 
@@ -1264,51 +1279,6 @@ selector.Choices = new int[] { 5, 6, 7, 8 };
 
 `CycleIndex` return the index in the `Choices` array of the last item returned. If we were using `Selector` to return the next training item, then we may well need the index to report progress or to go back and repeat a section.
 
-### Simple Stacks
-
-C# provides a quite serviceable `Stack` class. Even `LinkedList` from this package can provide a powerful stack. I think both are too heavy when we want a simple stack. This implementation is complete in under two dozen lines of code. It has some unique features that make it most suitable for lightweight applications.
-
-1. It is instantiated with `Stack<T>.Instance`.
-2. It is an `IDisposable`. Call `Dispose()` when you are done, and the instance is cached for later - reducing garbage collection.
-3. It is easy to access and change the most recent item pushed with `Top`, making it perfect for dynamic data that needs a history.
-4. `Push` and `Pop` both return the current item. It makes data with history easier to create.
-5. The constructor is protected so inherited classes can bypass the caching. Useful if they cache everything themselves.
-
-The easiest way to show off the functionality is with the source to `CounterStack`, a class that inherits from `Stack<int>`.
-
-#### CounterStack
-
-```c#
-public class CounterStack : Stack<int> {
-  public new static CounterStack Instance => Cache<CounterStack>.Instance;
-  public int Start(int startingValue = 0) => Math.Abs(Push(startingValue));
-  public int Next() => Math.Abs(++Top);
-  public bool Reached(int bounds) {
-    var reached = (Top >= bounds);
-    if (reached) Pop();
-    return reached;
-  }
-  public override void Dispose() { Cache<CounterStack>.Dispose(this); }
-}
-```
-
-So, thanks to `Stack`, `CounterStack` is concise. However, what does it do? Well, the name says it all - it is a stack of counters. OK, you say, but why? There are probably other uses, but I use it for an alternate form of iteration. We know that `foreach` causes lots of garbage to collect due to the state machine being generated by the compiler when a method returns `IEnumerator`. The problem is that these functions do not reset, so a new one has to be created for each turn of the loop. By providing methods `First` and `Next` in a class we can implement easy-to-use iteration with minimal garbage.
-
-```c#
-for (var key = map.First; key != null; key = map.Next) {
-  Process(key, map[key]);
-}
-```
-
-Cool, huh? However, how does it work? Here is the implementation in ***Map.cs***.
-
-```c#
-public object First => (Count > 0) ? keys[index.Start()] : null;
-public object Next => index.Reached(Count - 1) ? null : keys[index.Next()];
-private CounterStack index = CounterStack.Instance;
-```
-
-We could have just used `int index;`. In this case, that would probably OK, but in many similar instances, we have problems when one iteration occurs in another. Besides, this is easier to read.
 
 ### Trees
 
@@ -1316,7 +1286,7 @@ A tree Container for Varied Structured Data.
 
 #### Creating a Tree Container
 
-For no particularly good reason a new tree is created with a static property. `Trees` is type agnostic, so no additional information is required. The tree contains state including the current branch, array or leaf node. It starts by pointing at the root node.
+For no good reason I create a new tree with a static property. `Trees` is type agnostic, so it requires no additional information. The tree contains state including the current branch, array or leaf node. It starts by pointing at the root node.
 
 ```c#
 var tree = Trees.Instance;
@@ -1325,7 +1295,7 @@ Assert.IsTrue(tree.IsRoot);
 
 #### Tree Navigation
 
-The tree root is the known starting point. You can return to it explicitly with `tree.Root()` or implicitly with `To`. Moving back to root from the current node is implemented with `Parent(path)` or with ***..*** in the path.
+The tree root is the known starting point. You can return to it with `tree.Root()` or with `To`.  Use `Parent(path)` or with ***..*** in the path to move back to root.
 
 ```c#
 var tree = Trees.Instance.To("A.B.C");
@@ -1338,7 +1308,7 @@ Assert.IsTrue(tree.Has("C"));
 
 ##### Tree Walking
 
-All the tree walking methods can be given a path to travel up or down the tree. The question is, which way is up? If we are using a tree from nature, the root is down, and we go up to branches and leaves. Then again we represent tree structures on the page and screen with the root on the left with branches and leaves to the right.
+You can give All the tree walking methods a path to travel up or down the tree. The question is, which way is up? If we are using a tree from nature, the root is down, and we go up to branches and leaves. Then again we represent tree structures on the page and screen with the root on the left with branches and leaves to the right.
 
 Most provide a path to follow. It can be a single string with a `.`  separating nodes or a list of objects for non-string keys. You can walk back towards the root with `..` with each additional dot being another step back.
 
@@ -1351,11 +1321,11 @@ All these methods, bar `Anchor` return a reference to `Tree` for chaining.
 
 ###### Root()
 
-A tree instance keeps its location as an internal state, but often we have a path from the root. `Root()` is functionally identical to `To()` without parameters.
+A tree instance keeps its location as an internal state, but often we have a path from the root. `Root()` is identical to `To()` without parameters.
 
 ###### To(params object[] path)
 
-`To` searches from the root along the specified path. It returns null if a node does not exist. In this case, `Failure` is set and the tree references the last found node on the path.
+`To` searches from the root along the specified path. It returns null if a node does not exist. Here, `Failure` sets the tree references the last found node on the path.
 
 ```c#
 var type = tree.To("Authors.Books.Type")?.Leaf;
@@ -1374,7 +1344,7 @@ Assert .IsFalse(tree.Failure)
 
 ##### Children
 
-When investigating a tree where you do not have full disclosure of the structure or when serialising the contents, we need access to all values. `Children` returns an array of objects that represent the keys for this node in the tree. This is particularly useful for array nodes where the children are keyed on the index.
+When investigating a tree where you do not have full disclosure of the structure or when serialising the contents, we need access to all values. `Children` returns an array of objects that represent the keys for this node in the tree. This is useful for array nodes where the children keyed to the index.
 
 ```c#
 var tree = Trees.Instance.Add("A.B.C1..C2..C3").To("A.B");
@@ -1395,7 +1365,7 @@ Get back to where you once belong. Mark a spot on the tree to return to after a 
 
 #### Tree Contents
 
-Every node can store a leaf as an object. Access and updates are implemented for the current node or a child of a node.
+Every node can store a leaf as an object. It implements access and updates for the current node or a child of a node.
 
 ```c#
 var tree = Trees.Instance.Add("A.B.C");
@@ -1407,7 +1377,7 @@ tree.To("A.B")["C"] = "Array Update";
 
 ##### Arrays
 
-Children can also be accessed by array nomenclature. Unlike tree walking, the current node does not change. The value of a named (or numbered) child node is returned.
+The array nomenclature can also accesscChildren. Unlike tree walking, the current node does not change. It returns the value of a named (or numbered) child.
 
 ```c#
 var tree = Trees.Instance.Add("A.B.C");
@@ -1422,7 +1392,7 @@ Assert.AreEqual(tree[1], tree.To("A.B.C").Leaf);
 
 There are some convenience methods for some common conversions.
 
-- ***`IsNumber`*** returns true of the string is a valid integer or floating point. `Failed` is also set for post-conversion checking.
+- ***`IsNumber`*** returns true of the string is a valid integer or floating point. Its ets `Failed` for post-conversion checking.
 - ***`Long`*** returns a long number for both a whole number string and a floating point representation. It sets `Failed` if the leaf value was not a number.
 - ***`Double`*** returns a double for both a whole number string and a floating point representation. It sets `Failed` if the leaf value was not a number.
 - ***`Boolean`*** returns true if the word starts with ***t*** for true.
@@ -1430,7 +1400,7 @@ There are some convenience methods for some common conversions.
 
 #### Tree Additions and Removals
 
-While `To` or `Next` baulk if it can't find a node on the path, `Add` just creates all of them as needed. Filling a leaf with data is a separate operation. The path for `Add` is relative.
+While `To` or `Next` baulk if it can't find a node on the path, `Add` just creates as needed. Filling a leaf with data is a separate operation. The path for `Add` is relative.
 
 ```c#
 Trees.To("A.B.C").Add("Quote.English.Comtemporary").Leaf = "Now is the time";
@@ -1446,7 +1416,7 @@ tree.To("A.B").Dispose();
 
 #### Tree Export Support
 
-Sooner or later you need to serialise or deserialise from or to a tree. For that purpose `Key` returns a string that represents the path from the root to the current location. From there you can iterate through one level of child branches with `FirstChild` and `NextChild`.
+You may need to serialise or deserialise from or to a tree. For that purpose `Key` returns a string that represents the path from the root to the current location. From there you can iterate through one level of child branches with `FirstChild` and `NextChild`.
 
 ```c#
 void SerialiseTree(tree) {
@@ -1479,18 +1449,17 @@ If you need to know how many branches to prepare storage, use `Children`, which 
 
 ### Json.cs - parse to dictionary
 
-And it came about that the computer was born and all was good. Then there was another computer and the need to share things. It was easy. Knowing both sides, we can send data the computer understands. But wait, now some computers see the binary world differently. OK, let's make it human readable. Computers are faster at deserialisation by then. Comma separated variable (CSV) files became popular, but they lacked depth. Enter SGML and then XML. Fifty years have passed. There are signs at the airport saying "We are an XML Company!". What does that mean? It's just a way for all machines (and some people) to be able to read the same data. XML uses a DTD (document type definition). If an XML document does not pass the DTD rules, then it is no good. Toss it out. Great for developers. If it passes the rules, then it is easy to deserialise directly into a computer readable (i.e. binary format) object. Mind you, by hiding the structure from the developers they were free to build as they liked. I have seen Windows applications that changing the state in a drop-down causes millions of bytes to pass between client and server. Everyone was happy. Then JavaScript became more standardised and faster, and the Web App was born. Parsing XML in JavaScript was slow and difficult - even without checking it against a DTD. Unlike traditional server languages, JavaScript has dynamic data structures. You can send any structured data down the line and only work out what it contains when you need to. Some bright spark decided to send JavaScript source full of data structures. Javascript is fast at compiling itself. This method is now called JSONP. However, sending code has its risks even in a sandbox. Besides we can make the JavaScript compiler even faster if we give it a more rigid format and a subset of JavaScript. JSON was born. All was good. Then the people who don't live flexibility said "We can't have that" and started insisting on rigid structures in JavaScript. So, now we have something like XML but without the DTD to help us get it right at both ends. Developers are now spending more time than with XML.
+And it came about that the computer was born and all was good. Then there was another computer and the need to share things. It was easy. Knowing both sides, we can send data the computer understands. But wait, now some computers see the binary world. OK, let's make it human readable. Computers are faster at deserialisation by then. Comma separated variable (CSV) files became popular, but they lacked depth. Enter SGML and then XML. Fifty years have passed. There are signs at the airport saying "We are an XML Company!". What does that mean? It's just a way for all machines (and some people) to read the same data. XML uses a DTD (document type definition). If an XML document does not pass the DTD rules, then it is no good. Toss it out. Great for developers. If it passes the rules, then it is easy to deserialise into a computer readable (i.e. binary format) object. Mind you, by hiding the structure from the developers they were free to build as they liked. I have seen Windows applications that changing the state in a drop-down causes millions of bytes to pass between client and server. Everyone was happy. Then JavaScript became more standardised and faster, and the Web App was born. Parsing XML in JavaScript was slow and difficult - even without checking it against a DTD. Unlike traditional server languages, JavaScript has dynamic data structures. You can send any structured data down the line and only work out what it contains when you need to. Some bright spark sent JavaScript source full of data structures. Javascript is fast at compiling itself. They now call this method JSONP. However, sending code has its risks even in a sandbox. Besides we can make the JavaScript compiler even faster if we give it a more rigid format and a subset of JavaScript. JSON was born. All was good. Then the people who don't live flexibility said "We can't have that" and insisted on rigid structures in JavaScript. So, now we have something like XML but without the DTD to help us get it right at both ends. Developers are now spending more time than with XML.
 
 We must stand up and fight. JSON for JSON. Allow me to get the data I need, not just what the suites have defined.
 
 #### Parse
 
-After the above rant, it would be wrong to create a restrictive JSON reader. In the vein `Parse` does not throw any specific errors. In attempts to create an in-memory tree structure with both keys and values as strings. Keys and values can be wrapped in quotes or not. If they are the comma between entries is optional. Arrays are just branches with keys that are integers. A search can use a string or integer key.
+After the above rant, it would be wrong to create a restrictive JSON reader. In the vein `Parse` throws no specific errors. In attempts to create an in-memory tree structure with both keys and values as strings. You can wrap keys and values in quotes or not. If they are the comma between entries is optional. Arrays are just branches with keys that are integers. A search can use a string or integer key.
 
 Once you have parsed the JSON, use the [Trees](#trees) interface to process the data using the `tree.Node` member.
 
 ```c#
-// reasonably accurate JSON
 json.Parse(@"{""Not my age"":23}");
 Assert.AreEqual("23", json.Node["Not my age"]);
 // no starting braces
@@ -1509,7 +1478,7 @@ Assert.AreEqual("26", json.Node["Not my age"]);
 ### Build Support
 
 #### Define Preprocessor Symbols
-The only way to compile code that relies on a library that may not exists is to use the preprocessor. Since we will know the availability of a package, we can tell the compiler.
+The only way to compile code that relies on a library that may not exists is to use the preprocessor. Since we will know whether a package is available we can tell the compiler.
 
 For this, create a class in a ***Editor*** directory and have it initialise on load and inherit from ```AddDefineSymbols```. In the static constructor run your tests and add or remove define symbols as needed.
 
@@ -1527,9 +1496,9 @@ The last method looks unwieldy, but it is valuable for controlling compile-time 
 Provide the `HasFolder(string folder)` with the string representation of a folder under ***Assets***. `HasFolder` is the easiest way to check *unitypackage* existence.
 
 ##### Target
-Even if a *unitypackage* exists, the code may not apply to the target platform. `Target` takes a list of parameters and returns true if we are compiling for one of them.
+Even if a *unitypackage* exists, the code may not apply to the target platform. `Target` takes a list of parameters and returns true if we are compiling for one.
 
-Possible targets are `Android`, `iOS`, `Linux`, `Linux64`, `LinuxUniversal`, `N3DS`, `OSX`, `PS4`, `PSP2`, `Switch`, `Tizen`, `tvOS`, `WSAPlayer`, `WebGL`, `WiiU`, `Windows`, `Windows64` and `XboxOne`.
+Targets are `Android`, `iOS`, `Linux`, `Linux64`, `LinuxUniversal`, `N3DS`, `OSX`, `PS4`, `PSP2`, `Switch`, `Tizen`, `tvOS`, `WSAPlayer`, `WebGL`, `WiiU`, `Windows`, `Windows64` and `XboxOne`.
 
 ```c#
 if (Target(iOS, Android)) {...}
@@ -1562,18 +1531,18 @@ When building for different platforms, it is often necessary to tweak native con
 
 ##### Pre-Process Build
 ###### Android - Enable Multidex
-Almost any Unity3D game of any size will have more than 64,000 public methods. I know, this sounds crazy. It's all those packages you have imported. You could enable ***Proguard***. Apart from obfuscating your app it also attempts to remove all the functions not called. It is rarely fully automatic since it cannot efficiently deal with reflection. Multidex does not have that problem. It does make your app larger.
+Almost any Unity3D game of any size will have over 64,000 public methods. I know, this sounds crazy. It's all those packages you have imported. You could enable ***Proguard***. Apart from obfuscating your app it also tries to remove all the functions not called. It is not automatic since it cannot deal with reflection. Multidex does not have that problem, but makes your app larger.
 
 ##### Post-Process Build
 ###### iOS - Remove Notifications
 If your app does not use Push Notifications, then you can check this option to remove the build warning.
 
 ###### iOS - Plist Entries
-iOS will not be accepted if Apple does not find particular *plist* entries. Unity3D generates most of them, but occasionally they get out of sync. As of 2017, the ***NSCalendarsUsageDescription*** was missing. Add others as you need them.
+They will not accept iOS applications if Apple does not find particular *plist* entries. Unity3D generates most, but they get out of sync. As of 2017, the ***NSCalendarsUsageDescription*** was missing. Add others as you need them.
 
 ### Components
 
-`Components` is a static helper class with functions to create and find Components. They are all wrappers to ***slow*** Unity procedures, so cache the results. I created these primarily for testing since we decouple every test harness. Since then I have found them useful to get inside prefabs from other sources. Still not a good idea in production, but sometimes better than breaking existing code.
+`Components` is a static helper class with functions to create and find Components. They are all wrappers to ***slow*** Unity procedures, so cache the results. I created these for testing since we decouple every test harness. Since then I have found them useful to get inside prefabs from other sources. Still not a good idea in production, but sometimes better than breaking existing code.
 
 #### Components.Find&lt;T>(path...)
 
@@ -1611,7 +1580,7 @@ Assert.AreEqual("Button One", text.text);
 
 #### Components.Create&lt;T>(path...)
 
-Follow the fully qualified path, creating game objects that don't exist. Add an instance of component `T` to the final game object.
+Follow the qualified path, creating game objects that don't exist. Add an instance of component `T` to the final game object.
 
 ```c#
 // create a root GameObject with the specified name and add component
@@ -1628,7 +1597,7 @@ Find a component if it exists or creates it if it doesn't. Because of the `Creat
 
 This tool comes straight from [http://www.brechtos.com](Brecht Lecluyse) in a [http://www.brechtos.com/hiding-or-disabling-inspector-properties-using-propertydrawers-within-unity-5/](a blog from November 2015).
 
-Any reasonably complex `MonoBehaviour` can have quite a few items to display in the inspector. Often some items are only valid if another inspector-visible attribute is in a specific state.
+Any complex `MonoBehaviour` can have quite a few items to display in the inspector. Often some items are only valid if another inspector-visible attribute is in a specific state.
 
 1. Booleans are true to display conditional fields
 2. A string is not empty
@@ -1656,7 +1625,7 @@ Any reasonably complex `MonoBehaviour` can have quite a few items to display in 
 
 ### Label Attribute
 
-One of the challenges of using generic scriptable objects is the often uninformative labels in the inspector. In this truncated example below, we have a generic class with a variable for the inspector. `Stringer` inherits from it, but by using an attribute decorator `Labels`, I can rename the field to something more meaningful.
+One challenge of using generic scriptable objects is the often uninformative labels in the inspector. In this truncated example below, we have a generic class with a variable for the inspector. `Stringer` inherits from it, but by using an attribute decorator `Labels`, I can rename the field to something more meaningful.
 
 In the generic class where you have ***Inspector*** fields you want to rename, give them a `[Label]` attribute. In the concrete classes, use the `Labels(before, after, ...)` class attribute decorator with entries that match the before and after label value.
 
@@ -1664,7 +1633,7 @@ In the generic class where you have ***Inspector*** fields you want to rename, g
   public class OfType<T> : WithEmitter { [SerializeField, Label] private T value; }
 // ...
 [Labels("Value", "Text")] public sealed class Stringer : OfType<string> {}
-// or if there is only one,a s here, the label to replace can be implied
+// or if there is only one, as here
 [Labels("Text")] public sealed class Stringer : OfType<string> {}
 ```
 
@@ -1672,11 +1641,11 @@ In this example, we see a ***Text*** label instead of the generic `Value` one.
 
 ### Log - Plug-and-play Logging
 
-The Askowl `Log` class provides an easy-to-use interface to the Unity debug log and analytics reporting. If Unity Analytics is enabled, log messages are sent there as well as to the console. Without adding any extra consumers, log messages display on the console and in `Unity.Analytics`.
+The Askowl `Log` class provides an easy-to-use interface to the Unity debug log and analytics reporting. If you enable analytics it sends log messages there and to the console. Even when adding no extra consumers, log messages display on the console and in `Unity.Analytics`.
 
-`Log` discards console messages when not in the Unity editor. For other builds, you need to set `Log.ConsoleEnabled = true` explicitly if you need these logs.
+`Log` discards console messages when not in the Unity editor. For other builds, you need to set `Log.ConsoleEnabled = true` if you need these logs.
 
-Unity Analytics is set up as per these [Unity instructions](https://docs.unity3d.com/Manual/UnityAnalyticsSetup.html). They can then be explicitly disabled with 'UnityEngine.Analytics.Analytics.enabled' or if the target platform does not support it.
+Set up Unity Analytics per these [Unity instructions](https://docs.unity3d.com/Manual/UnityAnalyticsSetup.html). Disabled with 'UnityEngine.Analytics.Analytics.enabled' or if the target platform does not support it.
 
 It is simple to integrate third-party analytics or logging library as documented below.
 
@@ -1688,19 +1657,21 @@ Create a static delegate for each script or class that can write to the log.
 private static Log.MessageRecorder log = Log.Messages();
 ```
 
-You now have a function to call with a signature of:
+This function has a signature of:
 
 ```c#
-void MessageRecorder(string action, string message, params object[] more);
+void MessageRecorder(string action, string message);
 ```
 
 Think of the action as what your code was doing when you needed to record a message. It is a way of grouping messages in the analytics systems. `Log` records file and delegate names already without explicit grouping.
 
 ```c#
-log(action: "Level Completed", message: "Success", "Level=", 1, "Time=", 30.3);
+log(action: "Level Completed", message: "Success :: Level=1,Time=30.3");
 ```
 
-Alternatively, you may choose to have a different action for each level so that you can compare player performance. The output to the console takes the form:
+Note the ***" :: "*** used to separate the message from extra information. The extra string is a comma separated list of either key/value pairs in the form key=value or a simple values.
+
+You may have a different action for each level so you can compare player performance. The output to the console takes the form:
 
 > ***Level Completed***: for 'GameStats' -- result=Success, Level=1,Time=30.3,line=14,member=log
 
@@ -1712,7 +1683,7 @@ The consumer sees log information as:
 2. **Component** - filename of calling method/field
 3. **Result** - being the message supplied in the call
 4. **Member** - being the name of the field or function used to create the logging delegate.
-5. **More** - variable list of parameters from the logging call
+5. **Extra** - variable list of parameters from the logging call
 
 The *member name* is interesting. If you generate the delegate as a static field as recommended above, it is the name of that field. You can use this field to further differentiate messages by creating multiple fields.
 
@@ -1721,11 +1692,11 @@ private static Log.EventRecorder   todo   = Log.Events(action: "Todo");
 private static Log.EventRecorder   fixBug = Log.Events(action: "Todo");
 ```
 
-A log call can include any number of additional parameters. They can be either single objects or key-value pairs. If a parameter is a string that ends in an equals (=), it becomes a key, and the next parameter becomes a value. Log consumers can generate a dictionary using these rules with `Log.ToDictionary`. Objects that are not involved in key-value pairs become dictionary entries where the object is the key, and the value is null.
+A log call can include many additional parameters. They are single objects or key-value pairs. If a parameter is a string that ends in an equals (=), it becomes a key, and the next parameter becomes a value. Log consumers can generate a dictionary using these rules with `Log.ToDictionary`. Objects not involved in key-value pairs become dictionary entries where the object is the key, and the value is null.
 
 #### Event Logging
 
-In many situations, you want a limited set of consistent actions with varying messages. For messaging purposes, the action can be called the event, and the delegate call only has to supply a message.
+In many situations, you want a limited set of consistent actions with varying messages. For messaging purposes, the action is an event, and the delegate call only has to supply a message.
 
 ```c#
 private static Log.EventRecorder   healthUpEvent   = Log.Events(action: "Health");
@@ -1733,7 +1704,7 @@ private static Log.EventRecorder   healthDownEvent = Log.Events(action: "Health"
 private static Log.EventRecorder   error           = Log.Errors();
 ```
 
-The example includes two separate ***Health*** events that are differentiated by the member field in the result. This level of granularity is rarely needed, but it is nice to know for when you do. ***Error*** events are unique in that the action is always "Error".
+The example includes two separate ***Health*** events differentiated by the member field in the result. You may not need this level of granularity, but it is nice to know for when you do. ***Error*** events are unique in that the action is always "Error".
 
 #### Warnings
 
@@ -1746,11 +1717,11 @@ private static Log.EventRecorder   todo    = Log.Events(action: "Todo");
 
 #### Console Log Formatting
 
-If there is only one optional parameter and it is a `Unity.Object` then it is passed to     `Debug.Log` as the second parameter to provide extra detail.
+If there is only one optional parameter and it is a `Unity.Object` it passes to  `Debug.Log` as the second parameter to provide extra detail.
 
 #### Actions
 
-Individual messages can be highlighted in the log by colour, bolding or italics. Create an RTF string with the `Log.Action` method.
+You can highlight Individual messages in the log by colour, bolding or italics. Create an RTF string with the `Log.Action` method.
 
 ```c#
 public static string Action(string text, string colour, bool bold, bool italics);
@@ -1784,19 +1755,19 @@ So, pick your poison.
 
 #### Logging Support
 
-Apart from those already mentioned, you can turn an array of objects into a string of single entries and key-value pairs.
+Apart from those already mentioned, you can turn an array of objects into single entries and key-value pairs.
 
 ```c#
-var more = Log.More("count=", 1, "hello=", "world", "one", "two");
+var more = Log.Extras(new object[] {"count=", 1, "hello=", "world", "one", "two"});
 Assert.AreEqual(expected: "count=1,hello=world,one,two", actual: more);
 ```
 
-Alternatively, you can create a `Dictionary<string,object>` for additional processing. Some analytics like the data so that they can index it.
+, you can create a `Dictionary<string,object>` for additional processing. Some analytics like the data indexing.
 
 ```c#
 var dictionary = Log.ToDictionary(new Log.Contents {
   component = "My Component", action = "Act Now", result = "Success",
-  more      = new object[] {"count=", 1, "hello=", "world", "one", "two"}
+  extras     = ne"count=1,hello=world,one,two"}
 });
 Assert.AreEqual("Act Now", dictionary["action"]);
 Assert.AreEqual(1,         dictionary["count"]);
@@ -1806,13 +1777,12 @@ Assert.IsTrue(dictionary.ContainsKey("two"));
 
 #### Third Party Logging
 
-If for some reason the log processing is not to your liking or you have a personal analytics or logging package then you can easily add them to the decoupled interface. The first step is to create three methods for messages, warnings and errors. All have the `Log.EventDelegate` signature with a single parameter of type `Contents`.
+If the log processing is not to your liking or you have a personal analytics or logging package then you can add them to the decoupled interface. The first step is to create three methods for messages, warnings and errors. All have the `Log.EventDelegate` signature with a single parameter of type `Contents`.
 
 ```c#
 public struct Contents {
   public string component, action, result, member, extras;
   public int lineNumber;
-  public object[] more;
 }
 ```
 
@@ -1823,7 +1793,6 @@ Where:
 - **result** is the message
 - **member** is the name of the field created to hold the delegate.
 - **extras** is a formatted string containing the other data.
-- **more** is an array of objects containing the optional parameters
 
 Here is the Unity implementation. It makes use of the dictionary conversion documented above.
 
@@ -1838,7 +1807,7 @@ private static void UnityAnalyticsError(Contents contents) =>
   UnityEngine.Analytics.Analytics.CustomEvent("ERROR", ToDictionary(contents));
 ```
 
-For a second step, you have a choice. Log only to your target or add to the logging so that it goes to multiple sources.
+For a second step, you have a choice. Log only to your target or add to the logging so it goes to multiple sources.
 
 ```c#
 if (UnityEngine.Analytics.Analytics.enabled) {
@@ -1848,15 +1817,15 @@ if (UnityEngine.Analytics.Analytics.enabled) {
 }
 ```
 
-If I had chosen to drop the console logs, I would remove the plus to make it a single assignment. Of course for the console, I could enable or disable it with a single flag.
+If I had dropped the console logs, I would remove the plus to make it a single assignment. For the console, I could enable or disable it with a single flag.
 
 ### RichText
 
-Unity supports ***Rich Text*** in UI elements. It is similar to a subset of HTML.
+Unity supports ***Rich Text*** in UI elements. It is like a subset of HTML.
 
 #### Colours (Colors)
 
-Colours can be provided as an RGB hex triplet (#rrggbb) or by name. For code completion ease, `RichText.Colour` or `RichText.Color` has static members for the correct colours. Also, if you want to wrap a ***<color>*** tag around the text, there is a method for that.
+You can provide Colours as an RGB hex triplet (#rrggbb) or by name. For code completion ease, `RichText.Colour` or `RichText.Color` has static members for the correct colours. Also, if you want to wrap a ***<color>*** tag around the text, there is a method for that.
 
 ```c#
 using Askowl.RichText;
@@ -1866,11 +1835,11 @@ Debug.Log((Colour.Tag(Colour.Teal, "My message")));
 
 ### Objects
 
-`Objects` is a static class of helpers to find and create GameObjects and the like. They are all wrappers to ***slow*** Unity procedures, so cache the results.
+`Objects` is a static class of helpers to find and create GameObjects. They are all wrappers to ***slow*** Unity procedures, so cache the results.
 
 #### FindAll
 
-`FindAll<T>` is an extension of `Resources.FindObjectsOfTypeAll<T>`. It finds *all* objects of the specified type with a matching name. Objects can be game objects, prefabs, materials, meshes, textures or similar whether they are enabled or disabled. `Findall` return all resources of type T if the name is empty or null.
+`FindAll<T>` extends `Resources.FindObjectsOfTypeAll<T>`. It finds *all* objects of the specified type with a matching name. Objects can be game objects, prefabs, materials, meshes, textures or similar whether it enables or disables them. `Findall` return all resources of type T if the name is empty or null.
 
 ```c#
 gameObjects = Objects.FindAll<GameObject>("Text");
@@ -1888,7 +1857,7 @@ Assert.AreEqual("Button Two", gameObject.transform.parent.name);
 
 #### Path
 
-`Path` returns the fully qualified path to a GameObject. Use it for logging or navigation in `Components`.
+`Path` returns the qualified path to a GameObject. Use it for logging or navigation in `Components`.
 
 ```c#
 var gameObject = Objects.Find<GameObject>("Text");
@@ -1932,7 +1901,7 @@ Sometimes tests have an exclusive scene to highlight actions challenging to repr
 
 #### PushButton
 
-At the least, a player has to push a button to start the game. You can select the button by the name and path in the hierarchy or a `Button` reference. Separate sparse path elements by one or more slashes Missing segments are acceptable. For clarity, I use double-slash to indicate missing segments.
+At the least, a player has to push a button to start the game. You can select the button by the name and path in the hierarchy or a `Button` reference. Separate sparse path elements by one or more slashes Missing segments are acceptable. For clarity, I use double-slash to show missing segments.
 
 ```c#
 yield return PushButton("Canvas//Show Quote");
@@ -1944,7 +1913,7 @@ The coroutine returns after one tick - giving time for the button events to reac
 
 #### IsDisplayingInGui
 
-By giving the sparse path to a game object that has a renderer, this method checks whether a 2D component is partially or entirely within the view-space.
+By giving the sparse path to a game object that has a renderer, this method checks whether a 2D component is within the view-space.
 
 ```c#
 var buttonTwo = Components.Find<RectTransform>("Button Two");
@@ -2057,9 +2026,9 @@ The width of the range limits how many digits past the decimal point display.
 
 ### ScriptableObjects Display Drawer
 
-Scriptable objects provide a valuable resource. By moving code and data out of mono behaviours, we can more easily decouple and test our systems. The problem is that in the default Unity system a scriptable object in a mono behaviour shows up as a resource. You need to select it in the Project view to have the inspector show details.
+Scriptable objects provide a valuable resource. By moving code and data out of mono behaviours, we can more decouple and test our systems. The problem is that in the default Unity system a scriptable object in a mono behaviour shows up as a resource. You need to select it in the Project view to have the inspector show details.
 
-This script and many thanks to [TheVastBernie](https://forum.unity.com/members/thevastbernie.589052/) for his [script](https://forum.unity.com/threads/editor-tool-better-scriptableobject-inspector-editing.484393/) displays scriptable objects in full in the inspector view of a MonoBehaviour. There is nothing for you to do. When you load ***Able*** all happens automatically.
+This script and many thanks to [TheVastBernie](https://forum.unity.com/members/thevastbernie.589052/) for his [script](https://forum.unity.com/threads/editor-tool-better-scriptableobject-inspector-editing.484393/) displays scriptable objects in full in the inspector view of a MonoBehaviour. There is nothing for you to do. When you load ***Able*** it all happens.
 
 #### Closed
 

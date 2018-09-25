@@ -1,8 +1,8 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-using System;
-
 namespace Askowl {
+  using System;
+
   /// <a href=""></a>
   /// <inheritdoc />
   // ReSharper disable once ClassNeverInstantiated.Global
@@ -14,7 +14,7 @@ namespace Askowl {
     public int Start(int startingValue = 0) => Math.Abs(Push(startingValue));
 
     /// <a href="bit.ly/">Next</a>
-    public int Next() => Math.Abs(++Top);
+    public new int Next() => Math.Abs(++Top);
 
     /// <a href="bit.ly/">Next</a>
     public bool Reached(int bounds) {

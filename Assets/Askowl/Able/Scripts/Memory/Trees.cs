@@ -1,9 +1,9 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-using System;
-using System.Collections.Generic;
-
 namespace Askowl {
+  using System;
+  using System.Collections.Generic;
+
   /// <a href="">Tree Data Storage Container</a>
   public class Trees : IDisposable {
     #region Private Functionality
@@ -58,9 +58,9 @@ namespace Askowl {
 
     private struct Anchors : IDisposable {
       public LinkedList<Node> Stack;
-      public Trees            tree;
+      public Trees            Tree;
 
-      public void Dispose() { tree.here = Stack.Pop().Item; }
+      public void Dispose() { Tree.here = Stack.Pop().Item; }
 
       static Anchors() { LinkedList<Node>.DeactivateItemStatic = (node) => { }; }
     }
@@ -69,35 +69,25 @@ namespace Askowl {
 
     private Trees() {
       root    = here = Node.New("~ROOT~", null);
-      anchors = new Anchors { Stack = new LinkedList<Node>("Trees Anchor Stack"), tree = this };
+      anchors = new Anchors { Stack = new LinkedList<Node>("Trees Anchor Stack"), Tree = this };
     }
 
     /// <a href=""></a>
-    private Trees Walk(bool create, params object[] path) {
+    private Trees Walk(bool create, string path) {
       Failed   = false;
       isNumber = -1;
-      if (path.Length == 0) return this;
+      var split = path.Split('.');
 
-      if ((path.Length == 1) && path[0] is string s) {
-        var split = s.Split('.');
-        path = Array.ConvertAll(split, x => (object) x);
-      }
-
-      for (var i = 0; i < path.Length; i++) {
+      for (var i = 0; i < split.Length; i++) {
+        string key = split[i];
         if (here == null) return Failure();
 
-        if (here.Branch[path[i]].Found) { here = here.Branch.Value as Node; } else if (path[i] is int) {
-          var obj = path[i];
-          here = here.Branch[obj]?.Value as Node ?? (Node) here.Branch.Add(obj, Node.New(obj, here)).Value;
-        } else {
-          var key = path[i].ToString();
-
-          if (string.IsNullOrWhiteSpace(key)) { here = i == 0 ? here : here.Parent; } else if (Compare.IsDigitsOnly(key)
-          ) {
-            here = here.Branch[int.Parse(key) as object].Value as Node;
-          } else if (create) {
-            here = (Node) here.Branch.Add(path[i], Node.New(path[i], here)).Value;
-          } else { return Failure(); }
+        if (here.Branch[key].Found) { here = here.Branch.Value as Node; }
+        else {
+          if (string.IsNullOrWhiteSpace(key)) { here = i == 0 ? here : here.Parent; }
+//          else if (Compare.IsDigitsOnly(key)) { here = here.Branch[int.Parse(key) as object].Value as Node; }
+          else if (create) { here = (Node) here.Branch.Add(key, Node.New(key, here)).Value; }
+          else { return Failure(); }
         }
       }
 
@@ -127,15 +117,15 @@ namespace Askowl {
     }
 
     /// <a href=""></a>
-    public Trees To(params object[] path) => Root().Walk(create: false, path: path);
+    public Trees To(string path) => Root().Walk(create: false, path: path);
 
     /// <a href=""></a>
     // ReSharper disable once UnusedMethodReturnValue.Global
-    public Trees Next(params object[] path) => Walk(create: false, path: path);
+    public Trees Next(string path) => Walk(create: false, path: path);
 
     /// <a href="bit.ly/">Has</a>
     // ReSharper disable once UnusedMethodReturnValue.Global
-    public Trees Add(params object[] path) => Walk(create: true, path: path);
+    public Trees Add(string path) => Walk(create: true, path: path);
 
     /// <a href=""></a>
     public string Name => here.Name;
@@ -157,10 +147,12 @@ namespace Askowl {
       get {
         if (isNumber != -1) return isNumber != 0;
 
-        var word = Value;
+        string word = Value;
 
-        if (long.TryParse(word, out integer)) { floatingPoint = integer; } else if (double.TryParse(
-          word, out floatingPoint)) { integer                 = (long) floatingPoint; } else {
+        if (long.TryParse(word, out integer)) { floatingPoint = integer; }
+        else if (double.TryParse(
+          word, out floatingPoint)) { integer = (long) floatingPoint; }
+        else {
           Failed = true;
           return (isNumber = 0) == 1;
         }
@@ -199,17 +191,16 @@ namespace Askowl {
 
     /// <a href=""></a>
     public void Dispose() {
-      var parent = here.Parent;
-      var key    = here.Name;
+      var    parent = here.Parent;
+      string key    = here.Name;
       here.Dispose();
       here = parent ?? root;
       here.Branch.Remove(key);
     }
 
     /// <a href=""></a>
-    public IDisposable Anchor(params object[] path) {
+    public IDisposable Anchor(string path = "") {
       anchors.Stack.Push(here);
-
       Next(path);
       return anchors;
     }

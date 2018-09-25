@@ -8,18 +8,18 @@ namespace Askowl {
   public static class Objects {
     /// <a href=""></a>
     public static T Find<T>(string name) where T : Object {
-      T[] objects = FindAll<T>(name);
-      return (objects.Length > 0) ? objects[0] : null;
+      var objects = FindAll<T>(name);
+      return objects.Length > 0 ? objects[0] : null;
     }
 
     /// <a href=""></a>
     public static T[] FindAll<T>(string name) where T : Object {
-      T[]     all     = Resources.FindObjectsOfTypeAll<T>();
-      List<T> results = new List<T>();
+      var all     = Resources.FindObjectsOfTypeAll<T>();
+      var results = new List<T>();
 
       if (string.IsNullOrEmpty(name)) return all;
 
-      for (int i = 0; i < all.Length; i++) {
+      for (var i = 0; i < all.Length; i++) {
         if (all[i].name == name) results.Add(all[i]);
       }
 
@@ -28,8 +28,8 @@ namespace Askowl {
 
     /// <a href=""></a>
     public static string Path(GameObject gameObject) {
-      List<string> path      = new List<string>();
-      Transform    transform = gameObject.transform;
+      var       path      = new List<string>();
+      Transform transform = gameObject.transform;
 
       while (transform != null) {
         path.Add(transform.name);
@@ -41,17 +41,17 @@ namespace Askowl {
     }
 
     /// <a href=""></a>
-    public static GameObject CreateGameObject(params string[] path) {
-      if (path.Length == 1) path         = path[0].Split('/');
-      var last                           = path.Length - 1;
-      var gameObject                     = GameObject.Find($"/{path[0]}");
-      if (gameObject == null) gameObject = new GameObject(path[0]);
+    public static GameObject CreateGameObject(string path) {
+      var split                          = path.Split('/');
+      int last                           = split.Length - 1;
+      var gameObject                     = GameObject.Find($"/{split[0]}");
+      if (gameObject == null) gameObject = new GameObject(split[0]);
 
-      for (int i = 1; i <= last; i++) {
-        var transform = gameObject.transform.Find(path[i]);
+      for (var i = 1; i <= last; i++) {
+        var transform = gameObject.transform.Find(split[i]);
 
         if (transform == null) {
-          transform        = new GameObject(path[i]).transform;
+          transform        = new GameObject(split[i]).transform;
           transform.parent = gameObject.transform;
         }
 

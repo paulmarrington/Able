@@ -45,11 +45,8 @@ namespace Askowl {
     /// <a href="http://bit.ly"></a>
     public static void Dispose(T item) => Entries.Dispose(item);
 
-    /// <a href="http://bit.ly">Destroy everything in cache - including recycling</a>
-    public static void ClearCache() => Entries.Destroy();
-
-    /// <a href="http://bit.ly">Destroy everything in cache - including recycling</a>
-    public static void CleanCache() => Entries.Dispose();
+    /// <a href="http://bit.ly"></a>
+    public static void RecycleEverything() => Entries.Dispose();
 
     /// <a href="http://bit.ly">Anything you need to do before recycling?</a>
     public static Func<T> CreateItem { set => Entries.CreateItem = value; }

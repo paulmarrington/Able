@@ -53,8 +53,6 @@ namespace Askowl.Examples {
     [Test]
     public void To() {
       var tree = Trees.Instance.Add("A.B.C");
-      // `To` can take separate keys - allowing for non-string
-      Assert.IsNotNull(tree.To("A", "B", "C"));
       // `To` can split on `.`. This example starts from root
       Assert.AreEqual("C", tree.To("A.B.C").Name);
       // A -> B -> C -> <- B <- A -> B: Look at spaces between dots
@@ -242,7 +240,7 @@ namespace Askowl.Examples {
     /// Using <see cref="Trees.Key"/>
     [Test]
     public void Key() {
-      var tree = Trees.Instance.Add("A", "B", "C");
+      var tree = Trees.Instance.Add("A.B.C");
       // The string is the path from the root to the current node
       Assert.AreEqual("A.B.C", tree.Key);
     }

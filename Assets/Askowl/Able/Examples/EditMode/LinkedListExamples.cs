@@ -1,16 +1,17 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
 #if AskowlAble
-using System;
-using System.Text.RegularExpressions;
-using NUnit.Framework;
-using UnityEngine;
-using UnityEngine.TestTools;
 
 // ReSharper disable MemberCanBePrivate.Local disable UnusedAutoPropertyAccessor.Local
 // ReSharper disable StaticMemberInGenericType disable ClassNeverInstantiated.Global disable MissingXmlDoc disable UnusedMember.Local disable MemberHidesStaticFromOuterClass
 
 namespace Askowl.Examples {
+  using System;
+  using System.Text.RegularExpressions;
+  using NUnit.Framework;
+  using UnityEngine;
+  using UnityEngine.TestTools;
+
   public class LinkedListExamples {
     #region Test Classes
     public sealed class SealedClassRaw {
@@ -72,7 +73,7 @@ namespace Askowl.Examples {
     [Test]
     public void NodePrevious() {
       var list = new LinkedList<int>("NodePrevious");
-      list.Add(1, 2, 3, 4, 5);
+      list.Add(1).Add(2).Add(3).Add(4).Add(5);
 
       var count = 0;
 
@@ -85,7 +86,7 @@ namespace Askowl.Examples {
     [Test]
     public void NodeNext() {
       var list = new LinkedList<int>("NodeNext");
-      list.Add(1, 2, 3, 4, 5);
+      list.Add(1).Add(2).Add(3).Add(4).Add(5);
 
       var count = 0;
 
@@ -130,7 +131,7 @@ namespace Askowl.Examples {
     public void NodeComparisons() {
       var list = new LinkedList<int>("NodeComparisons") { CompareItem = (a, b) => a.Item.CompareTo(b.Item) };
 
-      list.Add(1, 4, 2); // becomes 4 2 1
+      list.Add(1).Add(4).Add(2); // becomes 4 2 1
 
       Assert.IsTrue(list.First   < list.Last);  // 1 < 4
       Assert.IsTrue(list.Second  > list.First); // 2 > 1
@@ -231,9 +232,9 @@ namespace Askowl.Examples {
       var node  = list1.Add(789);
       node.MoveTo(list2);
 
-      var expected = "   NodeToString2      (1)  <<  NodeToString1      (0)   ::  789";
-      var actual   = node.ToString();
-      Assert.AreEqual(expected, actual);
+      var    expected = "   NodeToString2      (1)  <<  NodeToString1    (0/0)   ::  789";
+      string actual   = node.ToString();
+      Assert.AreEqual(expected, actual, actual);
     }
 
     [Test]
@@ -407,7 +408,7 @@ namespace Askowl.Examples {
 
       var list = new LinkedList<MyClassProcessed>("CompareItemStatic");
 
-      list.Add(new MyClassProcessed { State = "Item 1" }, new MyClassProcessed { State = "Item 2" });
+      list.Add(new MyClassProcessed { State = "Item 1" }).Add(new MyClassProcessed { State = "Item 2" });
 
       Assert.AreEqual(expected: "Item 1", actual: list.First.Item.State);
       Assert.AreEqual(expected: "Item 2", actual: list.Second.Item.State);
@@ -419,7 +420,7 @@ namespace Askowl.Examples {
         CompareItem = (left, right) => string.Compare(left.Item.State, right.Item.State, StringComparison.Ordinal)
       };
 
-      list.Add(new MyClassRaw { State = "Item 1" }, new MyClassRaw { State = "Item 2" });
+      list.Add(new MyClassRaw { State = "Item 1" }).Add(new MyClassRaw { State = "Item 2" });
 
       Assert.AreEqual(expected: "Item 1", actual: list.First.Item.State);
       Assert.AreEqual(expected: "Item 2", actual: list.Second.Item.State);
@@ -427,7 +428,7 @@ namespace Askowl.Examples {
       // does not affect another instance
       var list2 = new LinkedList<MyClassRaw>("CompareItemInstance2");
 
-      list2.Add(new MyClassRaw { State = "Item 1" }, new MyClassRaw { State = "Item 2" });
+      list2.Add(new MyClassRaw { State = "Item 1" }).Add(new MyClassRaw { State = "Item 2" });
 
       Assert.AreEqual(expected: "Item 2", actual: list2.First.Item.State);
       Assert.AreEqual(expected: "Item 1", actual: list2.Second.Item.State);
@@ -437,7 +438,7 @@ namespace Askowl.Examples {
     public void CompareItemInherited() {
       var list = new LinkedList<MyClassInherited>("CompareItemInherited");
 
-      list.Add(new MyClassInherited { State = "Item 1" }, new MyClassInherited { State = "Item 2" });
+      list.Add(new MyClassInherited { State = "Item 1" }).Add(new MyClassInherited { State = "Item 2" });
 
       Assert.AreEqual(expected: "Item 1", actual: list.First.Item.State);
       Assert.AreEqual(expected: "Item 2", actual: list.Second.Item.State);
@@ -448,7 +449,7 @@ namespace Askowl.Examples {
           string.Compare(right.Item.State, left.Item.State, StringComparison.Ordinal)
       };
 
-      list2.Add(new MyClassInherited { State = "Item 1" }, new MyClassInherited { State = "Item 2" });
+      list2.Add(new MyClassInherited { State = "Item 1" }).Add(new MyClassInherited { State = "Item 2" });
 
       Assert.AreEqual(expected: "Item 2", actual: list2.First.Item.State);
       Assert.AreEqual(expected: "Item 1", actual: list2.Second.Item.State);
@@ -459,7 +460,7 @@ namespace Askowl.Examples {
       var list = new LinkedList<int>("Dispose");
 
       using (list) {
-        list.Add(1, 3, 4);
+        list.Add(1).Add(3).Add(4);
 
         Assert.AreEqual(expected: 3, actual: list.Count);
         Assert.AreEqual(expected: 0, actual: list.RecycleBin.Count);
@@ -472,7 +473,7 @@ namespace Askowl.Examples {
     [Test]
     public void Destroy() {
       var list = new LinkedList<int>("Destroy");
-      list.Add(1, 3, 4);
+      list.Add(1).Add(3).Add(4);
       Assert.AreEqual(expected: 3, actual: list.Count);
       Assert.AreEqual(expected: 0, actual: list.RecycleBin.Count);
       list.Destroy();
@@ -485,7 +486,7 @@ namespace Askowl.Examples {
     [Test]
     public void Add() {
       var list = new LinkedList<int>("Add");
-      list.Add(11, 12, 13);
+      list.Add(11).Add(12).Add(13);
       Assert.AreEqual(expected: 3, actual: list.Count);
     }
 
@@ -615,9 +616,9 @@ namespace Askowl.Examples {
     [Test]
     public void DebugMode() {
       LinkedList<int>.DebugMode = true;
-      LogAssert.Expect(LogType.Log, new Regex(".... LinkedList: Add to Tommy.*0."));
-      LogAssert.Expect(LogType.Log, new Regex(".... LinkedList: move Tommy.*1. to Freddy.*0."));
-      LogAssert.Expect(LogType.Log, new Regex(".*: move Freddy.*1.*to end of Tommy Recycling Bin.*0."));
+      LogAssert.Expect(LogType.Log, new Regex(".... LinkedList: Add to Tommy.*0.*"));
+      LogAssert.Expect(LogType.Log, new Regex(".... LinkedList: move Tommy.*1.* to Freddy.*0.*"));
+      LogAssert.Expect(LogType.Log, new Regex(".*: move Freddy.*1.* to end of Tommy Recycling Bin.*0.*"));
       var tommy  = new LinkedList<int>("Tommy");
       var freddy = new LinkedList<int>("Freddy");
       var node   = tommy.Add(1972);
@@ -629,7 +630,7 @@ namespace Askowl.Examples {
     [Test]
     public void ToStringExample() {
       var julies = new LinkedList<int>(name: "Julies");
-      julies.Add(1, 2, 3);
+      julies.Add(1).Add(2).Add(3);
       julies.Pop();
       Assert.AreEqual(expected: "Julies    (2/1)", actual: julies.ToString());
     }
@@ -640,9 +641,9 @@ namespace Askowl.Examples {
 
       var listB = new LinkedList<int>("B") { CompareItem = (node, cursor) => node.Item.CompareTo(cursor.Item) };
 
-      listA.Add(23, 14);
+      listA.Add(23).Add(14);
       var node99  = listA.Push(99);
-      var expect1 = new Regex("1:.*A.*3.*<<.*A.*3.*::.*14\n2:.*A.*3.*<<.*A.*3.*::.*23.*");
+      var expect1 = new Regex("1:.*A.*3.*<<.*A.*3.*::.*99\n2:.*A.*3.*<<.*A.*3.*::.*14.*");
       LogAssert.Expect(LogType.Log, expect1);
       Debug.Log(listA.Dump(2));
       node99.MoveTo(listB);

@@ -5,34 +5,34 @@ namespace Askowl.Examples {
   using NUnit.Framework;
 
   public class CounterStackExamples {
-    /// Using <see cref="CounterStack.Instance"/>
+    /// Using <see cref="CounterFifo.Instance"/>
     [Test]
     public void Instance() {
-      var counter = CounterStack.Instance;
+      var counter = CounterFifo.Instance;
       Assert.IsNotNull(counter);
     }
 
-    /// Using <see cref="CounterStack.Start"/>
+    /// Using <see cref="CounterFifo.Start"/>
     [Test]
     public void Start() {
-      using (var counter = CounterStack.Instance) {
+      using (var counter = CounterFifo.Instance) {
         Assert.AreEqual(0, counter.Start());
       }
     }
 
-    /// Using <see cref="CounterStack.Next"/>
+    /// Using <see cref="CounterFifo.Next"/>
     [Test]
     public void Next() {
-      using (var counter = CounterStack.Instance) {
+      using (var counter = CounterFifo.Instance) {
         Assert.AreEqual(0, counter.Start());
         Assert.AreEqual(1, counter.Next());
       }
     }
 
-    /// Using <see cref="CounterStack.Reached"/>
+    /// Using <see cref="CounterFifo.Reached"/>
     [Test]
     public void Reached() {
-      using (var counter = CounterStack.Instance) {
+      using (var counter = CounterFifo.Instance) {
         var actual = "";
 
         for (var count = counter.Start(); !counter.Reached(10); count = counter.Next()) {
@@ -43,10 +43,10 @@ namespace Askowl.Examples {
       }
     }
 
-    /// Using <see cref="CounterStack"/>
+    /// Using <see cref="CounterFifo"/>
     [Test]
     public void Countdown() {
-      using (var counter = CounterStack.Instance) {
+      using (var counter = CounterFifo.Instance) {
         var actual = "";
 
         for (var count = counter.Start(-10); !counter.Reached(0); count = counter.Next()) {

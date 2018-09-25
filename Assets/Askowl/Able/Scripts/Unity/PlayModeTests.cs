@@ -1,13 +1,12 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-using System.Collections;
-using System.Text.RegularExpressions;
-using UnityEngine;
-using UnityEngine.Assertions;
-using UnityEngine.UI;
-using Object = UnityEngine.Object;
-
 namespace Askowl {
+  using System.Collections;
+  using System.Text.RegularExpressions;
+  using UnityEngine;
+  using UnityEngine.Assertions;
+  using UnityEngine.UI;
+
   /// <a href=""></a>
   /// <inheritdoc />
   public class PlayModeTests : PlayModeController {
@@ -27,11 +26,9 @@ namespace Askowl {
     }
 
     /// <a href=""></a>
-    protected static T Component<T>(params string[] path) where T : Component {
-      T component = Components.Find<T>(path);
-
-      Assert.IsNotNull(value: component, message: $"For button '{Csv.ToString(path)}'");
-
+    protected static T Component<T>(string path) where T : Component {
+      var component = Components.Find<T>(path);
+      Assert.IsNotNull(value: component, message: $"For button '{path}'");
       return component;
     }
 
@@ -40,9 +37,9 @@ namespace Askowl {
 
     /// <a href=""></a>
     protected static T FindObject<T>(string name) where T : Object {
-      T[] objects = Objects.FindAll<T>(name);
+      var objects = Objects.FindAll<T>(name);
       Assert.AreNotEqual(0, objects?.Length);
-      return (objects?.Length > 0) ? objects[0] : null;
+      return objects?.Length > 0 ? objects[0] : null;
     }
 
     /// <a href=""></a>
@@ -57,7 +54,7 @@ namespace Askowl {
     }
 
     /// <a href=""></a>
-    protected IEnumerator PushButton(params string[] path) {
+    protected IEnumerator PushButton(string path) {
       yield return PushButton(Component<Button>(path)); // so it uses test version with assert
     }
 

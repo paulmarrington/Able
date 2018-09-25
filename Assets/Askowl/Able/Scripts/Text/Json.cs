@@ -20,7 +20,8 @@ namespace Askowl {
 
       if (!SkipWhiteSpace()) return this;
 
-      if (json[idx] == '{') { ParseToNode(); } else { ParseOneEntryToNode(); }
+      if (json[idx] == '{') { ParseToNode(); }
+      else { ParseOneEntryToNode(); }
 
       return this;
     }
@@ -55,7 +56,7 @@ namespace Askowl {
     private bool ParseOneEntryToNode() {
       if (!SkipWhiteSpace()) return false;
 
-      var key = json[idx++] == '"' ? ParseString() : NextWord(-1);
+      string key = json[idx++] == '"' ? ParseString() : NextWord(-1);
       if (json[idx] == ':') idx++;
 
       using (tree.Anchor()) {
@@ -69,7 +70,7 @@ namespace Askowl {
     private void ParseObject() {
       if (!SkipWhiteSpace()) return;
 
-      var token = json[idx++];
+      char token = json[idx++];
 
       switch (token) {
         case '{':
@@ -94,7 +95,7 @@ namespace Askowl {
 
       while (SkipWhiteSpace() && (json[idx] != ']')) {
         using (tree.Anchor()) {
-          tree.Add(index++);
+          tree.Add(index++.ToString());
           ParseObject();
         }
       }
@@ -124,9 +125,9 @@ namespace Askowl {
     }
 
     private string NextWord(int offset = 0) {
-      var first = idx += offset;
+      int first = idx += offset;
       while ((idx < json.Length) && ("{}[]\",:".IndexOf(json[idx]) == -1)) idx++;
-      var word = json.Substring(startIndex: first, length: idx - first);
+      string word = json.Substring(startIndex: first, length: idx - first);
       SkipWhiteSpace();
       return word.Trim();
     }

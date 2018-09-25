@@ -21,11 +21,11 @@ namespace Askowl.Examples {
       public string State { get; private set; }
 
       // A struct is useless in a cache if not initialised
-      private static MyStruct CreateItem() => new MyStruct {State = "StructCreated"};
+      private static MyStruct CreateItem() => new MyStruct { State = "StructCreated" };
     }
 
     private class Aware : IDisposable {
-      private static Aware CreateItem()     => new Aware {State = "Created"};
+      private static Aware CreateItem()     => new Aware { State = "Created" };
       private        void  DeactivateItem() => State = "Deactivated";
       private        void  ReactivateItem() => State += "Reactivated";
 
@@ -44,7 +44,7 @@ namespace Askowl.Examples {
     /// <a href="">Using <see cref="Cache{T}.Instance"/></a>
     [Test]
     public void InstanceStatic() {
-      Cache<MyStruct>.CleanCache();
+      Cache<MyStruct>.Entries.Destroy();
 
       var myStruct = Cache<MyStruct>.Instance;
 
@@ -54,7 +54,7 @@ namespace Askowl.Examples {
     /// <a href="">Using <see cref="Cache{T}.Dispose(T)"/></a>
     [Test]
     public void DisposeStatic() {
-      Cache<Aware>.CleanCache();
+      Cache<Aware>.Entries.Destroy();
 
       var myClass = Cache<Aware>.Instance;
 
@@ -65,23 +65,12 @@ namespace Askowl.Examples {
       Assert.AreEqual("Deactivated", myClass.State);
     }
 
-    /// <a href="">Using <see cref="Cache{T}.CleanCache"/></a>
+    /// <a href="">Using <see cref="Cache{T}.RecycleEverything"/></a>
     [Test]
-    public void CleanCache() {
+    public void RecycleEverything() {
       var unused = Cache<Aware>.Instance;
 
-      Cache<Aware>.CleanCache();
-
-      Assert.IsNull(Cache<Aware>.Entries.First);
-      Assert.IsNull(Cache<Aware>.Entries.RecycleBin.First);
-    }
-
-    /// <a href="">Using <see cref="Cache{T}.CleanCache"/></a>
-    [Test]
-    public void ClearCache() {
-      var unused = Cache<Aware>.Instance;
-
-      Cache<Aware>.ClearCache();
+      Cache<Aware>.RecycleEverything();
 
       Assert.IsNull(Cache<Aware>.Entries.First);
       Assert.IsNotNull(Cache<Aware>.Entries.RecycleBin.First);
@@ -90,10 +79,10 @@ namespace Askowl.Examples {
     /// <a href="">Using <see cref="Cache{T}.CreateItem"/></a>
     [Test]
     public void CreateItemStatic() {
-      Cache<AgnosticClassProcessed>.CleanCache();
+      Cache<AgnosticClassProcessed>.Entries.Destroy();
 
       // This would normally be in a static constructor. It only need be run once
-      Cache<AgnosticClassProcessed>.CreateItem = () => new AgnosticClassProcessed {State = "CreateItemStatic"};
+      Cache<AgnosticClassProcessed>.CreateItem = () => new AgnosticClassProcessed { State = "CreateItemStatic" };
 
       var agnosticClass = Cache<AgnosticClassProcessed>.Instance;
 
@@ -105,10 +94,10 @@ namespace Askowl.Examples {
     /// <a href="">Using <see cref="Cache{T}.DeactivateItem"/></a>
     [Test]
     public void DeactivateItemStatic() {
-      Cache<AgnosticClassProcessed>.CleanCache();
+      Cache<AgnosticClassProcessed>.Entries.Destroy();
       // This would normally be in a static constructor. It only need be run once
-      Cache<AgnosticClassProcessed>.CreateItem = () => new AgnosticClassProcessed {State = "CreateStatic"};
-      Cache<AgnosticClassProcessed>.DeactivateItem = (item) => item.State = "AgnosticDeactivateItem";
+      Cache<AgnosticClassProcessed>.CreateItem     = () => new AgnosticClassProcessed { State = "CreateStatic" };
+      Cache<AgnosticClassProcessed>.DeactivateItem = (item) => item.State =  "AgnosticDeactivateItem";
       Cache<AgnosticClassProcessed>.ReactivateItem = (item) => item.State += " AgnosticReactivateItem";
 
       var agnosticClass = Cache<AgnosticClassProcessed>.Instance;
@@ -117,19 +106,19 @@ namespace Askowl.Examples {
         Assert.AreEqual("CreateStatic", agnosticClass.State);
       }
 
-      Assert.AreEqual("AgnosticedDeactivateItem", agnosticClass.State);
+      Assert.AreEqual("AgnosticDeactivateItem", agnosticClass.State);
     }
 
     /// <a href="">Using <see cref="Cache{T}.ReactivateItem"/></a>
     [Test]
     public void ReactivateItemStatic() {
-      Cache<AgnosticClassProcessed>.CleanCache();
+      Cache<AgnosticClassProcessed>.Entries.Destroy();
 
       // This would normally be in a static constructor. It only need be run once
       Cache<AgnosticClassProcessed>.CreateItem =
-        () => new AgnosticClassProcessed {State = "CreateStatic"};
+        () => new AgnosticClassProcessed { State = "CreateStatic" };
 
-      Cache<AgnosticClassProcessed>.DeactivateItem = (item) => item.State = "SealedDeactivateItem";
+      Cache<AgnosticClassProcessed>.DeactivateItem = (item) => item.State =  "SealedDeactivateItem";
       Cache<AgnosticClassProcessed>.ReactivateItem = (item) => item.State += " SealedReactivateItem";
 
       var sealedClass = Cache<AgnosticClassProcessed>.Instance;
@@ -146,12 +135,10 @@ namespace Askowl.Examples {
     /// <a href="">Using <see cref="Cache{T}.Disposable(T)"/></a>
     [Test]
     public void DisposableStatic() {
-      Cache<Aware>.CleanCache();
+      Cache<Aware>.Entries.Destroy();
       var myClass = Cache<Aware>.Instance;
 
-      using (Cache<Aware>.Disposable(myClass)) {
-        Assert.AreEqual("Created", myClass.State);
-      }
+      using (Cache<Aware>.Disposable(myClass)) Assert.AreEqual("Created", myClass.State);
 
       Assert.AreEqual("Deactivated", myClass.State);
     }
@@ -161,7 +148,7 @@ namespace Askowl.Examples {
     /// <a href="">Using <see cref="Cache{T}.Dispose(T)"/></a>
     [Test]
     public void Dispose() {
-      Cache<Aware>.CleanCache();
+      Cache<Aware>.Entries.Destroy();
       var myClass = Aware.Instance;
 
       Assert.AreEqual("Created", myClass.State);
@@ -174,12 +161,10 @@ namespace Askowl.Examples {
     /// <a href="">Using <see cref="Cache{T}.Dispose(T)"/></a>
     [Test]
     public void CacheDispose() {
-      Cache<Aware>.CleanCache();
+      Cache<Aware>.Entries.Destroy();
       var myClass = Aware.Instance;
 
-      using (myClass) {
-        Assert.AreEqual("Created", myClass.State);
-      }
+      using (myClass) Assert.AreEqual("Created", myClass.State);
 
       Assert.AreEqual("Deactivated", myClass.State);
     }
@@ -187,7 +172,7 @@ namespace Askowl.Examples {
     /// <a href="">Using <see cref="Cache{T}.CreateItem"/></a>
     [Test]
     public void CreateItem() {
-      Cache<Aware>.CleanCache();
+      Cache<Aware>.Entries.Destroy();
 
       var myClass = Aware.Instance;
 
@@ -197,7 +182,7 @@ namespace Askowl.Examples {
     /// <a href="">Using <see cref="Cache{T}.DeactivateItem"/></a>
     [Test]
     public void DeactivateItem() {
-      Cache<Aware>.CleanCache();
+      Cache<Aware>.Entries.Destroy();
       var myClass = Aware.Instance;
 
       myClass.Dispose();
@@ -208,7 +193,7 @@ namespace Askowl.Examples {
     /// <a href="">Using <see cref="Cache{T}.ReactivateItem"/></a>
     [Test]
     public void ReactivateItem() {
-      Cache<Aware>.CleanCache();
+      Cache<Aware>.Entries.Destroy();
       var myClass = Aware.Instance;
 
       myClass.Dispose();

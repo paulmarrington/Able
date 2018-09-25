@@ -17,43 +17,42 @@ namespace Askowl.Examples {
 
     [Test]
     public void Count() {
-      var map = new Map("One", 1, "Two", 2, "Three", 3);
+      var map = new Map().Add("One", 1).Add("Two", 2).Add("Three", 3);
 
       Assert.AreEqual(expected: 3, actual: map.Count);
     }
 
     [Test]
     public void Set() {
-      var set = new Map().Set(1, 3, 5, 7, 9);
+      var set = new Map().Add(1).Add(3).Add(5).Add(7).Add(9);
 
       Assert.AreEqual(expected: 5, actual: set.Count);
 
-      set.Set(11, 13, 15);
+      set.Add(11).Add(13).Add(15);
 
       Assert.AreEqual(expected: 8, actual: set.Count);
     }
 
     [Test]
     public void Add() {
-      var map  = new Map("One", 1, "Two", 2, "Three", 3);
-      var more = new object[] { "Six", 6, "Seven", 7 };
+      var map = new Map().Add("One", 1).Add("Two", 2).Add("Three", 3);
 
-      map.Add("Four", 4, "Five", 5).Add(more);
+      map.Add("Four", 4).Add("Five", 5);
 
-      Assert.AreEqual(expected: 7, actual: map.Count);
+      Assert.AreEqual(expected: 5, actual: map.Count);
     }
 
     [Test]
     public void Remove() {
-      var map = new Map("One", 1, "Two", 2, "Three", 3);
+      var map = new Map().Add("One", 1).Add("Two", 2).Add("Three", 3);
 
-      map.Remove("Two", "One");
+      map.Remove("Two").Remove("One");
       Assert.AreEqual(1, map.Count);
     }
 
     [Test]
     public void Found() {
-      var map = new Map("One", 111, "Two", "2", "Three", new Map());
+      var map = new Map().Add("One", 111).Add("Two", "2").Add("Three", new Map());
 
       Assert.IsTrue(map["Two"].Found);
 
@@ -62,14 +61,14 @@ namespace Askowl.Examples {
 
     [Test]
     public void Key() {
-      var map = new Map("One", 111, "Two", "2", "Three", new Map());
+      var map = new Map().Add("One", 111).Add("Two", "2").Add("Three", new Map());
 
       Assert.AreEqual(expected: "Two", actual: map["Two"].Key);
     }
 
     [Test]
     public void Value() {
-      var map = new Map("One", 111, "Two", "2", "Three", new Map());
+      var map = new Map().Add("One", 111).Add("Two", "2").Add("Three", new Map());
 
       Assert.AreEqual(expected: "2", actual: map["Two"].Value);
 
@@ -78,7 +77,7 @@ namespace Askowl.Examples {
 
     [Test]
     public void StringKeyIteration() {
-      var map  = new Map("One", 111, "Two", "2", "Three", new Map());
+      var map  = new Map().Add("One", 111).Add("Two", "2").Add("Three", new Map());
       var keys = "";
 
       for (var key = map.First; key != null; key = map.Next) keys += key;
@@ -88,7 +87,7 @@ namespace Askowl.Examples {
 
     [Test]
     public void ObjectKeyIteration() {
-      var map  = new Map("One", 111, "Two", "2", "Three", new Map());
+      var map  = new Map().Add("One", 111).Add("Two", "2").Add("Three", new Map());
       var keys = "";
 
       for (var i = 0; i < map.Count; i++) keys += map[i];
@@ -98,7 +97,7 @@ namespace Askowl.Examples {
 
     [Test]
     public void Sort() {
-      var map    = new Map("One", 1, "Four", 4, "Three", 3, "Five", 5, "Two", 2);
+      var map    = new Map().Add("One", 1).Add("Four", 4).Add("Three", 3).Add("Five", 5).Add("Two", 2);
       var actual = "";
 
       for (var key = map.Sort().First; key != null; key = map.Next) actual += key;
@@ -108,7 +107,7 @@ namespace Askowl.Examples {
 
     [Test]
     public void SortT() {
-      var map    = new Map("One", 1, "Four", 4, "Three", 3, "Five", 5, "Two", 2);
+      var map    = new Map().Add("One", 1).Add("Four", 4).Add("Three", 3).Add("Five", 5).Add("Two", 2);
       var actual = "";
 
       map.Sort((x, y) => ((int) map[x].Value).CompareTo((int) map[y].Value));
@@ -119,7 +118,7 @@ namespace Askowl.Examples {
 
     [Test]
     public void ArrayGet() {
-      var map = new Map("One", 1, "Four", 4, "Three", 3, "Five", 5, "Two", 2);
+      var map = new Map().Add("One", 1).Add("Four", 4).Add("Three", 3).Add("Five", 5).Add("Two", 2);
 
       Assert.IsTrue(map["One"].Found);
       Assert.IsTrue(map["Three"].Found);
@@ -136,7 +135,7 @@ namespace Askowl.Examples {
     [Test]
     public void Dispose() {
       var values = new Disposable[3];
-      var map    = new Map("One", values[0], "Two", values[1], "Three", values[2]);
+      var map    = new Map().Add("One", values[0]).Add("Two", values[1]).Add("Three", values[2]);
       disposals = 0;
       map.Dispose();
       Assert.AreEqual(3, disposals);
@@ -152,12 +151,10 @@ namespace Askowl.Examples {
       const int sets      = 10000;
       bool      result;
 
-      for (var i = 0; i < keys.Length; i++) keys[i] = Guid.NewGuid().ToString();
-
-      // ReSharper disable once CoVariantArrayConversion
-      map.Set(keys);
-
-      for (var i = 0; i < keys.Length; i++) dict.Add(keys[i], null);
+      for (var i = 0; i < keys.Length; i++) {
+        map.Add(keys[i] = Guid.NewGuid().ToString());
+        dict.Add(keys[i], null);
+      }
 
       stopwatch.Start();
 
@@ -170,7 +167,7 @@ namespace Askowl.Examples {
       }
 
       stopwatch.Stop();
-      var mapTime = stopwatch.ElapsedMilliseconds;
+      long mapTime = stopwatch.ElapsedMilliseconds;
       stopwatch.Reset();
       stopwatch.Start();
 
@@ -183,7 +180,7 @@ namespace Askowl.Examples {
       }
 
       stopwatch.Stop();
-      var dictTime = stopwatch.ElapsedMilliseconds;
+      long dictTime = stopwatch.ElapsedMilliseconds;
 
       Debug.Log($"{$"{keys.Length}:",-8} Map: {mapTime,-10:F4} Dict: {dictTime,-10:F4}");
     }
