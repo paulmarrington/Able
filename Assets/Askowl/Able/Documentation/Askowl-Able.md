@@ -219,20 +219,15 @@ attitude = attitude.AngleAxis(Trig.zAxis, compass.MagneticHeading);
 ```
 
 #### Inverse
-
 `Inverse` changes rotation direction. If you rotate a quaternion and rotate back again using the inverse you get back the original quaternion.
-
 ```c#
 // C ...
 mainCamera.transform.localRotation = attitude.Inverse();
 ```
-
 #### LengthSquared
 
 The concept of length or magnitude for a quaternion has no visual representation when dealing with attitude or rotation. The catch is that most algorithms require unit quaternions - where the length squared approaches one.
-
 #### Normalise
-
 > We can compute a fast 1/sqrt(x) by using a tangent-line approximation to the function. It is like a simple 1-step Newton-Raphson iteration, and by tuning it for our specific case, we can achieve high accuracy for cheap. (A Newton-Raphson iteration is how specialised instruction sets like 3DNow and SSE compute fast 1/sqrt).
 
 |           http://www.cs.uky.edu/~cheng/cs633/quaternion.html |
@@ -243,25 +238,18 @@ This version is on an average 20% faster than `normalised` as provided by Unity.
 
 #### RightToLeftHanded
 
-For rotations, quaternions hold information on the direction in 3 dimensions and the rotation of the object. Think of an aeroplane flying straight in a particular direction. Given a point of reference, you can calculate the angle on the X, Y and Z planes. Now the aeroplane dips it's wing and spins upside-down. The calculations before are the same, but the rotation has changed. The sign of the rotation defines which way the aeroplane is spinning.
-
+For rotations, quaternions hold information on the direction in 3 dimensions and the rotation of the object. Think of an aeroplane flying straight in a particular direction. Given a point of reference, you can calculate the angle on the X, Y and Z planes. Now the aeroplane dips a wing and spins upside-down. The calculations before are the same, but the rotation has changed. The sign of the rotation defines which way the aeroplane is spinning.
 You cannot superimpose two of anything with opposite chirality and yet can be otherwise identical. The choice of which rotation direction is positive is arbitrary. The gyroscope used in phones has right-hand chirality, while Unity uses left-handed.
-
 ```c#
 Quaternion rotateTo = Device.Attitude.RightToLeftHanded(Trig.zAxis);
 ```
-
 #### RotateBy
-
 Unity uses left handed chirality using the Z-axis for the forward direction. The iOS gyroscope, for example, is right-handed. We can reverse the Chirality (a fancy word for handed) by negating the offending axis and W. This reverses rotation direction.
-
 ```c#
 var attitude = GPS.Attitude.RightToLeftHanded(Trig.zAxis);
 ```
-
 #### SwitchAxis
-
-Different IoT devices define different axes as forward. We need to pivot on the third axis by 90 degrees to correct for the difference. It reverses the chirality, but this function corrects for that.
+Different IoT devices define different axes as forward. We need to pivot on the third axis by 90 degrees to correct for the difference. This reverses the chirality, but this function corrects for that.
 
 ```c#
 // B ...
@@ -284,22 +272,17 @@ Integers where one is non-zero to define an axis. It records direction as 1 or -
 
 ##### Name
 
-The name is a character constant, being 'X', 'Y' or 'Z'. Use it for switch statements where the character means more than using the ordinal value.
-
+The name is a character constant, being 'X', 'Y' or 'Z'. Used for switch statements where the character means more than using the ordinal value.
 ##### Ord
-
 Ordinal value - the same as for `Vector3` - X=0, Y=1, Z=2. The values can be access by the ordinal value (i.e. Trig.xAxis[0] == 1).
-
 ##### Vector
-
 When Unity provided functions want to describe a direction, they use constants inside `Vector3` such as `Vector3.up`. Use `Trig.Y.Vector` to provide directions as XYZ.
 
 ##### VectorName
 
-Just for kicks and giggles, you can also retrieve the name of the associated vector `Trig.Y.VectorName == "up"`.
+You can also retrieve the name of the associated vector `Trig.Y.VectorName == "up"`.
 
 ##### OtherAxes
-
 When we use an axis as a pivot, we want to work with the other axes. This field refers to an array of the other two Directions. `Trig.xAxis.OtherAxes[0] == Trig.yAxis && Trig.xAxis.OtherAxes[1] == Trig.zAxis`.
 
 ##### Negative
@@ -393,12 +376,11 @@ AreEqual(expected, actual);
 
 ## Data Structures
 
-### Caching Instances
+### Cached Instances
 
-Even if premature optimisation is evil, the garbage collector can still be your enemy. If you target VR or mobile platforms, garbage collection runs degrade the gaming for your players. Even for PC/Mac/Linux machines, your players may have lower powered machines. Yes, I know, not the serious gamers. However, casual gamers? Even the simple `ForEach` allocates a tiny amount of memory each loop. This is the worst. A few areas allocating large chunks then lots of tiny chunks add up to frequent collection runs with much-fragmented memory to investigate. Let's not even talk about coroutines just now.
+Even if premature optimisation is evil, the garbage collector can still be your enemy. If you target VR or mobile platforms, garbage collection runs degrade the gaming for your players. Even for PC/Mac/Linux machines, your players may have lower powered machines. Yes, I know, not the serious gamers. However, casual gamers? Even the simple `ForEach` allocates a tiny amount of memory each loop. This is the worst. A few areas allocating large chunks followed by lots of tiny chunks add up to frequent collection runs with much-fragmented memory to investigate.
 
-What can we do about it without slowing down development or our game? When we are writing code, we can see where objects are being allocated/discarded a lot. Cache them for reuse on deactivation.
-
+What can we do about the problem without slowing down development or our game? When we are writing code, we can see where objects are being allocated/discarded a lot. Cache them for reuse on deactivation.
 Oh, so you want examples? Try these for size.
 
 1. Nodes in tree structures
@@ -413,13 +395,13 @@ When not to cache:
 2. Classes you cannot reset for reuse. IEnumerable is one of those, so no caching coroutines.
 3. Classes with larger data sets where you instantiate a lot at once, but in very infrequent batches. They need judgement calls. A `Dictionary` or `Map` with 100 entries each with a payload of 100 bytes and an average key length of 5 take about 64k. Not much in the modern scheme of things. Here cache the payloads, not the `Dictionary`.
 
-Look at `new`. It appears the same for classes and structs, but the latter uses the stack and does not allocate memory.
+The keyword `new` appears the same for classes and structs, but the latter uses the stack and does not allocate memory.
 
-The `Cache` class is static. We call classes that don't know about caching *Cache Agnostic*. You can also use *Cache Aware* classes that are more convenient and readable. For the impatient here are full examples of each.
+The `Cache` class is static. We call classes without caching awareness *Cache Agnostic*. You can also use *Cache Aware* classes that are more convenient and readable. For the impatient here are full examples of each.
 
 #### Cache Agnostic Usage
 
-Agnostic usage is compact. It is a little harder to read because if the static `Cache<Agnostic>` references.
+Agnostic usage is compact but is a little harder to read because if the static `Cache<Agnostic>` references.
 
 ```c#
 // This would be in a static constructor. Only  run once
@@ -443,7 +425,7 @@ Cache<Agnostic>.Dispose();            // and send it back again
 
 #### Cache Aware Usage
 
-A cache-aware class gives code is more explicit code. If you want to cache an unsealed class, you can even subclass it and add the functionality below.
+A cache-aware class gives code is more explicit code. If you want to cache an unsealed class, you can even subclass and add the functionality below.
 
 ```c#
 private class Aware : IDisposable {
@@ -471,17 +453,16 @@ aware.Dispose();
 
 #### Cache Entry Maintenance
 
-If the instance does not hold state, or you deactivate state in your code, then the class can cache with no further work. Just create it with the `Cache<T>.Instance` command rather than `new`. Like any resource, disposal is important. If the class implements the `IDisposable` interface, then the `using` statement is your best friend. If not, your code needs to use `Cache<T>.Dispose(instance)` or wrap in `using (Cache<T>.Disposable(instance)){}`.   An undisposed cached item makes a memory leak.
+If the instance does not hold state, or you deactivate state in your code, the class can cache with no further work. Create it with the `Cache<T>.Instance` command rather than `new`. Like any resource, disposal is important. If the class implements the `IDisposable` interface, the `using` statement is your best friend. If not, your code needs to use `Cache<T>.Dispose(instance)` or wrap in `using (Cache<T>.Disposable(instance)){}`.   An undisposed cached item makes a memory leak.
 
 As with the underlying [`LinkedList`](#linked-lists), The [`CreateItem`](#create-a-new-linked-list), [`DeactivatItem`](#create-a-new-linked-list) and [`ReactivateItem`](#create-a-new-linked-list) come in three flavours - Added as methods to a class (private or public), attached to a class so that all instances can use them, or attached to an instance. In the latter case, only that specific instance have the methods. Now for the precedence.
 
 1. A class with no actions attached runs the default as listed below, unless;
 2. A class defines instance methods with the action name and signature, unless;
-3. There is an static call instance action.
+3. We have a static call instance action.
 
 ##### CreateItem
-
-1. If there is no other action, then the class being cached must have an empty constructor.
+1. The class being cached must have an empty constructor.
 2. The class has a method `static ClassName CreateItem(){}`
 3. Set `Cache<T>.CreateItem` to a function without parameters that returns a new item.
 
@@ -502,7 +483,7 @@ var sealedClass2 = Cache<SealedClass>.Instance;    // sets index to 23
 
 ##### DeactivateItem
 
-Item `Dispose` may not be correct when recycling. Perhaps it contains an unclosed server connection, or a reference to a running prefab.
+Item `Dispose` may not be correct when recycling. Perhaps there is an unclosed server connection, or a reference to a running prefab.
 
 1. If the payload is an `IDisposable`, call `Dispose()` otherwise do nothing
 2. The class has a method `static ClassName DeactivateItem(){doSomething();}`
@@ -514,7 +495,7 @@ Reactivating an item may require additional activities. Reopen the connection, r
 
 #### Using a Cached Item
 
-A Cache is only as good as it's housekeeping. If a cached item gets forgotten about it won't recycle for later use, and it won't be available for garbage disposal because it remains on an active list. There does not appear to be a safe way using the garbage collector that does not end up making more garbage. Please prove me wrong.
+A Cache is only as good as the housekeeping. If a cached item gets forgotten about, recycling fails, garbage disposal fails and the object remains on an active list. There does not appear to be a safe way using the garbage collector that does not end up making more garbage. Please prove me wrong.
 
 For sequential code (even waiting for Coroutines meets this criterion), wrapping said code in `using` is the best option.
 
@@ -540,7 +521,7 @@ void StartWork() {aware = Aware.Instance;}
 void EndWork() {aware.Dispose();}
 ```
 
-If you used a cache item in a body of work, but not outside, you can use `ClearCache()` to send all remaining active items to the recycle bin. It is what you should do at the end of a scene. This example shows the difference between CleanCache and Clea**r**Cache.
+If you used a cache item in a body of work, but not outside, you can use `ClearCache()` to send all remaining active items to the recycle bin. This is what you should do at the end of a scene. This example shows the difference between CleanCache and Clea**r**Cache.
 
 ```c#
 Cache<Agnostic>.Instance;
@@ -599,11 +580,11 @@ using (var treeDisposable = TreeContainer.DisposableInstance) {
 } // Implicit dispose
 ```
 
-There are two ways to use `Disposable<T>`. Combine them to make three useful approaches.
+`Disposable<T>` can be used two ways. Combine them to make three useful approaches.
 
 1. ***Setting `Action`*** as above. Useful for sealed classes that do not have an `IDisposable` interface but need cleaning up.
-2. ***`IDisposable` Interface*** when the `PayLoad` has one. Calling `Dispose()` on the `Disposable` calls it for the `PayLoad` if it too has the interface.
-3. Use ***Both*** together. Think of a situation where the `PayLoad` implements `IDisposable` but it is part of a parent object wanting to know the change in state.
+2. ***`IDisposable` Interface*** when the `PayLoad` has one. Call `Dispose()` on the `Disposable` passes to the `PayLoad` if it too has the interface.
+3. Use ***Both*** together. Think of a situation where the `PayLoad` implements `IDisposable` but is part of a parent object wanting to be aware of a change in state.
 
 ```c#
   public void DisposableTWithDisposeAndAction() {
@@ -627,7 +608,7 @@ class Myclass : IDisposable {
 
 ### Emitter.cs - the observer pattern
 
-*Somebody* owns a ***Emitter*** and many other somebodies can register interest in the said emitter. All observers get told when anyone who has access to the emitter instance pulls the trigger. There is a second version ***Emitter&lt;T>*** that can pass an object between the emitter and all observers.
+*Somebody* owns a ***Emitter*** and many other somebodies can register interest in the said emitter. All observers get told when anyone who has access to the emitter instance pulls the trigger. The second version ***Emitter&lt;T>*** that can pass an object between the emitter and all observers.
 
 ```c#
 var emitter = new Emitter();
