@@ -6,7 +6,10 @@ description: Choose your advertising network
 * Table of Contents
 {:toc}
 ## Executive Summary
-`Able` contains scripts needed by other ***Askowl*** libraries. You will find mathematics support around time conversion, comparisons and trigonometry. The data structure section helps with containers, caching, emitters, selectors, stack and trees. We have scripts to parse generic (as in unknown internal structure) CSV and JSON data. For Unity3D support consider scripts to aid testing, locate components and game objects, pluggable logging, and various editor display and runtime components.
+`Able` contains scripts needed by other ***Askowl*** libraries.
+In the maths section you will time conversion, comparisons and trigonometry. Inspect data structure for with containers, caching, emitters, selectors, stack and trees.
+If you have a need to read CSV or JSON data from an unknown source, review the text section. 
+For Unity3D support view scripts to aid testing, locate components and game objects, pluggable logging, and various editor display and runtime components.
 
 > Read the code in the Examples Folder and run the Example scene
 
@@ -19,7 +22,7 @@ Unity provides lots of great functionality, but there are always more problems t
 
 #### Epoch Time
 
-For fast calculations the creators of Unix invented Epoch time to represent time as seconds since the start of 1970 in a 32-bit integer. This form wraps around in the year 2038 and suffered inaccuracy created by leap seconds. The conversion presented here is not 2038 limited. Leap seconds are an issue if you are using dates each side of an end of year correction - an unlikely event with minor implications.
+The creators of Unix invented Epoch time to represent time as seconds since the start of 1970 in a 32-bit integer. Dates wrap around in the year 2038 and suffered inaccuracy created by leap seconds. The conversion presented here is not 2038 limited. Leap seconds are an issue if you are using dates each side of an end of year correction - an unlikely event with minor implications.
 ```c#
 DateTime now          = DateTime.Now;
 double   epochTimeNow = Clock.EpochTimeNow;
@@ -143,7 +146,7 @@ AreEqual(expected: 4.0336f, actual: ema.Average(value: 4));
 
 #### EMA Average Angle
 
-EMA used with angles in degrees is the same except it normalises the result to be between -180 and +180 degrees.
+EMA used with angles in degrees is the same except with normalised results between -180 and +180 degrees.
 
 ```c#
 AreEqual(expected: -10f,       actual: ema.AverageAngle(degrees: -10));
@@ -268,7 +271,7 @@ When I prefer to use *X, Y, Z* instead of *right, up, forward* I use Trig.Direct
 
 ##### X, Y and Z
 
-Integers where one is non-zero to define an axis. It records direction as 1 or -1.
+Integers where one is non-zero to define an axis with recorded direction as 1 or -1.
 
 ##### Name
 
@@ -378,7 +381,7 @@ AreEqual(expected, actual);
 
 ### Cached Instances
 
-Even if premature optimisation is evil, the garbage collector can still be your enemy. If you target VR or mobile platforms, garbage collection runs degrade the gaming for your players. Even for PC/Mac/Linux machines, your players may have lower powered machines. Yes, I know, not the serious gamers. However, casual gamers? Even the simple `ForEach` allocates a tiny amount of memory each loop. This is the worst. A few areas allocating large chunks followed by lots of tiny chunks add up to frequent collection runs with much-fragmented memory to investigate.
+Even if premature optimisation is evil, the garbage collector can still be your enemy. If you target VR or mobile platforms, garbage collection runs degrade the gaming for your players. Even for PC/Mac/Linux machines, your players may have lower powered machines. Not the serious gamers. However, casual gamers? Even the simple `ForEach` allocates a tiny amount of memory each loop. This is the worst. A few areas allocating large chunks followed by lots of tiny chunks add up to frequent collection runs with much-fragmented memory to investigate.
 
 What can we do about the problem without slowing down development or our game? When we are writing code, we can see where objects are being allocated/discarded a lot. Cache them for reuse on deactivation.
 Oh, so you want examples? Try these for size.
@@ -452,8 +455,7 @@ aware.Dispose();
 ```
 
 #### Cache Entry Maintenance
-
-If the instance does not hold state, or you deactivate state in your code, the class can cache with no further work. Create it with the `Cache<T>.Instance` command rather than `new`. Like any resource, disposal is important. If the class implements the `IDisposable` interface, the `using` statement is your best friend. If not, your code needs to use `Cache<T>.Dispose(instance)` or wrap in `using (Cache<T>.Disposable(instance)){}`.   An undisposed cached item makes a memory leak.
+If the instance does not hold state, or you deactivate state in your code, the class can cache with no further work using `Cache<T>.Instance` command rather than `new`. Like any resource, disposal is important. If the class implements the `IDisposable` interface, the `using` statement is your best friend. If not, your code needs to use `Cache<T>.Dispose(instance)` or wrap in `using (Cache<T>.Disposable(instance)){}`.   An undisposed cached item makes a memory leak.
 
 As with the underlying [`LinkedList`](#linked-lists), The [`CreateItem`](#create-a-new-linked-list), [`DeactivatItem`](#create-a-new-linked-list) and [`ReactivateItem`](#create-a-new-linked-list) come in three flavours - Added as methods to a class (private or public), attached to a class so that all instances can use them, or attached to an instance. In the latter case, only that specific instance have the methods. Now for the precedence.
 
@@ -483,7 +485,7 @@ var sealedClass2 = Cache<SealedClass>.Instance;    // sets index to 23
 
 ##### DeactivateItem
 
-Item `Dispose` may not be correct when recycling. Perhaps there is an unclosed server connection, or a reference to a running prefab.
+Item `Dispose` may not be correct when recycling, possibly due to an unclosed server connection, or a reference to a running prefab.
 
 1. If the payload is an `IDisposable`, call `Dispose()` otherwise do nothing
 2. The class has a method `static ClassName DeactivateItem(){doSomething();}`
@@ -491,7 +493,7 @@ Item `Dispose` may not be correct when recycling. Perhaps there is an unclosed s
 
 ##### ReactivateItem
 
-Reactivating an item may require additional activities. Reopen the connection, restart the prefab or whatever. The actions are the same as above with R replacing D.
+To reactivate an item may require additional activities. Reopen the connection, restart the prefab or whatever. The actions are the same as above with R replacing D.
 
 #### Using a Cached Item
 
@@ -509,7 +511,7 @@ using (var aware = Aware.Instance) {
 }
 ```
 
-Otherwise, it is your responsibility to call `Dispose`. Remember exceptions.
+Otherwise your responsibility is to call `Dispose`. Remember exceptions.
 
 ```c#
 Agnostic agnostic;
@@ -537,7 +539,7 @@ Assert.IsNull(Cache<Agnostic>.Entries.RecycleBin.First);
 
 ### Disposable.cs for IDisposable
 
-You can implement closures and anonymous functions with `using(...){...}` and without creating a new class to manage it. `Disposable` is a struct, so it no garbage collection.
+You can implement closures and anonymous functions with `using(...){...}` and without creating a management class. `Disposable` is a struct, so sans garbage collection.
 
 ```c#
     [Test]
@@ -583,7 +585,7 @@ using (var treeDisposable = TreeContainer.DisposableInstance) {
 `Disposable<T>` can be used two ways. Combine them to make three useful approaches.
 
 1. ***Setting `Action`*** as above. Useful for sealed classes that do not have an `IDisposable` interface but need cleaning up.
-2. ***`IDisposable` Interface*** when the `PayLoad` has one. Call `Dispose()` on the `Disposable` passes to the `PayLoad` if it too has the interface.
+2. ***`IDisposable` Interface*** when the `PayLoad` has one. Call `Dispose()` on the `Disposable` passes to the `PayLoad` if available.
 3. Use ***Both*** together. Think of a situation where the `PayLoad` implements `IDisposable` but is part of a parent object wanting to be aware of a change in state.
 
 ```c#
@@ -657,17 +659,15 @@ private struct Observer3 : IObserver<int> {
 }
 ```
 
-While an ***Emitter*** provides extra facilities to the built-in ***event*** delegates, it does not improve decoupling. It paves the way for decoupled events using [***CustomAssets***](/CustomAssets), extending ***ScriptableObjects***.
-
+While an ***Emitter*** provides extra facilities to the built-in ***event*** delegates, decoupling is not improved. For decoupled events see [***CustomAssets***](/CustomAssets), extending ***ScriptableObjects***.
 ### Fifo Stacks
-
-C# provides a serviceable `Stack` class. Even `LinkedList` from this package can provide a powerful stack. I think both are too heavy when we want a simple stack. This implementation is complete in under two dozen lines of code. It has unique features that make it most suitable for lightweight applications.
+C# provides a serviceable `Stack` class. Even `LinkedList` from this package can provide a powerful stack. I think both are too heavy when we want a simple stack. This implementation is complete in under two dozen lines of code with unique features suitable for lightweight applications.
 
 1. Instantiate with `Fifo<T>.Instance`.
-2. It is an `IDisposable`. Cache with `Dispose()` for later - reducing garbage collection.
-3. It is easy to access and change the most recent item pushed with `Top`, making it perfect for dynamic data that needs a history.
+2. Is an `IDisposable`. Cache with `Dispose()` for later - reducing garbage collection.
+3. Change the most recent item pushed with `Top` for dynamic data that needs a history.
 4. Use `Next` to retrieve or update the second-in-line.
-5. `Push` and `Pop` both return the current item. It makes data with history easier to create.
+5. `Push` and `Pop` both return the current item making data with history easier to create.
 6. `Swap` is a convenience method that swaps `Top` with `Next`.
 7. `Count` will return the number of stack entries.
 8. Set `Count` to reduce the number of entries on the stack.
@@ -691,26 +691,23 @@ public class CounterFifo : Fifo<int> {
 }
 ```
 
-So, thanks to `Fifo`, CounterFifo is concise. However, what does it do? Well, the name says it all - it is a stack of counters. OK, you say, but why? There are other uses, but I use it for an alternate form of iteration. We know that `foreach` causes lots of garbage to collect due to the state machine being generated by the compiler when a method returns `IEnumerator`. The problem is that these functions do not reset, creating a new one for each turn of the loop. By providing methods `First` and `Next` in a class we can implement easy-to-use iteration with minimal garbage.
+So, thanks to `Fifo`, CounterFifo is a concise stack of counters providing an alternate form of iteration without garbage collection. C# `foreach` causes lots of garbage to collect due to the state machine being generated by the compiler when a method returns `IEnumerator`. These functions do not reset, so cannot be reused or cached. By providing methods `First` and `Next` in a class we can implement easy-to-use iteration with minimal garbage.
 
 ```c#
 for (var key = map.First; key != null; key = map.Next) {
   Process(key, map[key]);
 }
 ```
-
-Cool, huh? However, how does it work? Here is the implementation in ***Map.cs***.
-
+Here is the implementation in ***Map.cs***.
 ```c#
 public object First => (Count > 0) ? keys[index.Start()] : null;
 public object Next => index.Reached(Count - 1) ? null : keys[index.Next()];
 private CounterFifo index = CounterFifo.Instance;
 ```
-
 We could have just used `int index;`. In similar instances, we have problems when one iteration occurs in another. Besides, this is easier to read.
 ### Linked Lists
 
-C#/.Net provides an excellent LinkedList implementation. It is, by necessity generic. My implementation has different goals.
+C#/.Net provides an excellent generic LinkedList implementation. My implementation has different goals.
 
 1. Reduce garbage collection by keeping remaining nodes in a recycling list.
 2. Ordered lists by providing a comparator.
@@ -723,23 +720,16 @@ C#/.Net provides an excellent LinkedList implementation. It is, by necessity gen
 
 #### Nodes
 
-A node instance wraps each item added to a list. The node is a class, so it lives on the heap. We recycle nodes, no there is no garbage collection activity.
-
+A node instance wraps each item added to a list. The node lives on the heap, but is recycled to reduce garbage collection activity.
 ##### Node Name
-
 For clarity, while debugging a node name includes the home and owner lists and whatever the held item gives `ToString()`.
-
 ##### Node Owner and Home
-
-Place it on the `Home` list when we create a node. On being recycled, return it to it's home recycle bin. Set `Owner` each time a node moves to another list.
-
+We create a node on the `Home` list where it is returned when recycled. The `Owner`  is assigned each time a node moves to another list.
 ##### Node Comparison
-
 When walking the list, it is sometimes good to see if the node passes or fails a range check. Every node implements <, <=, >, >=, == and !=. They all rely on a single LinkedList function, `Compare`  as set during initialisation.
-
 ##### Move the Node to Another List
 
-Moving nodes provides the core difference between this linked list implementation and others. Moving nodes between lists provide the underlying mechanism for a caching state machine. Use with ordered lists to feed them to a state in priority order. `MoveTo` moves the current node to the sorted location or top of the target list, while `MoveToEndOf` moves it to the bottom.  Older items from the recycle bin  are first to reactivate.
+Moving nodes provides the core difference between this linked list implementation and others. A caching state machine can be created by moving nodes between lists. Use with ordered lists to feed them to a state in priority order. `MoveTo` moves the current node to the sorted location or top of the target list, while `MoveToEndOf` moves to the bottom.  Older items from the recycle bin  are first to reactivate.
 
 ##### Update Node Contents
 
@@ -751,22 +741,19 @@ using (var node = taskList.Top) {
     Process(node.Item);
 } // node sent to recycling
 ```
-To set a node adrift call `Destroy` instead. It deactivates the held item and then forgets the node ever existed. As soon as all references in your code go out of scope, the garbage collector is free to reuse the heap space.
+To set a node adrift call `Destroy` instead to deactivate the held item and then forgets the node ever existed. As soon as all references in your code go out of scope, the garbage collector is free to reuse the heap space.
 
 ```c#
 taskList.Top.Destroy();
 ```
-
-Calling `Destroy` on the LinkedList destroys all entries in both active and recycle bin lists.
-
+When `Destroy` is called all entries in both active and recycle bin lists are discarded.
 ##### Fetch a New Node
 
 `Fetch` pulls a new (or recycled) node iscurrent node's `Home` list then moved to `Owner`. If that is not your requirement, use `node.Home.Fetch()` or `node.Owner.Fetch()`.
 
 ##### Push an Item to Owner
 
-Create a  node for the entry item provided and give it the same `Home` as the current node and set to `Owner` as the current node.
-
+Create a  node for the entry item provided with the same `Home` and `Owner` as the current node.
 ##### Add Another Item
 
 For convenience in chaining `Node` has an `Add` method. In this example the first add is from `LinkedList` while the rest are from the inner `Node` class.
@@ -781,7 +768,7 @@ Creation defines how the linked list behaves.
 
 ##### Unordered Lists & FIFO Stacks
 
-When adding an item to the list, it always becomes the `Top` element. `Bottom` is the oldest entry.
+An item becomes the `Top` element when added. `Bottom` is the oldest entry.
 
 ```c#
 var numberList = new LinkedList<int>();
@@ -789,9 +776,7 @@ Assert.AreEqual(expected: 0, actual: numberList.New());
 ```
 
 ##### Custom Create, Deactivate & Reactivate
-
-It is fine to return `default(T)`, being zeros or null references, but then the user of your list needs to know to create an item when necessary. As an example, consider a list of open long-lived HTTP connections.
-
+Implicit creation returns `default(T)`, being zeros or null references. For more control, implement the custom methods herein.
 ```c#
 var connections = LinkedList<Connection>{
     CreateItem     = () => new Connection(myURL);
@@ -804,9 +789,8 @@ using (var node = connections.Fetch()) {
 }
 ```
 
-Yes, I know. This example is ignoring the asynchronous nature of the request and the possibility that the connection has timed out.
-
-`DeactivateItem` will not call `Dispose()` on the item if it is an `IDisposable`. Override it if you need that functionality. If the item needs reactivation when retrieved for reuse, set an activation parameter as above.
+This example is ignoring the asynchronous nature of the request and the possibility that the connection has timed out.
+`DeactivateItem` will not call `Dispose()` even for `IDisposable` unless overridden. If the item needs reactivation when retrieved for reuse, set an activation parameter as above.
 
 Before node recycling, we call `DeactivateItem(node)`.
 
@@ -857,7 +841,7 @@ Created or moved items maintain order. Inherit `CompareItem` or set it for a cla
 
 #### List Disposal
 
-Use linked lists as statics to keep reusable elements. Clear them when they have a limited life. There are two levels of cleanliness.
+Use linked lists as statics to keep reusable elements. Clear them when they have a limited life with two levels of cleanliness.
 1. `Discard()` disposes of any active elements, placing them in the recycle bin for later use. Use when you want to keep the linked list, but remove any outstanding elements. Called if it is an Item in a parent LinkedList.
 2. `Dispose()` removes items from the recycle bin as well so that the linked list can be safe for the garbage collector to pick up.
 
@@ -865,7 +849,7 @@ Use linked lists as statics to keep reusable elements. Clear them when they have
 
 ##### Add an Item
 
-If you have an item that has not been on a list, use `Add` to correct that oversight. It will pull an entry from the recycle bin if there is one.
+If you have an item that has not been on a list, use `Add` to correct that oversight. Add uses the recycle bin.
 
 ```c#
 var node = fences.Add(newFence).Add(anotherFence);
@@ -873,8 +857,7 @@ var node = fences.Add(newFence).Add(anotherFence);
 
 ##### Recycle a Node
 
-Use `Fetch` if you require a node with contents initialised elsewhere. It picks one from the recycling heap. If the recycling is empty, it creates a new item and matching node for you. The code does not set it if `CreateItem` is `default<T>`.
-
+Use `GetRecycledOrNew` if you require a node with contents initialised elsewhere.
 ```c#
 using (node = weatherEvents.Fetch()) {
     node.Item.UseMe();
@@ -883,7 +866,7 @@ using (node = weatherEvents.Fetch()) {
 
 ##### Move Item Between Lists
 
-So now we get to the part where the real magic happens. Different components can own lists of Jobs. When they have done there but they can toss the job (node) to the next component that needs it.
+So now we get to the part where the real magic happens. Different components can own lists of Jobs. When they have done they can toss the job (node) to the next waiting component.
 
 ```c#
 void Update() {
@@ -898,9 +881,9 @@ void Update() {
 }
 ```
 
-In this theoretical example, once we have processed a job we mark it finished or put it on another job list for a dispatcher to decide what to do next. Note that this example only works with small numbers of jobs, since it is only processing between 30 and 60 jobs a second.
+In this theoretical example, once we have processed a job we mark finished or put on another job list for a dispatcher to decide what to do next. Note that this example only works with small numbers of jobs, processing between 30 and 60 jobs a second.
 
-There is also a function to move to the end of a list for better dispersal of usage (LRU - least used). you can also use it to move an item to the end of the list regardless of priority.
+There is also a function to move to the end of a list for better dispersal of usage (LRU - least used). Can also used to move an item to the end of the list regardless of priority.
 
 ```c#
 var result = jobs.First.Item;
@@ -913,9 +896,9 @@ if (result == null) {
 
 ##### Disposal of a Node
 
-Disposing of a node once it has served its purpose calls `Dispose()` on the item if it is an `IDiposable`. It then moves the node to the `Home` recycle bin.
+Disposing of a node calls `Dispose()` on `IDiposable` item, moving to the `Home` recycle bin.
 
-If an item has a known lifetime then by far the best way is with a `using` statement. Like `Try/Finally` there is aguarantee of execution. If the work requires waiting for resources, then put the `using` statement in a Coroutine, or it's equivalent.
+If an item has a known lifetime then by far the best way is with a `using` statement, having a guarantee of execution. If the work requires waiting for resources, then put the `using` statement in a Coroutine.
 
 ```c#
 IEnumerator MyCoroutine() {
@@ -930,11 +913,10 @@ Sometimes we do not know the lifetime of an item beforehand. Here, whoever does 
 
 #### A Lifo Stack
 
-For the uninitiated, ***Lifo*** is an acronym for *Last in first out*. It well suits a linked list. The return stack used by most languages with functions is Lifo, so every return returns from the most recent function. Stack-based languages such as FORTH and FICL make working with Lifo an art form of efficiency (and unreadability). We use Lifo stacks every day with the undo stack when editing or the back button on a browser.
+For the uninitiated, ***Lifo*** is an acronym for *Last in first out*. The return stack used by most languages with functions is Lifo, so every return returns from the most recent function. Stack-based languages such as FORTH and FICL make working with Lifo an art form of efficiency (and unreadability). We use Lifo stacks every day with the undo stack when editing or the back button on a browser.
 
 ##### First
-
-`Top` is the standard entry to the linked list, so using Top has no overhead. `Top` is null if the list is empty. `Top` allows access to the first item for processing before deciding what to move or discard it. Don't expect `Top` to remain when you yield or otherwise relinquish the CPU. If you need it longer, move the item to a list to which your code has exclusive access.
+`First` is the standard entry to the linked list, so using Top has no overhead. `First` is null if the list is empty. `First` allows access to the first item for processing before deciding on move or discard. Don't expect `First` to remain when you yield or otherwise relinquish the CPU.
 
 ```c#
 var working = new LinkedList<MyWorld>();
@@ -946,19 +928,18 @@ if (node != null) {
 }
 ```
 
-`Top?.MoveTo` ensures that the readyList only provides a node if it is not empty.
+`First?.MoveTo` ensures that the readyList only provides a node if not empty.
 
 ##### Second
 
-`Second` is the second entry below `First`. It is null if the list has one entry or is empty. Use it as a premonition of things to come. For the ordered list you can tell if there is more immediate work. Can you think of any other uses?
+`Second` is the second entry below `First`, being null if the list has one entry or is empty.
 
 ##### Last
-
-`Last` is the other less visited end of the stack/linked list. Great for anyone who likes burning the candle from both ends. There is a `MoveToEnd` method that makes a node the new Bottom.
+`Last` is the other less visited end of the stack/linked list. Great for anyone who likes burning the candle from both ends. The `MoveToEnd` method makes a node the new Last.
 
 ##### Empty
 
-The example above for `Top` is not how I would do it. A better method would be
+A better method to implement `First` would be:
 
 ```c#
 var working = new LinkedList<MyWorld>();
@@ -974,7 +955,7 @@ For this example, both methods are identical because `yield` does not pass back 
 
 ##### Count
 
-`Count` walks a linked list to see how many nodes there are.
+`Count` keeps a tally of active nodes.
 
 ##### Push
 
@@ -990,7 +971,7 @@ dispatchList.Push(myItem);
 
 ##### Pop
 
-Also for every push, there has to be a pop. However, what do we do about node conservation? Easy, put it in the recycle bin. Remember to finish with it or move it somewhere safe before the next implicit or explicit yield. You need not dispose of the node.
+`Pop` places a node inin the recycle bin before returning a reference. Processing should occur before the next implicit or explicit yield. You need not dispose of the node.
 
 ```c#
 using (var node = taskList.Top) {
@@ -1001,8 +982,7 @@ node = taskList.Pop();
 Process(node.Item);
 ```
 
-This
-is better because you are free to move the node without it being moved back to the recycle bin for you.
+This is better because you are free to move the node without it being moved back to the recycle bin for you.
 
 #### Node Walking
 
@@ -1033,7 +1013,7 @@ void Update() {
 }
 ```
 
-By wrapping it in a `using` statement `Dispose` has a guarantee of execution.
+Inside a `using` statement `Dispose` has a guarantee of execution.
 
 #### Debug Mode
 
@@ -1041,7 +1021,7 @@ Because we can use linked lists in a cached state machine, knowing where a task 
 
 ##### Name
 
-Refers to the name of the list as provided in the constructor. It defaults to the name of the item type followed by an ordinal number.
+Refers to the name of the list as provided in the constructor, defaulting to the name of the item type followed by an ordinal number.
 
 ##### DebugMode
 
@@ -1053,7 +1033,7 @@ When enabled, `DebugMode` causes a log entry for every creation or movement of a
 
 ##### ToString
 
-Returns a string containing the list name and counts for it and the attached recycle bin.
+Returns a string containing the list name and counts entry counts.
 
 ### Map - A Dictionary Wrapper
 
@@ -1063,7 +1043,7 @@ My limited tests show that the `Dictionary` is faster than `SortedList`. The lat
 
 For `Map`, the `Hashtable` class would have made the perfect base, but in more tests `Dictionary` was faster. On the tests I created, `Map` can be up to a third again faster than `Dictionary`.
 
-#### Creating a Map and adding Entries
+#### Create a Map and add Entries
 
 You can add as many entries as you like by passing in key-value pairs. `Add` returns a reference to the `Map` for chaining.
 
@@ -1071,7 +1051,7 @@ You can add as many entries as you like by passing in key-value pairs. `Add` ret
 var map  = new Map().Add("One", 1).Add("Two", 2).Add("Three", 3);
 ```
 
-#### Creating or Updating a Set
+#### Create or Update a Set
 
 A `Set` is a convenience method to fill a `Map` with keys referencing null values.
 
@@ -1088,18 +1068,15 @@ var map = new Map()).Add("One", 1).Add("Two", 2).Add("Three", 3);
 map.Remove("Two").Remove("One");
 Assert.AreEqual(1, map.Count);
 ```
-
-Set will call `Dispose()` on values that implement `IDisposable`. Where this would cause awkward infinite recursion, turn it off with the `dispose` parameter.
+`Remove will call `Dispose()` on values that implement `IDisposable`. Where this would cause awkward infinite recursion, set the `dispose` parameter tof alse.
 
 ```c#
-map.Remove("Three" dispose: false);
+map.Remove("Three", dispose: false);
 ```
-
-
 
 #### Retrieve a Key/Value Pair
 
-The core method for search and rescue is an array override. It tries to retrieve the value for the supplied key and sets class instance values. It then returns a reference to `Map` for chaining.
+The core method for search and rescue is an array override, retrieving the value for the supplied key and setting class instance values then returning a reference to `Map` for chaining.
 
 ```c#
 var map = new Map().Add("One", 1).Add("Four", 4).Add("Three", 3).Add("Five", 5);
@@ -1109,16 +1086,14 @@ Assert.IsFalse(map["Seven"].Found);
 
 ##### Found
 
-We always need to know if a search was successful. We can't rely on `Value` being `null` since that may be a valid result.
-
+We can't rely on `Value` being `null` to indicate retrieval failure in all cases.
 ```c#
 var set = new Map().Add(1).Add(3).Add("Five").Add(7).Add(9);
 if (set[7].Found || set["Seven"].Found) Debug.Log("We have sevens");
 ```
-
 ##### Key
 
-For completeness, `Map` saves the last key searched - whether it is successful or not. It means you can pass the map around without having to search for an entry again.
+For completeness, `Map` saves the last key searched, even on failure. You can pass the map around without having to search for an entry again.
 
 ```c#
 var map = new Map().Add("One", 111).Add("Two", "2").Add("Three", new Map());
@@ -1135,28 +1110,24 @@ var map = new Map("One", 111, "Two", "2", "Three", new Map());
 Assert.AreEqual(expected: "2", actual: map["Two"].Value);
 Assert.IsNull(map["TryMe"].Value);
 ```
-
 #### Keys: Iterating Through a Map
 
 I designed the iteration techniques hereuse as little of the heap as possible to minimise garbage collection. Both mobile and VR apps suffer a busy the garbage collector.
 
-There is one other crucial distinguishing feature. By default, it returns the keys in the same order as it added them. This is valuable if they are coming from structured data such as XML or JSON.
+By default, iteration returns the keys in the same order as the were added. This is valuable if they are coming from structured data such as XML or JSON.
 
 ##### Count: of Items in a Map
 
-`Count` can always tell you how many items are in the `Map`. It's used to check if the map is empty or in an expected size range. Then there is object key iteration below.
-
-##### Using First and Next
+`Count` can always tell you how many items are in the `Map`.
+##### First and Next
 
 Because `string` keys are the most common, they get special treatment.
-
 ```c#
 for (var key = map.First; key != null; key = map.Next) {
   Process(key, map[key]);
 }
 ```
-
-##### Using Array Indexing
+##### Array Indexing
 
 Object keys are even more fundamental. `Map` allows access to keys with an integer array index.
 
@@ -1166,11 +1137,11 @@ for (int i = 0; i < map.Count; i++) {
 }
 ```
 
-##### Sorting
+##### Sorted Lists
 
-As mentioned above, without intervention the order of the keys for either iteration method is the order it inserted them into the map. This is useful for data where the order matters, such as JSON and XML.
+As mentioned above, without intervention the order of the keys for either iteration method is the order inserted. This is useful for data where the order matters, such as JSON and XML.
 
-When we need a different order, use one of the `Sort` functions. Without parameters, `Sort` uses the default sorting for an object. This is alphabetical for strings and numeric ascending for numbers. If you mix your keys, it becomes a dog's breakfast.
+When we need a different order, use one of the `Sort` functions. Without parameters, `Sort` uses the default sorting for an object. This is alphabetical for strings and numeric ascending for numbers.
 
 ```c#
 var map = new Map().Add("One", 1).Add("Four", 4).Add("Three", 3);

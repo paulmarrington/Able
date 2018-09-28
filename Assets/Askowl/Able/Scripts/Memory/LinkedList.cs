@@ -46,7 +46,7 @@ namespace Askowl {
       // ReSharper disable once UnusedMethodReturnValue.Global
       public Node MoveToEndOf(LinkedList<T> to) => to.Append(this);
 
-      /// <a href="http://unitydoc.marrington.net/Able#dispose-of-this-node">Dispose of a Node Forever</a>
+      /// <a href="">Dispose of a Node Forever</a>
       public void Destroy() {
         Owner.DeactivateItem(this);
         Item = default;
@@ -70,7 +70,7 @@ namespace Askowl {
       public override string ToString() => $"{Owner,25}  <<  {Home,-25}::  {Item}";
 
       /// <a href=""></a>
-      public Node Fetch() => Home.Fetch().MoveTo(Owner);
+      public Node GetRecycledOrNew() => Home.GetRecycledOrNew().MoveTo(Owner);
 
       /// <a href=""></a>
       public Node Push(T t) => Home.Push(item: t).MoveTo(Owner);
@@ -138,7 +138,7 @@ namespace Askowl {
       Name = string.IsNullOrWhiteSpace(name) ? $"{typeof(T).Name}-{++ordinal}" : name;
 
     /// <a href="">Linked List Name</a>
-    public string Name { get; }
+    public string Name;
 
     /// <a href="">Item Creation and Preparation when new() is not enough</a>
     public static Func<T> CreateItemStatic = GetDefaultCreateItem();
@@ -199,22 +199,14 @@ namespace Askowl {
     #region Node Creation and Movement
     /// <a href="">Add an Item to a List</a>
     public Node Add(T item) {
-      Node node = Fetch();
+      Node node = GetRecycledOrNew();
       reverseLookup?.Remove(node.Item).Add(item, node);
       node.Item = item;
       return node;
     }
 
-    /// <summary>
-    /// Fetch a node from the recycle bin. If the bin is empty, use the creator
-    /// function linked to the list to create and Item and then a Node.
-    /// The default creator function returns `default(T)`, which is adequate for
-    /// move value items. It will be null for object and can be filled in later
-    /// if needed.
-    /// </summary>
-    /// <returns>node for chained calls</returns>
-    /// <a href="http://unitydoc.marrington.net/Able#recycle-a-currently-unused-node">Get a recycled or new node</a>
-    public Node Fetch() {
+    /// <a href=""></a>
+    public Node GetRecycledOrNew() {
       if (RecycleBin.Empty) return Insert(NewNode(CreateItem()));
 
       var node = RecycleBin.First.MoveTo(this);
@@ -341,6 +333,9 @@ namespace Askowl {
 
     /// <a href="http://unitydoc.marrington.net/Able#fifo">Retrieve the first list item - <see cref="Node.Recycle"/></a>
     public Node Pop() => First?.Recycle();
+
+    /// <a href=""></a>
+    public Node Pull() => Last?.Recycle();
     #endregion
 
     #region Debugging

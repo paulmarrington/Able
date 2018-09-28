@@ -37,7 +37,7 @@ namespace Askowl {
     public static readonly LinkedList<T> Entries = new LinkedList<T>($"{typeof(T)} Cache");
 
     /// <a href="http://bit.ly"></a>
-    public static T Instance => Entries.Fetch().Item;
+    public static T Instance => Entries.GetRecycledOrNew().Item;
 
     /// <a href="http://bit.ly"></a>
     public static T Add(T item) => Entries.Add(item).Item;

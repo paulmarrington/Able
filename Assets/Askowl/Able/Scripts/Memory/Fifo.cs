@@ -53,6 +53,9 @@ namespace Askowl {
     /// <a href=""></a>
     public T Next { get => stack[pointer - 2]; set => stack[pointer - 2] = value; }
 
+    /// <a href=""></a>
+    public T Bottom { get => stack[0]; set => stack[0] = value; }
+
     /// <inheritdoc />
     public virtual void Dispose() {
       for (var i = 0; i < pointer; i++) (stack[i] as IDisposable)?.Dispose();
