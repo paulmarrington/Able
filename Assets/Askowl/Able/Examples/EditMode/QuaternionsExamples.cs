@@ -10,14 +10,13 @@ namespace Askowl.Examples {
   using Random = UnityEngine.Random;
 
   public class QuaternionsExamples {
-    [Test]
-    public void AroundAxis() {
+    [Test] public void AroundAxis() {
       Reset(test: "RotateBy", setsWithNewSeed: 100, nearRepeats: 1000, maxDegrees: 10);
 
       Walker(
         () => {
-          var angle = randomAngle;
-          var axis  = randomAxis;
+          float angle = RandomAngle;
+          int   axis  = randomAxis;
 
           var rotateBy = Quaternion.AngleAxis(angle, directions[axis].Vector);
           var actual   = rotateBy * seed;
@@ -28,8 +27,7 @@ namespace Askowl.Examples {
         });
     }
 
-    [Test]
-    public void Inverse() {
+    [Test] public void Inverse() {
       Reset(test: "Inverse", setsWithNewSeed: 100, nearRepeats: 1000, maxDegrees: 180);
 
       Walker(
@@ -42,22 +40,20 @@ namespace Askowl.Examples {
         });
     }
 
-    [Test]
-    public void LengthSquared() {
+    [Test] public void LengthSquared() {
       Reset(test: "LengthSquared", setsWithNewSeed: 100, nearRepeats: 1000, maxDegrees: 180);
 
       Walker(
         () => {
           var expected = 1;
 
-          var actual = seed.normalized.LengthSquared();
+          float actual = seed.normalized.LengthSquared();
 
           Assert.IsTrue(Compare.AlmostEqual(expected, actual));
         });
     }
 
-    [Test]
-    public void Normalise() {
+    [Test] public void Normalise() {
       Reset("Normalise", 1, 100000, 180);
 
       Walker(
@@ -71,14 +67,13 @@ namespace Askowl.Examples {
         });
     }
 
-    [Test]
-    public void NormaliseSpeed() {
+    [Test] public void NormaliseSpeed() {
       var a = Reseed();
       DenormaliseSeed();
 
-      var expected = SpeedTest("normalized", 10, 1000000, () => a = seed.normalized);
+      long expected = SpeedTest("normalized", 10, 1000000, () => a = seed.normalized);
 
-      var actual = SpeedTest("Normalise", 10, 1000000, () => a = seed.Normalise());
+      long actual = SpeedTest("Normalise", 10, 1000000, () => a = seed.Normalise());
 
       seed = a;
       var improvement = (int) ((1 - (float) actual / expected) * 100);
@@ -86,22 +81,20 @@ namespace Askowl.Examples {
       Assert.Greater(improvement, 10); // better than 10%
     }
 
-    [Test]
-    public void RightToLeftHanded() {
+    [Test] public void RightToLeftHanded() {
       Reset(test: "RightToLeftHanded", setsWithNewSeed: 100, nearRepeats: 1000, maxDegrees: 180);
 
       Walker(
         () => {
           var expected = seed;
 
-          var actual = seed.RightToLeftHanded(Trig.zAxis).RightToLeftHanded(Trig.zAxis);
+          var actual = seed.RightToLeftHanded(Trig.ZAxis).RightToLeftHanded(Trig.ZAxis);
 
           AreEqual(expected, actual);
         });
     }
 
-    [Test]
-    public void RotateBy() {
+    [Test] public void RotateBy() {
       Reset(test: "RotateBy", setsWithNewSeed: 100, nearRepeats: 1000, maxDegrees: 180);
 
       Walker(
@@ -117,13 +110,12 @@ namespace Askowl.Examples {
         });
     }
 
-    [Test]
-    public void SwitchAxis() {
+    [Test] public void SwitchAxis() {
       Reset(test: "SwitchAxis", setsWithNewSeed: 100, nearRepeats: 1000, maxDegrees: 180);
 
       Walker(
         () => {
-          var axis = Trig.xAxis;
+          var axis = Trig.XAxis;
 
           var euler    = seed.eulerAngles;
           var expected = Quaternion.Euler(euler.x, euler.z, euler.y);
@@ -149,7 +141,7 @@ namespace Askowl.Examples {
         total += watch.ElapsedMilliseconds;
       }
 
-      var average = total / passes;
+      long average = total / passes;
       Debug.Log($"{name}: {ms} = {average}");
       return average;
     }
@@ -158,7 +150,7 @@ namespace Askowl.Examples {
       for (var i = 0; i < 4; i++) seed[i] = Random.Range(-0.5f, 0.5f);
     }
 
-    private Trig.Direction[] directions = { Trig.xAxis, Trig.yAxis, Trig.zAxis };
+    private Trig.Direction[] directions = { Trig.XAxis, Trig.YAxis, Trig.ZAxis };
 
     private void Reset(string test, int setsWithNewSeed, int nearRepeats, float maxDegrees) {
       testName     = test;
@@ -169,7 +161,7 @@ namespace Askowl.Examples {
     }
 
     private void AreEqual(Quaternion expected, Quaternion actual) {
-      var dot = Mathf.Abs(Quaternion.Dot(expected, actual));
+      float dot = Mathf.Abs(Quaternion.Dot(expected, actual));
       if (dot > 0.9995) return;
 
       Assert.Fail(
@@ -182,7 +174,7 @@ namespace Askowl.Examples {
     }
 
     private void Walker(Action action) {
-      var startTime = Time.realtimeSinceStartup;
+      float startTime = Time.realtimeSinceStartup;
 
       for (var i = 0; i < sets; i++) {
         Reseed();
@@ -194,7 +186,7 @@ namespace Askowl.Examples {
         }
       }
 
-      var elapsed = Time.realtimeSinceStartup - startTime;
+      float elapsed = Time.realtimeSinceStartup - startTime;
       Debug.Log($"{testCount} tests run in {elapsed} seconds");
     }
 
@@ -202,11 +194,11 @@ namespace Askowl.Examples {
     private float      degreesApart = 180;
     private int        sets         = 2, repetitions = 10, testCount;
     private string     testName;
-    private float      randomAngle => Random.Range(-degreesApart, +degreesApart);
+    private float      RandomAngle => Random.Range(-degreesApart, +degreesApart);
     private int        randomAxis  => Random.Range(1,             3);
 
     private Quaternion NextSeed() {
-      var vector = new Vector3 { [randomAxis] = randomAngle };
+      var vector = new Vector3 { [randomAxis] = RandomAngle };
       return seed *= Quaternion.Euler(vector);
     }
 

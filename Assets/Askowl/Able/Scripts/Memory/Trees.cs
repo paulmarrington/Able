@@ -4,7 +4,7 @@ namespace Askowl {
   using System;
   using System.Collections.Generic;
 
-  /// <a href="">Tree Data Storage Container</a>
+  /// <a href="http://bit.ly/2Oq9Axs">Tree Container</a>
   public class Trees : IDisposable {
     #region Private Functionality
     // ReSharper disable once ClassNeverInstantiated.Global
@@ -72,7 +72,6 @@ namespace Askowl {
       anchors = new Anchors { Stack = new LinkedList<Node>("Trees Anchor Stack"), Tree = this };
     }
 
-    /// <a href=""></a>
     private Trees Walk(bool create, string path) {
       Failed   = false;
       isNumber = -1;
@@ -85,8 +84,7 @@ namespace Askowl {
         if (here.Branch[key].Found) { here = here.Branch.Value as Node; }
         else {
           if (string.IsNullOrWhiteSpace(key)) { here = i == 0 ? here : here.Parent; }
-//          else if (Compare.IsDigitsOnly(key)) { here = here.Branch[int.Parse(key) as object].Value as Node; }
-          else if (create) { here = (Node) here.Branch.Add(key, Node.New(key, here)).Value; }
+          else if (create) { here                    = (Node) here.Branch.Add(key, Node.New(key, here)).Value; }
           else { return Failure(); }
         }
       }
@@ -101,36 +99,36 @@ namespace Askowl {
     #endregion
 
     #region Public Interface
-    /// <a href=""></a>
-    public static Trees Instance => new Trees();
+    /// <a href="http://bit.ly/2Rj0Qbc"></a>
+    public static Trees Instance => Cache<Trees>.Instance;
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2Oq9u94"></a>
     public bool Failed { get; private set; }
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2RezGSC"></a>
     public bool IsRoot => here == root;
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2RezGSC"></a>
     public Trees Root() {
       here = root;
       return this;
     }
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2RezJxM"></a>
     public Trees To(string path) => Root().Walk(create: false, path: path);
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2OuLhhP"></a>
     // ReSharper disable once UnusedMethodReturnValue.Global
     public Trees Next(string path) => Walk(create: false, path: path);
 
-    /// <a href="bit.ly/">Has</a>
+    /// <a href="http://bit.ly/2Oq9Axs">Has</a>
     // ReSharper disable once UnusedMethodReturnValue.Global
     public Trees Add(string path) => Walk(create: true, path: path);
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2Oq9u94"></a>
     public string Name => here.Name;
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2NTfgR0"></a>
     public object Leaf {
       get => here.Leaf;
       set {
@@ -138,11 +136,10 @@ namespace Askowl {
         isNumber  = -1;
       }
     }
-
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2NTfgR0"></a>
     public string Value { get => (string) here.Leaf; set => here.Leaf = value; }
 
-    /// <a href="bit.ly/">IsNumber</a>
+    /// <a href="http://bit.ly/2NTfgR0"></a>
     public bool IsNumber {
       get {
         if (isNumber != -1) return isNumber != 0;
@@ -162,34 +159,34 @@ namespace Askowl {
       }
     }
 
-    /// <a href="bit.ly/">Value</a>
+    /// <a href="http://bit.ly/2NTfgR0"></a>
     public long Long => IsNumber ? integer : 0;
 
-    /// <a href="bit.ly/">Value</a>
+    /// <a href="http://bit.ly/2NTfgR0"></a>
     public double Double => IsNumber ? floatingPoint : 0;
 
-    /// <a href="bit.ly/">Value</a>
+    /// <a href="http://bit.ly/2NTfgR0"></a>
     public bool Boolean => Value.ToLower()[0] == 't';
 
-    /// <a href="bit.ly/">Value</a>
+    /// <a href="http://bit.ly/2NTfgR0"></a>
     public bool IsNull => (Value == null) || (Value.ToLower() == "null");
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2NTfgR0"></a>
     public object this[object key] {
       get => (here.Branch[key].Value as Node)?.Leaf;
       set => ((Node) here.Branch[key].Value).Leaf = value;
     }
 
-    /// <a href="bit.ly/">Keys</a>
+    /// <a href="http://bit.ly/2Oq9u94">Keys</a>
     public object[] Children => here.Branch.Keys;
 
-    /// <a href="bit.ly/">First</a>
+    /// <a href="http://bit.ly/2Oq9u94">First</a>
     public object FirstChild => here.Branch.First;
 
-    /// <a href="bit.ly/">First</a>
+    /// <a href="http://bit.ly/2Oq9u94">First</a>
     public object NextChild => here.Branch.Next;
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2RezGlA"></a>
     public void Dispose() {
       var    parent = here.Parent;
       string key    = here.Name;
@@ -198,7 +195,7 @@ namespace Askowl {
       here.Branch.Remove(key);
     }
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2NYOE0W"></a>
     public IDisposable Anchor(string path = "") {
       anchors.Stack.Push(here);
       Next(path);
@@ -208,7 +205,7 @@ namespace Askowl {
     /// <inheritdoc />
     public override string ToString() => Leaf.ToString();
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2Rj0Vf0"></a>
     public string Key {
       get {
         if (here == null) return "No Path";

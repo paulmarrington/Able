@@ -5,13 +5,13 @@
 namespace Askowl.Examples {
   using UnityEngine;
 
-  /// Using <see cref="PreviewEditor{T}" />
-  /// <inheritdoc />
+  /// Using <see cref="PreviewEditor{T}" /><inheritdoc />
   public class PreviewEditorExample : MonoBehaviour {
     // ReSharper disable once NotAccessedField.Local
     [SerializeField] private AudioClip audioClip;
   }
 
+  /// place-holder for player - if it were created
   public class AudioClips { }
 }
 #endif

@@ -8,8 +8,7 @@ namespace Askowl.Examples {
   using UnityEngine.TestTools;
   using UnityEngine.UI;
 
-  /// Using <see cref="PlayModeController" />
-  /// <inheritdoc />
+  /// Using <see cref="PlayModeController" /> <inheritdoc />
   public class PlayModeControllerExample : PlayModeController {
     /// Using <see cref="PlayModeController.LoadScene"/>
     [UnityTest]

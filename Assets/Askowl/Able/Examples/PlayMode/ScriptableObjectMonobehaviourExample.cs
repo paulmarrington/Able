@@ -4,9 +4,8 @@
 namespace Askowl.Examples {
   using UnityEngine;
 
-  /// Using <see cref="ScriptableObjectExample" />
-  /// <inheritdoc />
-  public class ScriptableObjectMonobehaviourExample : MonoBehaviour {
+  /// Using <see cref="ScriptableObjectExample" /><inheritdoc />
+  public class ScriptableObjectMonoBehaviourExample : MonoBehaviour {
     // ReSharper disable once NotAccessedField.Local
     [SerializeField] private ScriptableObjectExample scriptableObjectExample;
 

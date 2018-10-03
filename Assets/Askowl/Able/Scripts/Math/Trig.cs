@@ -4,47 +4,29 @@ using System;
 using UnityEngine;
 
 namespace Askowl {
-  /// <inheritdoc />
-  /// <summary>
-  /// Trigonometry Support
-  /// </summary>
-  /// <remarks><a href="http://unitydoc.marrington.net/Able#trigcs">Trigonometry Rocks</a></remarks>
+  /// <a href="http://bit.ly/2Oq9tC2">Trigonometry Rocks</a> <inheritdoc />
   public class Trig : MonoBehaviour {
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#direction">Define axes</a></remarks>
+    /// <a href="http://bit.ly/2Rinqkc">Define axes</a>
     public class Direction {
-      /// <summary>
-      /// Ordinal or order where x=0, y=1 and z=2. Useful to match to Vector2/3
-      /// </summary>
+      /// <a href="http://bit.ly/2OpRewA">Ordinal or order where x=0, y=1 and z=2. Useful to match to Vector2/3</a>
       public readonly int Ord;
 
-      /// <summary>
-      /// One of the three will be set to 1 for that axis or -1 for reverse
-      /// </summary>
+      /// <a href="http://bit.ly/2Rh3aPQ">One of the three will be set to 1 for that axis or -1 for reverse</a>
       public readonly int X, Y, Z;
 
-      /// <summary>
-      /// Name as a character - great for switch statements.
-      /// </summary>
+      /// <a href="http://bit.ly/2NUH7Ag">Name as a character - great for switch statements.</a>
       public readonly char Name;
 
-      /// <summary>
-      /// True if negative direction along the axis
-      /// </summary>
+      /// <a href="http://bit.ly/2Oq9sOu">True if negative direction along the axis</a>
       public readonly bool Negative;
 
-      /// <summary>
-      /// Vector3 equivalent of this direction
-      /// </summary>
+      /// <a href="http://bit.ly/2Rj0QIe">Vector3 equivalent of this direction</a>
       public readonly Vector3 Vector;
 
-      /// <summary>
-      /// Up, down, left, right, forward, back
-      /// </summary>
+      /// <a href="http://bit.ly/2NUH6wc">Up, down, left, right, forward, back</a>
       public readonly string VectorName;
 
-      /// <summary>
-      /// Array of the two other axes not set
-      /// </summary>
+      /// <a href="http://bit.ly/2NYnwPC">Array of the two other axes not set</a>
       public Direction[] OtherAxes => otherAxes[negOrd, Ord];
 
       /// <inheritdoc />
@@ -55,7 +37,7 @@ namespace Askowl {
         X        = x;
         Y        = y;
         Z        = z;
-        list     = new[] {X, Y, Z};
+        list     = new[] { X, Y, Z };
         Name     = name;
         Negative = neg;
         negOrd   = neg ? 0 : 1;
@@ -70,88 +52,60 @@ namespace Askowl {
       private readonly int    negOrd;
       private          int[]  list;
 
-      private static readonly string[,] vectorNames = {{"left", "down", "back"}, {"right", "up", "forward"}};
+      private static readonly string[,] vectorNames = { { "left", "down", "back" }, { "right", "up", "forward" } };
 
-      /// <summary>
-      /// For negative axis directions
-      /// </summary>
-      /// <param name="d">xAxis, yAxis or zAxis</param>
+      /// <a href="http://bit.ly/2Rinqkc">For negative axis directions</a>
       public static Direction operator -(Direction d) => directions[d.negOrd, d.Ord];
 
-      /// <summary>
-      /// Access XYZ by index (or ordinal)
-      /// </summary>
-      /// <param name="i">index</param>
+      /// <a href="http://bit.ly/2Oq9tC2">Access XYZ by index (or ordinal)</a>
       public int this[int i] => list[i];
     }
 
     private static readonly Direction[,] directions = {
       {
-        new Direction('X', neg: false, ord: 0, x: 1),
-        new Direction('Y', neg: false, ord: 1, y: 1),
-        new Direction('Z', neg: false, ord: 2, z: 1)
-      }, {
-        new Direction('X', neg: true, ord: 0, x: -1),
-        new Direction('Y', neg: true, ord: 1, y: -1),
-        new Direction('Z', neg: true, ord: 2, z: -1)
+        new Direction('X', neg: false, ord: 0, x: 1), new Direction('Y', neg: false, ord: 1, y: 1)
+      , new Direction('Z', neg: false, ord: 2, z: 1)
+      }
+    , {
+        new Direction('X', neg: true, ord: 0, x: -1), new Direction('Y', neg: true, ord: 1, y: -1)
+      , new Direction('Z', neg: true, ord: 2, z: -1)
       }
     };
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#direction">Define axes</a></remarks>
-    public static readonly Direction xAxis = directions[0, 0];
+    /// <a href="http://bit.ly/2OpRf3C">Define axes</a>
+    public static readonly Direction XAxis = directions[0, 0];
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#direction">Define axes</a></remarks>
-    public static readonly Direction yAxis = directions[0, 1];
+    /// <a href="http://bit.ly/2OpRf3C">Define axes</a>
+    public static readonly Direction YAxis = directions[0, 1];
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#direction">Define axes</a></remarks>
-    public static readonly Direction zAxis = directions[0, 2];
+    /// <a href="http://bit.ly/2OpRf3C">Define axes</a>
+    public static readonly Direction ZAxis = directions[0, 2];
 
     private static Direction[,][] otherAxes = {
-      {new[] {-yAxis, -zAxis}, new[] {-xAxis, -zAxis}, new[] {-xAxis, -yAxis}},
-      {new[] {yAxis, zAxis}, new[] {xAxis, zAxis}, new[] {xAxis, yAxis}}
+      { new[] { -YAxis, -ZAxis }, new[] { -XAxis, -ZAxis }, new[] { -XAxis, -YAxis } }
+    , { new[] { YAxis, ZAxis }, new[] { XAxis, ZAxis }, new[] { XAxis, YAxis } }
     };
 
-    private const double RadiansToDegrees = (180.0   / Math.PI);
-    private const double DegreesToRadians = (Math.PI / 180.0);
+    private const double radiansToDegrees = 180.0   / Math.PI;
+    private const double degreesToRadians = Math.PI / 180.0;
 
-    /// <summary>
-    /// Convert degrees to radians
-    /// </summary>
-    /// <param name="degrees">decimal degrees</param>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#toradians">Degrees to Radians</a></remarks>
-    public static double ToRadians(double degrees) => degrees * DegreesToRadians;
+    /// <a href="Direction">Convert degrees to radians</a>
+    public static double ToRadians(double degrees) => degrees * degreesToRadians;
 
-    /// <summary>
-    /// Convert radians to degrees
-    /// </summary>
-    /// <param name="radians"></param>
-    /// <returns>decimal degrees</returns>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#todegrees">Radians to Degrees</a></remarks>
-    public static double ToDegrees(double radians) => radians * RadiansToDegrees;
+    /// <a href="http://bit.ly/2Orh5nJ">Convert radians to degrees</a>
+    public static double ToDegrees(double radians) => radians * radiansToDegrees;
 
-    /// <summary>
-    /// Find the relative coordinate given distance and bearing.
-    /// </summary>
-    /// <param name="distanceApart">in whatever units you need</param>
-    /// <param name="bearingInRadians">Where 0 degrees is north (+Y), 90 degrees is East (+X), clockwise</param>
-    /// <returns>Vector2</returns>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#relative-position-given-distance-and-angle-or-bearing">Relative Position given Distance and Angle or Bearing</a></remarks>
+    /// <a href="http://bit.ly/2OpFtGy">Find the relative coordinate given distance and bearing.</a>
     public static Vector2 RelativePositionFromBearing(float distanceApart, float bearingInRadians) {
-      var x = distanceApart * Mathf.Sin(bearingInRadians);
-      var y = distanceApart * Mathf.Cos(bearingInRadians);
+      float x = distanceApart * Mathf.Sin(bearingInRadians);
+      float y = distanceApart * Mathf.Cos(bearingInRadians);
       return new Vector2(x, y);
     }
 
-    /// <summary>
-    /// Find the relative coordinate given distance and angle from X axis.
-    /// </summary>
-    /// <param name="distanceApart">in whatever units you need</param>
-    /// <param name="bearingInRadians">Where 0 degrees is +X, 90 degrees is +Y, counterclockwise</param>
-    /// <returns>Vector2</returns>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#relative-position-given-distance-and-angle-or-bearing">Relative Position given Distance and Angle or Bearing</a></remarks>
+    /// <a href="Direction">Find the relative coordinate given distance and angle from X axis.</a>
     public static Vector2 RelativePositionFromAngle(float distanceApart, float bearingInRadians) {
-      var x = distanceApart * Mathf.Cos(bearingInRadians);
-      var y = distanceApart * Mathf.Sin(bearingInRadians);
+      float x = distanceApart * Mathf.Cos(bearingInRadians);
+      float y = distanceApart * Mathf.Sin(bearingInRadians);
       return new Vector2(x, y);
     }
   }

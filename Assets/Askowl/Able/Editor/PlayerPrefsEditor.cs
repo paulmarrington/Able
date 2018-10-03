@@ -7,9 +7,10 @@ using System.Globalization;
 using UnityEditor;
 using UnityEngine;
 
+/// <a href="http://bit.ly/2IvOrg1">Player Prefs Editor</a> <inheritdoc />
 public sealed class PlayerPrefsEditor : EditorWindow {
-  [MenuItem("Edit/Player Prefs")]
-  public static void openWindow() {
+  /// <a href="http://bit.ly/2IvOrg1">Player Prefs Editor</a>
+  [MenuItem("Edit/Player Preferences")] public static void OpenWindow() {
     PlayerPrefsEditor window =
       (PlayerPrefsEditor) GetWindow(typeof(PlayerPrefsEditor));
 
@@ -17,19 +18,18 @@ public sealed class PlayerPrefsEditor : EditorWindow {
     window.Show();
   }
 
-  public enum FieldType {
-    String,
-    Integer,
-    Float
-  }
+  /// <a href="http://bit.ly/2IvOrg1">Player Prefs Editor recognised fields</a>
+  // ReSharper disable MissingXmlDoc
+  public enum FieldType { String, Integer, Float }
+  // ReSharper restore MissingXmlDoc
 
   private FieldType fieldType = FieldType.String;
   private string    setKey    = "";
   private string    setVal    = "";
   private string    error     = null;
 
-  void OnGUI() {
-    EditorGUILayout.LabelField("Player Prefs Editor", EditorStyles.boldLabel);
+  private void OnGUI() {
+    EditorGUILayout.LabelField("Player Preferences Editor", EditorStyles.boldLabel);
     EditorGUILayout.LabelField("by RomejanicDev");
     EditorGUILayout.Separator();
 
@@ -37,45 +37,37 @@ public sealed class PlayerPrefsEditor : EditorWindow {
     setKey    = EditorGUILayout.TextField("Key to Set",   setKey);
     setVal    = EditorGUILayout.TextField("Value to Set", setVal);
 
-    if (error != null) {
-      EditorGUILayout.HelpBox(error, MessageType.Error);
-    }
+    if (error != null) EditorGUILayout.HelpBox(error, MessageType.Error);
 
     if (GUILayout.Button("Set Key")) {
       if (fieldType == FieldType.Integer) {
-        int result;
-
-        if (!int.TryParse(setVal, out result)) {
+        if (!int.TryParse(setVal, out int result)) {
           error = "Invalid input \"" + setVal + "\"";
           return;
         }
 
         PlayerPrefs.SetInt(setKey, result);
-      } else if (fieldType == FieldType.Float) {
-        float result;
-
-        if (!float.TryParse(setVal, out result)) {
+      }
+      else if (fieldType == FieldType.Float) {
+        if (!float.TryParse(setVal, out float result)) {
           error = "Invalid input \"" + setVal + "\"";
           return;
         }
 
         PlayerPrefs.SetFloat(setKey, result);
-      } else {
-        PlayerPrefs.SetString(setKey, setVal);
       }
+      else { PlayerPrefs.SetString(setKey, setVal); }
 
       PlayerPrefs.Save();
       error = null;
     }
 
     if (GUILayout.Button("Get Key")) {
-      if (fieldType == FieldType.Integer) {
-        setVal = PlayerPrefs.GetInt(setKey).ToString();
-      } else if (fieldType == FieldType.Float) {
+      if (fieldType      == FieldType.Integer) { setVal = PlayerPrefs.GetInt(setKey).ToString(); }
+      else if (fieldType == FieldType.Float) {
         setVal = PlayerPrefs.GetFloat(setKey).ToString(CultureInfo.InvariantCulture);
-      } else {
-        setVal = PlayerPrefs.GetString(setKey);
       }
+      else { setVal = PlayerPrefs.GetString(setKey); }
     }
 
     if (GUILayout.Button("Delete Key")) {

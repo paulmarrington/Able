@@ -5,8 +5,7 @@ namespace Askowl.Examples {
   using NUnit.Framework;
 
   public class PickExamples {
-    [Test]
-    internal void PickExample() {
+    [Test] internal void PickExample() {
       var nose = new PickImplementation();
 
       Assert.AreEqual("1", nose.Pick());

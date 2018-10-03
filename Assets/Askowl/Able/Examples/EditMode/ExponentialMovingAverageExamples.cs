@@ -7,7 +7,7 @@ namespace Askowl.Examples {
   public class ExponentialMovingAverageExamples {
     [Test]
     public void AverageValue() {
-      var ema = new ExponentialMovingAverage(lookback: 4);
+      var ema = new ExponentialMovingAverage(lookBack: 4);
 
       AreEqual(expected: 1f,      actual: ema.Average(value: 1));
       AreEqual(expected: 2.6f,    actual: ema.Average(value: 5));

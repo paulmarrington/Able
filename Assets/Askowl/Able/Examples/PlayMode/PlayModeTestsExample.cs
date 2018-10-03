@@ -13,8 +13,7 @@ namespace Askowl.Examples {
   /// <inheritdoc />
   public class PlayModeTestsExample : PlayModeTests {
     /// Using <see cref="PlayModeTests.LoadScene"/>
-    [UnityTest]
-    public IEnumerator LoadScene() {
+    [UnityTest] public IEnumerator LoadScene() {
       LogAssert.Expect(LogType.Error, new Regex(@".*Nonsense Scene.*"));
       yield return LoadScene("Nonsense Scene");
 
@@ -22,8 +21,7 @@ namespace Askowl.Examples {
     }
 
     /// Using <see cref="PlayModeTests.Component{T}"/>
-    [UnityTest]
-    public IEnumerator ComponentT() {
+    [UnityTest] public IEnumerator ComponentT() {
       yield return LoadScene("Askowl-Able-Examples");
 
       var buttonTwo = Component<RectTransform>("Canvas//Button Two");
@@ -35,8 +33,7 @@ namespace Askowl.Examples {
     }
 
     /// Using <see cref="PlayModeTests.FindGameObject"/>
-    [UnityTest]
-    public IEnumerator FindGameObject() {
+    [UnityTest] public IEnumerator FindGameObject() {
       yield return LoadScene("Askowl-Able-Examples");
 
       LogAssert.Expect(LogType.Assert, new Regex(@".*Values are equal.*"));
@@ -44,8 +41,7 @@ namespace Askowl.Examples {
     }
 
     /// Using <see cref="PlayModeTests.FindObject{T}"/>
-    [UnityTest]
-    public IEnumerator FindObject() {
+    [UnityTest] public IEnumerator FindObject() {
       yield return LoadScene("Askowl-Able-Examples");
 
       FindObject<GameObject>("Button 23");
@@ -53,8 +49,7 @@ namespace Askowl.Examples {
     }
 
     /// Using <see cref="PlayModeTests.IsDisplayingInUI(string, bool, int)"/>
-    [UnityTest]
-    public IEnumerator IsDisplayingInUI() {
+    [UnityTest] public IEnumerator IsDisplayingInUI() {
       yield return LoadScene("Askowl-Able-Examples");
       yield return IsDisplayingInUI("Button One", visible: true, repeats: 10);
 
@@ -62,9 +57,8 @@ namespace Askowl.Examples {
       yield return IsDisplayingInUI("Button One", visible: false, repeats: 20);
     }
 
-    /// Using <see cref="PlayModeTests.PushButton(string[])"/>
-    [UnityTest]
-    public IEnumerator PushButton() {
+    /// Using <see cref="PlayModeTests.PushButton(string)"/>
+    [UnityTest] public IEnumerator PushButton() {
       yield return LoadScene("Askowl-Able-Examples");
 
       LogAssert.Expect(LogType.Assert, new Regex(@".*For button 'Button 2367'.*"));
@@ -72,8 +66,7 @@ namespace Askowl.Examples {
     }
 
     /// Using <see cref="PlayModeTests.CheckPattern"/>
-    [UnityTest]
-    public IEnumerator CheckPattern() {
+    [UnityTest] public IEnumerator CheckPattern() {
       yield return LoadScene("Askowl-Able-Examples");
 
       CheckPattern(new Regex(".*Test Pattern.*"), "This is a Test Pattern for A");

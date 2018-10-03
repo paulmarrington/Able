@@ -6,11 +6,8 @@ using System;
 using NUnit.Framework;
 
 namespace Askowl.Examples { //#TBD#
-  /// <remarks><a href="http://unitydoc.marrington.net/Able#emitter">The Observer Pattern</a></remarks>
   public class EmitterExamples {
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#emitter">Emitter</a></remarks>
-    [Test]
-    public void ObserverPatternUsing() {
+    [Test] public void ObserverPatternUsing() {
       counter = 0;
 
       var emitter = new Emitter();
@@ -29,9 +26,7 @@ namespace Askowl.Examples { //#TBD#
       Assert.AreEqual(expected: 4, actual: counter);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#emitter">Emitter</a></remarks>
-    [Test]
-    public void ObserverT() {
+    [Test] public void ObserverT() {
       counter = 0;
 
       var emitter = new Emitter<int>();
@@ -50,9 +45,7 @@ namespace Askowl.Examples { //#TBD#
       Assert.AreEqual(expected: 9, actual: emitter.LastValue);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#emitter">Emitter</a></remarks>
-    [Test]
-    public void ObserverPatternAbort() {
+    [Test] public void ObserverPatternAbort() {
       counter = 0;
 
       var emitter = new Emitter();

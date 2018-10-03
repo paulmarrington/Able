@@ -21,32 +21,29 @@ namespace Askowl {
   using UnityEditor;
   using UnityEngine;
 
-  /// <inheritdoc />
-  /// <summary>
-  /// Used by Unity editor code to add or remove definitions based in rules such as the existence of directories
-  /// </summary>
+  /// <a href="http://bit.ly/2RhucXi">Used by Unity editor code to add or remove definitions based in rules such as the existence of directories</a> <inheritdoc />
   public class DefineSymbols : Editor {
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2OrbCgM">Add preprocessor definitions</a>
     public static void AddDefines(string defines) {
       var allDefines = Split();
       allDefines.AddRange(collection: defines.Split(';').Except(second: allDefines));
       Save(defines: allDefines);
     }
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2OrbCgM">Remove preprocessor definitions</a>
     public static void RemoveDefines(string defines) =>
       Save(defines: Split().Except(second: defines.Split(';')).ToList());
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2OrbCgM">Add or remove preprocessor definitions base on a boolean</a>
     public static void AddOrRemoveDefines(bool addDefines, string named) {
       if (addDefines) { AddDefines(defines: named); }
       else { RemoveDefines(defines: named); }
     }
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2Rk1o06">See if there is a folder under `Assets`</a>
     protected static bool HasFolder(string folder) => AssetDatabase.IsValidFolder(path: "Assets/" + folder);
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2Rk1o06">Check Packages/manifest.json for package installation</a>
     protected static bool HasPackage(string packageName) {
       if (json == null) json = Json.Instance.Parse(File.ReadAllText("Packages/manifest.json"));
       return !json.Node.To($"dependencies.{packageName}").Failed;
@@ -54,7 +51,7 @@ namespace Askowl {
 
     private static Json json;
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2RinksQ">See if the current build target is one listed</a>
     protected static bool Target(params BuildTarget[] targets) =>
       targets.ToList().Contains(item: EditorUserBuildSettings.activeBuildTarget);
 
@@ -91,11 +88,7 @@ namespace Askowl {
   }
 
   /// <inheritdoc />
-  /// <summary>
-  /// When the project is loaded, create definitions based on both project name and product name.
-  /// </summary>
-  [InitializeOnLoad]
-  public sealed class SetProjectName : DefineSymbols {
+  [InitializeOnLoad] public sealed class SetProjectName : DefineSymbols {
     static SetProjectName() {
       var    dataPath    = Application.dataPath.Split('/');
       string projectName = dataPath[dataPath.Length - 2];

@@ -1,13 +1,14 @@
 ---
-title: Askowl Advertising Connector for Unity3D
-description: Choose your advertising network
+title: Able for Unity3D
+description: Askowl Base Library Enabler
 ---
 # [Able - Askowl Base Library Enabler](http://unitydoc.marrington.net/Able)
 * Table of Contents
 {:toc}
 ## Executive Summary
-`Able` contains scripts needed by other ***Askowl*** libraries.
-In the maths section you will time conversion, comparisons and trigonometry. Inspect data structure for with containers, caching, emitters, selectors, stack and trees.
+
+`Able` has scripts needed by other ***Askowl*** libraries.
+Use the maths section for time conversion, comparisons and trigonometry. Inspect data structures for with containers, caching, emitters, selectors, stack and trees.
 If you have a need to read CSV or JSON data from an unknown source, review the text section. 
 For Unity3D support view scripts to aid testing, locate components and game objects, pluggable logging, and various editor display and runtime components.
 
@@ -15,7 +16,7 @@ For Unity3D support view scripts to aid testing, locate components and game obje
 
 ## Introduction
 
-Unity provides lots of great functionality, but there are always more problems than solutions. All the solutions documented here were to solve problems in other Askowl libraries. They also stand on their own when simple is not so simple. I have divide the scripts into four sections for Math, Data, Text and Unity.
+Unity provides lots of great functionality, but always more problems than solutions. The solutions documented here were to solve problems in other Askowl libraries. They stand on their own when simple is not so simple. I have divided the scripts into four sections for Math, Data, Text and Unity.
 ## Maths functions
 
 ### Clock.cs - time & date conversions
@@ -53,9 +54,9 @@ Convert back from Epoch UTC to local time, C# style.
 
 #### AlmostEqual for Floating Point
 
-Floating point number comparisons can be hit or miss. Every mathematical operation is subject to rounding to fit into the number of bits. A single precision 32-bit float has around 7 digits of accuracy.  Even trivial calculations may not compare equal.
+Floating point number comparisons can be hit or miss due to rounding. A single precision 32-bit float has around 7 digits of accuracy.  Even trivial calculations may not compare equal.
 
-Enter `Compare.AlmostEqual`. You can specify the minimum change or use the defaults of 0.001 for single precision and 0.00001 for doubles.
+Enter `Compare.AlmostEqual`. You can specify the smallest change or use the defaults of 0.001 for single precision and 0.00001 for doubles.
 
 ```c#
 IsFalse(Compare.AlmostEqual(a: 1.1f, b: 1.2f, minimumChange: 0.1f));
@@ -108,13 +109,13 @@ Assert.IsFalse(Compare.isDigitsOnly(""));
 
 ***<u>From Wikipedia</u>***:
 
-> An **exponential moving average (EMA)**, also known as an **exponentially weighted moving average (EWMA)**,[[5\]](https://en.wikipedia.org/wiki/Moving_average#cite_note-5) is a first-order [infinite impulse response](https://en.wikipedia.org/wiki/Infinite_impulse_response) filter that applies weighting factors which decrease [exponentially](https://en.wikipedia.org/wiki/Exponential_decay). The weighting for each older [datum](https://en.wikipedia.org/wiki/Data) decreases, never reaching zero. The graph at right shows an example of the weight decrease.
+> An **exponential moving average (EMA)**, called a **exponentially weighted moving average (EWMA)**,[[5\]](https://en.wikipedia.org/wiki/Moving_average#cite_note-5) is a first-order [infinite impulse response](https://en.wikipedia.org/wiki/Infinite_impulse_response) filter that applies weighting factors which decrease [exponentially](https://en.wikipedia.org/wiki/Exponential_decay). The weighting for each older [datum](https://en.wikipedia.org/wiki/Data) decreases, never reaching zero. The graph at right shows an example of the weight decrease.
 
  ***<u>From Me (Paul Marrington):</u>***
 
 > An **exponential moving average** is a way to calculate an average where old values have less impact on the average than more recent ones.
 
-Financial calculations often make use of EMA, but IoT has needs also. Many devices can give jittery readings until they settle down. Real-world interactions make them inaccurate again. A good example is a compass or magnetometer. Walk past a mass of steel, and a compass will swing. EMA dampens the variations. Use when merging IoT data.
+Financial calculations often make use of EMA. So does IoT code. Many devices can give jittery readings. Real-world interactions make them inaccurate again. A compass or magnetometer will be affected by a mass of steel. EMA dampens the variations.
 
 #### EMA Initialisation
 
@@ -130,7 +131,7 @@ As the comment says, the average is over the last 8 values plus the new one. You
 var ema = new ExponentialMovingAverage(lookback: 50);
 ```
 
-The lookback value is application specific. Ask yourself how many data points back is the information irrelevant to the current value. If you take one reading a second and any reading over 15 seconds old has no value, set lookback to 15.
+The lookback value is application specific. Ask yourself how many data points are relevant to the current value. If you take one reading a second and any reading over 15 seconds old have no value, set lookback to 15.
 
 #### EMA Average Value
 
@@ -159,7 +160,7 @@ AreEqual(expected: -1.513316f, actual: ema.AverageAngle(degrees: 364));
 
 ### Geodetic.cs - distances & bearings
 
-> **Geodesy**: The branch of mathematics dealing with the shape and area of the earth or substantial portions.
+> **Geodesy**: The branch of mathematics dealing with the shape and area of the earth.
 >
 > **Origin**: late 16th century: from modern Latin geodaesia, from Greek geōdaisia, from gē ‘earth’ + daiein ‘divide’.
 >
@@ -170,7 +171,7 @@ AreEqual(expected: -1.513316f, actual: ema.AverageAngle(degrees: 364));
 
 #### Coordinates Data Structure
 
-Here lies another data structure that contains coordinates. Separate definitions can be more efficient than burdening one definition with lots of irrelevant data.
+Separate coordinate definitions can be more efficient than burdening one definition with lots of irrelevant data.
 
 In this world-view, coordinates use 64-bit double floating points for accuracy and are degrees or radians aware.
 
@@ -186,12 +187,12 @@ Debug.Log(same.ToString()); // -27.46850, 151.94379
 
 In the geodetic parlance, the shortest distance between two points is an arc, not a straight line. This follows the curvature of the earth.
 
-`Kilometres(from, to)` uses the Haversine formula to calculate the distance considering an approximation of the earth's curvature. For display convenience the version, `DistanceBetween(from, to)` exists to returns a string representation. If the distance is below one kilometre, the value is the number of metres (i.e. 43 m). For distances below ten kilometres, one decimal place (4.7 km) is adequate. Above ten the kilometres are whole numbers only (23 km).
+The `Kilometres(from, to)` method uses the Haversine formula to calculate the distance using a approximation of the earth's curvature.
+For display convenience `DistanceBetween(from, to)` returns a string representation. If the distance is below one kilometre, the value is the number of metres (i.e. 43 m). For distances below ten kilometres, one decimal place (4.7 km) is adequate. Above ten the kilometres are whole numbers only (23 km).
 
-#### Bearing from Point to Point
+#### Bearing Between Locations
 
-If you were hiking, you would take a bearing between yourself and a known landmark and follow that bearing.
-
+When hiking, take a bearing between yourself and a known landmark and follow that bearing.
 ```c#
 var degrees = Geodetic.BearingDegrees(from, to);
 var radians = Geodetic.BearingRadians(from, to);
@@ -200,7 +201,7 @@ Assert.AreEqual(degrees, Trig.degrees(radians));
 
 #### Find One Point from Another
 
-The next navigational trick is to find a destination coordinate when knowing the bearing and distance of that point. Useful if you want to call an air-strike down on an enemy position you are observing.
+The next navigational trick finds a destination knowing the bearing and distance. It is useful if you want to call an air-strike on an enemy position you are observing.
 
 ```c#
 Geodetic.Destination(start: here, distanceKm: 1.2, bearingDegrees: 23.4);
@@ -208,7 +209,7 @@ Geodetic.Destination(start: here, distanceKm: 1.2, bearingDegrees: 23.4);
 
 ### Quaternions.cs - adding features
 
-Unity quaternion math focusses on the needs of the game. Great, but methods needed for augmented reality are missing.
+Unity quaternion math needs more methods for augmented reality.
 
 #### AroundAxis
 
@@ -222,16 +223,16 @@ attitude = attitude.AngleAxis(Trig.zAxis, compass.MagneticHeading);
 ```
 
 #### Inverse
-`Inverse` changes rotation direction. If you rotate a quaternion and rotate back again using the inverse you get back the original quaternion.
+`Inverse` changes direction of rotation. If you rotate a quaternion forward then back using the inverse you get back the original quaternion.
 ```c#
 // C ...
 mainCamera.transform.localRotation = attitude.Inverse();
 ```
 #### LengthSquared
 
-The concept of length or magnitude for a quaternion has no visual representation when dealing with attitude or rotation. The catch is that most algorithms require unit quaternions - where the length squared approaches one.
+Length or size for a quaternion has no visual representation. Attitude and rotation algorithms need unit quaternions where the length squared approaches one.
 #### Normalise
-> We can compute a fast 1/sqrt(x) by using a tangent-line approximation to the function. It is like a simple 1-step Newton-Raphson iteration, and by tuning it for our specific case, we can achieve high accuracy for cheap. (A Newton-Raphson iteration is how specialised instruction sets like 3DNow and SSE compute fast 1/sqrt).
+> We can compute a fast 1/sqrt(x) by using a tangent-line approximation to the function. It is similar to a simple 1-step Newton-Raphson iteration, and by tuning it for our specific case, we can achieve high accuracy for cheap. (A Newton-Raphson iteration is how specialised instruction sets as for 3DNow and SSE compute fast 1/sqrt).
 
 |           http://www.cs.uky.edu/~cheng/cs633/quaternion.html |
 | -----------------------------------------------------------: |
@@ -241,18 +242,18 @@ This version is on an average 20% faster than `normalised` as provided by Unity.
 
 #### RightToLeftHanded
 
-For rotations, quaternions hold information on the direction in 3 dimensions and the rotation of the object. Think of an aeroplane flying straight in a particular direction. Given a point of reference, you can calculate the angle on the X, Y and Z planes. Now the aeroplane dips a wing and spins upside-down. The calculations before are the same, but the rotation has changed. The sign of the rotation defines which way the aeroplane is spinning.
-You cannot superimpose two of anything with opposite chirality and yet can be otherwise identical. The choice of which rotation direction is positive is arbitrary. The gyroscope used in phones has right-hand chirality, while Unity uses left-handed.
+The rotational use of quaternions provides the direction in 3 dimensions and the rotation of the object. Think of an aeroplane flying. Given a point of reference, you can calculate the angle on the X, Y and Z planes. Now the aeroplane dips a wing and spins. The rotation direction has changed.
+The sign of the rotation defines which way the aeroplane is spinning. This is called it's chirality. The choice of which rotation direction is positive is arbitrary. The gyroscope used in phones has right-hand chirality and Unity is left-handed.
 ```c#
 Quaternion rotateTo = Device.Attitude.RightToLeftHanded(Trig.zAxis);
 ```
 #### RotateBy
-Unity uses left handed chirality using the Z-axis for the forward direction. The iOS gyroscope, for example, is right-handed. We can reverse the Chirality (a fancy word for handed) by negating the offending axis and W. This reverses rotation direction.
+Unity uses left-handed chirality and the Z-axis for the forward direction. The iOS gyroscope, for example, is right-handed. We can reverse the Chirality (a fancy word for handed) by negating the offending axis and W.
 ```c#
 var attitude = GPS.Attitude.RightToLeftHanded(Trig.zAxis);
 ```
 #### SwitchAxis
-Different IoT devices define different axes as forward. We need to pivot on the third axis by 90 degrees to correct for the difference. This reverses the chirality, but this function corrects for that.
+Different IoT devices define different axes as forward. We need to pivot on the third axis by 90 degrees to correct. This reverses the chirality, but this function corrects for that.
 
 ```c#
 // B ...
@@ -267,7 +268,7 @@ attitude.SwitchAxis(pivot: Trig.xAxis)
 
 ##### Trig.xAxis / yAxis / zAxis
 
-When I prefer to use *X, Y, Z* instead of *right, up, forward* I use Trig.Direction values. These are unit directions with either the X, Y or Z component set 1 one to specify the axis.
+When I prefer to use *X, Y, Z* instead of *right, up, forward* I use Trig.Direction values. These are unit directions with either the X, Y or Z part set 1 one to specify the axis.
 
 ##### X, Y and Z
 
@@ -275,22 +276,22 @@ Integers where one is non-zero to define an axis with recorded direction as 1 or
 
 ##### Name
 
-The name is a character constant, being 'X', 'Y' or 'Z'. Used for switch statements where the character means more than using the ordinal value.
+The name is a constant, being 'X', 'Y' or 'Z'. Used for switch statements where a character means more than using the ordinal value.
 ##### Ord
 Ordinal value - the same as for `Vector3` - X=0, Y=1, Z=2. The values can be access by the ordinal value (i.e. Trig.xAxis[0] == 1).
 ##### Vector
-When Unity provided functions want to describe a direction, they use constants inside `Vector3` such as `Vector3.up`. Use `Trig.Y.Vector` to provide directions as XYZ.
+When Unity provided functions want to describe a direction, they use constants inside `Vector3` such as `Vector3.up`. Use `Trig.Y.Vector` to give directions as XYZ.
 
 ##### VectorName
 
-You can also retrieve the name of the associated vector `Trig.Y.VectorName == "up"`.
+You can retrieve the name of the associated vector `Trig.Y.VectorName == "up"`.
 
 ##### OtherAxes
-When we use an axis as a pivot, we want to work with the other axes. This field refers to an array of the other two Directions. `Trig.xAxis.OtherAxes[0] == Trig.yAxis && Trig.xAxis.OtherAxes[1] == Trig.zAxis`.
+When we pivot we change the other axes. This field refers to two Directions. `Trig.xAxis.OtherAxes[0] == Trig.yAxis && Trig.xAxis.OtherAxes[1] == Trig.zAxis`.
 
 ##### Negative
 
-`Vector3` has the concept of direction where positive is up, and the negative is down, with the same for left and right or forward and back. For `Trig.Direction`, use the unary minus as in `-Trig.xAxis`. OtherAxes for negative directions will themselves be negative. You can check if a direction is negative with `Trig.xAxis.Negative == false`.
+`Vector3` sees positive as up. Right and Forward are positive. For `Trig.Direction`, use the unary minus as in `-Trig.xAxis`. OtherAxes for negative directions will themselves be negative. You can check if a direction is negative with `Trig.xAxis.Negative == false`.
 
 Here is a slice of the unit tests for `Trig.xAxis` only.  Use these as a guide for what you can achieve.
 
@@ -346,8 +347,7 @@ Assert.IsTrue(Compare.AlmostEqual(1.5708, Trig.ToRadians(90)));
 ```
 
 #### ToDegrees
-
-Convert a value in radians back to degrees. Note the need to reduce accuracy in the comparison due to the calculation.
+This method converts a value in radians back to degrees.
 
 ```c#
 Assert.IsTrue(Compare.AlmostEqual(90, Trig.ToDegrees(1.5708), 1e5));
@@ -381,33 +381,33 @@ AreEqual(expected, actual);
 
 ### Cached Instances
 
-Even if premature optimisation is evil, the garbage collector can still be your enemy. If you target VR or mobile platforms, garbage collection runs degrade the gaming for your players. Even for PC/Mac/Linux machines, your players may have lower powered machines. Not the serious gamers. However, casual gamers? Even the simple `ForEach` allocates a tiny amount of memory each loop. This is the worst. A few areas allocating large chunks followed by lots of tiny chunks add up to frequent collection runs with much-fragmented memory to investigate.
+Even considering premature optimisation as evil, the garbage collector is your enemy. If you target VR or mobile platforms, garbage collection runs degrade the gaming for your players. Even for PC/Mac/Linux machines, your players may have lower powered machines.
+Even the simple `ForEach` allocates some memory. This is the worst. A few areas allocating large chunks followed by lots of tiny chunks cause frequent collection runs with much-fragmented memory to investigate.
 
-What can we do about the problem without slowing down development or our game? When we are writing code, we can see where objects are being allocated/discarded a lot. Cache them for reuse on deactivation.
+What can we do without slowing development of our game? When we are writing code, we can see where objects are being allocated/discarded. Cache them for reuse on deactivation.
 Oh, so you want examples? Try these for size.
-
 1. Nodes in tree structures
 2. JSON, XML and CSV encoding and decoding
 3. Events and emitters
-4. Temporary instances used in loops
+4. Temporary instances used in repeating code
 
 You get the idea.
 When not to cache:
 
 1. Classes that are rarely instantiated.
 2. Classes you cannot reset for reuse. IEnumerable is one of those, so no caching coroutines.
-3. Classes with larger data sets where you instantiate a lot at once, but in very infrequent batches. They need judgement calls. A `Dictionary` or `Map` with 100 entries each with a payload of 100 bytes and an average key length of 5 take about 64k. Not much in the modern scheme of things. Here cache the payloads, not the `Dictionary`.
+3. Classes with larger data sets in very infrequent batches. They need judgement calls. A `Dictionary` or `Map` with 100 entries each with a payload of 100 bytes and an average key length of 5 uses 64k.  Cache the payloads, not the `Dictionary`.
 
-The keyword `new` appears the same for classes and structs, but the latter uses the stack and does not allocate memory.
+The keyword `new` looks the same for classes and structs, but the latter uses the stack, not the heap.
 
-The `Cache` class is static. We call classes without caching awareness *Cache Agnostic*. You can also use *Cache Aware* classes that are more convenient and readable. For the impatient here are full examples of each.
+The `Cache` class is static. We call classes without caching awareness *Cache Agnostic*. *Cache Aware* classes are more convenient and readable.
 
 #### Cache Agnostic Usage
 
-Agnostic usage is compact but is a little harder to read because if the static `Cache<Agnostic>` references.
+Agnostic usage is compact but is harder to read because if the static `Cache<Agnostic>` references.
 
 ```c#
-// This would be in a static constructor. Only  run once
+// Contained in a static constructor. Only  run once
 Cache<Agnostic>.CreateItem     = () =>  new Agnostic {State = "Created"};
 Cache<Agnostic>.DeactivateItem = (item) => item.State =  "Deactivated";
 Cache<Agnostic>.ReactivateItem = (item) => item.State += " Reactivated";
@@ -428,7 +428,7 @@ Cache<Agnostic>.Dispose();            // and send it back again
 
 #### Cache Aware Usage
 
-A cache-aware class gives code is more explicit code. If you want to cache an unsealed class, you can even subclass and add the functionality below.
+A cache-aware class gives code is more explicit code. If you want to cache an unsealed class, you can even subclass and add the following functionality.
 
 ```c#
 private class Aware : IDisposable {
@@ -455,10 +455,12 @@ aware.Dispose();
 ```
 
 #### Cache Entry Maintenance
-If the instance does not hold state, or you deactivate state in your code, the class can cache with no further work using `Cache<T>.Instance` command rather than `new`. Like any resource, disposal is important. If the class implements the `IDisposable` interface, the `using` statement is your best friend. If not, your code needs to use `Cache<T>.Dispose(instance)` or wrap in `using (Cache<T>.Disposable(instance)){}`.   An undisposed cached item makes a memory leak.
+If the instance does not hold state, or you deactivate state in your code, the class can cache with no further work using `Cache<T>.Instance`. Disposal is important. If the class implements the `IDisposable` interface, the `using` statement is your best friend. If not, your code needs to use `Cache<T>.Dispose(instance)` or wrap in `using (Cache<T>.Disposable(instance)){}`.   An undisposed cached item makes a memory leak.
 
-As with the underlying [`LinkedList`](#linked-lists), The [`CreateItem`](#create-a-new-linked-list), [`DeactivatItem`](#create-a-new-linked-list) and [`ReactivateItem`](#create-a-new-linked-list) come in three flavours - Added as methods to a class (private or public), attached to a class so that all instances can use them, or attached to an instance. In the latter case, only that specific instance have the methods. Now for the precedence.
-
+As with the underlying [`LinkedList`](#linked-lists), The [`CreateItem`](#create-a-new-linked-list), [`DeactivatItem`](#create-a-new-linked-list) and [`ReactivateItem`](#create-a-new-linked-list) come in three flavours.
+1. Added as methods to a class (private or public);
+2. Attached to a class so that instances can use them; or
+3. Attached to an instance. In the latter case, only that specific instance have the methods. Now for the precedence.
 1. A class with no actions attached runs the default as listed below, unless;
 2. A class defines instance methods with the action name and signature, unless;
 3. We have a static call instance action.
@@ -490,16 +492,12 @@ Item `Dispose` may not be correct when recycling, possibly due to an unclosed se
 1. If the payload is an `IDisposable`, call `Dispose()` otherwise do nothing
 2. The class has a method `static ClassName DeactivateItem(){doSomething();}`
 3. Set `Cache<T>.DeactivateItem = (item) => item.doSomething()`
-
 ##### ReactivateItem
-
-To reactivate an item may require additional activities. Reopen the connection, restart the prefab or whatever. The actions are the same as above with R replacing D.
-
+To reactivate an item needs activities such as reopening the connection or restarting the prefab. Use the same three options as above, but us `Reactivate`.
 #### Using a Cached Item
+A cache requires housekeeping. If a cached item gets forgotten, recycling fails, garbage disposal fails and the object remains on an active list. There is not a safe way using the garbage collector that does not end up making more garbage. Please prove me wrong.
 
-A Cache is only as good as the housekeeping. If a cached item gets forgotten about, recycling fails, garbage disposal fails and the object remains on an active list. There does not appear to be a safe way using the garbage collector that does not end up making more garbage. Please prove me wrong.
-
-For sequential code (even waiting for Coroutines meets this criterion), wrapping said code in `using` is the best option.
+For sequential code (even waiting for Coroutines meets this criterion), wrapping said code in `using` is the best choice.
 
 ```c#
 var agnostic = Cache<Agnostic>.Instance;
@@ -511,7 +509,7 @@ using (var aware = Aware.Instance) {
 }
 ```
 
-Otherwise your responsibility is to call `Dispose`. Remember exceptions.
+Otherwise your responsibility is to call `Dispose`.
 
 ```c#
 Agnostic agnostic;
@@ -523,7 +521,7 @@ void StartWork() {aware = Aware.Instance;}
 void EndWork() {aware.Dispose();}
 ```
 
-If you used a cache item in a body of work, but not outside, you can use `ClearCache()` to send all remaining active items to the recycle bin. This is what you should do at the end of a scene. This example shows the difference between CleanCache and Clea**r**Cache.
+If you used a cache item in a body of work, but not outside, you can use `ClearCache()` to send remaining active items to the recycle bin. Do this at the end of a scene. This example shows differences between CleanCache and Clea**r**Cache.
 
 ```c#
 Cache<Agnostic>.Instance;
@@ -536,11 +534,8 @@ Cache<Agnostic>.CleanCache();
 Assert.IsNull(Cache<Agnostic>.Entries.First);
 Assert.IsNull(Cache<Agnostic>.Entries.RecycleBin.First);
 ```
-
 ### Disposable.cs for IDisposable
-
-You can implement closures and anonymous functions with `using(...){...}` and without creating a management class. `Disposable` is a struct, so sans garbage collection.
-
+The  `using(...){...}` statement will call `Dispose` at the end of the following code block.
 ```c#
     [Test]
     public void DisposableExample() {
@@ -556,19 +551,17 @@ You can implement closures and anonymous functions with `using(...){...}` and wi
     private int numberOfMonsters;
   }
 ```
-
 #### Disposable with Payload
-
 If we want to dispose of an object, we do not have direct access we need to add a payload.
 
 ```c#
 public static Disposable<TreeContainer> DisposableInstance {
   get {
-    var node = trees.Fetch();    // from a cache of objects in a LinkedList
+    var node = trees.Fetch();    // from cache in a LinkedList
 
     return new Disposable<TreeContainer> {
       Action = (tree) => {
-        tree.Root();    // to dispose of all the branches
+        tree.Root();    // to dispose of all branches
         node.Dispose();    // calls LinkList Dispose
       },
       Payload = node.Item
@@ -584,9 +577,9 @@ using (var treeDisposable = TreeContainer.DisposableInstance) {
 
 `Disposable<T>` can be used two ways. Combine them to make three useful approaches.
 
-1. ***Setting `Action`*** as above. Useful for sealed classes that do not have an `IDisposable` interface but need cleaning up.
+1. ***Setting `Action`*** as above. Useful for sealed classes that do not have an `IDisposable` interface but need cleaning.
 2. ***`IDisposable` Interface*** when the `PayLoad` has one. Call `Dispose()` on the `Disposable` passes to the `PayLoad` if available.
-3. Use ***Both*** together. Think of a situation where the `PayLoad` implements `IDisposable` but is part of a parent object wanting to be aware of a change in state.
+3. Use ***Both*** together. Think of where the `PayLoad` implements `IDisposable` but is part of a parent object wanting to be aware of a change in state.
 
 ```c#
   public void DisposableTWithDisposeAndAction() {
@@ -610,7 +603,7 @@ class Myclass : IDisposable {
 
 ### Emitter.cs - the observer pattern
 
-*Somebody* owns a ***Emitter*** and many other somebodies can register interest in the said emitter. All observers get told when anyone who has access to the emitter instance pulls the trigger. The second version ***Emitter&lt;T>*** that can pass an object between the emitter and all observers.
+A consumer creates an ***Emitter***. Many producers can register and send events. Observers get told when anyone who has access to the emitter instance pulls the trigger. The generic version can pass an object between the emitter and the observers.
 
 ```c#
 var emitter = new Emitter();
@@ -642,7 +635,7 @@ private struct Observer1 : IObserver {
 }
 ```
 
-The generic version can pass additional information.
+The generic version can pass information.
 
 ```c#
 var emitter = new Emitter<int>();
@@ -658,25 +651,20 @@ private struct Observer3 : IObserver<int> {
   public void OnNext(int        value) { counter = value; }
 }
 ```
-
-While an ***Emitter*** provides extra facilities to the built-in ***event*** delegates, decoupling is not improved. For decoupled events see [***CustomAssets***](/CustomAssets), extending ***ScriptableObjects***.
 ### Fifo Stacks
-C# provides a serviceable `Stack` class. Even `LinkedList` from this package can provide a powerful stack. I think both are too heavy when we want a simple stack. This implementation is complete in under two dozen lines of code with unique features suitable for lightweight applications.
+C# provides a serviceable `Stack` class. Even `LinkedList` from this package can offer a powerful stack. I think both are too heavy when we want a simple stack. This implementation is complete in under two dozen lines of code with unique features suitable for lightweight applications.
 
 1. Instantiate with `Fifo<T>.Instance`.
-2. Is an `IDisposable`. Cache with `Dispose()` for later - reducing garbage collection.
+2. Cache with `Dispose()` for later - reducing garbage collection.
 3. Change the most recent item pushed with `Top` for dynamic data that needs a history.
 4. Use `Next` to retrieve or update the second-in-line.
 5. `Push` and `Pop` both return the current item making data with history easier to create.
 6. `Swap` is a convenience method that swaps `Top` with `Next`.
 7. `Count` will return the number of stack entries.
 8. Set `Count` to reduce the number of entries on the stack.
-9. A protected constructor allows inherited classes to bypass caching. Useful if they cache everything themselves.
-
+9. A protected constructor allows inherited classes to bypass caching.
 The easiest way to show off the functionality is with the source to `CounterFifo`, a class that inherits from `Fifo<int>`.
-
 #### CounterFifo
-
 ```c#
 public class CounterFifo : Fifo<int> {
   public new static CounterFifo Instance => Cache<CounterFifo>.Instance;
@@ -691,8 +679,9 @@ public class CounterFifo : Fifo<int> {
 }
 ```
 
-So, thanks to `Fifo`, CounterFifo is a concise stack of counters providing an alternate form of iteration without garbage collection. C# `foreach` causes lots of garbage to collect due to the state machine being generated by the compiler when a method returns `IEnumerator`. These functions do not reset, so cannot be reused or cached. By providing methods `First` and `Next` in a class we can implement easy-to-use iteration with minimal garbage.
-
+Thanks to `Fifo`, CounterFifo is a concise stack of counters providing an alternate form of iteration without garbage collection.
+C# `foreach` causes lots of garbage to collect due to the state machine being generated by the compiler when a method returns `IEnumerator`. These functions do not reset, so cannot be reused or cached. 
+By providing methods `First` and `Next` in a class we can implement easy-to-use iteration with minimal garbage.
 ```c#
 for (var key = map.First; key != null; key = map.Next) {
   Process(key, map[key]);
@@ -706,9 +695,7 @@ private CounterFifo index = CounterFifo.Instance;
 ```
 We could have just used `int index;`. In similar instances, we have problems when one iteration occurs in another. Besides, this is easier to read.
 ### Linked Lists
-
-C#/.Net provides an excellent generic LinkedList implementation. My implementation has different goals.
-
+The goals of this linked lis implemention are:
 1. Reduce garbage collection by keeping remaining nodes in a recycling list.
 2. Ordered lists by providing a comparator.
 3. Manage state with ***create***, ***deactivate*** and ***reactivate***.
@@ -726,7 +713,7 @@ For clarity, while debugging a node name includes the home and owner lists and w
 ##### Node Owner and Home
 We create a node on the `Home` list where it is returned when recycled. The `Owner`  is assigned each time a node moves to another list.
 ##### Node Comparison
-When walking the list, it is sometimes good to see if the node passes or fails a range check. Every node implements <, <=, >, >=, == and !=. They all rely on a single LinkedList function, `Compare`  as set during initialisation.
+Every node implements <, <=, >, >=, == and !=. They all rely on a single LinkedList function, `Compare`  as set during initialisation.
 ##### Move the Node to Another List
 
 Moving nodes provides the core difference between this linked list implementation and others. A caching state machine can be created by moving nodes between lists. Use with ordered lists to feed them to a state in priority order. `MoveTo` moves the current node to the sorted location or top of the target list, while `MoveToEndOf` moves to the bottom.  Older items from the recycle bin  are first to reactivate.
@@ -735,7 +722,7 @@ Moving nodes provides the core difference between this linked list implementatio
 
 In a statement oriented world we would use `node.Item = value`, but we can also enjoye a functional approach with `node.MoveTo(state3list).Update(value)`.
 ##### Dispose of this Node
-Call `Recycle()` or wrap in a `using` compound statement to release a node. A node implements the `IDisposable`  interface.
+Call `Recycle()` or wrap in a `using` compound statement to release a node.
 ```c#
 using (var node = taskList.Top) {
     Process(node.Item);
@@ -756,7 +743,7 @@ When `Destroy` is called all entries in both active and recycle bin lists are di
 Create a  node for the entry item provided with the same `Home` and `Owner` as the current node.
 ##### Add Another Item
 
-For convenience in chaining `Node` has an `Add` method. In this example the first add is from `LinkedList` while the rest are from the inner `Node` class.
+For convenience in chaining `Node` has an `Add` method. The first add is from `LinkedList` while the rest are from the inner `Node` class.
 
 ```c#
 list.Add("One").Add("Two").Add("Three");
@@ -776,7 +763,7 @@ Assert.AreEqual(expected: 0, actual: numberList.New());
 ```
 
 ##### Custom Create, Deactivate & Reactivate
-Implicit creation returns `default(T)`, being zeros or null references. For more control, implement the custom methods herein.
+Implicit creation returns `default(T)` (being zeros or null references). For more control, implement custom methods.
 ```c#
 var connections = LinkedList<Connection>{
     CreateItem     = () => new Connection(myURL);
@@ -790,12 +777,9 @@ using (var node = connections.Fetch()) {
 ```
 
 This example is ignoring the asynchronous nature of the request and the possibility that the connection has timed out.
-`DeactivateItem` will not call `Dispose()` even for `IDisposable` unless overridden. If the item needs reactivation when retrieved for reuse, set an activation parameter as above.
-
+`DeactivateItem` will not call `Dispose()` on `IDisposable` instances. If the item needs reactivation when retrieved for reuse, set an activation parameter as above.
 Before node recycling, we call `DeactivateItem(node)`.
-
 You can create all three custom functions in different ways, depending on need.
-
 ```c#
 // 1. per-class/struct/value-type
 LinkedList<int>.CreateItemStatic     = () => -1;
@@ -827,37 +811,35 @@ Per-instance invocations only affect one instance of a linked list.
 
 ##### Ordered Linked Lists
 
-Caching state machines need a list of jobs to process in priority order. Priority could also be a time, a distance or any other measure we can compare.
+Caching state machines need a list of jobs in priority order. Priority could be a time, a distance or any other measure we can compare.
 
 ```c#
 var fences = new LinkedLisk<Geofence> {
     CompareItem = (left, right) 
         => node.Item.Distance.CompareTo(cursor.Item.Distance)
 }
-// fences nodes now implement <, <=, >, >=, == and !=
+// fences nodes now have <, <=, >, >=, == and !=
 if (fence.Active) fence.MoveTo(fences);    // injects in sorted order
 ```
-Created or moved items maintain order. Inherit `CompareItem` or set it for a class or an instance.
+List order is maintained when creating new or moving existing items. `CompareItem` is required.
 
 #### List Disposal
 
-Use linked lists as statics to keep reusable elements. Clear them when they have a limited life with two levels of cleanliness.
-1. `Discard()` disposes of any active elements, placing them in the recycle bin for later use. Use when you want to keep the linked list, but remove any outstanding elements. Called if it is an Item in a parent LinkedList.
-2. `Dispose()` removes items from the recycle bin as well so that the linked list can be safe for the garbage collector to pick up.
+Use linked lists as statics to keep reusable elements. When an elemement is no longer deeded, discard or dispose of it.
+1. `Discard()` disposes of any active elements, placing them in the recycle bin for later use. Use when you want to keep the linked list, but remove any outstanding elements. Called if an Item in a parent LinkedList.
+2. `Dispose()` removes items from the recycle bin as well so that the linked list can be safe for the garbage collector to retrieve.
 
 #### Node Creation and Movement
 
 ##### Add an Item
-
-If you have an item that has not been on a list, use `Add` to correct that oversight. Add uses the recycle bin.
-
+Add uses the recycle bin.
 ```c#
 var node = fences.Add(newFence).Add(anotherFence);
 ```
 
 ##### Recycle a Node
 
-Use `GetRecycledOrNew` if you require a node with contents initialised elsewhere.
+Use `GetRecycledOrNew` if you need a node with contents initialised elsewhere.
 ```c#
 using (node = weatherEvents.Fetch()) {
     node.Item.UseMe();
@@ -866,7 +848,7 @@ using (node = weatherEvents.Fetch()) {
 
 ##### Move Item Between Lists
 
-So now we get to the part where the real magic happens. Different components can own lists of Jobs. When they have done they can toss the job (node) to the next waiting component.
+So now we get to the part where the real magic happens. Different components can own lists of Jobs. When they have done they can toss the job (node) to the next waiting part.
 
 ```c#
 void Update() {
@@ -883,7 +865,7 @@ void Update() {
 
 In this theoretical example, once we have processed a job we mark finished or put on another job list for a dispatcher to decide what to do next. Note that this example only works with small numbers of jobs, processing between 30 and 60 jobs a second.
 
-There is also a function to move to the end of a list for better dispersal of usage (LRU - least used). Can also used to move an item to the end of the list regardless of priority.
+There is a function to move to the end of a list for better dispersal of usage (LRU - least used). It can be used to move an item to the end of the list regardless of priority.
 
 ```c#
 var result = jobs.First.Item;
@@ -913,10 +895,10 @@ Sometimes we do not know the lifetime of an item beforehand. Here, whoever does 
 
 #### A Lifo Stack
 
-For the uninitiated, ***Lifo*** is an acronym for *Last in first out*. The return stack used by most languages with functions is Lifo, so every return returns from the most recent function. Stack-based languages such as FORTH and FICL make working with Lifo an art form of efficiency (and unreadability). We use Lifo stacks every day with the undo stack when editing or the back button on a browser.
+***Lifo*** is an acronym for *Last in first out*. Stack-based languages such as FORTH and FICL make working with Lifo an art form of efficiency (and unreadability). We use Lifo stacks every day for undo operations when editing.
 
 ##### First
-`First` is the standard entry to the linked list, so using Top has no overhead. `First` is null if the list is empty. `First` allows access to the first item for processing before deciding on move or discard. Don't expect `First` to remain when you yield or otherwise relinquish the CPU.
+`First` is the standard entry to the linked list, so using Top has no overhead. `First` is null for an empty list. `First` allows access to the first item for processing before deciding on move or discard. Don't expect `First` to stay when you yield or otherwise relinquish the CPU.
 
 ```c#
 var working = new LinkedList<MyWorld>();
@@ -939,7 +921,7 @@ if (node != null) {
 
 ##### Empty
 
-A better method to implement `First` would be:
+A better  `First` implementation:
 
 ```c#
 var working = new LinkedList<MyWorld>();
@@ -959,7 +941,7 @@ For this example, both methods are identical because `yield` does not pass back 
 
 ##### Push
 
-`Push` is another way of moving a node. You can push an item or a node onto a stack.
+`Push` will also moving a node. You can push an item or a node onto a stack.
 
 ```c#
 var node = idleList.Pop();
@@ -986,7 +968,7 @@ This is better because you are free to move the node without it being moved back
 
 #### Node Walking
 
-Sing to the melody of *Jive Walking*. Node walking is the best way of processing all or some of the items in a list. 
+Sing to the melody of *Jive Walking*. 
 
 ```c#
 var tasks = new LinkedList<Task> {
@@ -1025,7 +1007,7 @@ Refers to the name of the list as provided in the constructor, defaulting to the
 
 ##### DebugMode
 
-When enabled, `DebugMode` causes a log entry for every creation or movement of a node. Because this includes stack dumps, you can find out who did what where.
+When enabled, `DebugMode` causes a log entry for every creation or movement of a node.
 
 ##### Dump
 
@@ -1039,7 +1021,7 @@ Returns a string containing the list name and counts entry counts.
 
 Underneath, a `Map` is still a C# `Dictionary` with similar object references for keys and values. This allows conversion for mixed types.
 
-My limited tests show that the `Dictionary` is faster than `SortedList`. The latter uses `Array.BinarySearch` to find entries. I have read other performance tests that report binary searches to be faster for small numbers of keys. I checked this on my MacBook Pro - and the Dictionary approach was twice as fast with 10 keys and hundreds of times faster will 1000 or more keys. Not that the results would be the same on other hardware - an Android phone for example.
+My limited tests show that the `Dictionary` is faster than `SortedList`. The latter uses `Array.BinarySearch` to find entries. I have read other performance tests that report binary searches to be faster for small numbers of keys. I checked this on my MacBook Pro - and the Dictionary approach was twice as fast with 10 keys and hundreds of times faster will 1000 or more keys.
 
 For `Map`, the `Hashtable` class would have made the perfect base, but in more tests `Dictionary` was faster. On the tests I created, `Map` can be up to a third again faster than `Dictionary`.
 
@@ -1068,7 +1050,7 @@ var map = new Map()).Add("One", 1).Add("Two", 2).Add("Three", 3);
 map.Remove("Two").Remove("One");
 Assert.AreEqual(1, map.Count);
 ```
-`Remove will call `Dispose()` on values that implement `IDisposable`. Where this would cause awkward infinite recursion, set the `dispose` parameter tof alse.
+`Remove` will call `Dispose()` when available. Where this would cause awkward infinite recursion, set the `dispose` parameter to false.
 
 ```c#
 map.Remove("Three", dispose: false);
@@ -1112,13 +1094,12 @@ Assert.IsNull(map["TryMe"].Value);
 ```
 #### Keys: Iterating Through a Map
 
-I designed the iteration techniques hereuse as little of the heap as possible to minimise garbage collection. Both mobile and VR apps suffer a busy the garbage collector.
+I designed the iteration techniques to use as little of the heap as possible to minimise garbage collection. Both mobile and VR apps suffer a busy the garbage collector.
 
 By default, iteration returns the keys in the same order as the were added. This is valuable if they are coming from structured data such as XML or JSON.
 
 ##### Count: of Items in a Map
-
-`Count` can always tell you how many items are in the `Map`.
+How many items are in the `Map`?
 ##### First and Next
 
 Because `string` keys are the most common, they get special treatment.
@@ -1129,7 +1110,7 @@ for (var key = map.First; key != null; key = map.Next) {
 ```
 ##### Array Indexing
 
-Object keys are even more fundamental. `Map` allows access to keys with an integer array index.
+`Map` allows access to keys by integer index.
 
 ```c#
 for (int i = 0; i < map.Count; i++) {
@@ -1139,9 +1120,9 @@ for (int i = 0; i < map.Count; i++) {
 
 ##### Sorted Lists
 
-As mentioned above, without intervention the order of the keys for either iteration method is the order inserted. This is useful for data where the order matters, such as JSON and XML.
+he order of the keys for either iteration method is the order they were inserted. This is useful for data where the order matters, such as JSON and XML.
 
-When we need a different order, use one of the `Sort` functions. Without parameters, `Sort` uses the default sorting for an object. This is alphabetical for strings and numeric ascending for numbers.
+For different ordering, use one of the `Sort` functions. Without parameters, `Sort` uses the default sorting for an object. This is alphabetical for strings and numeric ascending for numbers.
 
 ```c#
 var map = new Map().Add("One", 1).Add("Four", 4).Add("Three", 3);
@@ -1164,7 +1145,7 @@ In this example, we are sorting the keys by the value, not the key.
 
 ### Pick.cs - to choose from options
 
-This is an interface to pick an item from a list. `Pick()` can return random, ordered or any other selection method.
+Classes that involve picking an item from a list will use this interface. 
 
 ```c#
 class PickImplementation : Pick<string> {
@@ -1196,7 +1177,7 @@ for (int idx = 0; idx < 100; idx++) {
 
 #### Selector Initialiser
 
-The magic is in having different pickers for different requirements. The constructor allows for three types. Add more by overriding `Pick()`.
+The magic is in having different pickers for different requirements. Add more by overriding `Pick()`.
 
 ```c#
 new Selector<T> {
@@ -1214,9 +1195,9 @@ To return in a random order, set ***Exhaustive Random***. Nothing repeats until 
 
 #### Exhaustive Random Selections
 
-If there is a few choices, the player recognises the repeats, and they won't appear random. If the same item repeats at once it becomes obvious. The solution is to use exhaustive random selection. No item returns until all items have had a turn at being displayed.
+If there is a few choices, the player recognises the repeats, and they won't appear random. If the same item repeats at once it becomes obvious. The solution is to use exhaustive random selection. Items do not repeat until all items have been returned.
 
-Exhaustive Random is unnecessary for large sets of values. Set a watermark by giving `exhaustiveBelow` a value. If the number of choices available is below this value, exhaustive random selection occurs. If it is above, pseudo-random selection occurs.
+"Exhaustive Random" is unnecessary for large sets of values. Use a watermark by giving `exhaustiveBelow` a value. Numbers above the watermark will use  pseudo-random selection.
 
 #### Selector Choices
 
@@ -1260,7 +1241,7 @@ Assert.IsTrue(tree.Has("C"));
 
 ##### Tree Walking
 
-You can give All the tree walking methods a path to travel up or down the tree. The question is, which way is up? If we are using a tree from nature, the root is down, and we go up to branches and leaves. Then again we represent tree structures on the page and screen with the root on the left with branches and leaves to the right.
+You can give All the tree walking methods a path to travel up or down the tree. The question is, which way is up? If we are using a tree from nature, the root is down, and we go up to branches and leaves.
 
 Most provide a path to follow. It can be a single string with a `.`  separating nodes or a list of objects for non-string keys. You can walk back towards the root with `..` with each additional dot being another step back.
 
@@ -1303,7 +1284,7 @@ var tree = Trees.Instance.Add("A.B.C1..C2..C3").To("A.B");
 Assert.AreEqual("C1,C2,C3", Csv.ToString(tree.Children));
 ```
 
-Better yet, use `FirstChild`/`NextChild` for more concise code (See [Anchor](anchor) below)
+Better yet, use `FirstChild`/`NextChild` for more concise code (See [Anchor](#anchor) below)
 
 ###### Anchor
 
@@ -1383,7 +1364,7 @@ If you need to know how many branches to prepare storage, use `Children`, which 
 
 ## Text Manipulation
 
-### Csv.cs - serialize comma-separated lists
+### Csv.cs - serialise comma-separated lists
 
 ##### Static Line Serialisation
 
@@ -1401,8 +1382,7 @@ If you need to know how many branches to prepare storage, use `Children`, which 
 
 ### Json.cs - parse to dictionary
 
-And it came about that the computer was born and all was good. Then there was another computer and the need to share things. It was easy. Knowing both sides, we can send data the computer understands. But wait, now some computers see the binary world. OK, let's make it human readable. Computers are faster at deserialisation by then. Comma separated variable (CSV) files became popular, but they lacked depth. Enter SGML and then XML. Fifty years have passed. There are signs at the airport saying "We are an XML Company!". What does that mean? It's just a way for all machines (and some people) to read the same data. XML uses a DTD (document type definition). If an XML document does not pass the DTD rules, then it is no good. Toss it out. Great for developers. If it passes the rules, then it is easy to deserialise into a computer readable (i.e. binary format) object. Mind you, by hiding the structure from the developers they were free to build as they liked. I have seen Windows applications that changing the state in a drop-down causes millions of bytes to pass between client and server. Everyone was happy. Then JavaScript became more standardised and faster, and the Web App was born. Parsing XML in JavaScript was slow and difficult - even without checking it against a DTD. Unlike traditional server languages, JavaScript has dynamic data structures. You can send any structured data down the line and only work out what it contains when you need to. Some bright spark sent JavaScript source full of data structures. Javascript is fast at compiling itself. They now call this method JSONP. However, sending code has its risks even in a sandbox. Besides we can make the JavaScript compiler even faster if we give it a more rigid format and a subset of JavaScript. JSON was born. All was good. Then the people who don't live flexibility said "We can't have that" and insisted on rigid structures in JavaScript. So, now we have something like XML but without the DTD to help us get it right at both ends. Developers are now spending more time than with XML.
-
+And it came about that the computer was born.  All was good. Another computer appeared with a need to share. It was easy. Knowing both sides, we can send data the computer understands. But wait, now some computers see the binary world. OK, let's make it human readable. Computers are faster at deserialisation by then. Comma separated variable (CSV) files became popular, but they lacked depth. Enter SGML and then XML. Fifty years have passed. There are signs at the airport saying "We are an XML Company!". What does that mean? It's just a way for all machines (and some people) to read the same data. XML uses a DTD (document type definition). If an XML document does not pass the DTD rules, then it is no good. Great for developers. If it passes the rules, then it is easy to deserialise into a computer readable (i.e. binary format) object. Mind you, by hiding the structure from the developers they were free to build as they liked. I have seen Windows applications that changing the state in a menu causes millions of bytes to pass between client and server. Everyone was happy. Then JavaScript became more standardised and faster, and the Web App was born. Parsing XML in JavaScript was slow and difficult - even without checking it against a DTD. Unlike traditional server languages, JavaScript has dynamic data structures. You can send any structured data down the line and only work out what it contains when you need to. Some bright spark sent JavaScript source full of data structures. Javascript is fast at compiling itself. They now call this method JSONP. However, sending code has its risks even in a sandbox. Besides we can make the JavaScript compiler even faster if we give it a more rigid format and a subset of JavaScript. JSON was born. All was good. Then the people who don't live flexibility said "We can't have that" and insisted on rigid structures in JavaScript. So, now we have another XML without the DTD to guide us. Developers are spending more time than with XML.
 We must stand up and fight. JSON for JSON. Allow me to get the data I need, not just what the suites have defined.
 
 #### Parse
@@ -1432,10 +1412,8 @@ Assert.AreEqual("26", json.Node["Not my age"]);
 #### Define Preprocessor Symbols
 The only way to compile code that relies on a library that may not exists is to use the preprocessor. Since we will know whether a package is available we can tell the compiler.
 
-For this, create a class in a ***Editor*** directory and have it initialise on load and inherit from ```AddDefineSymbols```. In the static constructor run your tests and add or remove define symbols as needed.
-
+Create a class in a ***Editor*** directory and have it initialise on load. It shouldinherit from `AddDefineSymbols`. In the static constructor run your tests and add or remove define symbols as needed.
 ##### Symbol Definition Control
-
 There are three define symbol methods:
 
 1. `AddDefines(string defines);`
@@ -1445,7 +1423,9 @@ There are three define symbol methods:
 The last method looks unwieldy, but it is valuable for controlling compile-time actions that are build target dependent.
 
 ##### HasFolder
-Provide the `HasFolder(string folder)` with the string representation of a folder under ***Assets***. `HasFolder` is the easiest way to check *unitypackage* existence.
+`HasFolder(string folder)` expects a folder path under ***Assets***. `HasFolder` is the easiest way to check *unitypackage* existence.
+
+As of Unity 2018, installations can be recognised by package. The string in this case is from ***Packages/manifest.json*** with a key of ***dependencies.{packageName}***.
 
 ##### Target
 Even if a *unitypackage* exists, the code may not apply to the target platform. `Target` takes a list of parameters and returns true if we are compiling for one.
@@ -1479,8 +1459,7 @@ class myUnityPackageImplementation : MyUnityPackageInterface {
 `AskowlDecoupler` uses this technology. The implementation only activates for installed external packages.
 
 #### Pre/Post Process Build
-When building for different platforms, it is often necessary to tweak native configurations either before or after the build. All the tweaks are optional. Look to ***Askowl-Lib/Resources/PostProcessBuildDefault*** in the Unity Editor for the options you can change.
-
+When building for different platforms, it is often necessary to tweak native configurations either before or after the build. Look to ***Askowl-Lib/Resources/PostProcessBuildDefault*** in the Unity Editor for the options you can change.
 ##### Pre-Process Build
 ###### Android - Enable Multidex
 Almost any Unity3D game of any size will have over 64,000 public methods. I know, this sounds crazy. It's all those packages you have imported. You could enable ***Proguard***. Apart from obfuscating your app it also tries to remove all the functions not called. It is not automatic since it cannot deal with reflection. Multidex does not have that problem, but makes your app larger.
@@ -1543,14 +1522,13 @@ Assert.AreEqual("Created Text Component", Components.Find<Text>("Created").text)
 
 #### Components.Establish&lt;T>(path...)
 
-Find a component if it exists or creates it if it doesn't. Because of the `Create`, the path must be full, not sparse.
+Find a component if it exists or creates it if it doesn't. Because of `Create`, the path must be full, not sparse.
 
 ### ConditionalHideAttribute
 
-This tool comes straight from [http://www.brechtos.com](Brecht Lecluyse) in a [http://www.brechtos.com/hiding-or-disabling-inspector-properties-using-propertydrawers-within-unity-5/](a blog from November 2015).
+This tool comes straight from [Brecht Lecluyse](http://www.brechtos.com) in a [a blog from November 2015](http://www.brechtos.com/hiding-or-disabling-inspector-properties-using-propertydrawers-within-unity-5/).
 
-Any complex `MonoBehaviour` can have quite a few items to display in the inspector. Often some items are only valid if another inspector-visible attribute is in a specific state.
-
+Any complex `MonoBehaviour` can create a complex and confusing inspector. It is possible to simplify the inspector without custom code by looking for optional input.
 1. Booleans are true to display conditional fields
 2. A string is not empty
 3. A reference object contains a value (game object, prefab, and more)
@@ -1577,15 +1555,15 @@ Any complex `MonoBehaviour` can have quite a few items to display in the inspect
 
 ### Label Attribute
 
-One challenge of using generic scriptable objects is the often uninformative labels in the inspector. In this truncated example below, we have a generic class with a variable for the inspector. `Stringer` inherits from it, but by using an attribute decorator `Labels`, I can rename the field to something more meaningful.
+Generic scriptable objects will show uninformative labels in the inspector. With the attribute decorator `Labels` I can rename the field to something more meaningful.
 
-In the generic class where you have ***Inspector*** fields you want to rename, give them a `[Label]` attribute. In the concrete classes, use the `Labels(before, after, ...)` class attribute decorator with entries that match the before and after label value.
+In the generic class where you have ***Inspector*** fields you want to rename, give them a `[Label]` attribute. In the concrete classes, use the `Labels(before, after, ...)` class attribute decorator.
 
 ```c#
   public class OfType<T> : WithEmitter { [SerializeField, Label] private T value; }
 // ...
 [Labels("Value", "Text")] public sealed class Stringer : OfType<string> {}
-// or if there is only one, as here
+// or if there is only one
 [Labels("Text")] public sealed class Stringer : OfType<string> {}
 ```
 
@@ -1593,12 +1571,10 @@ In this example, we see a ***Text*** label instead of the generic `Value` one.
 
 ### Log - Plug-and-play Logging
 
-The Askowl `Log` class provides an easy-to-use interface to the Unity debug log and analytics reporting. If you enable analytics it sends log messages there and to the console. Even when adding no extra consumers, log messages display on the console and in `Unity.Analytics`.
-
+The Askowl `Log` class is an easy-to-use interface to both the Unity debug log and analytics reporting.
 `Log` discards console messages when not in the Unity editor. For other builds, you need to set `Log.ConsoleEnabled = true` if you need these logs.
 
-Set up Unity Analytics per these [Unity instructions](https://docs.unity3d.com/Manual/UnityAnalyticsSetup.html). Disabled with 'UnityEngine.Analytics.Analytics.enabled' or if the target platform does not support it.
-
+Set up Unity Analytics per these [Unity instructions](https://docs.unity3d.com/Manual/UnityAnalyticsSetup.html). Logging is Disabled with 'UnityEngine.Analytics.Analytics.enabled' or if the target platform does not support it.
 It is simple to integrate third-party analytics or logging library as documented below.
 
 #### Basic Logging
@@ -1636,31 +1612,24 @@ The consumer sees log information as:
 3. **Result** - being the message supplied in the call
 4. **Member** - being the name of the field or function used to create the logging delegate.
 5. **Extra** - variable list of parameters from the logging call
-
-The *member name* is interesting. If you generate the delegate as a static field as recommended above, it is the name of that field. You can use this field to further differentiate messages by creating multiple fields.
-
 ```c#
 private static Log.EventRecorder   todo   = Log.Events(action: "Todo");
 private static Log.EventRecorder   fixBug = Log.Events(action: "Todo");
 ```
 
-A log call can include many additional parameters. They are single objects or key-value pairs. If a parameter is a string that ends in an equals (=), it becomes a key, and the next parameter becomes a value. Log consumers can generate a dictionary using these rules with `Log.ToDictionary`. Objects not involved in key-value pairs become dictionary entries where the object is the key, and the value is null.
+A log call can include many additional parameters represented in a string. If a parameter is a string that ends in an equals (=), it becomes a key, and the next parameter becomes a value. Log consumers can generate a dictionary using these rules with `Log.ToDictionary`. Objects not involved in key-value pairs become dictionary entries where the object is the key, and the value is null.
 
 #### Event Logging
-
-In many situations, you want a limited set of consistent actions with varying messages. For messaging purposes, the action is an event, and the delegate call only has to supply a message.
-
 ```c#
 private static Log.EventRecorder   healthUpEvent   = Log.Events(action: "Health");
 private static Log.EventRecorder   healthDownEvent = Log.Events(action: "Health");
 private static Log.EventRecorder   error           = Log.Errors();
 ```
-
-The example includes two separate ***Health*** events differentiated by the member field in the result. You may not need this level of granularity, but it is nice to know for when you do. ***Error*** events are unique in that the action is always "Error".
+The example includes two separate ***Health*** events differentiated by the member field in the result. You may not need this level of granularity. ***Error*** events are unique in that the action is always "Error".
 
 #### Warnings
 
-Warnings are identical to messages except they call a different method in the consumers. In the Unity console, you can see them with a yellow marker. Most analytics interfaces treat them the same as messages.
+Warnings are identical to messages except they call a different method in  consumers. The Unity console marks them with a yellow icon. Most analytics interfaces treat them the same as messages.
 
 ```c#
 private static Log.MessageRecorder warning = Log.Warnings("Warning");
@@ -1714,7 +1683,7 @@ var more = Log.Extras(new object[] {"count=", 1, "hello=", "world", "one", "two"
 Assert.AreEqual(expected: "count=1,hello=world,one,two", actual: more);
 ```
 
-, you can create a `Dictionary<string,object>` for additional processing. Some analytics like the data indexing.
+Create a `Dictionary<string,object>` for additional processing.
 
 ```c#
 var dictionary = Log.ToDictionary(new Log.Contents {
@@ -1729,7 +1698,7 @@ Assert.IsTrue(dictionary.ContainsKey("two"));
 
 #### Third Party Logging
 
-If the log processing is not to your liking or you have a personal analytics or logging package then you can add them to the decoupled interface. The first step is to create three methods for messages, warnings and errors. All have the `Log.EventDelegate` signature with a single parameter of type `Contents`.
+If the log processing is not to your liking or you have a personal analytics or logging package then you can add them to the decoupled interface. Create methods for messages, warnings and errors. All have the `Log.EventDelegate` signature with a single parameter of type `Contents`.
 
 ```c#
 public struct Contents {
@@ -1746,7 +1715,7 @@ Where:
 - **member** is the name of the field created to hold the delegate.
 - **extras** is a formatted string containing the other data.
 
-Here is the Unity implementation. It makes use of the dictionary conversion documented above.
+The Unity implementation uses the dictionary conversion documented above.
 
 ```c#
 private static void UnityAnalyticsMessage(Contents ct) =>
@@ -1777,7 +1746,7 @@ Unity supports ***Rich Text*** in UI elements. It is like a subset of HTML.
 
 #### Colours (Colors)
 
-You can provide Colours as an RGB hex triplet (#rrggbb) or by name. For code completion ease, `RichText.Colour` or `RichText.Color` has static members for the correct colours. Also, if you want to wrap a ***<color>*** tag around the text, there is a method for that.
+You can provide Colours as an RGB hex triplet (#rrggbb) or by name. For code completion ease, `RichText.Colour` or `RichText.Color` has static members for the correct colours. There is a methid to wrap text with a ***<color>*** tag.
 
 ```c#
 using Askowl.RichText;
@@ -1829,11 +1798,11 @@ Assert.AreEqual(gameObject, gameObject2);
 
 ### PlayMode Test Runner Support
 
-Askowl Custom Assets have tests for Unity editor PlayMode test-runner. Because this is the core Askowl unity package, it includes the rudimentary support for testing. See the Askowl TestAutomator package for more exhaustive support.
+Able includes only the rudimentary support for testing. See the Askowl TestAutomator package for more exhaustive support.
 
 ### PlayModeController
 
-PlayModeController is a base class of protected methods used to control actions in the game. Most of the methods run in Coroutines so that control code can wait for them to complete. It uses by *PlayModeTests* and *RemoteControl* classes.
+PlayModeController is a base class used to control actions in the game. Most of the methods run in Coroutines so that control code can wait for them to complete. It uses by *PlayModeTests* and *RemoteControl* classes.
 
 #### Scene
 
@@ -1842,7 +1811,7 @@ The protected reference to the loaded `Scene` object.
 #### LoadScene
 
 Load a scene by name from the scenes list in the build.
-Sometimes tests have an exclusive scene to highlight actions challenging to reproduce in game-play. Add to the build, but they include little overhead to the release game.
+Sometimes tests have an dedicated scene. Add it to the build. It creates little overhead to the release game.
 
 ```c#
   [UnityTest] public IEnumerator AccessCustomAssets() {
@@ -1917,8 +1886,7 @@ CheckPattern(@"^Direct .* at \d\d/\d\d/\d\d\d\d \d\d:\d\d:\d\d", results.text);
 ```
 
 ### A Sample Play Mode Test
-
-Because we sent the slider with a quote, we need to test a range to make sure all is as it should be.
+Because we sent the slider with a quote, we need to test a range.
 
 ```c#
 [UnityTest]
@@ -1937,7 +1905,7 @@ Because we sent the slider with a quote, we need to test a range to make sure al
 
 ### PreviewEditor
 
-Unity custom editors provide additional functionality for the Inspector panel. `PreviewEditor<T>` is a generic that adds a ***Preview*** button to the bottom of the Component.
+`PreviewEditor<T>` is a generic that adds a ***Preview*** button to the bottom of the Component.
 
 `AudioClipsEditor` is a custom class that plays a sound when pressing ***Preview***.
 
@@ -1963,8 +1931,7 @@ In this example, the potential range is between 0.0 and 10.0 inclusive, but the 
 
 <img src="RangeDrawer.png" width="50%">
 
-Set range values with the sliders or by typing values on the boxes to the left and right.
-
+Set range values with sliders or by typing.
 ### RangeBounds Attribute
 
 For more meaningful ranges we add an attribute called `RangeBounds`.
@@ -1980,7 +1947,7 @@ The width of the range limits how many digits past the decimal point display.
 
 Scriptable objects provide a valuable resource. By moving code and data out of mono behaviours, we can more decouple and test our systems. The problem is that in the default Unity system a scriptable object in a mono behaviour shows up as a resource. You need to select it in the Project view to have the inspector show details.
 
-This script and many thanks to [TheVastBernie](https://forum.unity.com/members/thevastbernie.589052/) for his [script](https://forum.unity.com/threads/editor-tool-better-scriptableobject-inspector-editing.484393/) displays scriptable objects in full in the inspector view of a MonoBehaviour. There is nothing for you to do. When you load ***Able*** it all happens.
+This script and many thanks to [TheVastBernie](https://forum.unity.com/members/thevastbernie.589052/) for his [script](https://forum.unity.com/threads/editor-tool-better-scriptableobject-inspector-editing.484393/). It displays scriptable objects in full in the inspector view for a MonoBehaviour.
 
 #### Closed
 
@@ -2012,10 +1979,9 @@ This example can play a sound from the list, making a game sound less tedious. J
 All classes inheriting from `Set` have a `Pick()` method with two controlling field entries:
 
 - ***cycle***: True to return entries in order, false to get a random selection.
-- ***exhaustiveBelow***: If the number of entries in the set is below this value, then while `Pick()` returns a random entry with no repeats. From a list of three, nothing appears random.
-
+- ***exhaustiveBelow***: If the number of entries in the set is smaller than this value, then while `Pick()` returns a random entry with no repeats.
 These options are available in the editor when you create a custom asset from a `Set`.
 
 #### Set Contents
 
-The `Elements` fields a public `List<T>`, so access it content, but for modifications, use `Add(entry)` and `Remove(entry)` as they rebuild the selector. Overwriting the elements array also trigger a rebuild, as will an explicit `Reset()` call.
+The `Elements` field is a public `List<T>`. For modifications, use `Add(entry)` and `Remove(entry)` as they rebuild the selector. Overwriting the elements array also trigger a rebuild, as will an explicit `Reset()` call.

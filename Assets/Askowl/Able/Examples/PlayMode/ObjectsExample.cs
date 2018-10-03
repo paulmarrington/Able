@@ -7,9 +7,7 @@ namespace Askowl.Examples {
   using UnityEngine;
   using UnityEngine.TestTools;
 
-  /// <inheritdoc />
-  /// Using <see cref="T:Askowl.Objects" />
-  /// <inheritdoc />
+  /// Using <see cref="T:Askowl.Objects" /> <inheritdoc />
   public class ObjectsExamples : PlayModeTests {
     /// Using <see cref="Objects.Find{T}"/>
     [UnityTest]
@@ -47,7 +45,7 @@ namespace Askowl.Examples {
       yield return LoadScene("Askowl-Able-Examples");
 
       var gameObject = Objects.Find<GameObject>("Text");
-      var path       = Objects.Path(gameObject);
+      string path       = Objects.Path(gameObject);
       Assert.AreEqual("Canvas/Level/Button Two/Text", path);
     }
 

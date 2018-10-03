@@ -4,13 +4,10 @@
 namespace Askowl.Examples {
   using NUnit.Framework;
 
-  /// <remarks><a href="http://unitydoc.marrington.net/Able#Csvcs-serialization-of-commaseparated-lists">Serialise List to CSV</a></remarks>
   public class CsvExamples {
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#tocsv">Convert an array to a CSV string</a></remarks>
-    [Test]
-    public void ToCsv() {
-      var expected = "1,3,5,7,9";
-      var actual   = Csv.ToString(new[] { 1, 3, 5, 7, 9 });
+    [Test] public void ToCsv() {
+      var    expected = "1,3,5,7,9";
+      string actual   = Csv.ToString(new[] { 1, 3, 5, 7, 9 });
       Assert.AreEqual(expected, actual);
 
       expected = "1,3,5,7,9";

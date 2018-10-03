@@ -8,15 +8,8 @@ namespace Askowl.Examples {
   using NUnit.Framework;
   using UnityEditor;
 
-  /// <summary>
-  /// Check whether compiler symbols can be defined and used
-  /// </summary>
   public sealed class DefineSymbolsExample {
-    /// <summary>
-    /// Make sure that the definitions created by MyDefinitions class have been recognised
-    /// </summary>
-    [Test]
-    public void DefineSymbolsSimplePasses() {
+    [Test] public void DefineSymbolsSimplePasses() {
       #if (!Askowl)
       Assert.Fail("Expected define 'Askowl' does not exist");
       #endif
@@ -48,10 +41,7 @@ namespace Askowl.Examples {
     }
   }
 
-  /// <a href="DefineSymbols"></a>
-  /// <inheritdoc />
-  [InitializeOnLoad]
-  public sealed class MyDefinitions : DefineSymbols {
+  [InitializeOnLoad] public sealed class MyDefinitions : DefineSymbols {
     static MyDefinitions() {
       bool update = HasFolder(folder: "Askowl/Able") && Target(iOS, Android, OSX, Windows);
 

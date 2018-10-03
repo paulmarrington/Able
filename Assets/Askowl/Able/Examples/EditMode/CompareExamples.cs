@@ -1,13 +1,11 @@
 ﻿#if UNITY_EDITOR && Able
 
-using NUnit.Framework;
+namespace Askowl.Examples {
+  using NUnit.Framework;
 
-namespace Askowl.Examples { //#TBD#
-  /// <remarks><a href="http://unitydoc.marrington.net/Able#comparecs-equality-and-almost-equality">check if two numbers are almost the same</a></remarks>
+//#TBD#
   public class CompareExamples {
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#almostequal-for-floating-point">check if two numbers are almost the same</a></remarks>
-    [Test]
-    public void AlmostEqualFloatingPoint() {
+    [Test] public void AlmostEqualFloatingPoint() {
       Assert.IsFalse(Compare.AlmostEqual(a: 1.1f, b: 1.2f, minimumChange: 0.1f));
       Assert.IsTrue(Compare.AlmostEqual(a: 1.1f,  b: 1.2f, minimumChange: 0.11f));
 
@@ -21,9 +19,7 @@ namespace Askowl.Examples { //#TBD#
       Assert.IsTrue(Compare.AlmostEqual(a: 123.456789, b: 123.45679));
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#almostequal-for-integers">check if two numbers are almost the same</a></remarks>
-    [Test]
-    public void AlmostEqualInteger() {
+    [Test] public void AlmostEqualInteger() {
       Assert.IsFalse(Compare.AlmostEqual(a: 123L, b: 133L, minimumChange: 10L));
       Assert.IsTrue(Compare.AlmostEqual(a: 123L,  b: 133L, minimumChange: 11L));
 

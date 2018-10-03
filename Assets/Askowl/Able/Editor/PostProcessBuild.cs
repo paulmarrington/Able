@@ -1,106 +1,67 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
+
+using System;
 using System.IO;
 using System.Text.RegularExpressions;
-using JetBrains.Annotations;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
 using UnityEditor.Callbacks;
 using UnityEngine;
+
+// ReSharper disable MissingXmlDoc InconsistentNaming UnusedMember.Local UnusedParameter.Global NotAccessedField.Global UnassignedField.Global, MemberCanBeInternal, ReSharper disable FieldCanBeMadeReadOnly.Global, InconsistentNaming
+
 #if UNITY_IOS || UNITY_TVOS
 using UnityEditor.iOS.Xcode;
 #endif
 
 // Default plist includes NSCalendarsUsageDescription = Not Required
 
-/// <summary>
-/// Do any modifications required by the different platforms to build without fiddling
-/// </summary>
+/// <a href="http://bit.ly/2O0Z5Bu">Post-process build configuration from the inspector</a> <inheritdoc />
 [CreateAssetMenu(menuName = "Build/PostProcessor", fileName = "PostProcessBuild")]
 public sealed class PostProcessBuild : ScriptableObject {
-  /// <summary>
-  /// iOS plist entry types allowed
-  /// </summary>
-  [Serializable]
-  public enum EntryTypes {
-    // ReSharper disable MissingXmlDoc
+  /// <a href="http://bit.ly/2Oq9pSO">Plist item types</a>
+  [Serializable] public enum EntryTypes { String, Boolean, Integer }
 
-    String,
-    Boolean,
-    Integer
-
-    // ReSharper restore MissingXmlDoc
-  }
-
-  // ReSharper disable UnassignedField.Global, MemberCanBeInternal, ReSharper disable FieldCanBeMadeReadOnly.Global, InconsistentNaming
-  /// <summary>
-  /// iOS required data needed to work the magic
-  /// </summary>
-  [Serializable]
-  // ReSharper disable once InconsistentNaming
-  public sealed class IOS {
-    /// <summary>
-    /// This is what is needed to add a plist entry into an iOS build
-    /// </summary>
-    [Serializable]
-    public sealed class PlistEntry {
-      // ReSharper disable MissingXmlDoc
-
+  /// <a href="http://bit.ly/2Oq9vKa">iOS required data needed to work the magic</a>
+  [Serializable] public sealed class IOS {
+    /// <a href="http://bit.ly/2Oq9vKa">This is what is needed to add a plist entry into an iOS build</a>
+    [Serializable] public sealed class PlistEntry {
       public string     Key;
       public EntryTypes EntryType;
       public string     Value;
-
-      // ReSharper restore MissingXmlDoc
     }
 
-    /// <summary>
-    /// set UNITY_USES_REMOTE_NOTIFICATIONS to 0
-    /// </summary>
+    /// <a href="http://bit.ly/2Rj0VM2">set UNITY_USES_REMOTE_NOTIFICATIONS to 0</a>
     public bool RemoveNotifications = true;
 
-    /// <summary>
-    /// Entries to add to the build plist file used by iOS
-    /// </summary>
+    /// <a href="http://bit.ly/2Oq9vKa">Entries to add to the build plist file used by iOS</a>
     public PlistEntry[] PlistEntries;
   }
 
-  /// <summary>
-  /// Android required data needed to work the magic
-  /// </summary>
-  [Serializable]
-  public sealed class Android {
-    /// <summary>
-    /// Multidex allows for files with more than 64k entries in the linker name dictionary
-    /// </summary>
+  /// <a href="http://bit.ly/2Re92cJ">Android required data needed to work the magic</a>
+  [Serializable] public sealed class Android {
+    /// <a href="http://bit.ly/2Re92cJ">Multidex allows for files with more than 64k entries in the linker name dictionary</a>
     public bool EnableMultidex = true;
   }
 
-  /// <summary>
-  /// Instance of iOS build data so that it can be modified or added to from the Unity editor
-  /// </summary>
+  /// <a href="http://bit.ly/2Oq9pSO">Instance of iOS build data so that it can be modified or added to from the Unity editor</a>
   // ReSharper disable once InconsistentNaming
   public IOS iOS;
 
-  /// <summary>
-  /// Instance of Android build data so that it can be modified or added to from the Unity editor
-  /// </summary>
+  /// <a href="http://bit.ly/2Oq9pSO">Instance of Android build data so that it can be modified or added to from the Unity editor</a>
   // ReSharper disable once InconsistentNaming
   public Android android;
   // ReSharper restore UnassignedField.Global, MemberCanBeInternal, FieldCanBeMadeReadOnly.Global, InconsistentNaming
 
-  /// <summary>
-  /// Called by unity during the build process after the platform specific code has been created and before the platform builder takes over
-  /// </summary>
-  /// <param name="buildTarget"></param>
-  /// <param name="pathToBuiltProject"></param>
-  [PostProcessBuild(callbackOrder: 900)]
-  public static void OnPostProcessBuild(BuildTarget buildTarget,
-                                        string      pathToBuiltProject) {
-#if UNITY_IOS || UNITY_TVOS
+  /// <a href="http://bit.ly/2RezLpo">Called by unity during the build process after the platform specific code has been created and before the platform builder takes over</a>
+  [PostProcessBuild(callbackOrder: 900)] public static void OnPostProcessBuild(
+    BuildTarget buildTarget,
+    string      pathToBuiltProject) {
+    #if UNITY_IOS || UNITY_TVOS
     PostProcessBuild postProcessBuild = Load();
-    string           plistPath        = pathToBuiltProject + "/Info.plist";
-    PlistDocument    plist            = new PlistDocument();
+    string           plistPath = pathToBuiltProject + "/Info.plist";
+    PlistDocument    plist = new PlistDocument();
     plist.ReadFromString(text: File.ReadAllText(path: plistPath));
 
     if (postProcessBuild.iOS.RemoveNotifications) {
@@ -114,7 +75,7 @@ public sealed class PostProcessBuild : ScriptableObject {
   }
 
   private static void
-    MissingPushNotificationEntitlementRemover([NotNull] string pathToBuiltProject) {
+    MissingPushNotificationEntitlementRemover(string pathToBuiltProject) {
     string classesDirectory = Path.Combine(path1: pathToBuiltProject, path2: "Classes");
     string headerPath       = Path.Combine(path1: classesDirectory,   path2: "Preprocessor.h");
 
@@ -127,14 +88,13 @@ public sealed class PostProcessBuild : ScriptableObject {
         replacement: "define UNITY_USES_REMOTE_NOTIFICATIONS 0");
 
       File.WriteAllText(path: headerPath, contents: code);
-    } else {
-      Debug.LogError(message: "Preprocessor file doesn't exist.");
     }
+    else { Debug.LogError(message: "Preprocessor file doesn't exist."); }
   }
 
-#if UNITY_IOS || UNITY_TVOS
+  #if UNITY_IOS || UNITY_TVOS
   private static void AddPlistEntries(PlistDocument                         plist,
-                                      [NotNull] IEnumerable<IOS.PlistEntry> plistEntries) {
+                                      IEnumerable<IOS.PlistEntry> plistEntries) {
     foreach (IOS.PlistEntry plistEntry in plistEntries) {
       switch (plistEntry.EntryType) {
         case EntryTypes.String:
@@ -169,11 +129,11 @@ public sealed class PostProcessBuild : ScriptableObject {
 }
 
 internal sealed class MyCustomBuildProcessor : IPreprocessBuildWithReport {
-  public int  callbackOrder                         { get { return 0; } }
+  public int  callbackOrder                         => 0;
   public void OnPreprocessBuild(BuildReport report) { }
 
   public void OnPreprocessBuild(BuildTarget target, string targetPath) {
-#if UNITY_ANDROID
+    #if UNITY_ANDROID
     PostProcessBuild build = PostProcessBuild.Load();
     string           path = "Assets/Plugins/Android/AndroidManifest.xml";
     string           tools = "xmlns:tools=\"http://schemas.android.com/tools\"";

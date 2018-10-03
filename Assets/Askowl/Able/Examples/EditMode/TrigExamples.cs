@@ -5,15 +5,11 @@ namespace Askowl.Examples {
   using NUnit.Framework;
   using UnityEngine;
 
-//#TBD#
-  /// <remarks><a href="http://unitydoc.marrington.net/Able#trigcs">Trigonometry Rocks</a></remarks>
   public class TrigTests {
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#direction">Define axes</a></remarks>
-    [Test]
-    public void PositiveDirection() {
-      var xAxis = Trig.xAxis;
-      var yAxis = Trig.yAxis;
-      var zAxis = Trig.zAxis;
+    [Test] public void PositiveDirection() {
+      var xAxis = Trig.XAxis;
+      var yAxis = Trig.YAxis;
+      var zAxis = Trig.ZAxis;
 
       Assert.AreEqual(1,             xAxis.X);
       Assert.AreEqual(0,             xAxis.Y);
@@ -61,16 +57,14 @@ namespace Askowl.Examples {
       Assert.AreEqual(yAxis, otherAxes[1]);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#direction">Define axes</a></remarks>
-    [Test]
-    public void NegativeDirection() {
-      var minusX = -Trig.xAxis;
-      var minusY = -Trig.yAxis;
-      var minusZ = -Trig.zAxis;
+    [Test] public void NegativeDirection() {
+      var minusX = -Trig.XAxis;
+      var minusY = -Trig.YAxis;
+      var minusZ = -Trig.ZAxis;
 
-      var xAxis = Trig.xAxis;
-      var yAxis = Trig.yAxis;
-      var zAxis = Trig.zAxis;
+      var xAxis = Trig.XAxis;
+      var yAxis = Trig.YAxis;
+      var zAxis = Trig.ZAxis;
 
       Assert.IsFalse(xAxis.Negative);
       Assert.IsTrue(minusX.Negative);
@@ -124,9 +118,7 @@ namespace Askowl.Examples {
       Assert.AreEqual(minusY, otherAxes[1]);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#toradians">Degrees to Radians</a></remarks>
-    [Test]
-    public void ToRadians() {
+    [Test] public void ToRadians() {
       Assert.IsTrue(Compare.AlmostEqual(0.0174533, Trig.ToRadians(1)));
       Assert.IsTrue(Compare.AlmostEqual(0.575959,  Trig.ToRadians(33)));
       Assert.IsTrue(Compare.AlmostEqual(1.29154,   Trig.ToRadians(74)));
@@ -139,9 +131,7 @@ namespace Askowl.Examples {
       Assert.IsTrue(Compare.AlmostEqual(5.46288,   Trig.ToRadians(313)));
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#todegrees">Radians to Degrees</a></remarks>
-    [Test]
-    public void ToDegrees() {
+    [Test] public void ToDegrees() {
       Assert.IsTrue(Compare.AlmostEqual(1f,   Trig.ToDegrees(0.0174533), 1e5));
       Assert.IsTrue(Compare.AlmostEqual(33f,  Trig.ToDegrees(0.575959),  1e5));
       Assert.IsTrue(Compare.AlmostEqual(74f,  Trig.ToDegrees(1.29154),   1e5));
@@ -154,9 +144,7 @@ namespace Askowl.Examples {
       Assert.IsTrue(Compare.AlmostEqual(313f, Trig.ToDegrees(5.46288),   1e5));
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#relative-position-given-distance-and-angle-or-bearing">Relative Position given Distance and Angle or Bearing</a></remarks>
-    [Test]
-    public void RelativePositionFromBearing() {
+    [Test] public void RelativePositionFromBearing() {
       Vector2 expected = Vector2.zero;
       expected.Set(0, 1);
       Vector2 actual = Trig.RelativePositionFromBearing(1, (float) Trig.ToRadians(0));
@@ -179,9 +167,7 @@ namespace Askowl.Examples {
       AreEqual(expected, actual);
     }
 
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#relative-position-given-distance-and-angle-or-bearing">Relative Position given Distance and Angle or Bearing</a></remarks>
-    [Test]
-    public void RelativePositionFromAngle() {
+    [Test] public void RelativePositionFromAngle() {
       Vector2 expected = Vector2.zero;
       expected.Set(newX: 1, newY: 0);
       Vector2 actual = Trig.RelativePositionFromAngle(1, (float) Trig.ToRadians(0));

@@ -1,13 +1,10 @@
 ﻿// With thanks to Jason Weimann  -- jason@unity3d.college
 
-using UnityEditor;
-using UnityEngine;
-
 namespace Askowl {
-  /// <inheritdoc />
-  /// <summary>
-  /// Unity Editor drawer used for <see cref="T:Askowl.Range" /> fields. Displays minimum and maximum values along with a dual-slider.
-  /// </summary>
+  using UnityEditor;
+  using UnityEngine;
+
+  /// <a href="http://bit.ly/2OvF2KC">Unity Editor drawer used for <see cref="T:Askowl.Range" /> fields. Displays minimum and maximum values along with a dual-slider.</a> <inheritdoc />
   [CustomPropertyDrawer(type: typeof(Range), useForChildren: true)]
   public class RangeDrawer : PropertyDrawer {
     private          SerializedProperty minProp,  maxProp;
@@ -25,7 +22,7 @@ namespace Askowl {
       position = EditorGUI.PrefixLabel(position, label);
       EditorGUI.BeginChangeCheck();
 
-      var rect = new Rect(position) {width = 40};
+      var rect = new Rect(position) { width = 40 };
       style.alignment = TextAnchor.MiddleRight;
       float.TryParse(GUI.TextField(rect, minValue.ToString(boundsFormat), style), out minValue);
 
@@ -47,19 +44,19 @@ namespace Askowl {
     }
 
     private void LoadCurrentMinMax(SerializedProperty property) {
-      minProp  = property.FindPropertyRelative(("min"));
-      maxProp  = property.FindPropertyRelative(("max"));
+      minProp  = property.FindPropertyRelative("min");
+      maxProp  = property.FindPropertyRelative("max");
       minValue = minProp.floatValue;
       maxValue = maxProp.floatValue;
     }
 
     private void LoadRangeBounds() {
       var  ranges = fieldInfo.GetCustomAttributes(typeof(RangeBoundsAttribute), inherit: true);
-      bool set    = (ranges.Length > 0);
+      bool set    = ranges.Length > 0;
 
       rangeMin = set ? ((RangeBoundsAttribute) ranges[0]).Min : 0;
       rangeMax = set ? ((RangeBoundsAttribute) ranges[0]).Max : 1;
-      int places = (rangeMax < 10) ? 2 : (rangeMax < 100) ? 1 : 0;
+      int places = rangeMax < 10 ? 2 : rangeMax < 100 ? 1 : 0;
 
       boundsFormat = $"F{places}";
     }

@@ -5,15 +5,14 @@ namespace Askowl {
   using System.Collections;
   using System.Collections.Generic;
 
-  /// <a href=""></a>
+  /// <a href="http://bit.ly/2NUH9Io">A dictionary wrapper</a>
   // ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
   public class Map : IDisposable {
     private readonly Dictionary<object, object> map = new Dictionary<object, object>();
 
-    /// <a href=""></a>
     private readonly ArrayList keys = new ArrayList();
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2NUH9Io">Remove an entry, optionally calling Dispose()</a>
     // ReSharper disable once UnusedMethodReturnValue.Global
     public Map Remove(object key, bool dispose = true) {
       if ((key == null) || !map.ContainsKey(key)) return this;
@@ -25,33 +24,33 @@ namespace Askowl {
       return this;
     }
 
-    /// <a href="bit.ly/">First</a>
+    /// <a href="http://bit.ly/2OrPYc5">Retrieve the value for the first key entered/sorted</a>
     public object First => Count > 0 ? keys[index.Start()] : null;
 
-    /// <a href="bit.ly/">First</a>
+    /// <a href="http://bit.ly/2OrPYc5">Retrieve the value for the second key entered/sorted</a>
     public object Next => index.Reached(Count - 1) ? null : keys[index.Next()];
 
     private CounterFifo index = CounterFifo.Instance;
 
-    /// <a href="bit.ly/">[</a>
+    /// <a href="http://bit.ly/2Oq9wOe">Get a key by index based where 0 is the oldest/sorted</a>
     public object this[int i] => keys[i];
 
-    /// <a href="bit.ly/">Keys</a>
+    /// <a href="http://bit.ly/2Orh4QH">Array of keys in entry/sorted order</a>
     public object[] Keys => keys.ToArray();
 
-    /// <a href="bit.ly/">Sort</a>
+    /// <a href="http://bit.ly/2RezFOy">Sort keys ascending alphabetic</a>
     public Map Sort() {
       keys.Sort();
       return this;
     }
 
-    /// <a href="bit.ly/">Sort</a>
+    /// <a href="http://bit.ly/2RezFOy">Sort keys using a comparator</a>
     public Map Sort(Comparison<object> comparison) {
       keys.Sort(Comparer<object>.Create(comparison));
       return this;
     }
 
-    /// <a href="bit.ly/">[</a>
+    /// <a href="Pair http://bit.ly/2RhchzZ">Prepare retrieval given a known key</a>
     public Map this[object key] {
       get {
         Found = map.TryGetValue(Key = key, out Value);
@@ -59,7 +58,7 @@ namespace Askowl {
       }
     }
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2Oq9DcC">Add a map or set entry</a>
     public Map Add(object key, object value = null) {
       if (key == null) return this;
 
@@ -68,19 +67,19 @@ namespace Askowl {
       return this;
     }
 
-    /// <a href="bit.ly/">Count</a>
+    /// <a href="http://bit.ly/2Rj0Rfg">Number of entries in the map</a>
     public int Count => keys.Count;
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2Oq9qWS">Was the last search successful?</a>
     public bool Found;
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2Rin6lu">Last key searched for</a>
     public object Key;
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2Os3Wed">Last value found (null for failure)</a>
     public object Value;
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2NUH9Io">Remove all entries - calling Dispose() on each one</a>
     public virtual void Dispose() {
       for (var i = 0; i < Count; i++) (map[keys[i]] as IDisposable)?.Dispose();
       keys.Clear();

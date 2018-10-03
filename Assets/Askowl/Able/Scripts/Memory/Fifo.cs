@@ -3,7 +3,7 @@
 namespace Askowl {
   using System;
 
-  /// <a href=""></a>
+  /// <a href="http://bit.ly/2NTA5Ml"></a>
   public class Fifo<T> : IDisposable {
     private T[] stack = new T[8];
     private int pointer;
@@ -11,19 +11,19 @@ namespace Askowl {
     // ReSharper disable once UnusedMember.Local
     private void DeactivateItem() { pointer = 0; }
 
-    /// <a href="">For subclasses that do their own caching</a>
+    /// <a href="http://bit.ly/2NTA5Ml">Raw creation for subclasses that do their own caching</a>
     protected Fifo() { }
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2NTA5Ml">Fetch Fifo Stack from recycling</a>
     public static Fifo<T> Instance => Cache<Fifo<T>>.Instance;
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2NTA5Ml">Array-like indexing into the stack</a>
     public T this[int i] => stack[i];
 
-    /// <a href="bit.ly/">Count</a>
+    /// <a href="http://bit.ly/2NTA5Ml">Number of items on the stack</a>
     public int Count { get => pointer; set => pointer = value < pointer ? value : pointer; }
 
-    /// <a href="bit.ly/">Push</a>
+    /// <a href="http://bit.ly/2NTA5Ml">Push a new entry onto the top of the stack</a>
     public T Push(T entry) {
       if (pointer >= stack.Length) {
         var old = stack;
@@ -34,10 +34,11 @@ namespace Askowl {
       return stack[pointer++] = entry;
     }
 
-    /// <a href="bit.ly/">Pop</a>
+    /// <a href="http://bit.ly/2NTA5Ml">Pop an entry from the top of the stack</a>
+    // ReSharper disable once VirtualMemberNeverOverridden.Global
     public virtual T Pop() => pointer == 0 ? default : stack[--pointer];
 
-    /// <a href="bit.ly/">Pop</a>
+    /// <a href="http://bit.ly/2NTA5Ml">Swap the top and second entries on the stack</a>
     public Fifo<T> Swap() {
       if (pointer >= 2) {
         T top = Top;
@@ -47,13 +48,13 @@ namespace Askowl {
       return this;
     }
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2NTA5Ml">Get/set the value at the top of the stack.</a>
     public T Top { get => stack[pointer - 1]; set => stack[pointer - 1] = value; }
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2NTA5Ml">Get/set the value at second to top of the stack.</a>
     public T Next { get => stack[pointer - 2]; set => stack[pointer - 2] = value; }
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2NTA5Ml">Get/set the value at the bottom of the stack.</a>
     public T Bottom { get => stack[0]; set => stack[0] = value; }
 
     /// <inheritdoc />

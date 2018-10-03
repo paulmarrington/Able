@@ -15,11 +15,10 @@ namespace Askowl {
    CustomEditor(inspectedType: typeof(MonoBehaviour), editorForChildClasses: true)]
   public class MonoBehaviourEditor : Editor { }
 
-  /// <a href=""></a>
-  /// <inheritdoc />
+  /// <a href="http://bit.ly/2NTAoXr">Edit ScriptableObject data directly in component</a> <inheritdoc />
   [CustomPropertyDrawer(type: typeof(ScriptableObject), useForChildren: true)]
   public class ScriptableObjectDrawer : PropertyDrawer {
-    private static readonly Dictionary<string, bool> FoldoutByType = new Dictionary<string, bool>();
+    private static readonly Dictionary<string, bool> foldoutByType = new Dictionary<string, bool>();
 
     private Editor editor;
 
@@ -32,11 +31,11 @@ namespace Askowl {
       if (label.text.StartsWith("Element ")) return;
 
       string typeKey = property.objectReferenceValue.name;
-      bool   foldout = FoldoutByType.ContainsKey(typeKey) && FoldoutByType[typeKey];
+      bool   foldout = foldoutByType.ContainsKey(typeKey) && foldoutByType[typeKey];
 
-      FoldoutByType[typeKey] = EditorGUI.Foldout(position, foldout, GUIContent.none);
+      foldoutByType[typeKey] = EditorGUI.Foldout(position, foldout, GUIContent.none);
 
-      if (!FoldoutByType[typeKey]) return;
+      if (!foldoutByType[typeKey]) return;
 
       EditorGUI.indentLevel++;
 
@@ -63,15 +62,14 @@ namespace Askowl {
    CustomEditor(inspectedType: typeof(SerializedObject), editorForChildClasses: true)]
   public class SerializedObjectEditor : Editor { }
 
-  /// <a href=""></a>
-  /// <inheritdoc />
+  /// <a href="http://bit.ly/2NTezHo">Label Generic Custom Assets</a> <inheritdoc />
   [CustomPropertyDrawer(type: typeof(LabelAttribute), useForChildren: true)]
   public class CustomAssetLabelDrawer : PropertyDrawer {
     /// <inheritdoc />
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
       var attributeType = property.serializedObject.targetObject.GetType();
       var attributes    = attributeType.GetCustomAttributes(typeof(LabelsAttribute), false);
-      if ((attributes.Length > 0)) (attributes[0] as LabelsAttribute)?.Change(label);
+      if (attributes.Length > 0) (attributes[0] as LabelsAttribute)?.Change(label);
       EditorGUI.PropertyField(position, property, label, includeChildren: true);
     }
 

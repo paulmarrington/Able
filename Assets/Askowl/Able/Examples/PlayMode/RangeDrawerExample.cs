@@ -10,8 +10,8 @@ namespace Askowl.Examples {
     private Range range = new Range(min: 12, max: 18);
 
     internal void RangeExample() {
-      for (int i = 0; i < 10; i++) {
-        int value = (int) range.Pick();
+      for (var i = 0; i < 10; i++) {
+        var value = (int) range.Pick();
 
         if ((value < 12) || (value > 18)) {
           Debug.LogError($"{value} is not in range");

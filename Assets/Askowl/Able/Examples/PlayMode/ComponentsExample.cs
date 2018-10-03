@@ -9,8 +9,7 @@ namespace Askowl.Examples {
   using UnityEngine.TestTools;
   using UnityEngine.UI;
 
-  /// Using <see cref="T:Askowl.Components" />
-  /// <inheritdoc />
+  /// Using <see cref="T:Askowl.Components" /> <inheritdoc />
   public class ComponentsExample : PlayModeTests {
     /// Using <see cref="Components.Find{T}(string)"/>
     [UnityTest]

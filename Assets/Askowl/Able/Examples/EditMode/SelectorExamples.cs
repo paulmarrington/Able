@@ -9,13 +9,12 @@ namespace Askowl.Examples {
     private readonly int[] ints   = { 0, 1, 2, 3, 4 };
     private          int[] counts = { 0, 0, 0, 0, 0 };
 
-    [Test]
-    public void Random() {
+    [Test] public void Random() {
       // default is random
       var selector = new Selector<int> { Choices = ints };
 
       for (var i = 0; i < 10; i++) {
-        var pick = selector.Pick();
+        int pick = selector.Pick();
         counts[pick]++;
       }
 
@@ -30,39 +29,36 @@ namespace Askowl.Examples {
       }
     }
 
-    [Test]
-    public void Sequential() {
+    [Test] public void Sequential() {
       var selector = new Selector<int> { Choices = ints, IsRandom = false };
 
       for (var i = 0; i < 10; i++) {
-        var pick = selector.Pick();
+        int pick = selector.Pick();
 
         if (pick != i % 5) Assert.Fail($"Sequential failed with {pick} on iteration {i}");
       }
     }
 
-    [Test]
-    public void ExhaustiveRandom() {
+    [Test] public void ExhaustiveRandom() {
       // or we can be random, but exhaust all possibilities before going round again
       var selector = new Selector<int> { Choices = ints, ExhaustiveBelow = 100 };
 
       counts = new[] { 0, 0, 0, 0, 0 };
 
       for (var i = 0; i < 10; i++) {
-        var pick = selector.Pick();
+        int pick = selector.Pick();
         counts[pick]++;
       }
 
       for (var i = 0; i < counts.Length; i++) Assert.AreEqual(2, counts[i]);
     }
 
-    [Test]
-    public void ExhaustiveWatermark() {
+    [Test] public void ExhaustiveWatermark() {
       // Unless our number of choices are below a watermark value
       var selector = new Selector<int> { Choices = ints, ExhaustiveBelow = 4 };
 
       for (var i = 0; i < 10; i++) {
-        var pick = selector.Pick();
+        int pick = selector.Pick();
         counts[pick]++;
       }
 

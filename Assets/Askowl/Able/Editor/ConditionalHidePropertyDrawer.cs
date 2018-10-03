@@ -7,13 +7,12 @@ using UnityEditor;
 using UnityEngine;
 
 namespace Askowl {
-  /// <a href="http://www.brechtos.com/hiding-or-disabling-inspector-properties-using-propertydrawers-within-unity-5/"></a>
-  /// <inheritdoc />
+  /// <a href="http://bit.ly/2NZbbe8">ConditionalHide Attribute</a> from
+  /// <a href="http://www.brechtos.com/hiding-or-disabling-inspector-properties-using-propertydrawers-within-unity-5/">Brecht Lecluyse</a> <inheritdoc />
   [CustomPropertyDrawer(typeof(ConditionalHideAttribute))]
   public class ConditionalHidePropertyDrawer : PropertyDrawer {
     private Boolean displayProperty;
 
-    /// <a href=""></a>
     /// <inheritdoc />
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
       string             sourceFieldName = ((ConditionalHideAttribute) attribute).sourceFieldName;
@@ -30,23 +29,20 @@ namespace Askowl {
             displayProperty = !string.IsNullOrWhiteSpace(sourceProperty.stringValue);
             break;
           case SerializedPropertyType.ObjectReference:
-            displayProperty = (sourceProperty.objectReferenceValue != null);
+            displayProperty = sourceProperty.objectReferenceValue != null;
             break;
         }
       }
 
-      if (displayProperty)
+      if (displayProperty) {
         EditorGUI.PropertyField(position: position, property: property, label: label, includeChildren: true);
+      }
     }
 
-    /// <a href=""></a>
     /// <inheritdoc />
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
-      if (displayProperty) {
-        return EditorGUI.GetPropertyHeight(property, label);
-      } else {
-        return -EditorGUIUtility.standardVerticalSpacing;
-      }
+      if (displayProperty) { return EditorGUI.GetPropertyHeight(property, label); }
+      else { return -EditorGUIUtility.standardVerticalSpacing; }
     }
   }
 }

@@ -9,8 +9,7 @@ using UnityEngine.Assertions;
 using UnityEngine.TestTools;
 
 namespace Askowl.Examples {
-  /// Using <see cref="Log" />
-  /// <inheritdoc />
+  /// Using <see cref="Log" /><inheritdoc />
   public class LogExamples : PlayModeTests {
     private const  string              sceneName = "Askowl-Able-Examples";
     private static Log.MessageRecorder log       = Log.Messages();

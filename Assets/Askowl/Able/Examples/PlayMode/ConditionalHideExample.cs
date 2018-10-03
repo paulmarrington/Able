@@ -30,9 +30,12 @@ namespace Askowl {
 
     [ConditionalHide("text"), SerializeField]
     private int whatNow = 33;
+    /// <a href=""></a>
+    public string AString { get => aString; set => aString = value; }
 
     private void Start() {
-      if (enableAll) { number = whatNow; } else { userName = backupContent; }
+      if (enableAll) { number = whatNow; }
+      else { userName         = backupContent; }
 
       if (text != null) {
         whatNow       = number;

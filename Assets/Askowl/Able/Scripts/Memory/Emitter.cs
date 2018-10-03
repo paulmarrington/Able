@@ -3,104 +3,74 @@
 using System;
 
 namespace Askowl {
-  /// <summary>
-  /// Emit a signal where observers may listen for events. No data is exchanged.
-  /// </summary>
-  /// <remarks><a href="http://unitydoc.marrington.net/Able#emitter">The Observer Pattern</a></remarks>
-  public class Emitter {
-    private event Action listeners = delegate { };
+  /// <a href="http://bit.ly/2OzDM9D">Cached C# Action instances using the observer pattern</a>
+  public class Emitter : IDisposable {
+    /// <a href="http://bit.ly/2OzDM9D">Retrieve an emitter from recycling or new</a>
+    public static Emitter Instance => Cache<Emitter>.Instance;
 
-    /// <summary>
-    /// Tell all watchers we have changed
-    /// </summary>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#emitter">The Observer Pattern</a></remarks>
-    public void Fire() { listeners(); }
+    private event Action Listeners = delegate { };
 
-    /// <summary>
-    /// Called by an observer to show interest in an event. To cancel monitoring,
-    /// call Dispose() on the return value or have it as the focus of a using
-    /// statement.
-    /// </summary>
-    /// <param name="observer">instance that implements OnNext() and OnCompleted()</param>
-    /// <returns>Am object with a Dispose() method.</returns>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#emitter">The Observer Pattern</a></remarks>
+    /// <a href="http://bit.ly/2OzDM9D">The owner shoots and all the listeners hear</a>
+    public void Fire() { Listeners(); }
+
+    /// <a href="http://bit.ly/2OzDM9D">Ask an emitter to tell me too</a>
     public IDisposable Subscribe(IObserver observer) {
       Action listener = observer.OnNext;
-      listeners += listener;
-      bool disposed = false;
+      Listeners += listener;
+      var disposed = false;
 
       return new Disposable {
         Action = () => {
           if (disposed) return;
 
           disposed  =  true;
-          listeners -= listener;
+          Listeners -= listener;
           observer.OnCompleted();
         }
       };
     }
+
+    /// <a href="http://bit.ly/2OzDM9D">Call when we are done with this emitter.</a> <inheritdoc />
+    public void Dispose() { Cache<Emitter>.Dispose(this); }
   }
 
-  /// <inheritdoc cref="IObservable{T}" />
-  /// <summary>
-  /// Emit a signal where observers may listen for events. The signal includes
-  /// a data object.
-  /// </summary>
-  /// <typeparam name="T">Object passed from emitter to observer as a transfer of information</typeparam>
-  /// <remarks><a href="http://unitydoc.marrington.net/Able#emitter">The Observer Pattern</a></remarks>
+  /// <a href="http://bit.ly/2OzDM9D">Cached C# Action{T} instances using the observer pattern</a> <inheritdoc cref="IObservable{T}" />
   public class Emitter<T> : Emitter, IObservable<T> {
-    private event Action<T> listeners = delegate { };
+    /// <a href="http://bit.ly/2OzDM9D">Retrieve an emitter from recycling or new</a>
+    public new static Emitter<T> Instance => Cache<Emitter<T>>.Instance;
 
-    /// <summary>
-    /// Read-only reference to the last value sent to the listeners.
-    /// </summary>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#emitter">The Observer Pattern</a></remarks>
+    private event Action<T> Listeners = delegate { };
+
+    /// <a href="http://bit.ly/2OzDM9D">Convenient reference to the value sent with the last emission</a>
     public T LastValue { get; private set; }
 
-    /// <summary>
-    /// Tell all watchers we have changed
-    /// </summary>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#emitter">The Observer Pattern</a></remarks>
-    public void Fire(T value) { listeners(LastValue = value); }
+    /// <a href="http://bit.ly/2OzDM9D">The owner shoots and all the listeners hear</a>
+    public void Fire(T value) { Listeners(LastValue = value); }
 
-    /// <summary>
-    /// Called by an observer to show interest in an event. To cancel monitoring,
-    /// call Dispose() on the return value or have it as the focus of a using
-    /// statement.
-    /// </summary>
-    /// <param name="observer">instance that implements IObserver{T} methods</param>
-    /// <returns>Am object with a Dispose() method.</returns>
-    /// <remarks><a href="http://unitydoc.marrington.net/Able#emitter">The Observer Pattern</a></remarks>
+    /// <a href="http://bit.ly/2OzDM9D">Ask an emitter to give me a reference to the value ejected</a>
     public IDisposable Subscribe(IObserver<T> observer) {
       Action<T> listener = observer.OnNext;
-      listeners += listener;
-      bool disposed = false;
+      Listeners += listener;
+      var disposed = false;
 
       return new Disposable {
         Action = () => {
           if (disposed) return;
 
           disposed  =  true;
-          listeners -= listener;
+          Listeners -= listener;
           observer.OnCompleted();
         }
       };
     }
   }
 
-  /// <summary>
-  /// An Observable{T} equivalent when there is no data to share
-  /// </summary>
-  /// <remarks><a href="http://unitydoc.marrington.net/Able#emitter">The Observer Pattern</a></remarks>
+  /// <a href="http://bit.ly/2OzDM9D">Observer pattern without a payload</a>
   public interface IObserver {
-    /// <summary>
-    /// Called when an emitter fires
-    /// </summary>
+    /// <a href="http://bit.ly/2OzDM9D">Get the next listener</a>
     void OnNext();
 
-    /// <summary>
-    /// Called when an emitter is done - and not expected to provide any more data
-    /// </summary>
+    /// <a href="http://bit.ly/2OzDM9D">Called when the emitter is discarded</a>
     void OnCompleted();
   }
 }

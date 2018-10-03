@@ -2,8 +2,7 @@
 using UnityEngine;
 
 namespace Askowl.Examples {
-  /// Using <see cref="PreviewEditor{T}" />
-  /// <inheritdoc />
+  /// Using <see cref="PreviewEditor{T}" /><inheritdoc />
   [CustomEditor(typeof(AudioClip))]
   public class AudioClipsEditor : PreviewEditor<AudioSource> {
     /// <inheritdoc />
