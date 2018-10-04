@@ -8,23 +8,23 @@ namespace Askowl {
   using UnityEngine;
   using UnityEngine.Analytics;
 
-  /// <a href=""></a>
+  /// <a href="http://bit.ly/2RinksQ">Logging dirt cheap</a>
   public static class Log {
     #region Producer Interface
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2Oq9Bl0">Signature to write message log entries - this is what you use in your code</a>
     public delegate void MessageRecorder(string action, string message);
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2Oq9pSO">Signature to write event log entries - this is what you use in your code</a>
     public delegate void EventRecorder(string message);
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2Oq9Bl0">Method called to create a log calling function in your script</a>
     public static MessageRecorder Messages(
       [CallerMemberName] string memberName = "",
       [CallerFilePath]   string filePath   = "",
-      [CallerLineNumber] int    lineNumber = 0) =>
-      (action, message) => MessageEvent(Fill(action, memberName, message, filePath, lineNumber));
+      [CallerLineNumber] int    lineNumber = 0) => (action, message) =>
+      MessageEvent(Fill(action, memberName, message, filePath, lineNumber));
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2Re92cJ">>Method called to create a log calling function in your script</a>
     public static EventRecorder Warnings(
       string                    action,
       [CallerMemberName] string memberName = "",
@@ -32,14 +32,14 @@ namespace Askowl {
       [CallerLineNumber] int    lineNumber = 0) =>
       (message) => WarningEvent(Fill(action, memberName, message, filePath, lineNumber));
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2Oq9pSO">>Method called to create a log calling function in your script</a>
     public static EventRecorder Errors(
       [CallerMemberName] string memberName = "",
       [CallerFilePath]   string filePath   = "",
       [CallerLineNumber] int    lineNumber = 0) =>
       (message) => ErrorEvent(Fill("Error", memberName, message, filePath, lineNumber));
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2Oq9pSO">>Method called to create a log calling function in your script</a>
     public static EventRecorder Events(
       string                    action,
       [CallerMemberName] string memberName = "",
@@ -56,16 +56,16 @@ namespace Askowl {
       }
       return new Contents {
         component = Path.GetFileNameWithoutExtension(path), lineNumber = line, action = action, result = message
-      , extras      = $"{more}line={line},member={member}", member       = member
+      , extras    = $"{more}line={line},member={member}", member       = member
       };
     }
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2O0Z5Bu">Implementation methods get information to record in this structure</a>
     public struct Contents {
-      /// <a href=""></a>
+      /// <a href="http://bit.ly/2O0Z5Bu"></a>
       // ReSharper disable InconsistentNaming
       public string component, action, result, member, extras;
-      /// <a href=""></a>
+      /// <a href="http://bit.ly/2O0Z5Bu"></a>
       // ReSharper disable once NotAccessedField.Global
       public int lineNumber;
       // ReSharper restore InconsistentNaming
@@ -73,28 +73,28 @@ namespace Askowl {
     #endregion
 
     #region Consumer Interface
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2Rj0VM2">method signature for message listeners (log writers)</a>
     public delegate void EventDelegate(Contents contents);
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2Rj0VM2">Event queue for log providers to listen to</a>
     public static event EventDelegate MessageEvent = ConsoleMessage;
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2Rj0VM2">Event queue for log providers to listen to</a>
     public static event EventDelegate WarningEvent = ConsoleWarning;
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2Rj0VM2">Event queue for log providers to listen to</a>
     public static event EventDelegate ErrorEvent = ConsoleError;
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2O0Z5Bu">Log formatting for extra data</a>
     public static string Extras(string[] list) =>
       string.Join(separator: ",", value: list).Trim(trimCharacters).Replace("=,", "=");
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2O0Z5Bu">Log formatting for extra data</a>
     public static string Extras(object[] list) => Extras(Array.ConvertAll(array: list, converter: x => x.ToString()));
 
     private static char[] trimCharacters = { ',', ' ' };
 
-    /// <a href=""></a>
+    /// <a href="Log Parameter Formatting">Log formatting for extra data</a>
     public static Dictionary<string, object> ToDictionary(Contents contents) {
       var dictionary = new Dictionary<string, object> {
         { "component", contents.component }, { "action", contents.action }, { "result", contents.result }
@@ -118,13 +118,13 @@ namespace Askowl {
     #endregion
 
     #region Console Log Consumer
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2RezLpo">Set to false for no logging to Unity console</a>
     public static bool ConsoleEnabled = true;
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2RezLpo">Console logging actions - providing text formatting commands</a>
     public static readonly Map Actions;
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2Rj0VM2"></a>
     public static string Action(string text, string colour = "darkblue", bool bold = false, bool italics = false) =>
       $"{Open('b', bold)}{Open('i', italics)}<color={colour}>{text}</color>{Close('i', italics)}{Close('b', bold)}";
 
@@ -156,11 +156,10 @@ namespace Askowl {
       Actions = new Map();
       Actions.Add("tbd", tbd).Add("todo", tbd).Add("later", tbd).Add("incomplete", tbd)
              .Add("fixme", fix).Add("fix-me", fix).Add("bug", fix).Add("outstanding", fix);
-      #if !UNITY_EDITOR
-// So that mobile host logs don't get too crowded to read.
+      #if !UNITY_EDITOR // So that mobile host logs don't get too crowded to read.
       Application.SetStackTraceLogType(logType:LogType.Log,stackTraceType:StackTraceLogType.None);
       ConsoleEnabled = false;
-#endif
+      #endif
       if (Analytics.enabled) {
         MessageEvent += UnityAnalyticsMessage;
         WarningEvent += UnityAnalyticsWarning;

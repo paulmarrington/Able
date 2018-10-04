@@ -7,20 +7,19 @@ namespace Askowl {
 
   /// <a href="http://bit.ly/2Rj0PEa">Instance caching</a>
   public class Cache {
-    /// <a href="">Boxed value items</a> //#TBD#//
+    /// <a href="http://bit.ly/2Rj0Wj4">Boxed value items</a>
     public interface Boxed { }
 
-    /// <a href="">Caching boxed value items</a>
-    /// <inheritdoc cref="LinkedList{T}" />
+    /// <a href="http://bit.ly/2Rj0Wj4">Caching boxed value items</a> <inheritdoc cref="LinkedList{T}" />
     public class Boxed<T> : LinkedList<T>.Node, Boxed {
-      /// <a href="">Unboxed value storage</a>
+      /// <a href="http://bit.ly/2Rj0Wj4">Unboxed value storage</a>
       // ReSharper disable once UnassignedField.Global
       public T Value;
 
-      /// <a href="">Add a cache entry containing a new value item</a>
+      /// <a href="http://bit.ly/2Rj0Wj4">Add a cache entry containing a new value item</a>
       public static Boxed New(T item) => (Boxed) Cache<T>.Entries.Add(item);
 
-      /// <a href="">Create a new cache holding a copy of the value item.</a>
+      /// <a href="http://bit.ly/2Rj0Wj4">Create a new cache holding a copy of the value item.</a>
       public static Boxed Clone(Boxed<T> item) => (Boxed<T>) Cache<T>.Entries.Add(item.Value);
 
       /// <inheritdoc />

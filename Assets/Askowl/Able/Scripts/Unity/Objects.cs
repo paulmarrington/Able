@@ -1,18 +1,18 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-using System.Collections.Generic;
-using UnityEngine;
-
 namespace Askowl {
-  /// <a href=""></a>
+  using System.Collections.Generic;
+  using UnityEngine;
+
+  /// <a href="http://bit.ly/2NW3mGj">Static Object Helpers</a>
   public static class Objects {
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2NZbbe8">Find a game object by name and presence of a type of component</a>
     public static T Find<T>(string name) where T : Object {
       var objects = FindAll<T>(name);
       return objects.Length > 0 ? objects[0] : null;
     }
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2RhLCD5">Find all game objects by name and presence of a type of component</a>
     public static T[] FindAll<T>(string name) where T : Object {
       var all     = Resources.FindObjectsOfTypeAll<T>();
       var results = new List<T>();
@@ -26,7 +26,7 @@ namespace Askowl {
       return results.ToArray();
     }
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2NUH87i">String representation of the absolute path to a game object</a>
     public static string Path(GameObject gameObject) {
       var       path      = new List<string>();
       Transform transform = gameObject.transform;
@@ -40,7 +40,7 @@ namespace Askowl {
       return string.Join(separator: "/", value: path.ToArray());
     }
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2NZZYKj">Create a game object on a specific path in the hierarchy</a>
     public static GameObject CreateGameObject(string path) {
       var split                          = path.Split('/');
       int last                           = split.Length - 1;

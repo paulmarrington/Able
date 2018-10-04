@@ -1,83 +1,46 @@
 ﻿// With thanks to Jason Weimann  -- jason@unity3d.college
 
-using System;
-using UnityEngine;
-using Random = UnityEngine.Random;
-
 namespace Askowl {
-  /// <inheritdoc />
-  /// <summary>
-  /// Simple class to represent the high and low bounds for a float. It includes a picker to randomly choose a number within that range
-  /// </summary>
-  /// <remarks><a href="http://customassets.marrington.net#range">More...</a></remarks>
-  [Serializable]
-  public class Range : Pick<float> {
+  using System;
+  using UnityEngine;
+  using Random = UnityEngine.Random;
+
+  /// <a href="http://bit.ly/2OuGzAF">Simple class to represent the high and low bounds for a float. It includes a picker to randomly choose a number within that range</a> <inheritdoc />
+  [Serializable] public class Range : Pick<float> {
     [SerializeField] private float min;
     [SerializeField] private float max;
 
-    /// <summary>
-    /// Lowest value a number can have in this range
-    /// </summary>
-    /// <remarks><a href="http://customassets.marrington.net#range">More...</a></remarks>
-    public float Min { get { return min; } private set { min = value; } }
+    /// <a href="http://bit.ly/2OuGzAF">Lowest value a number can have in this range</a>
+    public float Min { get => min; private set => min = value; }
 
-    /// <summary>
-    /// Highest value a number can have in this range
-    /// </summary>
-    /// <remarks><a href="http://customassets.marrington.net#range">More...</a></remarks>
-    public float Max { get { return max; } private set { max = value; } }
+    /// <a href="http://bit.ly/2OuGzAF">Highest value a number can have in this range</a>
+    public float Max { get => max; private set => max = value; }
 
-    /// <summary>
-    /// Default constructor used when the range is set in a MonoBehaviour in the Unity Editor
-    /// </summary>
-    /// <remarks><a href="http://customassets.marrington.net#range">More...</a></remarks>
+    /// <a href="http://bit.ly/2OuGzAF">Default constructor used when the range is set in a MonoBehaviour in the Unity Editor</a>
     public Range() { }
 
-    /// <summary>
-    /// Constructor used to set the range directly or as initialisation for MonoBehaviour data
-    /// </summary>
-    /// <param name="min"><see cref="Min"/></param>
-    /// <param name="max"><see cref="Max"/></param>
-    /// <remarks><a href="http://customassets.marrington.net#range">More...</a></remarks>
+    /// <a href="http://bit.ly/2OuGzAF">Constructor used to set the range directly or as initialisation for MonoBehaviour data</a>
     public Range(float min, float max) {
       Min = min;
       Max = max;
     }
 
-    /// <inheritdoc />
-    /// <summary>
-    /// Choose a random number within the inclusive range
-    /// </summary>
-    /// <returns>A pseudo-random number</returns>
-    /// <remarks><a href="http://customassets.marrington.net#range">More...</a></remarks>
+    /// <a href="http://bit.ly/2OuGzAF">Choose a random number within the inclusive range</a> <inheritdoc />
     public float Pick() => Random.Range(min, max);
   }
 
-  /// <summary>
-  /// Used for <see cref="Range"/> variable in the Unity Editor to set the maximum bounds they can be set to
-  /// </summary>
-  /// <remarks><a href="http://customassets.marrington.net#rangebounds-attribute">More...</a></remarks>
+  /// <a href="http://bit.ly/2NTC1o1">Used for `Range` variable in the Unity Editor to set the maximum bounds they can be set to</a>
   public class RangeBoundsAttribute : Attribute {
-    /// <summary>
-    /// Setting the bounds
-    /// </summary>
-    /// <remarks><a href="http://customassets.marrington.net#rangebounds-attribute">More...</a></remarks>
-    /// <code>[SerializeField, RangeBounds(0, 999)] private Range distance = new Range(1, 999);</code>
-    /// <param name="min">Minimum value the range slider will move down to</param>
-    /// <param name="max">Maximum value the range slider will move up to</param>
+    /// <a href="http://bit.ly/2NTC1o1">[SerializeField, RangeBounds(0, 999)] private Range distance = new Range(1, 999);</a>
     public RangeBoundsAttribute(float min, float max) {
       Min = min;
       Max = max;
     }
 
-    /// <summary>
-    /// Used by RangeDrawer exclusively
-    /// </summary>
+    /// <a href="http://bit.ly/2NTC1o1">Used by RangeDrawer exclusively</a>
     public float Max { get; }
 
-    /// <summary>
-    /// Used by RangeDrawer exclusively
-    /// </summary>
+    /// <a href="http://bit.ly/2NTC1o1">Used by RangeDrawer exclusively</a>
     public float Min { get; }
   }
 }

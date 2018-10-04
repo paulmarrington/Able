@@ -50,7 +50,7 @@ namespace Askowl {
       return this;
     }
 
-    /// <a href="Pair http://bit.ly/2RhchzZ">Prepare retrieval given a known key</a>
+    /// <a href="http://bit.ly/2RhchzZ">Prepare retrieval given a known key</a>
     public Map this[object key] {
       get {
         Found = map.TryGetValue(Key = key, out Value);

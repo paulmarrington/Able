@@ -15,7 +15,7 @@ namespace Askowl {
 
     /// <inheritdoc />
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
-      string             sourceFieldName = ((ConditionalHideAttribute) attribute).sourceFieldName;
+      string             sourceFieldName = ((ConditionalHideAttribute) attribute).SourceFieldName;
       string             conditionPath   = property.propertyPath.Replace(property.name, sourceFieldName);
       SerializedProperty sourceProperty  = property.serializedObject.FindProperty(conditionPath);
       displayProperty = true;

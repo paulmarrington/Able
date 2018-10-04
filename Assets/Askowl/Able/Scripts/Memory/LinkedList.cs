@@ -16,7 +16,7 @@ namespace Askowl {
       /// <a href="http://bit.ly/2OssV13">Node links</a>
       public Node Previous, Next;
 
-      /// <a href="http://bit.ly/2RezEKu">List that currently owns this node is called Owner. It is changed by <see cref="MoveTo"/> Home is the list in which the node was first inserted. It is to this recycle bin it will return on Dispose().</a>
+      /// <a href="http://bit.ly/2RezEKu">List that currently owns this node is called Owner. It is changed by `MoveTo` Home is the list in which the node was first inserted. It is to this recycle bin it will return on Dispose().</a>
       public LinkedList<T> Owner, Home;
 
       /// <a href="http://bit.ly/2OssV13">Item can be value type (int, float ... struct) or object (class instance)</a>
@@ -147,10 +147,10 @@ namespace Askowl {
     /// <a href="http://bit.ly/2Oq9C8y">Prepare an idle item for reuse</a>
     public Action<Node> ReactivateItem { private get; set; } = (node) => ReactivateItemStatic(node);
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2Rj0PEa">Called before an item is returned to recycling</a>
     public static Action<Node> DeactivateItemStatic = GetDefaultDeactivateItem();
 
-    /// <a href="">For Deactivation when Dispose() is not enough</a>
+    /// <a href="http://bit.ly/2Rj0PEa">For Deactivation when Dispose() is not enough</a>
     public Action<Node> DeactivateItem { private get; set; } = (node) => DeactivateItemStatic(node);
 
     /// <a href="http://bit.ly/2OzziQl">Used to insert items into the correct location for sorted lists</a>
@@ -325,10 +325,10 @@ namespace Askowl {
     /// <a href="http://bit.ly/2O02sID">Add a node to the list</a>
     public Node Push(Node node) => node.MoveTo(this);
 
-    /// <a href="http://bit.ly/2Ov490b">Retrieve the first list item - <see cref="Node.Recycle"/></a>
+    /// <a href="http://bit.ly/2Ov490b">Retrieve the first list item - `Node.Recycle`</a>
     public Node Pop() => First?.Recycle();
 
-    /// <a href=""></a> //#TBD#//
+    /// <a href="http://bit.ly/2NTD9Ih">Pull the last item from the list</a>
     public Node Pull() => Last?.Recycle();
     #endregion
 

@@ -3,9 +3,9 @@
 namespace Askowl {
   using UnityEngine;
 
-  /// <a href=""></a>
+  /// <a href="http://bit.ly/2NU54b0">Static helper for Unity Components</a>
   public static class Components {
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2RezHpE">Find a component on a given path</a>
     public static T Find<T>(string path = "") where T : Component {
       var split         = path.Split('/');
       var parentObjects = Objects.FindAll<GameObject>(split[0]);
@@ -18,11 +18,11 @@ namespace Askowl {
       return default;
     }
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2NX3NjD">Find a component of a specific type on a given path</a>
     public static T Find<T>(GameObject inParentObject, string path) where T : Component =>
       Find<T>(inParentObject, path.Split('/'));
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2NX3NjD">Find a component of a specific type on a given path</a>
     public static T Find<T>(GameObject inParentObject, string[] path) where T : Component {
       var components = inParentObject.GetComponentsInChildren<T>();
       if (components.Length == 0) return default;
@@ -47,14 +47,13 @@ namespace Askowl {
       return default;
     }
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2Oo6eer">Create an instance of a component</a>
     public static T Create<T>(string path) where T : Component {
       GameObject gameObject = Objects.CreateGameObject(path);
       return gameObject.AddComponent<T>();
     }
 
-    /// <a href=""></a>
-    public static T Establish<T>(string path) where T : Component =>
-      Find<T>(path) ?? Create<T>(path);
+    /// <a href="http://bit.ly/2RhMbN5">Find or create a component</a>
+    public static T Establish<T>(string path) where T : Component => Find<T>(path) ?? Create<T>(path);
   }
 }

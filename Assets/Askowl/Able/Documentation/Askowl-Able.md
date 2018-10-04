@@ -2,7 +2,8 @@
 title: Able for Unity3D
 description: Askowl Base Library Enabler
 ---
-# [Able - Askowl Base Library Enabler](http://unitydoc.marrington.net/Able)
+# [Able - Askowl Base Library Enabler](https://paulmarrington.github.io/Unity-Documentation/Able/Doxygen/html/annotated.html)
+
 * Table of Contents
 {:toc}
 ## Executive Summary
@@ -12,7 +13,9 @@ Use the maths section for time conversion, comparisons and trigonometry. Inspect
 If you have a need to read CSV or JSON data from an unknown source, review the text section. 
 For Unity3D support view scripts to aid testing, locate components and game objects, pluggable logging, and various editor display and runtime components.
 
-> Read the code in the Examples Folder and run the Example scene
+> Read the code in the Examples Folder and run the Example scene.
+>
+> The Doxygen pages [here](https://paulmarrington.github.io/Unity-Documentation/Able/Doxygen/html/annotated.html)
 
 ## Introduction
 
@@ -534,7 +537,21 @@ Cache<Agnostic>.CleanCache();
 Assert.IsNull(Cache<Agnostic>.Entries.First);
 Assert.IsNull(Cache<Agnostic>.Entries.RecycleBin.First);
 ```
+#### Boxing Value Types
+
+C# generously wraps objects around basic value type so that they can be treated as object. The downside is load on the garbage collector. User defined value objects are called `struct` and are passed by value instead of reference. Used properly, `struct` instances do not use the heap or the garbage collector. Each entry has the interface `Boxed` for codes that need to distinguish value types from objects. There are two new methods.
+
+1. ***New(T item)*** creates a new entry, inserts the value item and adds it to `Cache<T>.`
+2. ***Clone(Boxed<T> item)*** creates a new entry and copies the value from an existing one.
+
+Both use nodes from the recycling bin where possible.
+
+In addition, useful methods are inherited from the Cache/LinkedList.Node, the most important being ***`Recycle()`***  to return an entry for later reuse.
+
+***
+
 ### Disposable.cs for IDisposable
+
 The  `using(...){...}` statement will call `Dispose` at the end of the following code block.
 ```c#
     [Test]
@@ -638,10 +655,12 @@ private struct Observer1 : IObserver {
 The generic version can pass information.
 
 ```c#
-var emitter = new Emitter<int>();
+var emitter = Emitter<int>.Instance;
 using (emitter.Subscribe(new Observer3())) {
   emitter.Fire(10);
 }
+// ...
+emitter.Dispose(); // drops it back on the recycling
 ```
 
 ```c#
@@ -658,12 +677,13 @@ C# provides a serviceable `Stack` class. Even `LinkedList` from this package can
 2. Cache with `Dispose()` for later - reducing garbage collection.
 3. Change the most recent item pushed with `Top` for dynamic data that needs a history.
 4. Use `Next` to retrieve or update the second-in-line.
-5. `Push` and `Pop` both return the current item making data with history easier to create.
-6. `Swap` is a convenience method that swaps `Top` with `Next`.
-7. `Count` will return the number of stack entries.
-8. Set `Count` to reduce the number of entries on the stack.
-9. A protected constructor allows inherited classes to bypass caching.
-The easiest way to show off the functionality is with the source to `CounterFifo`, a class that inherits from `Fifo<int>`.
+5. `Bottom` is used to retrieve or set the oldest item on the stack.
+6. `Push` and `Pop` both return the current item making data with history easier to create.
+7. `Swap` is a convenience method that swaps `Top` with `Next`.
+8. `Count` will return the number of stack entries.
+9. Set `Count` to reduce the number of entries on the stack.
+10. A protected constructor allows inherited classes to bypass caching.
+    The easiest way to show off the functionality is with the source to `CounterFifo`, a class that inherits from `Fifo<int>`.
 #### CounterFifo
 ```c#
 public class CounterFifo : Fifo<int> {
@@ -765,7 +785,7 @@ Assert.AreEqual(expected: 0, actual: numberList.New());
 ##### Custom Create, Deactivate & Reactivate
 Implicit creation returns `default(T)` (being zeros or null references). For more control, implement custom methods.
 ```c#
-var connections = LinkedList<Connection>{
+var connections = new LinkedList<Connection>{
     CreateItem     = () => new Connection(myURL);
     ReactivateItem = (node) => node.Item.CheckForStaleConnections();
     DeactivateItem = (node) => node.Item.SetLowPowerState();
@@ -795,7 +815,8 @@ private class MyClass {
     public int State;
 }
 // 3. per-instance control
-var numbers = LinkedList<int> {
+var numbers = new LinkedList<int> {
+    Name           = "My Linked List"
     CreateItem     = () => -1;
     DeactivateItem = (node) => node.Item = -2;
     ReactivateItem = (node) => node.Item = -1;
@@ -1942,6 +1963,10 @@ For more meaningful ranges we add an attribute called `RangeBounds`.
 ```
 
 The width of the range limits how many digits past the decimal point display.
+
+### Rich Text
+
+Unity supports a small HTML subset called rich text. It is available for use in UI elements and can be used in log displays. Since I can never remember the names of all but a few primary colours, I have added a static `Colour` (or `Color`) class helper.
 
 ### ScriptableObjects Display Drawer
 

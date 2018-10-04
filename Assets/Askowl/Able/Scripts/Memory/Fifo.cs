@@ -3,7 +3,7 @@
 namespace Askowl {
   using System;
 
-  /// <a href="http://bit.ly/2NTA5Ml"></a>
+  /// <a href="http://bit.ly/2NTA5Ml">Intentionally simple stack implementation</a>
   public class Fifo<T> : IDisposable {
     private T[] stack = new T[8];
     private int pointer;
@@ -57,7 +57,7 @@ namespace Askowl {
     /// <a href="http://bit.ly/2NTA5Ml">Get/set the value at the bottom of the stack.</a>
     public T Bottom { get => stack[0]; set => stack[0] = value; }
 
-    /// <inheritdoc />
+    /// <a href="http://bit.ly/2NTA5Ml">Send back to recycling</a><inheritdoc />
     public virtual void Dispose() {
       for (var i = 0; i < pointer; i++) (stack[i] as IDisposable)?.Dispose();
       pointer = 0;

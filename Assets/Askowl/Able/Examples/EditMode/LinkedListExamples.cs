@@ -558,9 +558,19 @@ namespace Askowl.Examples {
 
     [Test] public void Pop() {
       var list  = new LinkedList<int>("NodePop");
-      var node1 = list.Add(123);
+      var node0 = list.Add(123);
+      var node1 = list.Add(456);
       var node2 = list.Pop();
       Assert.AreEqual(node1.Item, node2.Item);
+      Assert.IsNotNull(list.RecycleBin);
+    }
+
+    [Test] public void Pull() {
+      var list  = new LinkedList<int>("NodePull");
+      var node0 = list.Add(123);
+      var node1 = list.Add(456);
+      var node2 = list.Pop();
+      Assert.AreEqual(node0.Item, node2.Item);
       Assert.IsNotNull(list.RecycleBin);
     }
     #endregion

@@ -89,7 +89,7 @@ namespace Askowl {
     private const double radiansToDegrees = 180.0   / Math.PI;
     private const double degreesToRadians = Math.PI / 180.0;
 
-    /// <a href="Direction">Convert degrees to radians</a>
+    /// <a href="http://bit.ly/2Rj0RMi">Convert degrees to radians</a>
     public static double ToRadians(double degrees) => degrees * degreesToRadians;
 
     /// <a href="http://bit.ly/2Orh5nJ">Convert radians to degrees</a>
@@ -102,7 +102,7 @@ namespace Askowl {
       return new Vector2(x, y);
     }
 
-    /// <a href="Direction">Find the relative coordinate given distance and angle from X axis.</a>
+    /// <a href="http://bit.ly/2Rj0RMi">Find the relative coordinate given distance and angle from X axis.</a>
     public static Vector2 RelativePositionFromAngle(float distanceApart, float bearingInRadians) {
       float x = distanceApart * Mathf.Cos(bearingInRadians);
       float y = distanceApart * Mathf.Sin(bearingInRadians);

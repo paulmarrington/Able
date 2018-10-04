@@ -4,15 +4,15 @@ namespace Askowl {
   using System;
   using System.Text;
 
-  /// <a href=""></a>
+  /// <a href="http://bit.ly/2NX3NjD">Deserialisation from JSON format</a>
   public class Json : IDisposable {
     #region PublicInterface
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2NX3NjD">Retrieve a Json instance used to load data into</a>
     public static Json Instance => new Json();
 
     private Json() { }
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2Oo6eer">Parse text containing valid but unknown format JSON</a>
     public Json Parse(string jsonText) {
       tree = Trees.Instance;
       json = jsonText;
@@ -26,11 +26,10 @@ namespace Askowl {
       return this;
     }
 
-    /// <a href=""></a>
-    /// <inheritdoc />
+    /// <a href="http://bit.ly/2NX3NjD">Clear deserialised JSON tree</a> <inheritdoc />
     public void Dispose() { tree.Dispose(); }
 
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2NX3NjD">Retrieve the current node in the parsed JSON tree</a>
     public Trees Node => tree;
     #endregion
 

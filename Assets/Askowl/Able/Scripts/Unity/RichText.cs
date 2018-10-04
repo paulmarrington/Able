@@ -1,11 +1,12 @@
-﻿namespace Askowl.RichText {
-  /// <a href=""></a>
-  /// <inheritdoc />
+﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
+
+namespace Askowl.RichText {
+  /// <a href="http://bit.ly/2OpSm3i">Color class with American spelling</a><inheritdoc />
   public class Color : Colour { }
 
-  /// <a href=""></a>
+  /// <a href="http://bit.ly/2OpSm3i">Static helper for text colour</a>
   public class Colour {
-    /// <a href=""></a>
+    /// <a href="http://bit.ly/2OpSm3i">List of recognised colours. Use #rrggbb as an alternative</a>
     public static string
       Aqua      = "aqua",      Black  = " black", Blue     = "blue",
       Brown     = "brown",     Cyan   = "cyan",   DarkBlue = "darkblue",
