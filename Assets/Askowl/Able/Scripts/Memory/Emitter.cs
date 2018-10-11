@@ -1,8 +1,8 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-using System;
-
 namespace Askowl {
+  using System;
+
   /// <a href="http://bit.ly/2OzDM9D">Cached C# Action instances using the observer pattern</a>
   public class Emitter : IDisposable {
     /// <a href="http://bit.ly/2OzDM9D">Retrieve an emitter from recycling or new</a>
@@ -11,7 +11,7 @@ namespace Askowl {
     private event Action Listeners = delegate { };
 
     /// <a href="http://bit.ly/2OzDM9D">The owner shoots and all the listeners hear</a>
-    public void Fire() { Listeners(); }
+    public void Fire() => Listeners();
 
     /// <a href="http://bit.ly/2OzDM9D">Ask an emitter to tell me too</a>
     public IDisposable Subscribe(IObserver observer) {
@@ -31,10 +31,11 @@ namespace Askowl {
     }
 
     /// <a href="http://bit.ly/2OzDM9D">Call when we are done with this emitter.</a> <inheritdoc />
-    public void Dispose() { Cache<Emitter>.Dispose(this); }
+    public void Dispose() => Cache<Emitter>.Dispose(this);
   }
 
   /// <a href="http://bit.ly/2OzDM9D">Cached C# Action{T} instances using the observer pattern</a> <inheritdoc cref="IObservable{T}" />
+  // ReSharper disable once ClassNeverInstantiated.Global
   public class Emitter<T> : Emitter, IObservable<T> {
     /// <a href="http://bit.ly/2OzDM9D">Retrieve an emitter from recycling or new</a>
     public new static Emitter<T> Instance => Cache<Emitter<T>>.Instance;

@@ -5,7 +5,6 @@ namespace Askowl {
   using System.Collections.Generic;
   using System.IO;
   using System.Runtime.CompilerServices;
-  using UnityEngine;
   using UnityEngine.Analytics;
 
   /// <a href="http://bit.ly/2RinksQ">Logging dirt cheap</a>
@@ -59,6 +58,14 @@ namespace Askowl {
       , extras    = $"{more}line={line},member={member}", member       = member
       };
     }
+
+    /// <a href="">Shortcut to call `Log.Debug` from anywhere</a> //#TBD#//
+    public static void Debug(
+      string                    message,
+      [CallerMemberName] string memberName = "",
+      [CallerFilePath]   string filePath   = "",
+      [CallerLineNumber] int    lineNumber = 0) =>
+      ConsoleWarning(Fill("Debug", memberName, message, filePath, lineNumber));
 
     /// <a href="http://bit.ly/2O0Z5Bu">Implementation methods get information to record in this structure</a>
     public struct Contents {
@@ -135,15 +142,15 @@ namespace Askowl {
     }
 
     private static void ConsoleMessage(Contents contents) {
-      if (ConsoleEnabled) Debug.Log(ToString(contents));
+      if (ConsoleEnabled) UnityEngine.Debug.Log(ToString(contents));
     }
 
     private static void ConsoleWarning(Contents contents) {
-      if (ConsoleEnabled) Debug.LogWarning(ToString(contents));
+      if (ConsoleEnabled) UnityEngine.Debug.LogWarning(ToString(contents));
     }
 
     private static void ConsoleError(Contents contents) {
-      if (ConsoleEnabled) Debug.LogError(ToString(contents));
+      if (ConsoleEnabled) UnityEngine.Debug.LogError(ToString(contents));
     }
 
     private static string Open(char  tag, bool set) => set ? $"<{tag}>" : "";

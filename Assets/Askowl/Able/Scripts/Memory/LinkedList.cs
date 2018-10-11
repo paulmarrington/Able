@@ -279,9 +279,7 @@ namespace Askowl {
       if (node      == node.Owner.First) { node.Owner.First = node.Next; }
       else if (node == node.Owner.Last
       ) { node.Owner.Last = node.Previous; }
-      else if ((node.Previous == null)
-            && (node.Next
-             == null)) {
+      else if ((node.Previous == null) && (node.Next == null)) {
         return; // Node doesn't belong to anyone
       }
 
