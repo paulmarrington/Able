@@ -67,6 +67,13 @@ namespace Askowl {
       [CallerLineNumber] int    lineNumber = 0) =>
       ConsoleWarning(Fill("Debug", memberName, message, filePath, lineNumber));
 
+    /// <a href="">Shortcut to call `Log.Debug` from anywhere</a> //#TBD#//
+    public static void Error(
+      string                    message,
+      [CallerMemberName] string memberName = "",
+      [CallerFilePath]   string filePath   = "",
+      [CallerLineNumber] int    lineNumber = 0) => ErrorEvent(Fill("Error", memberName, message, filePath, lineNumber));
+
     /// <a href="http://bit.ly/2O0Z5Bu">Implementation methods get information to record in this structure</a>
     public struct Contents {
       /// <a href="http://bit.ly/2O0Z5Bu"></a>

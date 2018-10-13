@@ -23,6 +23,9 @@ namespace Askowl {
     /// <a href="http://bit.ly/2NTA5Ml">Number of items on the stack</a>
     public int Count { get => pointer; set => pointer = value < pointer ? value : pointer; }
 
+    /// <a href=""></a> //#TBD#//
+    public bool Empty => Count == 0;
+
     /// <a href="http://bit.ly/2NTA5Ml">Push a new entry onto the top of the stack</a>
     public T Push(T entry) {
       if (pointer >= stack.Length) {
@@ -49,13 +52,13 @@ namespace Askowl {
     }
 
     /// <a href="http://bit.ly/2NTA5Ml">Get/set the value at the top of the stack.</a>
-    public T Top { get => stack[pointer - 1]; set => stack[pointer - 1] = value; }
+    public T Top { get => Empty ? default : stack[pointer - 1]; set => stack[pointer - 1] = value; }
 
     /// <a href="http://bit.ly/2NTA5Ml">Get/set the value at second to top of the stack.</a>
     public T Next { get => stack[pointer - 2]; set => stack[pointer - 2] = value; }
 
     /// <a href="http://bit.ly/2NTA5Ml">Get/set the value at the bottom of the stack.</a>
-    public T Bottom { get => stack[0]; set => stack[0] = value; }
+    public T Bottom { get => Empty ? default : stack[0]; set => stack[0] = value; }
 
     /// <a href="http://bit.ly/2NTA5Ml">Send back to recycling</a><inheritdoc />
     public virtual void Dispose() {

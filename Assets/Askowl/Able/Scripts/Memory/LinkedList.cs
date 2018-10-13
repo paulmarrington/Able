@@ -66,10 +66,10 @@ namespace Askowl {
       /// <a href="http://bit.ly/2RhcvXR">Get a node and item either recycled or created new.</a>
       public Node GetRecycledOrNew() => Home.GetRecycledOrNew().MoveTo(Owner);
 
-      /// <a href="http://bit.ly/2NXfQgH">Fetch an unused not and use it as the container for the provided new item</a>
+      /// <a href="http://bit.ly/2NXfQgH">Fetch an unused node and use it as the container for the provided new item</a>
       public Node Push(T t) => Home.Push(item: t).MoveTo(Owner);
 
-      /// <a href="http://bit.ly/2OvNqd4">Fetch an unused not and use it as the container for the provided new item</a>
+      /// <a href="http://bit.ly/2OvNqd4">Fetch an unused node and use it as the container for the provided new item</a>
       public Node Add(T t) => Home.Add(item: t).MoveTo(Owner);
     }
 
