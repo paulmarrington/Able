@@ -15,11 +15,12 @@
 
     /// <a href="http://bit.ly/2Rk1o06">Many labels</a>
     public LabelsAttribute(params string[] labels) {
-      for (var i = 0; i < labels.Length; i++) this.labels.Add(labels[i]);
+      for (var i = 0; i < labels.Length; i+=2) this.labels.Add(labels[i], labels[i+1]);
     }
 
     /// <a href="http://bit.ly/2Rk1o06">Make the switch in the Inspector</a>
-    public void Change(GUIContent guiLabel) =>
-      guiLabel.text = labels[guiLabel.text].Found ? labels.Value.ToString() : label ?? guiLabel.text;
+    public void Change(GUIContent guiLabel) => guiLabel.text = labels[guiLabel.text].Found
+      ? labels.Value?.ToString() ?? label ?? guiLabel.text
+      : label                    ?? guiLabel.text;
   }
 }

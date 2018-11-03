@@ -12,6 +12,11 @@ namespace Askowl {
 
     private readonly ArrayList keys = new ArrayList();
 
+    /// <a href=""></a> //#TBD#//
+    public static Map Instance => Cache<Map>.Instance;
+
+    internal Map CreateItem() => new Map { cached = true };
+
     /// <a href="http://bit.ly/2NUH9Io">Remove an entry, optionally calling Dispose()</a>
     // ReSharper disable once UnusedMethodReturnValue.Global
     public Map Remove(object key, bool dispose = true) {
@@ -81,21 +86,37 @@ namespace Askowl {
 
     /// <a href="http://bit.ly/2NUH9Io">Remove all entries - calling Dispose() on each one</a>
     public virtual void Dispose() {
-      for (var i = 0; i < Count; i++) (map[keys[i]] as IDisposable)?.Dispose();
-      keys.Clear();
-      map.Clear();
-      index.Dispose();
+      if (cached) { Cache<Map>.Dispose(this); }
+      else { DeactivateItem(this); }
+    }
+
+    internal static void DeactivateItem(Map item) {
+      for (var i = 0; i < item.Count; i++) (item.map[item.keys[i]] as IDisposable)?.Dispose();
+      item.keys.Clear();
+      item.map.Clear();
+      item.index.Dispose();
+    }
+
+    /// <a href=""></a> //#TBD#//
+    public Dictionary<string, Tv> ToDictionary<Tv>() where Tv : class {
+      using (this) {
+        var dictionary = new Dictionary<string, Tv>();
+
+        for (var key = First; key != null; key = Next) dictionary[key.ToString()] = this[key].Value as Tv;
+        return dictionary;
+      }
     }
 
     /// <inheritdoc />
     public override string ToString() {
       (builder ?? (builder = new List<string>())).Clear();
 
-      for (var key = First; key != null; key = Next) builder.Add($"{key}={Value}");
+      for (var key = First; key != null; key = Next) builder.Add($"{key}={this[key].Value}");
 
       return string.Join(separator: ", ", value: builder.ToArray());
     }
 
     private List<string> builder;
+    private bool         cached;
   }
 }

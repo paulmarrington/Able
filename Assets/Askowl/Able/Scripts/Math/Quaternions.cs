@@ -29,7 +29,7 @@ namespace Askowl {
         il *= additiveConstant + factor * (lengthSquared - neighborhood);
       }
 
-      if (count > 3) Debug.LogWarning($"Normalise for {q}, sql {lengthSquared} had {count} iterations");
+      if (count > 4) Debug.LogWarning($"Normalise for {q}, sql {lengthSquared} had {count} iterations");
 
       return new Quaternion(q.x * il, q.y * il, q.z * il, q.w * il);
     }

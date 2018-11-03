@@ -6,6 +6,8 @@ description: Askowl Base Library Enabler
 
 * Table of Contents
 {:toc}
+
+
 ## Executive Summary
 
 `Able` has scripts needed by other ***Askowl*** libraries.
@@ -20,6 +22,27 @@ For Unity3D support view scripts to aid testing, locate components and game obje
 ## Introduction
 
 Unity provides lots of great functionality, but always more problems than solutions. The solutions documented here were to solve problems in other Askowl libraries. They stand on their own when simple is not so simple. I have divided the scripts into four sections for Math, Data, Text and Unity.
+
+Code compiled and tested in ***Unity3D 2018.3.0b1*** with C# set to `.NET 4.x Equivalent`
+
+## Running the Able Integrity Tests
+
+Loading the ***Able*** unity packages is all that is required to use any of the library functions. To run the Able unit tests requires a little more setup.
+
+1. Open the scene *Assets/Askowl/Able/Examples/Askowl-Able-Examples*
+   1. Select menu *File // Build Settings...* and;
+   2. Press the *Add Open Scenes* button.
+2. Press button *Player Settings...* on the bottom left of the build settings form then;
+   1. Scroll down the Inspector window to the *Scripting Define Symbols* entry and;
+   2. Enter *;Able;AskowlAble* to the end of the string.
+   3. Select menu *File // Save*
+      1. `;Askowl` will be added to the *Scripting Define Symbols*
+3. Choose menu *Assets // Reimport All* and wait for the editor reload
+4. Use the menu *Window // General // Test Runner* and;
+   1. Press the *Edit Mode* button
+   2. Press the *Run All* button
+   3. Press the *Run Mode* button
+
 ## Maths functions
 
 ### Clock.cs - time & date conversions

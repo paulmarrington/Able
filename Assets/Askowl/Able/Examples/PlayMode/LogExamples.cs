@@ -1,14 +1,14 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
 #if AskowlAble
-using System.Collections;
-using System.Text.RegularExpressions;
-using Askowl.RichText;
-using UnityEngine;
-using UnityEngine.Assertions;
-using UnityEngine.TestTools;
-
 namespace Askowl.Examples {
+  using System.Collections;
+  using System.Text.RegularExpressions;
+  using Askowl.RichText;
+  using UnityEngine;
+  using UnityEngine.Assertions;
+  using UnityEngine.TestTools;
+
   /// Using <see cref="Log" /><inheritdoc />
   public class LogExamples : PlayModeTests {
     private const  string              sceneName = "Askowl-Able-Examples";
@@ -19,8 +19,7 @@ namespace Askowl.Examples {
     private static Log.EventRecorder   error     = Log.Errors();
 
     /// Using <see cref="Log.Messages"/>
-    [UnityTest]
-    public IEnumerator Messages() {
+    [UnityTest] public IEnumerator Messages() {
       yield return LoadScene(sceneName);
 
       LogAssert.Expect(LogType.Log, new Regex("Run Away: .* result=all is well.*line=.*,member="));
@@ -28,8 +27,7 @@ namespace Askowl.Examples {
     }
 
     /// Using <see cref="Log.Events"/>
-    [UnityTest]
-    public IEnumerator Events() {
+    [UnityTest] public IEnumerator Events() {
       yield return LoadScene(sceneName);
 
       LogAssert.Expect(LogType.Log, new Regex("Lost Health: .* result=fell down well"));
@@ -37,8 +35,7 @@ namespace Askowl.Examples {
     }
 
     /// Using <see cref="Log.Warnings"/>
-    [UnityTest]
-    public IEnumerator Warnings() {
+    [UnityTest] public IEnumerator Warnings() {
       yield return LoadScene(sceneName);
 
       LogAssert.Expect(LogType.Warning, new Regex("Warning: .* result=Too many objects"));
@@ -46,8 +43,7 @@ namespace Askowl.Examples {
     }
 
     /// Using <see cref="Log.Errors"/>
-    [UnityTest]
-    public IEnumerator Errors() {
+    [UnityTest] public IEnumerator Errors() {
       yield return LoadScene(sceneName);
 
       LogAssert.Expect(LogType.Error, new Regex("Error: .* result=we should never get here"));
@@ -55,8 +51,7 @@ namespace Askowl.Examples {
     }
 
     /// Using <see cref="Log.Extras(object[])"/>
-    [UnityTest]
-    public IEnumerator More() {
+    [UnityTest] public IEnumerator More() {
       yield return LoadScene(sceneName);
 
       string more = Log.Extras(new object[] { "count=", 1, "hello=", "world", "one", "two" });
@@ -64,8 +59,7 @@ namespace Askowl.Examples {
     }
 
     /// Using <see cref="Log.ToDictionary"/>
-    [UnityTest]
-    public IEnumerator ToDictionary() {
+    [UnityTest] public IEnumerator ToDictionary() {
       yield return LoadScene(sceneName);
 
       var dictionary = Log.ToDictionary(
@@ -76,15 +70,14 @@ namespace Askowl.Examples {
       Assert.IsTrue(dictionary.ContainsKey("action"));
       Assert.AreEqual("Act Now", dictionary["action"]);
       Assert.AreEqual("Success", dictionary["result"]);
-      Assert.AreEqual(1,         dictionary["count"]);
+      Assert.AreEqual("1",       dictionary["count"]);
       Assert.AreEqual("world",   dictionary["hello"]);
       Assert.IsTrue(dictionary.ContainsKey("one"));
       Assert.IsTrue(dictionary.ContainsKey("two"));
     }
 
     /// Using <see cref="Log.ConsoleEnabled"/>
-    [UnityTest]
-    public IEnumerator ConsoleEnabled() {
+    [UnityTest] public IEnumerator ConsoleEnabled() {
       yield return LoadScene(sceneName);
 
       Log.ConsoleEnabled = false;
@@ -94,8 +87,7 @@ namespace Askowl.Examples {
     }
 
     /// Using <see cref="Log.Actions"/>
-    [UnityTest]
-    public IEnumerator Actions() {
+    [UnityTest] public IEnumerator Actions() {
       yield return LoadScene(sceneName);
 
       LogAssert.Expect(LogType.Warning, new Regex("<b><i><color=maroon>TO-BE-DONE</color></i></b>: .* result=TBD"));
@@ -103,8 +95,7 @@ namespace Askowl.Examples {
     }
 
     /// Using <see cref="Log.Action"/>
-    [UnityTest]
-    public IEnumerator NextAction() {
+    [UnityTest] public IEnumerator NextAction() {
       yield return LoadScene(sceneName);
 
       Log.Actions.Add("deleteme", Log.Action("Delete Me", Colour.Aqua, bold: true, italics: true));

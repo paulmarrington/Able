@@ -18,6 +18,21 @@ namespace Askowl.Examples {
       actual   = Csv.ToString(new[] { "One", "Two", "Three", "Four", "Five" });
       Assert.AreEqual(expected, actual);
     }
+
+    [Test] public void ToMap() {
+      var csv = @"""a"",'b','c'='23',d='com,ma',e=""eee"",count=1,hello=world,one,two";
+      Map map = Csv.ToMap(csv);
+      Assert.IsTrue(map["a"].Found);
+      Assert.IsTrue(map["b"].Found);
+      Assert.AreEqual("23",     map["c"].Value);
+      Assert.AreEqual("com,ma", map["d"].Value);
+      Assert.AreEqual("eee",    map["e"].Value);
+      Assert.AreEqual("1",      map["count"].Value);
+      Assert.AreEqual("world",  map["hello"].Value);
+      Assert.IsTrue(map["one"].Found);
+      Assert.IsTrue(map["two"].Found);
+      Assert.IsFalse(map["three"].Found);
+    }
   }
 }
 #endif

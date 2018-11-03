@@ -61,8 +61,7 @@ namespace Askowl.Examples {
     }
 
     static LinkedListExamples() {
-      LinkedList<SealedClassProcessed>.CreateItemStatic =
-        () => new SealedClassProcessed { State = "CreateItem" };
+      LinkedList<SealedClassProcessed>.CreateItemStatic = () => new SealedClassProcessed { State = "CreateItem" };
 
       LinkedList<SealedClassProcessed>.DeactivateItemStatic = (seal) => seal.Item.State =  " DeactivateItem";
       LinkedList<SealedClassProcessed>.ReactivateItemStatic = (seal) => seal.Item.State += " ReactivateItem";
@@ -569,7 +568,7 @@ namespace Askowl.Examples {
       var list  = new LinkedList<int>("NodePull");
       var node0 = list.Add(123);
       var node1 = list.Add(456);
-      var node2 = list.Pop();
+      var node2 = list.Pull();
       Assert.AreEqual(node0.Item, node2.Item);
       Assert.IsNotNull(list.RecycleBin);
     }

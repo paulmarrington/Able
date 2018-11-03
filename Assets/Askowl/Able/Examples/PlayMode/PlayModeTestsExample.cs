@@ -27,7 +27,7 @@ namespace Askowl.Examples {
       var buttonTwo = Component<RectTransform>("Canvas//Button Two");
       Assert.IsNotNull(buttonTwo);
 
-      LogAssert.Expect(LogType.Assert, new Regex(@".*For button 'Nonsense..Button Fifty-Five'.*"));
+      LogAssert.Expect(LogType.Assert, new Regex(@".*'Nonsense//Button Fifty-Five' not found.*"));
       buttonTwo = Component<RectTransform>("Nonsense//Button Fifty-Five");
       Assert.IsNull(buttonTwo);
     }
@@ -61,7 +61,7 @@ namespace Askowl.Examples {
     [UnityTest] public IEnumerator PushButton() {
       yield return LoadScene("Askowl-Able-Examples");
 
-      LogAssert.Expect(LogType.Assert, new Regex(@".*For button 'Button 2367'.*"));
+      LogAssert.Expect(LogType.Assert, new Regex(@".*'Button 2367' not found.*"));
       yield return PushButton("Button 2367");
     }
 

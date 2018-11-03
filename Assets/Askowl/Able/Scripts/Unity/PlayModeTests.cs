@@ -16,8 +16,7 @@ namespace Askowl {
      * LogAssert.Expect(LogType, Regex);
      */
 
-    /// <a href="http://bit.ly/2NZZYKj">Load scene. Assert on failure</a>
-    /// <inheritdoc />
+    /// <a href="http://bit.ly/2NZZYKj">Load scene. Assert on failure</a> <inheritdoc />
     protected override IEnumerator LoadScene(string name) {
       yield return base.LoadScene(name);
 
@@ -27,7 +26,7 @@ namespace Askowl {
     /// <a href="http://bit.ly/2NTezHo">Components.Find, assert on failure</a>
     protected static T Component<T>(string path) where T : Component {
       var component = Components.Find<T>(path);
-      Assert.IsNotNull(value: component, message: $"For '{path}'");
+      Assert.IsNotNull(value: component, message: $"'{path}' not found");
       return component;
     }
 

@@ -109,26 +109,14 @@ namespace Askowl {
     private static char[] trimCharacters = { ',', ' ' };
 
     /// <a href="Log Parameter Formatting">Log formatting for extra data</a>
-    public static Dictionary<string, object> ToDictionary(Contents contents) {
-      var dictionary = new Dictionary<string, object> {
-        { "component", contents.component }, { "action", contents.action }, { "result", contents.result }
-      , { "member", contents.member }
-      };
+    public static Map ToMap(Contents contents) => Csv.ToMap(contents.extras)
+                                                     .Add("component", contents.component)
+                                                     .Add("action",    contents.action)
+                                                     .Add("result",    contents.result)
+                                                     .Add("member",    contents.member);
 
-      for (var i = 0; i < contents.extras.Length; i++) {
-        string key   = contents.extras[i].ToString();
-        object value = null;
-
-        if (key.EndsWith("=")) {
-          key   = key.Substring(0, key.Length - 1);
-          value = contents.extras[++i];
-        }
-
-        dictionary[key] = value;
-      }
-
-      return dictionary;
-    }
+    /// <a href="Log Parameter Formatting">Log formatting for extra data</a>
+    public static Dictionary<string, object> ToDictionary(Contents contents) => ToMap(contents).ToDictionary<object>();
     #endregion
 
     #region Console Log Consumer
