@@ -3,10 +3,10 @@
 #if AskowlAble
 namespace Askowl.Examples {
   using NUnit.Framework;
+  using UnityEngine;
 
   public class ExponentialMovingAverageExamples {
-    [Test]
-    public void AverageValue() {
+    [Test] public void AverageValue() {
       var ema = new ExponentialMovingAverage(lookBack: 4);
 
       AreEqual(expected: 1f,      actual: ema.Average(value: 1));
@@ -25,8 +25,7 @@ namespace Askowl.Examples {
       AreEqual(expected: 4f,        actual: ema.Average(value: 4));
     }
 
-    [Test]
-    public void AverageAngle() {
+    [Test] public void AverageAngle() {
       var ema = new ExponentialMovingAverage(); // look-back defaults to 8
 
       AreEqual(expected: -10f,       actual: ema.AverageAngle(degrees: -10));
@@ -39,6 +38,15 @@ namespace Askowl.Examples {
 
     private void AreEqual(float expected, float actual) {
       Assert.IsTrue(Compare.AlmostEqual(expected, actual), $"Expected {expected}, Actual {actual}");
+    }
+
+    [Test] public void Example() {
+      var ema = new ExponentialMovingAverage();
+      var sum = 0;
+      for (var i = 1; i <= 20; i++) {
+        float sma = (float) (sum += i) / i;
+        Debug.Log($"{i,2}: sma={sma:n2}\tema={ema.Average(i):n2}");
+      }
     }
   }
 }

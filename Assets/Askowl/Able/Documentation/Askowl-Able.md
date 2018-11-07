@@ -2,11 +2,11 @@
 title: Able for Unity3D
 description: Askowl Base Library Enabler
 ---
-# [Able - Askowl Base Library Enabler](https://paulmarrington.github.io/Unity-Documentation/Able/Doxygen/html/annotated.html)
+# [Able - Askowl Base Library Enabler](https://assetstore.unity.com/packages/slug/131162)
 
 * Table of Contents
 {:toc}
-
+Download from the [Unity Store](https://assetstore.unity.com/packages/slug/131162)
 
 ## Executive Summary
 
@@ -148,7 +148,7 @@ Financial calculations often make use of EMA. So does IoT code. Many devices can
 The purest form is to create a new EMA object without parameters.
 
 ```c#
-var ema = new ExponentialMovingAverage(); // lookback defaults to 8
+var ema = new ExponentialMovingAverage(); // lookback defaults to 9
 ```
 
 As the comment says, the average is over the last 8 values plus the new one. You can set your own.
