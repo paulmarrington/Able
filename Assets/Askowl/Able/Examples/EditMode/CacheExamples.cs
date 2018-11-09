@@ -7,10 +7,18 @@ using NUnit.Framework;
 // ReSharper disable UnusedMember.Local
 
 namespace Askowl.Examples {
+  using UnityEngine;
+
   public class CacheExamples {
     #region Working Data
     public sealed class AgnosticClass {
       public string State { get; set; } = "New";
+    }
+
+    [Test] public void Example() {
+      var myClass = Cache<AgnosticClass>.Instance;
+      using (Cache<AgnosticClass>.Disposable(myClass)) { myClass.State = "Used"; }
+      Debug.Log(myClass.State);
     }
 
     public sealed class AgnosticClassProcessed {
