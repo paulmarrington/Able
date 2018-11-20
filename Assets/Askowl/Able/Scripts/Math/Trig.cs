@@ -4,9 +4,9 @@ using System;
 using UnityEngine;
 
 namespace Askowl {
-  /// <a href="http://bit.ly/2Oq9tC2">Trigonometry Rocks</a> <inheritdoc />
-  public class Trig : MonoBehaviour {
-    /// <a href="http://bit.ly/2Rinqkc">Define axes</a>
+  /// <a href="http://bit.ly/2Oq9tC2">Trigonometry is about the lengths and angles of triangles.</a>
+  public static class Trig {
+    /// <a href="http://bit.ly/2Rinqkc">For our spatial work we also need to know which side and the direction of travel</a>
     public class Direction {
       /// <a href="http://bit.ly/2OpRewA">Ordinal or order where x=0, y=1 and z=2. Useful to match to Vector2/3</a>
       public readonly int Ord;

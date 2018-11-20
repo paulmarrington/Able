@@ -11,7 +11,7 @@ namespace Askowl {
       return rotateBy * q;
     }
 
-    /// <a href="http://bit.ly/2RhLC63">The inverse used when the Quaternion is a rotation - and is the reverse rotation. In other words apply rotation then apply inverse and nothing will have changed.</a>
+    /// <a href="http://bit.ly/2RhLC63">Inverse reversed the rotation component of a quaternion.</a>
     public static Quaternion Inverse(this Quaternion q) => Quaternion.Inverse(q);
 
     /// <a href="http://bit.ly/2RezLWq">The concept of length or magnitude for a quaternion has no visual representation when dealing with attitude or rotation. The catch is that most algorithms require unit quaternions - where the length squared will approach one.</a>
@@ -47,7 +47,7 @@ namespace Askowl {
       return q;
     }
 
-    /// <a href="http://bit.ly/2Oq9rtU">Gyro is right-handed while Unity is left-handed - so change chirality</a>
+    /// <a href="http://bit.ly/2Oq9rtU">Multiplying quaternions may make sense to mathematicians, but to the rest of is RotateBy is clearer</a>
     public static Quaternion RotateBy(this Quaternion q, Quaternion attitude) => attitude * q;
 
     /// <a href="http://bit.ly/2Os3WLf">One person's left is another person's up. More importantly the gyroscope in the phone sees forward as the Z axis while Unity likes to use Y for that. This function also changes the chirality (handedness).</a>
