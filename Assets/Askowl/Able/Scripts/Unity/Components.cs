@@ -48,10 +48,7 @@ namespace Askowl {
     }
 
     /// <a href="http://bit.ly/2Oo6eer">Create an instance of a component</a>
-    public static T Create<T>(string path) where T : Component {
-      GameObject gameObject = Objects.CreateGameObject(path);
-      return gameObject.AddComponent<T>();
-    }
+    public static T Create<T>(string path) where T : Component => Objects.CreateGameObject(path).AddComponent<T>();
 
     /// <a href="http://bit.ly/2RhMbN5">Find or create a component</a>
     public static T Establish<T>(string path) where T : Component => Find<T>(path) ?? Create<T>(path);

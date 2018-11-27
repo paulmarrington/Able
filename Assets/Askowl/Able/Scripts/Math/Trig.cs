@@ -1,9 +1,9 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-using System;
-using UnityEngine;
-
 namespace Askowl {
+  using System;
+  using UnityEngine;
+
   /// <a href="http://bit.ly/2Oq9tC2">Trigonometry is about the lengths and angles of triangles.</a>
   public static class Trig {
     /// <a href="http://bit.ly/2Rinqkc">For our spatial work we also need to know which side and the direction of travel</a>

@@ -14,15 +14,13 @@ namespace Askowl {
 
     /// <a href="http://bit.ly/2RhLCD5">Find all game objects by name and presence of a type of component</a>
     public static T[] FindAll<T>(string name) where T : Object {
-      var all     = Resources.FindObjectsOfTypeAll<T>();
-      var results = new List<T>();
-
+      var all = Resources.FindObjectsOfTypeAll<T>();
       if (string.IsNullOrEmpty(name)) return all;
 
+      var results = Lists<T>.Local;
       for (var i = 0; i < all.Length; i++) {
         if (all[i].name == name) results.Add(all[i]);
       }
-
       return results.ToArray();
     }
 
