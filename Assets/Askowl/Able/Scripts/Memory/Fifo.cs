@@ -26,6 +26,9 @@ namespace Askowl {
     /// <a href=""></a> //#TBD#//
     public bool Empty => Count == 0;
 
+    /// <a href=""></a> //#TBD#//
+    public Action OnPush = delegate { };
+
     /// <a href="http://bit.ly/2NTA5Ml">Push a new entry onto the top of the stack</a>
     public T Push(T entry) {
       if (pointer >= stack.Length) {
@@ -34,7 +37,9 @@ namespace Askowl {
         Array.Copy(old, stack, old.Length);
       }
 
-      return stack[pointer++] = entry;
+      stack[pointer++] = entry;
+      OnPush();
+      return entry;
     }
 
     /// <a href="http://bit.ly/2NTA5Ml">Pop an entry from the top of the stack</a>
