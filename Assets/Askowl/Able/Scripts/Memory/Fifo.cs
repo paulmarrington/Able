@@ -35,14 +35,13 @@ namespace Askowl {
       }
 
       stack[pointer++] = entry;
-      if (pointer == 1) notEmpty?.Fire();
       return entry;
     }
 
     /// <a href="http://bit.ly/2NTA5Ml">Pop an entry from the top of the stack</a>
     // ReSharper disable once VirtualMemberNeverOverridden.Global
 //    public virtual T Pop() => pointer == 0 ? default : stack[--pointer];
-    public virtual T Pop() { return pointer == 0 ? default : stack[--pointer]; }
+    public virtual T Pop() => pointer == 0 ? default : stack[--pointer];
 
     private static int nextId;
     private        int id = ++nextId;
@@ -72,10 +71,6 @@ namespace Askowl {
       pointer = 0;
       Cache<Fifo<T>>.Dispose(this);
     }
-
-    /// <a href=""></a> //#TBD#//
-    public Emitter NotEmpty => notEmpty ?? (notEmpty = Emitter.Instance);
-    private Emitter notEmpty;
 
     /// <a href=""></a> //#TBD#//
     public override string ToString() => $"{typeof(T)}-{id}:{pointer}";

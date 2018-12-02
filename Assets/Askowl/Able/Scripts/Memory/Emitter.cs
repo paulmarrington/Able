@@ -2,7 +2,6 @@
 
 namespace Askowl {
   using System;
-  using UnityEngine;
 
   /// <a href="http://bit.ly/2OzDM9D">Cached C# Action instances using the observer pattern</a>
   public class Emitter : IDisposable {
@@ -14,7 +13,6 @@ namespace Askowl {
 
     /// <a href="http://bit.ly/2OzDM9D">The owner shoots and all the listeners hear</a>
     public void Fire() {
-      Debug.Log($"**** Fire {listeners}"); //#DM#//
       for (var idx = 0; idx < listeners.Count; idx++) listeners[idx]();
     }
 
@@ -26,7 +24,6 @@ namespace Askowl {
 
     /// <a href="http://bit.ly/2OzDM9D">Call when we are done with this emitter.</a> <inheritdoc />
     public void Dispose() {
-      Debug.Log($"**** Dispose {listeners}"); //#DM#//
       listeners.Dispose();
       Cache<Emitter>.Dispose(this);
     }

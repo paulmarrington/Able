@@ -4,8 +4,6 @@
 
 namespace Askowl {
   using System;
-  using System.Collections;
-  using System.Collections.Generic;
   using System.Reflection;
   using System.Text;
   using UnityEngine;
@@ -109,9 +107,7 @@ namespace Askowl {
     private static Func<T> GetDefaultCreateItem() {
       var flags = BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
 
-      var method = typeof(T).GetMethod(
-        "CreateItem", flags, null, CallingConventions.Standard,
-        Type.EmptyTypes, null);
+      var method = typeof(T).GetMethod("CreateItem", flags, null, CallingConventions.Standard, Type.EmptyTypes, null);
 
       if (method != null) return () => (T) method.Invoke(null, null);
 
@@ -279,11 +275,8 @@ namespace Askowl {
 
     private void Unlink(Node node) {
       if (node      == node.Owner.First) { node.Owner.First = node.Next; }
-      else if (node == node.Owner.Last
-      ) { node.Owner.Last = node.Previous; }
-      else if ((node.Previous == null) && (node.Next == null)) {
-        return; // Node doesn't belong to anyone
-      }
+      else if (node == node.Owner.Last) { node.Owner.Last   = node.Previous; }
+      else if ((node.Previous == null) && (node.Next == null)) return;
 
       node.Owner.Count--;
 
