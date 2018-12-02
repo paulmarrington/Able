@@ -2,36 +2,34 @@
 
 namespace Askowl {
   using System;
+  using UnityEngine;
 
   /// <a href="http://bit.ly/2OzDM9D">Cached C# Action instances using the observer pattern</a>
   public class Emitter : IDisposable {
     /// <a href="http://bit.ly/2OzDM9D">Retrieve an emitter from recycling or new</a>
+//    public static Emitter Instance => Cache<Emitter>.Instance;
     public static Emitter Instance => Cache<Emitter>.Instance;
 
-    private event Action Listeners = delegate { };
+    private Fifo<Action> listeners = new Fifo<Action>();
 
     /// <a href="http://bit.ly/2OzDM9D">The owner shoots and all the listeners hear</a>
-    public void Fire() => Listeners();
-
-    /// <a href="http://bit.ly/2OzDM9D">Ask an emitter to tell me too</a>
-    public IDisposable Subscribe(IObserver observer) {
-      Action listener = observer.OnNext;
-      Listeners += listener;
-      var disposed = false;
-
-      return new Disposable {
-        Action = () => {
-          if (disposed) return;
-
-          disposed  =  true;
-          Listeners -= listener;
-          observer.OnCompleted();
-        }
-      };
+    public void Fire() {
+      Debug.Log($"**** Fire {listeners}"); //#DM#//
+      for (var idx = 0; idx < listeners.Count; idx++) listeners[idx]();
     }
 
+    /// <a href="http://bit.ly/2OzDM9D">Ask an emitter to tell me too</a>
+    public void Subscribe(IObserver observer) { listeners.Push(observer.OnNext); }
+
+    /// <a href="http://bit.ly/2OzDM9D">Ask an emitter to tell me too</a>
+    public void Subscribe(Action action) { listeners.Push(action); }
+
     /// <a href="http://bit.ly/2OzDM9D">Call when we are done with this emitter.</a> <inheritdoc />
-    public void Dispose() => Cache<Emitter>.Dispose(this);
+    public void Dispose() {
+      Debug.Log($"**** Dispose {listeners}"); //#DM#//
+      listeners.Dispose();
+      Cache<Emitter>.Dispose(this);
+    }
   }
 
   /// <a href="http://bit.ly/2OzDM9D">Cached C# Action{T} instances using the observer pattern</a> <inheritdoc cref="IObservable{T}" />

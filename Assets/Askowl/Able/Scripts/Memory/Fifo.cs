@@ -12,7 +12,7 @@ namespace Askowl {
     private void DeactivateItem() { pointer = 0; }
 
     /// <a href="http://bit.ly/2NTA5Ml">Raw creation for subclasses that do their own caching</a>
-    protected Fifo() { }
+    public Fifo() { }
 
     /// <a href="http://bit.ly/2NTA5Ml">Fetch Fifo Stack from recycling</a>
     public static Fifo<T> Instance => Cache<Fifo<T>>.Instance;
@@ -26,11 +26,8 @@ namespace Askowl {
     /// <a href=""></a> //#TBD#//
     public bool Empty => Count == 0;
 
-    /// <a href=""></a> //#TBD#//
-    public Action OnPush = delegate { };
-
     /// <a href="http://bit.ly/2NTA5Ml">Push a new entry onto the top of the stack</a>
-    public T Push(T entry) {
+    public virtual T Push(T entry) {
       if (pointer >= stack.Length) {
         var old = stack;
         stack = new T[old.Length * 2];
@@ -38,13 +35,17 @@ namespace Askowl {
       }
 
       stack[pointer++] = entry;
-      OnPush();
+      if (pointer == 1) notEmpty?.Fire();
       return entry;
     }
 
     /// <a href="http://bit.ly/2NTA5Ml">Pop an entry from the top of the stack</a>
     // ReSharper disable once VirtualMemberNeverOverridden.Global
-    public virtual T Pop() => pointer == 0 ? default : stack[--pointer];
+//    public virtual T Pop() => pointer == 0 ? default : stack[--pointer];
+    public virtual T Pop() { return pointer == 0 ? default : stack[--pointer]; }
+
+    private static int nextId;
+    private        int id = ++nextId;
 
     /// <a href="http://bit.ly/2NTA5Ml">Swap the top and second entries on the stack</a>
     public Fifo<T> Swap() {
@@ -71,5 +72,12 @@ namespace Askowl {
       pointer = 0;
       Cache<Fifo<T>>.Dispose(this);
     }
+
+    /// <a href=""></a> //#TBD#//
+    public Emitter NotEmpty => notEmpty ?? (notEmpty = Emitter.Instance);
+    private Emitter notEmpty;
+
+    /// <a href=""></a> //#TBD#//
+    public override string ToString() => $"{typeof(T)}-{id}:{pointer}";
   }
 }

@@ -2,31 +2,35 @@
 
 #if UNITY_EDITOR && Able
 
-using System;
-using NUnit.Framework;
+namespace Askowl.Examples {
+  using System;
+  using NUnit.Framework;
 
-namespace Askowl.Examples { //#TBD#
   public class EmitterExamples {
-    [Test] public void ObserverPatternUsing() {
+    [Test] public void ObserverEmitter() {
       counter = 0;
 
       var emitter = new Emitter();
 
-      using (emitter.Subscribe(new Observer1())) {
-        using (emitter.Subscribe(new Observer2())) {
-          Assert.AreEqual(expected: 0, actual: counter);
-          emitter.Fire();
-          Assert.AreEqual(expected: 3, actual: counter);
-          emitter.Fire();
-          Assert.AreEqual(expected: 6, actual: counter);
-        }
-      }
-
-      // Each has run OnCompleted
-      Assert.AreEqual(expected: 4, actual: counter);
+      emitter.Subscribe(new Observer1());
+      emitter.Subscribe(new Observer2());
+      Assert.AreEqual(expected: 0, actual: counter);
+      emitter.Fire();
+      Assert.AreEqual(expected: 3, actual: counter);
+      emitter.Fire();
+      Assert.AreEqual(expected: 6, actual: counter);
     }
 
-    [Test] public void ObserverT() {
+    [Test] public void ActionEmitter() {
+      var emitter = new Emitter();
+      void action() { counter++; }
+      emitter.Subscribe(action);
+      Assert.AreEqual(expected: 0, actual: counter);
+      emitter.Fire();
+      Assert.AreEqual(expected: 1, actual: counter);
+    }
+
+    [Test] public void ObserverTEmitter() {
       counter = 0;
 
       var emitter = new Emitter<int>();
@@ -43,32 +47,6 @@ namespace Askowl.Examples { //#TBD#
       Assert.AreEqual(expected: 8, actual: counter);
       // Last value broadcast
       Assert.AreEqual(expected: 9, actual: emitter.LastValue);
-    }
-
-    [Test] public void ObserverPatternAbort() {
-      counter = 0;
-
-      var emitter = new Emitter();
-
-      using (var subscription = emitter.Subscribe(new Observer1())) {
-        // we now have one subscription
-        Assert.AreEqual(expected: 0, actual: counter);
-        // Tell observers we have something for them
-        emitter.Fire();
-        // The observer changes the value
-        Assert.AreEqual(expected: 1, actual: counter);
-        // A manual call to Dispose will stop the observer listening ...
-        subscription.Dispose();
-        // ... and calls OnComplete that in this case sets count to zero
-        Assert.AreEqual(expected: 0, actual: counter);
-        // Now if we fire...
-        emitter.Fire(); // not listening any more
-        // ... the counter doesn't change because we have no observers
-        Assert.AreEqual(expected: 0, actual: counter);
-      }
-
-      // Outside the using - and Dispose was called implicitly but OnComplete was not called again
-      Assert.AreEqual(expected: 0, actual: counter);
     }
 
     private struct Observer1 : IObserver {
