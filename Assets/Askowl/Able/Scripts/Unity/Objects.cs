@@ -7,13 +7,13 @@ namespace Askowl {
   /// <a href="http://bit.ly/2NW3mGj">Static Object Helpers</a>
   public static class Objects {
     /// <a href="http://bit.ly/2NZbbe8">Find a game object by name and presence of a type of component</a>
-    public static T Find<T>(string name) where T : Object {
+    public static T Find<T>(string name = "") where T : Object {
       var objects = FindAll<T>(name);
       return objects.Length > 0 ? objects[0] : null;
     }
 
     /// <a href="http://bit.ly/2RhLCD5">Find all game objects by name and presence of a type of component</a>
-    public static T[] FindAll<T>(string name) where T : Object {
+    public static T[] FindAll<T>(string name = "") where T : Object {
       var all = Resources.FindObjectsOfTypeAll<T>();
       if (string.IsNullOrEmpty(name)) return all;
 
