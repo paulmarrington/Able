@@ -1,5 +1,6 @@
 ﻿//- If you are developing for augmented reality over distances larger than a room then you will be using GPS, Compass/Magnetometer and other instruments for location and direction. Any calculation for direction and distance between two or more points will need to take into account the curvature of the earth's surface. The branch of mathematics for these calculations is called Geodesy. Able provides a set of basic calculations in the Geodetic class.
 
+#if UNITY_EDITOR && Able
 namespace Askowl.Examples {
   using NUnit.Framework;
 
@@ -11,7 +12,7 @@ namespace Askowl.Examples {
       var to = Geodetic.Coords(latitude: -0.47941664, longitude: 2.65191906, radians: true);
       //- The calculations below don't need to know which form is used. We can always convert it ourselves
       from = from.ToRadians();
-      to   = to.ToDegrees();
+      to = to.ToDegrees();
       //- Now we have two coordinates we can calculate how far apart they are
       double metresApart = Geodetic.Kilometres(from, to) * 1000;
       //- or use the human readable form which will use meters or km as needed
@@ -25,3 +26,4 @@ namespace Askowl.Examples {
     }
   }
 }
+#endif
