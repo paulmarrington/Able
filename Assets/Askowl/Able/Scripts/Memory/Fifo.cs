@@ -1,15 +1,17 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-namespace Askowl {
-  using System;
+using System;
 
+namespace Askowl {
   /// <a href="http://bit.ly/2NTA5Ml">Intentionally simple stack implementation</a>
   public class Fifo<T> : IDisposable {
     private T[] stack = new T[8];
     private int pointer;
 
     // ReSharper disable once UnusedMember.Local
-    private void DeactivateItem() { pointer = 0; }
+    private void DeactivateItem() {
+      pointer = 0;
+    }
 
     /// <a href="http://bit.ly/2NTA5Ml">Raw creation for subclasses that do their own caching</a>
     public Fifo() { }
@@ -21,19 +23,17 @@ namespace Askowl {
     public T this[int i] => stack[i];
 
     /// <a href="http://bit.ly/2NTA5Ml">Number of items on the stack</a>
-    public int Count { get => pointer; set => pointer = value < pointer ? value : pointer; }
+    public int Count {
+      get => pointer;
+      set => pointer = value < pointer ? value : pointer;
+    }
 
     /// <a href=""></a> //#TBD#//
     public bool Empty => Count == 0;
 
     /// <a href="http://bit.ly/2NTA5Ml">Push a new entry onto the top of the stack</a>
     public virtual T Push(T entry) {
-      if (pointer >= stack.Length) {
-        var old = stack;
-        stack = new T[old.Length * 2];
-        Array.Copy(old, stack, old.Length);
-      }
-
+      if (pointer >= stack.Length) Array.Resize(ref stack, stack.Length * 2);
       stack[pointer++] = entry;
       return entry;
     }
@@ -53,23 +53,39 @@ namespace Askowl {
         Top  = Next;
         Next = top;
       }
+
       return this;
     }
 
     /// <a href="http://bit.ly/2NTA5Ml">Get/set the value at the top of the stack.</a>
-    public T Top { get => Empty ? default : stack[pointer - 1]; set => stack[pointer - 1] = value; }
+    public T Top {
+      get => Empty ? default : stack[pointer - 1];
+      set => stack[pointer                   - 1] = value;
+    }
 
     /// <a href="http://bit.ly/2NTA5Ml">Get/set the value at second to top of the stack.</a>
-    public T Next { get => stack[pointer - 2]; set => stack[pointer - 2] = value; }
+    public T Next {
+      get => stack[pointer - 2];
+      set => stack[pointer - 2] = value;
+    }
 
     /// <a href="http://bit.ly/2NTA5Ml">Get/set the value at the bottom of the stack.</a>
-    public T Bottom { get => Empty ? default : stack[0]; set => stack[0] = value; }
+    public T Bottom {
+      get => Empty ? default : stack[0];
+      set => stack[0] = value;
+    }
 
     /// <a href="http://bit.ly/2NTA5Ml">Send back to recycling</a><inheritdoc />
     public virtual void Dispose() {
       for (var i = 0; i < pointer; i++) (stack[i] as IDisposable)?.Dispose();
       pointer = 0;
       Cache<Fifo<T>>.Dispose(this);
+    }
+
+    /// <a href=""></a> //#TBD#//
+    public T[] ToArray() {
+      Array.Resize(ref stack, pointer);
+      return stack;
     }
 
     /// <a href=""></a> //#TBD#//

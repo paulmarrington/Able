@@ -3,6 +3,12 @@
 namespace Askowl {
   using System;
 
+  /// <a href="">Encapsulation emitting change information to multiple listeners</a> //#TBD#//
+  public interface IHasEmitter {
+    /// <a href="">Read-only reference to the emitter so we can pass changes</a> //#TBD#//
+    Emitter Emitter { get; }
+  }
+
   /// <a href="http://bit.ly/2OzDM9D">Cached C# Action instances using the observer pattern</a>
   public class Emitter : IDisposable {
     /// <a href="http://bit.ly/2OzDM9D">Retrieve an emitter from recycling or new</a>
@@ -22,10 +28,14 @@ namespace Askowl {
     public int Firings;
 
     /// <a href="http://bit.ly/2OzDM9D">Ask an emitter to tell me too</a>
-    public void Subscribe(IObserver observer) { listeners.Push(observer.OnNext); }
+    public void Subscribe(IObserver observer) {
+      listeners.Push(observer.OnNext);
+    }
 
     /// <a href="http://bit.ly/2OzDM9D">Ask an emitter to tell me too</a>
-    public void Subscribe(Action action) { listeners.Push(action); }
+    public void Subscribe(Action action) {
+      listeners.Push(action);
+    }
 
     /// <a href=""></a> //#TBD#//
     public void RemoveAllListeners() {
@@ -55,7 +65,9 @@ namespace Askowl {
     public T LastValue { get; private set; }
 
     /// <a href="http://bit.ly/2OzDM9D">The owner shoots and all the listeners hear</a>
-    public void Fire(T value) { Listeners(LastValue = value); }
+    public void Fire(T value) {
+      Listeners(LastValue = value);
+    }
 
     /// <a href="http://bit.ly/2OzDM9D">Ask an emitter to give me a reference to the value ejected</a>
     public IDisposable Subscribe(IObserver<T> observer) {
