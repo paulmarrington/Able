@@ -8,45 +8,49 @@ using UnityEngine;
 
 namespace Askowl {
   /// <a href="http://bit.ly/2NXaCSb">Create a set in the inspector and provide an interface to pick one</a> <inheritdoc cref="Pick" />
-  [Serializable]
-  // ReSharper disable once ClassWithVirtualMembersNeverInherited.Global
-  public class Set<T> : Pick<T> {
+  [Serializable] public class Set<T> : Pick<T> {
     #region Inspector Fields
 
     /// <a href="http://bit.ly/2NXaCSb">List of elements to pick from - set in the inspector</a>
-    [SerializeField] public List<T> Elements;
+    [SerializeField] private List<T> elements = default;
 
     [SerializeField, Tooltip("true for sequential, false for random")]
-    internal bool Cycle;
+    private bool cycle = false;
 
     [SerializeField, Tooltip(
        "If the list is shorter then select items randomly, but never choose one a second time until all have been picked. This is useful for short lists to reduce unexpected repeats.")]
-    internal int ExhaustiveBelow;
+    private int exhaustiveBelow = 10;
 
     #endregion
 
     #region Picker
 
-    /// <a href="http://bit.ly/2NTAqP3">Selector created to manage picking from a set</a>
-    public Set() => selector = new Selector<T>() {ExhaustiveBelow = ExhaustiveBelow, IsRandom = !Cycle};
+    /// <a href=""></a> //#TBD#// <inheritdoc />
+    public override string ToString() =>
+      $"Set {GetType().Name}: Size = {elements?.Count}, Cycle = {cycle}, Exhaustive Below = {exhaustiveBelow}";
+
+    /// <a href=""></a> //#TBD#//
+    public int InitialSize => elements?.Count ?? 0;
 
     /// <a href="http://bit.ly/2NWwH3e">Rebuild selections if we change contents</a>
-    // ReSharper disable once VirtualMemberNeverOverridden.Global
-    protected virtual Selector<T> BuildSelector() {
-      selector.Choices = Elements.ToArray();
-      return selector;
-    }
+    protected virtual void BuildSelector() => selector.Choices = elements.ToArray();
 
     /// <a href="http://bit.ly/2NTAqP3">Pick one item from many</a> <inheritdoc />
     public T Pick() => Selector.Pick();
 
     /// <a href="http://bit.ly/2NWwH3e">Remove all set entries</a>
-    public void Reset() => selector.Reset();
+    public void Reset() => Selector.Reset();
 
     /// <a href="http://bit.ly/2NTAqP3">Selector to call to get picked elements</a>
-    protected Selector<T> Selector => selector.Choices.Length == 0 ? BuildSelector() : selector;
+    protected Selector<T> Selector {
+      get {
+        if (selector == null) selector = new Selector<T>() {ExhaustiveBelow = exhaustiveBelow, IsRandom = !cycle};
+        if (selector.Choices.Length == 0 && InitialSize > 0) BuildSelector();
+        return selector;
+      }
+    }
 
-    private readonly Selector<T> selector;
+    private Selector<T> selector;
 
     #endregion
 
@@ -54,15 +58,15 @@ namespace Askowl {
 
     /// <a href="http://bit.ly/2NWwH3e">Add one entry to those open for selection</a>
     protected void Add(T entry) {
-      Elements.Add(entry);
+      elements.Add(entry);
       Reset();
     }
 
     /// <a href="http://bit.ly/2NWwH3e">Remove one entry to those open for selection</a>
     protected void Remove(T entry) {
-      if (!Elements.Contains(entry)) return;
+      if (!elements.Contains(entry)) return;
 
-      Elements.Remove(entry);
+      elements.Remove(entry);
       Reset();
     }
 
