@@ -1,6 +1,9 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
+using System;
 using System.Collections;
+using System.IO;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -12,14 +15,28 @@ namespace Askowl {
     protected Scene Scene;
 
     /// <a href="http://bit.ly/2NZbbe8">Load a scene by name (must be in build)</a>
-    protected virtual IEnumerator LoadScene(string name) {
-      var handle = SceneManager.LoadSceneAsync(sceneName: name, mode: LoadSceneMode.Single);
+    protected virtual IEnumerator LoadScene(string path) {
+      var handle = SceneManager.LoadSceneAsync(sceneName: path, mode: LoadSceneMode.Single);
+      if (handle == null) yield break;
+      while (!handle.isDone) yield return null;
+      Scene = SceneManager.GetActiveScene();
+    }
 
-      if (handle != null) {
-        while (!handle.isDone) yield return null;
-
-        Scene = SceneManager.GetActiveScene();
+    /// <a href=""></a> //#TBD#//
+    protected static void AddSceneToBuildSettings(string path) {
+      string[] scenePaths = Directory.GetFiles(Application.dataPath, $"{path}.unity", SearchOption.AllDirectories);
+      if (scenePaths.Length == 0) return;
+      path = scenePaths[0].Substring(startIndex: Application.dataPath.Length - "Assets".Length);
+      var scenes = EditorBuildSettings.scenes;
+      for (int i = scenes.Length - 1; i >= 0; i--) { // most likely at the end
+        if (scenes[i].path == path) return;
       }
+
+      var newSettings = new EditorBuildSettingsScene[scenes.Length + 1];
+      Array.Copy(scenes, newSettings, scenes.Length);
+      var sceneToAdd = new EditorBuildSettingsScene(path, true);
+      newSettings[newSettings.Length - 1] = sceneToAdd;
+      EditorBuildSettings.scenes          = newSettings;
     }
 
     /// <a href="http://bit.ly/2NUH87i">Push a GUI button</a>
