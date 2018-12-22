@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections;
-using System.IO;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -10,7 +9,7 @@ using UnityEngine.UI;
 
 namespace Askowl {
   /// <a href="http://bit.ly/2NW3mGj">Control a running scene (skeleton implementation)</a>
-  public class PlayModeController {
+  public partial class PlayModeController {
     /// <a href="http://bit.ly/2RhLCD5"></a>
     protected Scene Scene;
 
@@ -23,10 +22,9 @@ namespace Askowl {
     }
 
     /// <a href=""></a> //#TBD#//
-    protected static void AddSceneToBuildSettings(string path) {
-      string[] scenePaths = Directory.GetFiles(Application.dataPath, $"{path}.unity", SearchOption.AllDirectories);
-      if (scenePaths.Length == 0) return;
-      path = scenePaths[0].Substring(startIndex: Application.dataPath.Length - "Assets".Length);
+    public static void AddSceneToBuildSettings(string path) {
+      path = Objects.FindFile($"{path}.unity");
+      if (path == null) return;
       var scenes = EditorBuildSettings.scenes;
       for (int i = scenes.Length - 1; i >= 0; i--) { // most likely at the end
         if (scenes[i].path == path) return;
@@ -40,7 +38,7 @@ namespace Askowl {
     }
 
     /// <a href="http://bit.ly/2NUH87i">Push a GUI button</a>
-    protected static IEnumerator PushButton(Button button) {
+    public static IEnumerator PushButton(Button button) {
       if (button != null) {
         button.Select();
         button.onClick.Invoke();
@@ -49,7 +47,7 @@ namespace Askowl {
     }
 
     /// <a href="http://bit.ly/2NZZYKj">See if component is visible on the UI display/screen</a>
-    public bool IsDisplayingInUI(RectTransform transform) {
+    public bool IsDisplayingInUi(RectTransform transform) {
       if ((transform == null) || !transform.gameObject.activeInHierarchy) return false;
 
       Rect screenRect    = new Rect(0, 0, Screen.width, Screen.height);

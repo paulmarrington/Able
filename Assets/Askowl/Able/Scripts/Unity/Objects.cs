@@ -1,9 +1,11 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-namespace Askowl {
-  using System.Collections.Generic;
-  using UnityEngine;
+using System.Collections.Generic;
+using System.IO;
+using UnityEditor;
+using UnityEngine;
 
+namespace Askowl {
   /// <a href="http://bit.ly/2NW3mGj">Static Object Helpers</a>
   public static class Objects {
     /// <a href="http://bit.ly/2NZbbe8">Find a game object by name and presence of a type of component</a>
@@ -57,6 +59,19 @@ namespace Askowl {
       }
 
       return gameObject;
+    }
+
+    /// <a href=""></a> //#TBD#//
+    public static T LoadAsset<T>(string path) where T : Object {
+      path = FindFile(path);
+      return path == null ? null : AssetDatabase.LoadAssetAtPath<T>(path);
+    }
+
+    /// <a href=""></a> //#TBD#//
+    public static string FindFile(string path) {
+      string[] scenePaths = Directory.GetFiles(Application.dataPath, path, SearchOption.AllDirectories);
+      if (scenePaths.Length == 0) return null;
+      return scenePaths[0].Substring(startIndex: Application.dataPath.Length - "Assets".Length);
     }
   }
 }

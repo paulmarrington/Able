@@ -42,7 +42,7 @@ namespace Askowl {
     /// <a href="http://bit.ly/2NZZYKj">IsDisplayingInUI, assert if not visible/invisible as expected after nn frames</a>
     public IEnumerator IsDisplayingInUi(string path, bool visible = true, int repeats = 300) {
       for (var count = 0; count < repeats; count++) {
-        if (IsDisplayingInUI(Components.Find<RectTransform>(path)) == visible) yield break;
+        if (IsDisplayingInUi(Components.Find<RectTransform>(path)) == visible) yield break;
 
         yield return null;
       }
