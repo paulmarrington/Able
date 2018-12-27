@@ -55,6 +55,10 @@ namespace Askowl {
           transform.parent = gameObject.transform;
         }
 
+        gameObject.AddComponent<Rigidbody>();
+        gameObject.AddComponent<MeshFilter>();
+        gameObject.AddComponent<BoxCollider>();
+        gameObject.AddComponent<MeshRenderer>();
         gameObject = transform.gameObject;
       }
 

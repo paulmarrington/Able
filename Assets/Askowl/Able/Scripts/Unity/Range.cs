@@ -1,20 +1,20 @@
 ﻿// With thanks to Jason Weimann  -- jason@unity3d.college
 
-namespace Askowl {
-  using System;
-  using UnityEngine;
-  using Random = UnityEngine.Random;
+using System;
+using UnityEngine;
+using Random = UnityEngine.Random;
 
+namespace Askowl {
   /// <a href="http://bit.ly/2OuGzAF">Simple class to represent the high and low bounds for a float. It includes a picker to randomly choose a number within that range</a> <inheritdoc />
   [Serializable] public class Range : Pick<float> {
     [SerializeField] private float min;
     [SerializeField] private float max;
 
     /// <a href="http://bit.ly/2OuGzAF">Lowest value a number can have in this range</a>
-    public float Min { get => min; private set => min = value; }
+    public float Min { get => min; set => min = value; }
 
     /// <a href="http://bit.ly/2OuGzAF">Highest value a number can have in this range</a>
-    public float Max { get => max; private set => max = value; }
+    public float Max { get => max; set => max = value; }
 
     /// <a href="http://bit.ly/2OuGzAF">Default constructor used when the range is set in a MonoBehaviour in the Unity Editor</a>
     public Range() { }
