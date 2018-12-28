@@ -1,25 +1,26 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-namespace Askowl {
-  using System;
-  using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 
+namespace Askowl {
   /// <a href="http://bit.ly/2Oq9Axs">Tree Container</a>
   // ReSharper disable once ClassNeverInstantiated.Global
   public class Trees : IDisposable {
     #region Private Functionality
+
     // ReSharper disable once ClassNeverInstantiated.Global
     internal class Node : IDisposable {
       private Node() { }
 
       internal struct LeafNode : IDisposable {
         public object Value;
-        public void   Dispose() { (Value as IDisposable)?.Dispose(); }
+        public void   Dispose() => (Value as IDisposable)?.Dispose();
       }
 
       internal struct BranchNode : IDisposable {
         public Map  Value;
-        public void Dispose() { Value?.Dispose(); }
+        public void Dispose() => Value?.Dispose();
       }
 
       internal string     Name;
@@ -61,16 +62,16 @@ namespace Askowl {
       public LinkedList<Node> Stack;
       public Trees            Tree;
 
-      public void Dispose() { Tree.here = Stack.Pop().Item; }
+      public void Dispose() => Tree.here = Stack.Pop().Item;
 
-      static Anchors() { LinkedList<Node>.DeactivateItemStatic = (node) => { }; }
+      static Anchors() => LinkedList<Node>.DeactivateItemStatic = (node) => { };
     }
 
-    private Anchors anchors;
+    private readonly Anchors anchors;
 
     private Trees() {
       root    = here = Node.New("~ROOT~", null);
-      anchors = new Anchors { Stack = new LinkedList<Node>("Trees Anchor Stack"), Tree = this };
+      anchors = new Anchors {Stack = new LinkedList<Node>("Trees Anchor Stack"), Tree = this};
     }
 
     private Trees Walk(bool create, string path) {
@@ -82,11 +83,16 @@ namespace Askowl {
         string key = split[i];
         if (here == null) return Failure();
 
-        if (here.Branch[key].Found) { here = here.Branch.Value as Node; }
-        else {
-          if (string.IsNullOrWhiteSpace(key)) { here = i == 0 ? here : here.Parent; }
-          else if (create) { here                    = (Node) here.Branch.Add(key, Node.New(key, here)).Value; }
-          else { return Failure(); }
+        if (here.Branch[key].Found) {
+          here = here.Branch.Value as Node;
+        } else {
+          if (string.IsNullOrWhiteSpace(key)) {
+            here = i == 0 ? here : here.Parent;
+          } else if (create) {
+            here = (Node) here.Branch.Add(key, Node.New(key, here)).Value;
+          } else {
+            return Failure();
+          }
         }
       }
 
@@ -97,9 +103,11 @@ namespace Askowl {
       Failed = true;
       return this;
     }
+
     #endregion
 
     #region Public Interface
+
     /// <a href="http://bit.ly/2Rj0Qbc">Fetch a cached Trees instance</a>
     public static Trees Instance => Cache<Trees>.Instance;
 
@@ -138,7 +146,7 @@ namespace Askowl {
       }
     }
     /// <a href="http://bit.ly/2NTfgR0">Leaf value here (null if last walk failed)</a>
-    public string Value { get => (string) here.Leaf; set => here.Leaf = value; }
+    public string Value { get => here.Leaf.ToString(); set => here.Leaf = value; }
 
     /// <a href="http://bit.ly/2NTfgR0"></a>
     public bool IsNumber {
@@ -147,10 +155,8 @@ namespace Askowl {
 
         string word = Value;
 
-        if (long.TryParse(word, out integer)) { floatingPoint = integer; }
-        else if (double.TryParse(
-          word, out floatingPoint)) { integer = (long) floatingPoint; }
-        else {
+        if (long.TryParse(word, out integer)) { floatingPoint = integer; } else if (double.TryParse(
+          word, out floatingPoint)) { integer                 = (long) floatingPoint; } else {
           Failed = true;
           return (isNumber = 0) == 1;
         }
@@ -218,7 +224,8 @@ namespace Askowl {
       }
     }
 
-    private List<string> tsPath = new List<string>();
+    private readonly List<string> tsPath = new List<string>();
+
     #endregion
   }
 }

@@ -1,14 +1,14 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
+using System.Collections;
+using System.Text.RegularExpressions;
+using UnityEngine;
+using UnityEngine.Assertions;
+using UnityEngine.TestTools;
+
 #if AskowlAble
 
 namespace Askowl.Examples {
-  using System.Collections;
-  using System.Text.RegularExpressions;
-  using UnityEngine;
-  using UnityEngine.Assertions;
-  using UnityEngine.TestTools;
-
   /// Using <see cref="PlayModeTests" />
   /// <inheritdoc />
   public class PlayModeTestsExample : PlayModeTests {
@@ -48,13 +48,13 @@ namespace Askowl.Examples {
       LogAssert.Expect(LogType.Assert, new Regex(@".*Values are equal.*"));
     }
 
-    /// Using <see cref="PlayModeTests.IsDisplayingInUI(string, bool, int)"/>
-    [UnityTest] public IEnumerator IsDisplayingInUI() {
+    /// Using <see cref="PlayModeTests.IsDisplayingInUi(string, bool, int)"/>
+    [UnityTest] public IEnumerator IsDisplayingInUi() {
       yield return LoadScene("Askowl-Able-Examples");
-      yield return IsDisplayingInUI("Button One", visible: true, repeats: 10);
+      yield return IsDisplayingInUi("Button One", visible: true, repeats: 10);
 
       LogAssert.Expect(LogType.Assert, new Regex(@".*IsDisplayingInUI 'Button One' failed to act as expected.*"));
-      yield return IsDisplayingInUI("Button One", visible: false, repeats: 20);
+      yield return IsDisplayingInUi("Button One", visible: false, repeats: 20);
     }
 
     /// Using <see cref="PlayModeTests.PushButton(string)"/>
