@@ -3,7 +3,6 @@
  */
 
 using System;
-using System.Collections.Generic;
 using UnityEngine;
 
 namespace Askowl {
@@ -12,12 +11,13 @@ namespace Askowl {
     #region Inspector Fields
 
     /// <a href="http://bit.ly/2NXaCSb">List of elements to pick from - set in the inspector</a>
-    [SerializeField] private List<T> elements = default;
+    [SerializeField] private T[] elements = default;
 
     [SerializeField, Tooltip("true for sequential, false for random")]
     private bool cycle = false;
 
-    [SerializeField, Tooltip(
+    [SerializeField
+   , Tooltip(
        "If the list is shorter then select items randomly, but never choose one a second time until all have been picked. This is useful for short lists to reduce unexpected repeats.")]
     private int exhaustiveBelow = 10;
 
@@ -27,48 +27,39 @@ namespace Askowl {
 
     /// <a href=""></a> //#TBD#// <inheritdoc />
     public override string ToString() =>
-      $"Set {GetType().Name}: Size = {elements?.Count}, Cycle = {cycle}, Exhaustive Below = {exhaustiveBelow}";
+      $"Set {GetType().Name}: Size = {elements.Length}, Cycle = {cycle}, Exhaustive Below = {exhaustiveBelow}";
 
     /// <a href=""></a> //#TBD#//
-    public int InitialSize => elements?.Count ?? 0;
+    public int InitialSize => elements.Length;
 
     /// <a href="http://bit.ly/2NWwH3e">Rebuild selections if we change contents</a>
-    protected virtual void BuildSelector() => selector.Choices = elements.ToArray();
+    protected virtual void BuildSelector() {
+      built            = true;
+      selector.Choices = elements;
+    }
 
     /// <a href="http://bit.ly/2NTAqP3">Pick one item from many</a> <inheritdoc />
     public T Pick() => Selector.Pick();
 
     /// <a href="http://bit.ly/2NWwH3e">Remove all set entries</a>
-    public void Reset() => Selector.Reset();
+    public void Reset() {
+      built = false;
+      selector?.Reset();
+    }
 
     /// <a href="http://bit.ly/2NTAqP3">Selector to call to get picked elements</a>
     protected Selector<T> Selector {
       get {
-        if (selector == null) selector = new Selector<T>() {ExhaustiveBelow = exhaustiveBelow, IsRandom = !cycle};
-        if (selector.Choices.Length == 0 && InitialSize > 0) BuildSelector();
+        if (selector == null) {
+          selector = new Selector<T>() {ExhaustiveBelow = exhaustiveBelow, IsRandom = !cycle};
+        }
+        if (!built) BuildSelector();
         return selector;
       }
     }
 
     private Selector<T> selector;
-
-    #endregion
-
-    #region Mutable
-
-    /// <a href="http://bit.ly/2NWwH3e">Add one entry to those open for selection</a>
-    protected void Add(T entry) {
-      elements.Add(entry);
-      Reset();
-    }
-
-    /// <a href="http://bit.ly/2NWwH3e">Remove one entry to those open for selection</a>
-    protected void Remove(T entry) {
-      if (!elements.Contains(entry)) return;
-
-      elements.Remove(entry);
-      Reset();
-    }
+    private bool        built;
 
     #endregion
   }

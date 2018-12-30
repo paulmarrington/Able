@@ -57,6 +57,24 @@ namespace Askowl.Transcript {
 
       //- Use Dispose to remove everything from and including the current node'
       tree.To("Australia.Queensland").Dispose();
+
+      //- When traversing the contents of a tree it is useful to save amd restore locations
+      tree = Trees.Instance.Add("a.b.c.d");
+      tree.Add("a.b.c2.d2");
+      using (tree.Anchor("a.b")) {
+        tree.Next("c.d");
+      }
+      Assert.AreEqual("a.b.c2.d2", tree.Key);
+
+      //- and, of course, we need to be able to traverse a tree
+      object[] cs = tree.To("a.b").Children; // will be c and c2
+
+      //- and to walk the structure. Use anchor to walk more than one level
+      var c = "";
+
+      for (var name = tree.Root().FirstChild; name != null; name = tree.NextChild) c += name;
+
+      Assert.AreEqual("cc2", c);
     }
   }
 }

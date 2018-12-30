@@ -12,6 +12,6 @@ namespace Askowl {
         return local;
       }
     }
-    private static List<T> local = new List<T>();
+    private static readonly List<T> local = new List<T>();
   }
 }

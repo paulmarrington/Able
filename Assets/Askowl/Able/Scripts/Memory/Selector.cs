@@ -21,15 +21,14 @@ namespace Askowl {
       if (choices.Length == 0) return default;
       if (picker         != null) return picker();
 
-      if (choices.Length == 0) { picker = () => default; }
-      else if (!IsRandom) { // cycle through list
+      if (choices.Length == 0) {
+        picker = () => default;
+      } else if (!IsRandom) { // cycle through list
         cycleIndex = 0;
         picker     = () => choices[cycleIndex++ % choices.Length];
-      }
-      else if (choices.Length >= ExhaustiveBelow) { // random selection
+      } else if (choices.Length >= ExhaustiveBelow) { // random selection
         picker = () => choices[Random.Range(0, choices.Length)];
-      }
-      else {
+      } else {
         remainingSelections = new List<T>(collection: choices);
 
         picker = () => { // different random choice until list exhausted, then repeat
@@ -64,6 +63,6 @@ namespace Askowl {
     /// <a href="http://bit.ly/2OrRfQp">Remove all choices for an empty list</a>
     public void Reset() => choices = emptyChoices;
 
-    private T[] emptyChoices = { };
+    private readonly T[] emptyChoices = { };
   }
 }

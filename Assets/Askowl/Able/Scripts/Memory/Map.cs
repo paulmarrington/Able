@@ -15,7 +15,7 @@ namespace Askowl {
     /// <a href=""></a> //#TBD#//
     public static Map Instance => Cache<Map>.Instance;
 
-    internal Map CreateItem() => new Map { cached = true };
+    internal Map CreateItem() => new Map {cached = true};
 
     /// <a href="http://bit.ly/2NUH9Io">Remove an entry, optionally calling Dispose()</a>
     // ReSharper disable once UnusedMethodReturnValue.Global
@@ -35,7 +35,7 @@ namespace Askowl {
     /// <a href="http://bit.ly/2OrPYc5">Retrieve the value for the second key entered/sorted</a>
     public object Next => index.Reached(Count - 1) ? null : keys[index.Next()];
 
-    private CounterFifo index = CounterFifo.Instance;
+    private readonly CounterFifo index = CounterFifo.Instance;
 
     /// <a href="http://bit.ly/2Oq9wOe">Get a key by index based where 0 is the oldest/sorted</a>
     public object this[int i] => keys[i];
@@ -86,8 +86,7 @@ namespace Askowl {
 
     /// <a href="http://bit.ly/2NUH9Io">Remove all entries - calling Dispose() on each one</a>
     public virtual void Dispose() {
-      if (cached) { Cache<Map>.Dispose(this); }
-      else { DeactivateItem(this); }
+      if (cached) { Cache<Map>.Dispose(this); } else { DeactivateItem(this); }
     }
 
     internal static void DeactivateItem(Map item) {
@@ -95,6 +94,11 @@ namespace Askowl {
       item.keys.Clear();
       item.map.Clear();
       item.index.Dispose();
+    }
+
+    public void Clear() {
+      keys.Clear();
+      map.Clear();
     }
 
     /// <a href=""></a> //#TBD#//

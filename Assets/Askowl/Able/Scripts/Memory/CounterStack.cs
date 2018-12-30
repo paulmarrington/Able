@@ -1,8 +1,8 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-namespace Askowl {
-  using System;
+using System;
 
+namespace Askowl {
   /// <a href="http://bit.ly/2NU98YO">A stack of counters for garbage-free iterations</a> <inheritdoc />
   // ReSharper disable once ClassNeverInstantiated.Global
   public class CounterFifo : Fifo<int> {
@@ -23,6 +23,6 @@ namespace Askowl {
     }
 
     /// <inheritdoc />
-    public override void Dispose() { Cache<CounterFifo>.Dispose(this); }
+    public override void Dispose() => Cache<CounterFifo>.Dispose(this);
   }
 }
