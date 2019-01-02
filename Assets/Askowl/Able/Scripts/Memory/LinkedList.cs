@@ -74,6 +74,7 @@ namespace Askowl {
     }
 
     #region Private create, deactivation and activation support
+
     private static Func<T> CallConstructor() {
       var flags       = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
       var constructor = typeof(T).GetConstructor(flags, null, Type.EmptyTypes, null);
@@ -87,21 +88,20 @@ namespace Askowl {
       return typeof(T).GetMethod(name, flags, null, CallingConventions.HasThis, parameters, null);
     }
 
-    private static Type[] ComparisonParameters = { typeof(T), typeof(T) };
+    private static readonly Type[] comparisonParameters = {typeof(T), typeof(T)};
 
     private static Action<Node> DefaultActivation(string name) {
       var method = DefaultMethod(name, Type.EmptyTypes);
       if (method == null) return null;
-
       return node => method.Invoke(node.Item, null);
     }
 
     private static Func<Node, Node, int> GetDefaultCompareItem() {
-      var method = DefaultMethod("CompareItem", ComparisonParameters);
+      var method = DefaultMethod("CompareItem", comparisonParameters);
       if (method == null) return (node, other) => 0;
 
       orderedDynamic = true;
-      return (node, other) => (int) method.Invoke(node.Item, new object[] { node.Item, other.Item });
+      return (node, other) => (int) method.Invoke(node.Item, new object[] {node.Item, other.Item});
     }
 
     private static Func<T> GetDefaultCreateItem() {
@@ -122,9 +122,11 @@ namespace Askowl {
     private static bool orderedDynamic;
     private        bool ordered = orderedStatic || orderedDynamic;
     private static int  ordinal;
+
     #endregion
 
     #region Public List Creation and Destruction
+
     /// <a href="http://bit.ly/2RhsEws">Get an instance of this type of linked list</a>
     public LinkedList(string name = null) =>
       Name = string.IsNullOrWhiteSpace(name) ? $"{typeof(T).Name}-{++ordinal}" : name;
@@ -187,9 +189,11 @@ namespace Askowl {
       while (First != null) First.Dispose();
       First = Last = null;
     }
+
     #endregion
 
     #region Node Creation and Movement
+
     /// <a href="http://bit.ly/2OtGxZV">Add an Item to a List</a>
     public Node Add(T item) {
       Node node = GetRecycledOrNew();
@@ -223,7 +227,7 @@ namespace Askowl {
     private static Map reverseLookup;
 
     private Node NewNode(T item) {
-      Node newNode = new Node() { Item = item, Owner = this, Home = this };
+      Node newNode = new Node() {Item = item, Owner = this, Home = this};
       reverseLookup?.Add(item, newNode);
       return newNode;
     }
@@ -274,9 +278,9 @@ namespace Askowl {
     }
 
     private void Unlink(Node node) {
-      if (node      == node.Owner.First) { node.Owner.First = node.Next; }
-      else if (node == node.Owner.Last) { node.Owner.Last   = node.Previous; }
-      else if ((node.Previous == null) && (node.Next == null)) return;
+      if (node == node.Owner.First) { node.Owner.First = node.Next; } else if (node == node.Owner.Last) {
+        node.Owner.Last = node.Previous;
+      } else if ((node.Previous == null) && (node.Next == null)) return;
 
       node.Owner.Count--;
 
@@ -290,13 +294,15 @@ namespace Askowl {
     /// <a href="http://bit.ly/2OvDxfs">List for Unused Nodes</a>
     public LinkedList<T> RecycleBin => isRecycleBin ? null : recycleBin ?? (recycleBin = NewRecycleBin);
 
-    private LinkedList<T> NewRecycleBin => new LinkedList<T>($"{Name} Recycling Bin") { isRecycleBin = true };
+    private LinkedList<T> NewRecycleBin => new LinkedList<T>($"{Name} Recycling Bin") {isRecycleBin = true};
 
     private bool          isRecycleBin;
     private LinkedList<T> recycleBin;
+
     #endregion
 
     #region FiFo Stack
+
     /// <a href="http://bit.ly/2O11goE">First Node in List or null</a>
     public Node First;
 
@@ -323,19 +329,20 @@ namespace Askowl {
 
     /// <a href="http://bit.ly/2NTD9Ih">Pull the last item from the list</a>
     public Node Pull() => Last?.Recycle();
+
     #endregion
 
     #region Debugging
+
     /// <a href="http://bit.ly/2RezKBQ">Debug mode logs changes</a>
     // ReSharper disable once StaticMemberInGenericType
     public static bool DebugMode = false;
 
-    private void DebugMessage(Node node, string append = "") {
+    private void DebugMessage(Node node, string append = "") =>
       Debug.Log(
         node.Owner == this
           ? $"**** LinkedList: Add to {this}"
           : $"**** LinkedList: move {node.Owner} to {append}{this}");
-    }
 
     /// <a href="http://bit.ly/2OxOL3m">Return list contents as a string</a>
     public string Dump(int maxEntriesToDump = 1000) {
@@ -354,6 +361,7 @@ namespace Askowl {
       string count = recycleBin != null ? $"({Count}/{recycleBin.Count})" : $"({Count})";
       return $"{Name} {count,8}";
     }
+
     #endregion
   }
 }

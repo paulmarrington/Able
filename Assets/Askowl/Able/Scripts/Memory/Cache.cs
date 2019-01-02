@@ -49,12 +49,12 @@ namespace Askowl {
     public static Func<T> CreateItem { set => Entries.CreateItem = value; }
 
     /// <a href="http://bit.ly/2Rh3gqG">A lambda to be called before sending an item to recycling for later use</a>
-    public static Action<T> DeactivateItem { set { Entries.DeactivateItem = (node) => value(node.Item); } }
+    public static Action<T> DeactivateItem { set => Entries.DeactivateItem = (node) => value(node.Item); }
 
     /// <a href="http://bit.ly/2Riz7Hj">A lambda to be called before reusing an item from the recycle bin</a>
-    public static Action<T> ReactivateItem { set { Entries.ReactivateItem = (node) => value(node.Item); } }
+    public static Action<T> ReactivateItem { set => Entries.ReactivateItem = (node) => value(node.Item); }
 
     /// <a href="http://bit.ly/2OrE4it">A disposable for `using` so items will be cleaned up</a>
-    public static IDisposable Disposable(T item) => new Disposable { Action = Entries.ReverseLookup(item).Dispose };
+    public static IDisposable Disposable(T item) => new Disposable {Action = Entries.ReverseLookup(item).Dispose};
   }
 }
