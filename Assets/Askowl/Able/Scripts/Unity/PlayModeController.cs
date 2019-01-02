@@ -53,6 +53,8 @@ namespace Askowl {
       Rect screenRect    = new Rect(0, 0, Screen.width, Screen.height);
       var  objectCorners = new Vector3[4];
       transform.GetWorldCorners(fourCornersArray: objectCorners);
+      if (Compare.AlmostEqual(objectCorners[0].y, objectCorners[1].y)) return false;
+      if (Compare.AlmostEqual(objectCorners[1].x, objectCorners[2].x)) return false;
       return screenRect.Contains(point: objectCorners[1]);
     }
   }
