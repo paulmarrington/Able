@@ -10,10 +10,16 @@ using UnityEditor;
 
 namespace Askowl {
   #region CustomAssetsInMonoBehaviour
+
   /// <inheritdoc />
   [CanEditMultipleObjects,
    CustomEditor(inspectedType: typeof(MonoBehaviour), editorForChildClasses: true)]
   public class MonoBehaviourEditor : Editor { }
+
+  /// <inheritdoc />
+  [CanEditMultipleObjects,
+   CustomEditor(inspectedType: typeof(ScriptableObject), editorForChildClasses: true)]
+  public class ScriptableObjectEditor : Editor { }
 
   /// <a href="http://bit.ly/2NTAoXr">Edit ScriptableObject data directly in component</a> <inheritdoc />
   [CustomPropertyDrawer(type: typeof(ScriptableObject), useForChildren: true)]
@@ -49,9 +55,11 @@ namespace Askowl {
       EditorGUI.indentLevel--;
     }
   }
+
   #endregion
 
   #region ValueLabelChange
+
   /// <inheritdoc />
   [CanEditMultipleObjects,
    CustomEditor(inspectedType: typeof(LabelsAttribute), editorForChildClasses: true)]
@@ -77,5 +85,6 @@ namespace Askowl {
     public override float GetPropertyHeight(SerializedProperty property, GUIContent label) =>
       EditorGUI.GetPropertyHeight(property);
   }
+
   #endregion
 }
