@@ -10,6 +10,7 @@ namespace Askowl {
   /// <a href="http://bit.ly/2RinksQ">Logging dirt cheap</a>
   public static class Log {
     #region Producer Interface
+
     /// <a href="http://bit.ly/2Oq9Bl0">Signature to write message log entries - this is what you use in your code</a>
     public delegate void MessageRecorder(string action, string message);
 
@@ -20,8 +21,9 @@ namespace Askowl {
     public static MessageRecorder Messages(
       [CallerMemberName] string memberName = "",
       [CallerFilePath]   string filePath   = "",
-      [CallerLineNumber] int    lineNumber = 0) => (action, message) =>
-      MessageEvent(Fill(action, memberName, message, filePath, lineNumber));
+      [CallerLineNumber] int    lineNumber = 0) =>
+      (action, message) =>
+        MessageEvent(Fill(action, memberName, message, filePath, lineNumber));
 
     /// <a href="http://bit.ly/2Re92cJ">>Method called to create a log calling function in your script</a>
     public static EventRecorder Warnings(
@@ -72,7 +74,8 @@ namespace Askowl {
       string                    message,
       [CallerMemberName] string memberName = "",
       [CallerFilePath]   string filePath   = "",
-      [CallerLineNumber] int    lineNumber = 0) => ErrorEvent(Fill("Error", memberName, message, filePath, lineNumber));
+      [CallerLineNumber] int    lineNumber = 0) =>
+      ErrorEvent(Fill("Error", memberName, message, filePath, lineNumber));
 
     /// <a href="http://bit.ly/2O0Z5Bu">Implementation methods get information to record in this structure</a>
     public struct Contents {
@@ -84,9 +87,11 @@ namespace Askowl {
       public int lineNumber;
       // ReSharper restore InconsistentNaming
     }
+
     #endregion
 
     #region Consumer Interface
+
     /// <a href="http://bit.ly/2Rj0VM2">method signature for message listeners (log writers)</a>
     public delegate void EventDelegate(Contents contents);
 
@@ -106,20 +111,23 @@ namespace Askowl {
     /// <a href="http://bit.ly/2O0Z5Bu">Log formatting for extra data</a>
     public static string Extras(object[] list) => Extras(Array.ConvertAll(array: list, converter: x => x.ToString()));
 
-    private static char[] trimCharacters = { ',', ' ' };
+    private static readonly char[] trimCharacters = {',', ' '};
 
     /// <a href="Log Parameter Formatting">Log formatting for extra data</a>
-    public static Map ToMap(Contents contents) => Csv.ToMap(contents.extras)
-                                                     .Add("component", contents.component)
-                                                     .Add("action",    contents.action)
-                                                     .Add("result",    contents.result)
-                                                     .Add("member",    contents.member);
+    public static Map ToMap(Contents contents) =>
+      Csv.ToMap(contents.extras)
+         .Add("component", contents.component)
+         .Add("action",    contents.action)
+         .Add("result",    contents.result)
+         .Add("member",    contents.member);
 
     /// <a href="Log Parameter Formatting">Log formatting for extra data</a>
     public static Dictionary<string, object> ToDictionary(Contents contents) => ToMap(contents).ToDictionary<object>();
+
     #endregion
 
     #region Console Log Consumer
+
     /// <a href="http://bit.ly/2RezLpo">Set to false for no logging to Unity console</a>
     public static bool ConsoleEnabled = true;
 
@@ -168,9 +176,11 @@ namespace Askowl {
         ErrorEvent   += UnityAnalyticsError;
       }
     }
+
     #endregion
 
     #region Unity Analytics Log Consumer
+
     private static void UnityAnalyticsMessage(Contents contents) =>
       Analytics.CustomEvent(contents.action, ToDictionary(contents));
 
@@ -179,6 +189,7 @@ namespace Askowl {
 
     private static void UnityAnalyticsError(Contents contents) =>
       Analytics.CustomEvent("ERROR", ToDictionary(contents));
+
     #endregion
   }
 }
