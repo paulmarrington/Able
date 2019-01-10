@@ -1,12 +1,12 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-namespace Askowl {
-  using System;
-  using System.Collections.Generic;
-  using System.IO;
-  using System.Runtime.CompilerServices;
-  using UnityEngine.Analytics;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Runtime.CompilerServices;
+using UnityEngine.Analytics;
 
+namespace Askowl {
   /// <a href="http://bit.ly/2RinksQ">Logging dirt cheap</a>
   public static class Log {
     #region Producer Interface
@@ -167,7 +167,7 @@ namespace Askowl {
       Actions.Add("tbd", tbd).Add("todo", tbd).Add("later", tbd).Add("incomplete", tbd)
              .Add("fixme", fix).Add("fix-me", fix).Add("bug", fix).Add("outstanding", fix);
       #if !UNITY_EDITOR // So that mobile host logs don't get too crowded to read.
-      Application.SetStackTraceLogType(logType:LogType.Log,stackTraceType:StackTraceLogType.None);
+      UnityEngine.Application.SetStackTraceLogType(logType:UnityEngine.LogType.Log,stackTraceType:UnityEngine.StackTraceLogType.None);
       ConsoleEnabled = false;
       #endif
       if (Analytics.enabled) {

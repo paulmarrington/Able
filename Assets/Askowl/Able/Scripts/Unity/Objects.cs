@@ -65,11 +65,13 @@ namespace Askowl {
       return gameObject;
     }
 
+    #if UNITY_EDITOR
     /// <a href=""></a> //#TBD#//
     public static T LoadAsset<T>(string path) where T : Object {
       path = FindFile(path);
       return path == null ? null : AssetDatabase.LoadAssetAtPath<T>(path);
     }
+    #endif
 
     /// <a href=""></a> //#TBD#//
     public static string FindFile(string path) {

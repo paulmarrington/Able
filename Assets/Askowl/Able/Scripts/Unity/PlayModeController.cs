@@ -23,6 +23,7 @@ namespace Askowl {
 
     /// <a href=""></a> //#TBD#//
     public static void AddSceneToBuildSettings(string path) {
+      #if UNITY_EDITOR
       path = Objects.FindFile($"{path}.unity");
       if (path == null) return;
       var scenes = EditorBuildSettings.scenes;
@@ -35,6 +36,7 @@ namespace Askowl {
       var sceneToAdd = new EditorBuildSettingsScene(path, true);
       newSettings[newSettings.Length - 1] = sceneToAdd;
       EditorBuildSettings.scenes          = newSettings;
+      #endif
     }
 
     /// <a href="http://bit.ly/2NUH87i">Push a GUI button</a>
