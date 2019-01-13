@@ -28,14 +28,10 @@ namespace Askowl {
     public int Firings;
 
     /// <a href="http://bit.ly/2OzDM9D">Ask an emitter to tell me too</a>
-    public void Subscribe(IObserver observer) {
-      listeners.Push(observer.OnNext);
-    }
+    public void Subscribe(IObserver observer) { listeners.Push(observer.OnNext); }
 
     /// <a href="http://bit.ly/2OzDM9D">Ask an emitter to tell me too</a>
-    public void Subscribe(Action action) {
-      listeners.Push(action);
-    }
+    public void Subscribe(Action action) { listeners.Push(action); }
 
     /// <a href=""></a> //#TBD#//
     public void RemoveAllListeners() {
@@ -65,9 +61,7 @@ namespace Askowl {
     public T LastValue { get; private set; }
 
     /// <a href="http://bit.ly/2OzDM9D">The owner shoots and all the listeners hear</a>
-    public void Fire(T value) {
-      Listeners(LastValue = value);
-    }
+    public void Fire(T value) => Listeners(LastValue = value);
 
     /// <a href="http://bit.ly/2OzDM9D">Ask an emitter to give me a reference to the value ejected</a>
     public IDisposable Subscribe(IObserver<T> observer) {

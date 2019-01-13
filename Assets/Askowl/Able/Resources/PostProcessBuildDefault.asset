@@ -3,12 +3,13 @@
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e550840d06ed54b35ac043c18ade5e57, type: 3}
+  m_Script: {fileID: 11500000, guid: fcd9d6df83e9b4fd5a80501d2aa473c9, type: 3}
   m_Name: PostProcessBuildDefault
   m_EditorClassIdentifier: 
   iOS:
