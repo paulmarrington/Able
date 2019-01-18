@@ -14,20 +14,21 @@ namespace Askowl {
     public int ExhaustiveBelow = 1;
 
     private T[]     choices = { };
-    private Func<T> picker;
+    private Func<T> picker, next;
 
     /// <a href="http://bit.ly/2OrRfQp">Method called to pick an item</a> <inheritdoc />
     public T Pick() {
-      if (choices.Length == 0) return default;
-      if (picker         != null) return picker();
+      if (picker != null) return picker();
 
       if (choices.Length == 0) {
         picker = () => default;
+      } else if (choices.Length == 1) {
+        picker = () => choices[0];
       } else if (!IsRandom) { // cycle through list
-        cycleIndex = 0;
-        picker     = () => choices[cycleIndex++ % choices.Length];
+        cycleIndex = -1;
+        picker     = () => choices[++cycleIndex % choices.Length];
       } else if (choices.Length >= ExhaustiveBelow) { // random selection
-        picker = () => choices[Random.Range(0, choices.Length)];
+        picker = () => choices[cycleIndex = Random.Range(0, choices.Length)];
       } else {
         remainingSelections = new List<T>(collection: choices);
 
@@ -44,12 +45,41 @@ namespace Askowl {
       return picker();
     }
 
+    /// <a href="">Called when a pick fails and we need to try something else</a> //#TBD#//
+    public T Next() {
+      if (next != null) return next();
+
+      if (choices.Length == 0) {
+        next = () => default;
+      } else if (choices.Length == 1) {
+        next = () => choices[0];
+      } else if (!IsRandom) { // cycle through list
+        cycleIndex = -1;
+        next       = () => choices[++cycleIndex % choices.Length];
+      } else if (choices.Length >= ExhaustiveBelow) { // random selection
+        next = () => choices[cycleIndex = Random.Range(0, choices.Length)];
+      } else {
+        remainingSelections = new List<T>(collection: choices);
+
+        next = () => { // different random choice until list exhausted, then repeat
+          if (remainingSelections.Count == 0) remainingSelections = new List<T>(collection: choices);
+
+          cycleIndex = Random.Range(0, remainingSelections.Count);
+          T result = remainingSelections[index: cycleIndex];
+          remainingSelections.RemoveAt(index: cycleIndex);
+          return result;
+        };
+      }
+
+      return next();
+    }
+
     /// <a href="http://bit.ly/2OvDtMK">Used to update the choices to a new set using the same picker.</a>
     public T[] Choices {
       get => choices;
       set {
         choices = value;
-        picker  = null;
+        picker  = next = null;
       }
     }
 
