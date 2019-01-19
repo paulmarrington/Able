@@ -14,7 +14,7 @@ namespace Askowl {
     public int ExhaustiveBelow = 1;
 
     private T[]     choices = { };
-    private Func<T> picker, next;
+    private Func<T> picker;
 
     /// <a href="http://bit.ly/2OrRfQp">Method called to pick an item</a> <inheritdoc />
     public T Pick() {
@@ -42,36 +42,15 @@ namespace Askowl {
         };
       }
 
+      next = -1;
       return picker();
     }
 
     /// <a href="">Called when a pick fails and we need to try something else</a> //#TBD#//
     public T Next() {
-      if (next != null) return next();
-
-      if (choices.Length == 0) {
-        next = () => default;
-      } else if (choices.Length == 1) {
-        next = () => choices[0];
-      } else if (!IsRandom) { // cycle through list
-        cycleIndex = -1;
-        next       = () => choices[++cycleIndex % choices.Length];
-      } else if (choices.Length >= ExhaustiveBelow) { // random selection
-        next = () => choices[cycleIndex = Random.Range(0, choices.Length)];
-      } else {
-        remainingSelections = new List<T>(collection: choices);
-
-        next = () => { // different random choice until list exhausted, then repeat
-          if (remainingSelections.Count == 0) remainingSelections = new List<T>(collection: choices);
-
-          cycleIndex = Random.Range(0, remainingSelections.Count);
-          T result = remainingSelections[index: cycleIndex];
-          remainingSelections.RemoveAt(index: cycleIndex);
-          return result;
-        };
-      }
-
-      return next();
+      if (next == -1) next = cycleIndex;
+      next = (next + 1) % choices.Length;
+      return next == (cycleIndex % choices.Length) ? default : choices[next];
     }
 
     /// <a href="http://bit.ly/2OvDtMK">Used to update the choices to a new set using the same picker.</a>
@@ -79,11 +58,11 @@ namespace Askowl {
       get => choices;
       set {
         choices = value;
-        picker  = next = null;
+        picker  = null;
       }
     }
 
-    private int cycleIndex;
+    private int cycleIndex, next;
 
     /// <a href="http://bit.ly/2NU0GsC">The location of the next choice in the sequence.</a>
     public int CycleIndex => cycleIndex % choices.Length;
