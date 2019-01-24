@@ -69,6 +69,7 @@ namespace Askowl {
       Cache<Fifo<T>>.Dispose(this);
     }
 
+    /// <a href=""></a> //#TBD#//
     public void Clear() {
       for (var i = 0; i < pointer; i++) (stack[i] as IDisposable)?.Dispose();
       pointer = 0;

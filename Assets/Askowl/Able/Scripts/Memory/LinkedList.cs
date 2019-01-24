@@ -52,6 +52,7 @@ namespace Askowl {
 
       /// <a href="http://bit.ly/2Rh3dv0">Deactivate an entry and put the containing node in the recycling bin</a>
       public Node Recycle() {
+        if (Owner == Home.recycleBin) return this;
         Owner.DeactivateItem(this);
         MoveToEndOf(Home.RecycleBin);
         return this;
@@ -74,12 +75,10 @@ namespace Askowl {
     }
 
     #region Private create, deactivation and activation support
-
     private static Func<T> CallConstructor() {
       var flags       = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
       var constructor = typeof(T).GetConstructor(flags, null, Type.EmptyTypes, null);
       if (constructor == null) return null;
-
       return () => (T) constructor.Invoke(parameters: null);
     }
 
@@ -122,11 +121,9 @@ namespace Askowl {
     private static bool orderedDynamic;
     private        bool ordered = orderedStatic || orderedDynamic;
     private static int  ordinal;
-
     #endregion
 
     #region Public List Creation and Destruction
-
     /// <a href="http://bit.ly/2RhsEws">Get an instance of this type of linked list</a>
     public LinkedList(string name = null) =>
       Name = string.IsNullOrWhiteSpace(name) ? $"{typeof(T).Name}-{++ordinal}" : name;
@@ -189,11 +186,9 @@ namespace Askowl {
       while (First != null) First.Dispose();
       First = Last = null;
     }
-
     #endregion
 
     #region Node Creation and Movement
-
     /// <a href="http://bit.ly/2OtGxZV">Add an Item to a List</a>
     public Node Add(T item) {
       Node node = GetRecycledOrNew();
@@ -298,11 +293,9 @@ namespace Askowl {
 
     private bool          isRecycleBin;
     private LinkedList<T> recycleBin;
-
     #endregion
 
     #region FiFo Stack
-
     /// <a href="http://bit.ly/2O11goE">First Node in List or null</a>
     public Node First;
 
@@ -329,11 +322,9 @@ namespace Askowl {
 
     /// <a href="http://bit.ly/2NTD9Ih">Pull the last item from the list</a>
     public Node Pull() => Last?.Recycle();
-
     #endregion
 
     #region Debugging
-
     /// <a href="http://bit.ly/2RezKBQ">Debug mode logs changes</a>
     // ReSharper disable once StaticMemberInGenericType
     public static bool DebugMode = false;
@@ -361,7 +352,6 @@ namespace Askowl {
       string count = recycleBin != null ? $"({Count}/{recycleBin.Count})" : $"({Count})";
       return $"{Name} {count,8}";
     }
-
     #endregion
   }
 }
