@@ -36,17 +36,17 @@ namespace Askowl {
 
     /// <a href="http://bit.ly/2OrbCgM">Add or remove preprocessor definitions base on a boolean</a>
     public static void AddOrRemoveDefines(bool addDefines, string named) {
-      if (addDefines) { AddDefines(defines: named); }
-      else { RemoveDefines(defines: named); }
+      if (addDefines) { AddDefines(defines: named); } else { RemoveDefines(defines: named); }
     }
 
     /// <a href="http://bit.ly/2Rk1o06">See if there is a folder under `Assets`</a>
-    protected static bool HasFolder(string folder) => AssetDatabase.IsValidFolder(path: "Assets/" + folder);
+    public static bool HasFolder(string folder) =>
+      !string.IsNullOrEmpty(folder) && AssetDatabase.IsValidFolder(path: "Assets/" + folder);
 
     /// <a href="http://bit.ly/2Rk1o06">Check Packages/manifest.json for package installation</a>
-    protected static bool HasPackage(string packageName) {
+    public static bool HasPackage(string packageName) {
       if (json == null) json = Json.Instance.Parse(File.ReadAllText("Packages/manifest.json"));
-      return !json.Node.To($"dependencies.{packageName}").Failed;
+      return !string.IsNullOrEmpty(packageName) && !json.Node.To($"dependencies.{packageName}").Failed;
     }
 
     private static Json json;
@@ -75,10 +75,11 @@ namespace Askowl {
     // ReSharper restore InconsistentNaming
     // ReSharper restore MissingXmlDoc
 
-    private static List<string> Split() => PlayerSettings.GetScriptingDefineSymbolsForGroup(
-                                                            targetGroup: EditorUserBuildSettings
-                                                             .selectedBuildTargetGroup)
-                                                         .Split(';').ToList();
+    private static List<string> Split() =>
+      PlayerSettings.GetScriptingDefineSymbolsForGroup(
+                       targetGroup: EditorUserBuildSettings
+                        .selectedBuildTargetGroup)
+                    .Split(';').ToList();
 
     private static void Save(List<string> defines) {
       PlayerSettings.SetScriptingDefineSymbolsForGroup(
