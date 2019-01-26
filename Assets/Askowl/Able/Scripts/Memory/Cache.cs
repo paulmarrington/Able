@@ -2,9 +2,9 @@
 
 // ReSharper disable ClassNeverInstantiated.Global
 
-namespace Askowl {
-  using System;
+using System;
 
+namespace Askowl {
   /// <a href="http://bit.ly/2Rj0PEa">Instance caching</a>
   public class Cache {
     /// <a href="http://bit.ly/2Rj0Wj4">Boxed value items</a>
@@ -36,8 +36,17 @@ namespace Askowl {
     /// <a href="http://bit.ly/2NXgIlt">Get a node reference (from recycling if available)</a>
     public static T Instance => Entries.GetRecycledOrNew().Item;
 
+    /// <a href="">Get a node reference (from recycling if available)</a>
+    public static LinkedList<T>.Node NodeInstance => Entries.GetRecycledOrNew();
+
     /// <a href="http://bit.ly/2OrE4it">Get a new or recycled node and add an item reference</a>
     public static T Add(T item) => Entries.Add(item).Item;
+
+    /// <a href=""></a> //#TBD#//
+    public static T Value(object nodeReference) {
+      var node = (nodeReference as LinkedList<T>.Node);
+      return (node == null) ? default : node.Item;
+    }
 
     /// <a href="http://bit.ly/2OrE4it">Dispose cleanly of a node and the contained item</a>
     public static void Dispose(T item) => Entries.Dispose(item);
