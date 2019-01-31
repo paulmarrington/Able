@@ -52,11 +52,14 @@ namespace Askowl {
 
       /// <a href="http://bit.ly/2Rh3dv0">Deactivate an entry and put the containing node in the recycling bin</a>
       public Node Recycle() {
+        nodeForNext.Next = Next;
         if (Owner == Home.recycleBin) return this;
         Owner.DeactivateItem(this);
         MoveToEndOf(Home.RecycleBin);
-        return this;
+        return nodeForNext;
       }
+
+      private static readonly Node nodeForNext = new Node();
 
       /// <inheritdoc />
       public void Dispose() => Recycle();

@@ -66,4 +66,14 @@ namespace Askowl {
     /// <a href="http://bit.ly/2OrE4it">A disposable for `using` so items will be cleaned up</a>
     public static IDisposable Disposable(T item) => new Disposable {Action = Entries.ReverseLookup(item).Dispose};
   }
+
+  /// <a href=""></a> //#TBD#//
+  public class Cached<T> : IDisposable where T : Cached<T> {
+    /// <a href=""></a> //#TBD#//
+    public static T Instance => Cache<T>.Instance;
+    protected Cached() { } // so we can't use new()
+
+    /// <a href=""></a> //#TBD#//
+    public void Dispose() => Cache<T>.Dispose(this as T);
+  }
 }
