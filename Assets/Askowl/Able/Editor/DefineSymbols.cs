@@ -45,8 +45,9 @@ namespace Askowl {
 
     /// <a href="http://bit.ly/2Rk1o06">Check Packages/manifest.json for package installation</a>
     public static bool HasPackage(string packageName) {
+      if (string.IsNullOrEmpty(packageName)) return false;
       if (json == null) json = Json.Instance.Parse(File.ReadAllText("Packages/manifest.json"));
-      return !string.IsNullOrEmpty(packageName) && !json.Node.To($"dependencies.{packageName}").Failed;
+      return !json.Node.To($"dependencies.{packageName}").Failed;
     }
 
     private static Json json;
