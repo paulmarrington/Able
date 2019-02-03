@@ -9,7 +9,6 @@ namespace Askowl {
   /// <a href="http://bit.ly/2NXaCSb">Create a set in the inspector and provide an interface to pick one</a> <inheritdoc cref="Pick" />
   [Serializable] public class Set<T> : Pick<T> {
     #region Inspector Fields
-
     /// <a href="http://bit.ly/2NXaCSb">List of elements to pick from - set in the inspector</a>
     [SerializeField] private T[] elements = default;
 
@@ -20,11 +19,9 @@ namespace Askowl {
    , Tooltip(
        "If the list is shorter then select items randomly, but never choose one a second time until all have been picked. This is useful for short lists to reduce unexpected repeats.")]
     private int exhaustiveBelow = 10;
-
     #endregion
 
     #region Picker
-
     /// <a href=""></a> //#TBD#// <inheritdoc />
     public override string ToString() =>
       $"Set {GetType().Name}: Size = {elements.Length}, Cycle = {cycle}, Exhaustive Below = {exhaustiveBelow}";
@@ -52,6 +49,7 @@ namespace Askowl {
       get {
         if (selector == null) {
           selector = new Selector<T>() {ExhaustiveBelow = exhaustiveBelow, IsRandom = !cycle};
+          built    = false;
         }
         if (!built) BuildSelector();
         return selector;
@@ -60,7 +58,6 @@ namespace Askowl {
 
     private Selector<T> selector;
     private bool        built;
-
     #endregion
   }
 }
