@@ -58,6 +58,7 @@ namespace Askowl {
     /// <a href="http://bit.ly/2RhchzZ">Prepare retrieval given a known key</a>
     public Map this[object key] {
       get {
+        Value = default;
         Found = map.TryGetValue(Key = key, out Value);
         return this;
       }
@@ -96,6 +97,7 @@ namespace Askowl {
       item.index.Dispose();
     }
 
+    /// <a href=""></a> //#TBD#//
     public void Clear() {
       keys.Clear();
       map.Clear();
