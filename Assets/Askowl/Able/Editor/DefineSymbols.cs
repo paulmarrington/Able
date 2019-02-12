@@ -13,14 +13,14 @@
   }
  */
 
-namespace Askowl {
-  using System.Collections.Generic;
-  using System.IO;
-  using System.Linq;
-  using System.Text.RegularExpressions;
-  using UnityEditor;
-  using UnityEngine;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using UnityEditor;
+using UnityEngine;
 
+namespace Askowl {
   /// <a href="http://bit.ly/2RhucXi">Used by Unity editor code to add or remove definitions based in rules such as the existence of directories</a> <inheritdoc />
   public class DefineSymbols : Editor {
     /// <a href="http://bit.ly/2OrbCgM">Add preprocessor definitions</a>
@@ -82,11 +82,10 @@ namespace Askowl {
                         .selectedBuildTargetGroup)
                     .Split(';').ToList();
 
-    private static void Save(List<string> defines) {
+    private static void Save(List<string> defines) =>
       PlayerSettings.SetScriptingDefineSymbolsForGroup(
         targetGroup: EditorUserBuildSettings.selectedBuildTargetGroup,
         defines: string.Join(separator: ";", value: defines.ToArray()));
-    }
   }
 
   /// <inheritdoc />
