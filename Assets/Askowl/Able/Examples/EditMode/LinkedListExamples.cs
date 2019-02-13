@@ -1,11 +1,11 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-#if AskowlAble
+#if AskowlTests
 
 // ReSharper disable MemberCanBePrivate.Local disable UnusedAutoPropertyAccessor.Local
 // ReSharper disable StaticMemberInGenericType disable ClassNeverInstantiated.Global disable MissingXmlDoc disable UnusedMember.Local disable MemberHidesStaticFromOuterClass
 
-namespace Askowl.Examples {
+namespace Askowl.Able.Examples {
   using System;
   using System.Text.RegularExpressions;
   using NUnit.Framework;

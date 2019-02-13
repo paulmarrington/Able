@@ -1,9 +1,9 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-#if AskowlAble
+#if AskowlTests
 using UnityEngine;
 
-namespace Askowl.Examples {
+namespace Askowl.Able.Examples {
   /// <inheritdoc />
   public class RangeDrawerExample : MonoBehaviour {
     [SerializeField, RangeBounds(min: 10, max: 20)]

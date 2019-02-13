@@ -6,9 +6,9 @@ using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.TestTools;
 
-#if AskowlAble
+#if AskowlTests
 
-namespace Askowl.Examples {
+namespace Askowl.Able.Examples {
   /// Using <see cref="PlayModeTests" />
   /// <inheritdoc />
   public class PlayModeTestsExample : PlayModeTests {

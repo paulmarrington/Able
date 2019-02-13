@@ -1,7 +1,7 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-#if AskowlAble
-namespace Askowl.Examples {
+#if AskowlTests
+namespace Askowl.Able.Examples {
   using NUnit.Framework;
 
   /// Using <see cref="Trees"/>

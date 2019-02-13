@@ -2,8 +2,8 @@
 
 // ReSharper disable NotAccessedField.Local
 
-#if AskowlAble
-namespace Askowl.Examples {
+#if AskowlTests
+namespace Askowl.Able.Examples {
   using System.Collections;
   using UnityEngine;
 

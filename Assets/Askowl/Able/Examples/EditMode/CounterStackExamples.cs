@@ -1,9 +1,8 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-#if AskowlAble
-namespace Askowl.Examples {
-  using NUnit.Framework;
-
+using NUnit.Framework;
+#if AskowlTests
+namespace Askowl.Able.Examples {
   public class CounterStackExamples {
     [Test] public void Instance() {
       var counter = CounterFifo.Instance;

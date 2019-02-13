@@ -1,8 +1,7 @@
-﻿#if UNITY_EDITOR && Able
+﻿using NUnit.Framework;
+#if AskowlTests
 
-namespace Askowl.Examples {
-  using NUnit.Framework;
-
+namespace Askowl.Able.Examples {
   public class CompareExamples {
     [Test] public void AlmostEqualFloatingPoint() {
       Assert.IsFalse(Compare.AlmostEqual(a: 1.1f, b: 1.2f, minimumChange: 0.1f));

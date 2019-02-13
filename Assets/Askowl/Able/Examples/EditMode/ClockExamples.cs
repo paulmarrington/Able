@@ -1,8 +1,7 @@
-﻿#if UNITY_EDITOR && Able
-namespace Askowl.Examples {
-  using System;
-  using NUnit.Framework;
-
+﻿using System;
+using NUnit.Framework;
+#if AskowlTests
+namespace Askowl.Able.Examples {
   public class ClockExamples {
     [Test] public void EpochTime() {
       DateTime dateTimeNow  = DateTime.Now;

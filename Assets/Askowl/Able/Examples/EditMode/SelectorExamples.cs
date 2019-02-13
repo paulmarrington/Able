@@ -1,10 +1,10 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-#if AskowlAble
+#if AskowlTests
 using System;
 using NUnit.Framework;
 
-namespace Askowl.Examples {
+namespace Askowl.Able.Examples {
   public class SelectorExamples {
     private readonly int[] ints   = { 0, 1, 2, 3, 4 };
     private          int[] counts = { 0, 0, 0, 0, 0 };

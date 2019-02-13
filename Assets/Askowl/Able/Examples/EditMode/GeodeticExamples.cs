@@ -1,9 +1,9 @@
-﻿#if UNITY_EDITOR && Able
+﻿#if AskowlTests
 
 using System;
 using NUnit.Framework;
 
-namespace Askowl.Examples {
+namespace Askowl.Able.Examples {
   public class GeodeticExamples {
     double[,] coords = {
       { -27.46850, 151.94379, 5, 180 }, { -27.46855, 151.94379, 5, 180 }, { -27.46851, 151.94377, 34, 0 }

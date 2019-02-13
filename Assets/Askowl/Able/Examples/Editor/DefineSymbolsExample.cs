@@ -2,8 +2,8 @@
 
 // ReSharper disable HeuristicUnreachableCode
 
-#if UNITY_EDITOR && Able
-namespace Askowl.Examples {
+#if AskowlTests
+namespace Askowl.Able.Examples {
   using System.Linq;
   using NUnit.Framework;
   using UnityEditor;

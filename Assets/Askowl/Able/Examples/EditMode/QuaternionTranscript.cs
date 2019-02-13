@@ -1,13 +1,13 @@
 ﻿//- Quaternions are truly mind-bending. Fortunately, Unity has done most of the work for us. As always, need always seems to exceed supply. The Askowl.Quaternion class adds a few extension methods with useful additions.
 
-#if UNITY_EDITOR && Able
-namespace Askowl.Examples {
+#if AskowlTests
+namespace Askowl.Able.Transcript {
   using NUnit.Framework;
   using UnityEngine;
 
   public class QuaternionTranscript {
     [Test] public void Example() {
-      Quaternion quaternion = Quaternion.Euler(x: 123, y: -55,  z: 271);
+      Quaternion quaternion  = Quaternion.Euler(x: 123, y: -55,  z: 271);
       Quaternion quaternion2 = Quaternion.Euler(x: -88, y: -122, z: -33);
       //- Rotate quaternion around an axis by a specified number of degrees then normalise. This is the same as the built-in AngleAxis, but considerable more readable and so easier to read.
       quaternion.AroundAxis(Trig.YAxis, 90.0f);

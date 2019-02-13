@@ -1,11 +1,11 @@
 ﻿//- Trees is part of the free Able library available on the Unity store. Please support my efforts by joining my Patreon group from the link below.
 //- A tree collection is effectively lists of lists. It is a popular way of representing data in a way that our minds can follow while limiting the information being reviewed at any one time. Think of directory folder structures or multi-level menu systems.
-#if AskowlAble
+#if AskowlTests
 using NUnit.Framework;
 
 // ReSharper disable MissingXmlDoc
 
-namespace Askowl.Transcript {
+namespace Askowl.Able.Transcript {
   public class TreesTranscript {
     [Test] public void TreesTranscriptSimplePasses() {
       //- It is a policy in able to use a static Instance method to create new collections. Both trees and nodes are cached to reduce excessive garbage collection usage.
