@@ -3,8 +3,8 @@
 #if AskowlTests
 using System;
 using NUnit.Framework;
-
-// ReSharper disable UnusedMember.Local
+using NUnit.Framework.Internal;
+// ReSharper disable MissingXmlDoc
 
 namespace Askowl.Able.Examples {
   using UnityEngine;
