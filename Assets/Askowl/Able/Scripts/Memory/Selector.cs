@@ -54,6 +54,9 @@ namespace Askowl {
       return next == (cycleIndex % choices.Length) ? default : choices[next];
     }
 
+    /// <a href=""></a> //#TBD#//
+    public void Top() => cycleIndex = -1;
+
     /// <a href="http://bit.ly/2OvDtMK">Used to update the choices to a new set using the same picker.</a>
     public T[] Choices {
       get => choices;
