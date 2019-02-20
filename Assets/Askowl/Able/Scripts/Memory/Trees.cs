@@ -2,13 +2,13 @@
 
 using System;
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace Askowl {
   /// <a href="http://bit.ly/2Oq9Axs">Tree Container</a>
   // ReSharper disable once ClassNeverInstantiated.Global
   public class Trees : IDisposable {
     #region Private Functionality
-
     // ReSharper disable once ClassNeverInstantiated.Global
     internal class Node : IDisposable {
       private Node() { }
@@ -62,7 +62,11 @@ namespace Askowl {
       public LinkedList<Node> Stack;
       public Trees            Tree;
 
-      public void Dispose() => Tree.here = Stack.Pop().Item;
+      public void Dispose() {
+        Debug.Log($"*** Dispose BEFORE {Tree.here}: {Stack.First.Item}"); //#DM#//
+        Tree.here = Stack.Pop();
+        Debug.Log($"*** Dispose AFTER '{Tree.here}'"); //#DM#//
+      }
 
       static Anchors() => LinkedList<Node>.DeactivateItemStatic = (node) => { };
     }
@@ -103,11 +107,9 @@ namespace Askowl {
       Failed = true;
       return this;
     }
-
     #endregion
 
     #region Public Interface
-
     /// <a href="http://bit.ly/2Rj0Qbc">Fetch a cached Trees instance</a>
     public static Trees Instance => Cache<Trees>.Instance;
 
@@ -135,7 +137,7 @@ namespace Askowl {
     public Trees Add(string path) => Walk(create: true, path: path);
 
     /// <a href="http://bit.ly/2Oq9u94">Name of node here</a>
-    public string Name => here.Name;
+    public string Name => here?.Name;
 
     /// <a href="http://bit.ly/2NTfgR0"></a>
     public object Leaf {
@@ -146,7 +148,7 @@ namespace Askowl {
       }
     }
     /// <a href="http://bit.ly/2NTfgR0">Leaf value here (null if last walk failed)</a>
-    public string Value { get => here.Leaf.ToString(); set => here.Leaf = value; }
+    public string Value { get => here?.Leaf?.ToString(); set => here.Leaf = value; }
 
     /// <a href="http://bit.ly/2NTfgR0"></a>
     public bool IsNumber {
@@ -225,7 +227,6 @@ namespace Askowl {
     }
 
     private readonly List<string> tsPath = new List<string>();
-
     #endregion
   }
 }

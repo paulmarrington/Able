@@ -2,16 +2,21 @@
 
 using System.Collections;
 using System.Text.RegularExpressions;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.TestTools;
-
 #if AskowlTests
 
 namespace Askowl.Able.Examples {
   /// Using <see cref="PlayModeTests" />
   /// <inheritdoc />
   public class PlayModeTestsExample : PlayModeTests {
+    private static string sceneName = "Askowl-Able-Examples";
+    #if UNITY_EDITOR
+    [InitializeOnLoadMethod] private static void AddSceneToBuildSettings() => AddSceneToBuildSettings(sceneName);
+    #endif
+
     /// Using <see cref="PlayModeTests.LoadScene"/>
     [UnityTest] public IEnumerator LoadScene() {
       LogAssert.Expect(LogType.Error, new Regex(@".*Nonsense Scene.*"));
@@ -22,7 +27,7 @@ namespace Askowl.Able.Examples {
 
     /// Using <see cref="PlayModeTests.Component{T}"/>
     [UnityTest] public IEnumerator ComponentT() {
-      yield return LoadScene("Askowl-Able-Examples");
+      yield return LoadScene(sceneName);
 
       var buttonTwo = Component<RectTransform>("Canvas//Button Two");
       Assert.IsNotNull(buttonTwo);
@@ -34,7 +39,7 @@ namespace Askowl.Able.Examples {
 
     /// Using <see cref="PlayModeTests.FindGameObject"/>
     [UnityTest] public IEnumerator FindGameObject() {
-      yield return LoadScene("Askowl-Able-Examples");
+      yield return LoadScene(sceneName);
 
       LogAssert.Expect(LogType.Assert, new Regex(@".*Values are equal.*"));
       FindGameObject("Button 23");
@@ -42,7 +47,7 @@ namespace Askowl.Able.Examples {
 
     /// Using <see cref="PlayModeTests.FindObject{T}"/>
     [UnityTest] public IEnumerator FindObject() {
-      yield return LoadScene("Askowl-Able-Examples");
+      yield return LoadScene(sceneName);
 
       FindObject<GameObject>("Button 23");
       LogAssert.Expect(LogType.Assert, new Regex(@".*Values are equal.*"));
@@ -50,7 +55,7 @@ namespace Askowl.Able.Examples {
 
     /// Using <see cref="PlayModeTests.IsDisplayingInUi(string, bool, int)"/>
     [UnityTest] public IEnumerator IsDisplayingInUi() {
-      yield return LoadScene("Askowl-Able-Examples");
+      yield return LoadScene(sceneName);
       yield return IsDisplayingInUi("Button One", visible: true, repeats: 10);
 
       LogAssert.Expect(LogType.Assert, new Regex(@".*IsDisplayingInUI 'Button One' failed to act as expected.*"));
@@ -59,7 +64,7 @@ namespace Askowl.Able.Examples {
 
     /// Using <see cref="PlayModeTests.PushButton(string)"/>
     [UnityTest] public IEnumerator PushButton() {
-      yield return LoadScene("Askowl-Able-Examples");
+      yield return LoadScene(sceneName);
 
       LogAssert.Expect(LogType.Assert, new Regex(@".*'Button 2367' not found.*"));
       yield return PushButton("Button 2367");
@@ -67,7 +72,7 @@ namespace Askowl.Able.Examples {
 
     /// Using <see cref="PlayModeTests.CheckPattern"/>
     [UnityTest] public IEnumerator CheckPattern() {
-      yield return LoadScene("Askowl-Able-Examples");
+      yield return LoadScene(sceneName);
 
       CheckPattern(new Regex(".*Test Pattern.*"), "This is a Test Pattern for A");
     }

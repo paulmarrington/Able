@@ -321,10 +321,20 @@ namespace Askowl {
     public Node Push(Node node) => node.MoveTo(this);
 
     /// <a href="http://bit.ly/2Ov490b">Retrieve the first list item - `Node.Recycle`</a>
-    public Node Pop() => First?.Recycle();
+    public T Pop() {
+      if (First == null) return default;
+      var item = First.Item;
+      First.Recycle();
+      return item;
+    }
 
     /// <a href="http://bit.ly/2NTD9Ih">Pull the last item from the list</a>
-    public Node Pull() => Last?.Recycle();
+    public T Pull() {
+      if (Last == null) return default;
+      var item = Last.Item;
+      Last.Recycle();
+      return item;
+    }
     #endregion
 
     #region Debugging

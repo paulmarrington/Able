@@ -1,5 +1,6 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
+using UnityEditor;
 #if AskowlTests
 namespace Askowl.Able.Examples {
   using System.Collections;
@@ -10,23 +11,27 @@ namespace Askowl.Able.Examples {
 
   /// Using <see cref="PlayModeController" /> <inheritdoc />
   public class PlayModeControllerExample : PlayModeController {
+    private static string scenePath = "Askowl-Able-Examples";
+    #if UNITY_EDITOR
+    [InitializeOnLoadMethod] private static void AddSceneToBuildSettings() => AddSceneToBuildSettings(scenePath);
+    #endif
     /// Using <see cref="PlayModeController.LoadScene"/>
     [UnityTest] public IEnumerator SceneReference() {
-      yield return LoadScene("Askowl-Able-Examples");
+      yield return LoadScene(scenePath);
 
-      Assert.AreEqual("Askowl-Able-Examples", Scene.name);
+      Assert.AreEqual(scenePath, Scene.name);
     }
 
     /// Using <see cref="PlayModeController.LoadScene"/>
     [UnityTest] public IEnumerator LoadScene() {
-      yield return LoadScene("Askowl-Able-Examples");
+      yield return LoadScene(scenePath);
 
       Assert.IsTrue(Scene.isLoaded);
     }
 
     /// Using <see cref="PlayModeController.PushButton(Button)"/>
     [UnityTest] public IEnumerator PushButton() {
-      yield return LoadScene("Askowl-Able-Examples");
+      yield return LoadScene(scenePath);
 
       var button = Components.Find<Button>("Button One");
 
@@ -37,7 +42,7 @@ namespace Askowl.Able.Examples {
 
     /// Using <see cref="PlayModeController.IsDisplayingInUI"/>
     [UnityTest] public IEnumerator IsDisplayingInUI() {
-      yield return LoadScene("Askowl-Able-Examples");
+      yield return LoadScene(scenePath);
 
       var rectTransform = Components.Find<RectTransform>("Button Two");
       var transform     = rectTransform.gameObject.transform;

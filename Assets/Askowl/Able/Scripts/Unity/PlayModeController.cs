@@ -14,11 +14,21 @@ namespace Askowl {
     protected Scene Scene;
 
     /// <a href="http://bit.ly/2NZbbe8">Load a scene by name (must be in build)</a>
-    protected virtual IEnumerator LoadScene(string path) {
-      var handle = SceneManager.LoadSceneAsync(sceneName: path, mode: LoadSceneMode.Single);
+    protected virtual IEnumerator LoadScene(string sceneName) {
+      if (!Application.CanStreamedLevelBeLoaded(sceneName)) {
+        Debug.Log( //throw new Exception(
+          $@"Add the following to your file:
+          private static string sceneName = ""{sceneName}"";
+          #if UNITY_EDITOR
+          [InitializeOnLoadMethod] private static void AddSceneToBuildSettings() => AddSceneToBuildSettings(sceneName);
+          #endif
+          ");
+      }
+      var handle = SceneManager.LoadSceneAsync(sceneName: sceneName, mode: LoadSceneMode.Single);
       if (handle == null) yield break;
       while (!handle.isDone) yield return null;
       Scene = SceneManager.GetActiveScene();
+      yield return null;
     }
 
     /// <a href=""></a> //#TBD#//

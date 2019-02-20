@@ -1,19 +1,24 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
+using System;
+using System.Collections;
+using NUnit.Framework;
+using UnityEditor;
+using UnityEngine;
+using UnityEngine.TestTools;
+using UnityEngine.UI;
 #if AskowlTests
 namespace Askowl.Able.Examples {
-  using System;
-  using System.Collections;
-  using NUnit.Framework;
-  using UnityEngine;
-  using UnityEngine.TestTools;
-  using UnityEngine.UI;
-
   /// Using <see cref="T:Askowl.Components" /> <inheritdoc />
   public class ComponentsExample : PlayModeTests {
+    private static string scenePath = "Askowl-Able-Examples";
+    #if UNITY_EDITOR
+    [InitializeOnLoadMethod] private static void AddSceneToBuildSettings() => AddSceneToBuildSettings(scenePath);
+    #endif
+
     /// Using <see cref="Components.Find{T}(string)"/>
     [UnityTest] public IEnumerator FindPath() {
-      yield return LoadScene("Askowl-Able-Examples");
+      yield return LoadScene(scenePath);
 
       // No path, starts at root
       var text = Components.Find<Text>();
@@ -37,7 +42,7 @@ namespace Askowl.Able.Examples {
 
     /// Using <see cref="Components.Find{T}(GameObject, string[])"/>
     [UnityTest] public IEnumerator FindGameObjectPath() {
-      yield return LoadScene("Askowl-Able-Examples");
+      yield return LoadScene(scenePath);
 
       // if we know the parent object we can start from there.
       var canvas = GameObject.Find("Canvas");
@@ -47,7 +52,7 @@ namespace Askowl.Able.Examples {
 
     /// Using <see cref="Components.Create{T}"/>
     [UnityTest] public IEnumerator Create() {
-      yield return LoadScene("Askowl-Able-Examples");
+      yield return LoadScene(scenePath);
 
       // create a root GameObject with the specified name and add component
       var text = Components.Create<Text>("Canvas/New Path/Created Text");
@@ -57,7 +62,7 @@ namespace Askowl.Able.Examples {
 
     /// Using <see cref="Components.Establish{T}"/>
     [UnityTest] public IEnumerator Establish() {
-      yield return LoadScene("Askowl-Able-Examples");
+      yield return LoadScene(scenePath);
 
       // First we create, then we retrieve again
       string path = $"Canvas/{Guid.NewGuid().ToString()}";

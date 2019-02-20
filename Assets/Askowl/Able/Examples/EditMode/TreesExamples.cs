@@ -7,15 +7,13 @@ namespace Askowl.Able.Examples {
   /// Using <see cref="Trees"/>
   public class TreesExamples {
     /// Using <see cref="Trees"/>
-    [Test]
-    public void Instance() {
+    [Test] public void Instance() {
       var tree = Trees.Instance;
       Assert.IsNotNull(tree);
     }
 
     /// Using <see cref="Trees.Root"/>
-    [Test]
-    public void Root() {
+    [Test] public void Root() {
       var tree = Trees.Instance.Add("OneOffRoot");
       Assert.IsTrue(tree.Next("OneOffRoot").Failed);
 
@@ -27,8 +25,7 @@ namespace Askowl.Able.Examples {
     }
 
     /// Using <see cref="Trees.IsRoot"/>
-    [Test]
-    public void IsRoot() {
+    [Test] public void IsRoot() {
       var tree = Trees.Instance;
 
       Assert.IsTrue(tree.IsRoot);
@@ -39,8 +36,7 @@ namespace Askowl.Able.Examples {
     }
 
     /// Using <see cref="Trees.Failed"/>
-    [Test]
-    public void Failed() {
+    [Test] public void Failed() {
       var tree = Trees.Instance.Add("A.B.C");
       tree.To("A.C");
       Assert.IsTrue(tree.Failed);
@@ -50,8 +46,7 @@ namespace Askowl.Able.Examples {
     }
 
     /// Using <see cref="Trees.To"/>
-    [Test]
-    public void To() {
+    [Test] public void To() {
       var tree = Trees.Instance.Add("A.B.C");
       // `To` can split on `.`. This example starts from root
       Assert.AreEqual("C", tree.To("A.B.C").Name);
@@ -60,8 +55,7 @@ namespace Askowl.Able.Examples {
     }
 
     /// Using <see cref="Trees.Next"/>
-    [Test]
-    public void Next() {
+    [Test] public void Next() {
       var tree = Trees.Instance.Add("A.B.C");
       // Next is relative to the current tree location
       tree.To("A").Next("B");
@@ -69,8 +63,7 @@ namespace Askowl.Able.Examples {
     }
 
     /// Using <see cref="Trees.Add"/>
-    [Test]
-    public void Add() {
+    [Test] public void Add() {
       var tree = Trees.Instance.Add("A.B");
       tree.Add("D");
       // `Add` is always relative to the current location
@@ -80,8 +73,7 @@ namespace Askowl.Able.Examples {
     }
 
     /// Using <see cref="Trees.Name"/>
-    [Test]
-    public void Name() {
+    [Test] public void Name() {
       var tree = Trees.Instance.Add("IamHere");
       // Tree name is the name of the current node
       Assert.AreEqual("IamHere", tree.Name);
@@ -90,8 +82,7 @@ namespace Askowl.Able.Examples {
     }
 
     /// Using <see cref="Trees.Leaf"/>
-    [Test]
-    public void Leaf() {
+    [Test] public void Leaf() {
       var tree = Trees.Instance.Add("IamHere");
       Assert.IsNull(tree.Leaf);
       tree.Leaf = "a string value";
@@ -99,8 +90,7 @@ namespace Askowl.Able.Examples {
     }
 
     /// Using <see cref="Trees.Value"/>
-    [Test]
-    public void Value() {
+    [Test] public void Value() {
       var tree = Trees.Instance.Add("IamHere");
       Assert.IsNull(tree.Leaf);
       tree.Leaf = "a string value";
@@ -108,8 +98,7 @@ namespace Askowl.Able.Examples {
     }
 
     /// Using <see cref="Trees.IsNumber"/>
-    [Test]
-    public void IsNumber() {
+    [Test] public void IsNumber() {
       var tree = Trees.Instance.Add("IamHere");
       tree.Leaf = "22";
       Assert.IsTrue(tree.IsNumber);
@@ -124,8 +113,7 @@ namespace Askowl.Able.Examples {
     }
 
     /// Using <see cref="Trees.Long"/>
-    [Test]
-    public void Long() {
+    [Test] public void Long() {
       var tree = Trees.Instance.Add("IamHere");
       tree.Leaf = "22";
       Assert.AreEqual(expected: 22, actual: tree.Long);
@@ -138,8 +126,7 @@ namespace Askowl.Able.Examples {
     }
 
     /// Using <see cref="Trees.Double"/>
-    [Test]
-    public void Double() {
+    [Test] public void Double() {
       var tree = Trees.Instance.Add("IamHere");
       tree.Leaf = "22";
       Assert.AreEqual(expected: 22, actual: tree.Double);
@@ -150,8 +137,7 @@ namespace Askowl.Able.Examples {
     }
 
     /// Using <see cref="Trees.Boolean"/>
-    [Test]
-    public void Boolean() {
+    [Test] public void Boolean() {
       var tree = Trees.Instance.Add("IamHere");
       tree.Leaf = "false";
       Assert.IsFalse(tree.Boolean);
@@ -162,8 +148,7 @@ namespace Askowl.Able.Examples {
     }
 
     /// Using <see cref="Trees.IsNull"/>
-    [Test]
-    public void IsNull() {
+    [Test] public void IsNull() {
       var tree = Trees.Instance.Add("IamHere");
       Assert.IsTrue(tree.IsNull);
       tree.Leaf = "null";
@@ -177,8 +162,7 @@ namespace Askowl.Able.Examples {
     }
 
     /// Using <see cref="Trees.this[object]"/>
-    [Test]
-    public void ArrayUpdate() {
+    [Test] public void ArrayUpdate() {
       var tree = Trees.Instance.Add("A.B.C");
       // Update the current node leaf
       tree.Leaf = "Leaf Update";
@@ -189,8 +173,7 @@ namespace Askowl.Able.Examples {
     }
 
     /// Using <see cref="Trees.Dispose"/>
-    [Test]
-    public void Dispose() {
+    [Test] public void Dispose() {
       var tree = Trees.Instance.Add("A.B.C");
       // drop everything form and including the current Node
       tree.To("A.B")?.Dispose();
@@ -200,9 +183,9 @@ namespace Askowl.Able.Examples {
     }
 
     /// Using <see cref="Trees.Anchor"/>
-    [Test]
-    public void Anchor() {
+    [Test] public void Anchor() {
       var tree = Trees.Instance.Add("A.B.C");
+      Assert.AreEqual("C", tree.Name);
 
       // `using` with `Tree`
       using (tree.Anchor()) tree.To("A");
@@ -212,23 +195,20 @@ namespace Askowl.Able.Examples {
     }
 
     /// Using <see cref="Trees.Children"/>
-    [Test]
-    public void Children() {
+    [Test] public void Children() {
       var tree = Trees.Instance.Add("A.B.C1..C2..C3").To("A.B");
       // Retrieve the names of branches, leaves and arrays under the current branch
       Assert.AreEqual("C1,C2,C3", Csv.ToString(tree.Children));
     }
 
     /// Using <see cref="Trees.FirstChild"/>
-    [Test]
-    public void FirstChild() {
+    [Test] public void FirstChild() {
       var tree = Trees.Instance.Add("A.B.C1..C2..C3").To("A.B");
       Assert.AreEqual("C1", tree.FirstChild);
     }
 
     /// Using <see cref="Trees.NextChild"/>
-    [Test]
-    public void NextChild() {
+    [Test] public void NextChild() {
       var tree   = Trees.Instance.Add("A.B.C1..C2..C3").To("A.B");
       var actual = "";
 
@@ -238,16 +218,14 @@ namespace Askowl.Able.Examples {
     }
 
     /// Using <see cref="Trees.Key"/>
-    [Test]
-    public void Key() {
+    [Test] public void Key() {
       var tree = Trees.Instance.Add("A.B.C");
       // The string is the path from the root to the current node
       Assert.AreEqual("A.B.C", tree.Key);
     }
 
     /// Using <see cref="Trees.ToString"/>
-    [Test]
-    public new void ToString() {
+    [Test] public new void ToString() {
       var tree = Trees.Instance.Add("A.B.C");
       tree.Leaf = 333;
       // Value of the current Leaf as a string

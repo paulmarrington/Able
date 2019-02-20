@@ -1,5 +1,6 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
+using UnityEditor;
 #if AskowlTests
 namespace Askowl.Able.Examples {
   using System.Collections;
@@ -12,11 +13,15 @@ namespace Askowl.Able.Examples {
   /// Using <see cref="Log" /><inheritdoc />
   public class LogExamples : PlayModeTests {
     private const  string              sceneName = "Askowl-Able-Examples";
-    private static Log.MessageRecorder log       = Log.Messages();
-    private static Log.EventRecorder   warning   = Log.Warnings("Warning");
-    private static Log.EventRecorder   logEvent  = Log.Events(action: "Lost Health");
-    private static Log.EventRecorder   todo      = Log.Warnings(action: "Todo");
-    private static Log.EventRecorder   error     = Log.Errors();
+    private static readonly Log.MessageRecorder log       = Log.Messages();
+    private static readonly Log.EventRecorder   warning   = Log.Warnings("Warning");
+    private static readonly Log.EventRecorder   logEvent  = Log.Events(action: "Lost Health");
+    private static readonly Log.EventRecorder   todo      = Log.Warnings(action: "Todo");
+    private static readonly Log.EventRecorder   error     = Log.Errors();
+
+    #if UNITY_EDITOR
+    [InitializeOnLoadMethod] private static void AddSceneToBuildSettings() => AddSceneToBuildSettings(sceneName);
+    #endif
 
     /// Using <see cref="Log.Messages"/>
     [UnityTest] public IEnumerator Messages() {

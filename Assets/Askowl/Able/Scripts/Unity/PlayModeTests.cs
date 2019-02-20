@@ -17,9 +17,9 @@ namespace Askowl {
      */
 
     /// <a href="http://bit.ly/2NZZYKj">Load scene. Assert on failure</a> <inheritdoc />
-    protected override IEnumerator LoadScene(string path) {
-      yield return base.LoadScene(path);
-      CheckPattern(new Regex($"^({Scene.name}|.*/{Scene.name})"), path);
+    protected override IEnumerator LoadScene(string sceneName) {
+      yield return base.LoadScene(sceneName);
+      CheckPattern(new Regex($"^({Scene.name}|.*/{Scene.name})"), sceneName);
     }
 
     /// <a href="http://bit.ly/2NTezHo">Components.Find, assert on failure</a>

@@ -18,7 +18,6 @@ namespace Askowl.Able.Examples {
     [Test] public void Example() {
       var myClass = Cache<AgnosticClass>.Instance;
       using (Cache<AgnosticClass>.Disposable(myClass)) { myClass.State = "Used"; }
-      Debug.Log(myClass.State);
     }
 
     public sealed class AgnosticClassProcessed {
@@ -29,11 +28,11 @@ namespace Askowl.Able.Examples {
       public string State { get; private set; }
 
       // A struct is useless in a cache if not initialised
-      private static MyStruct CreateItem() => new MyStruct { State = "StructCreated" };
+      private static MyStruct CreateItem() => new MyStruct {State = "StructCreated"};
     }
 
     private class Aware : IDisposable {
-      private static Aware CreateItem()     => new Aware { State = "Created" };
+      private static Aware CreateItem()     => new Aware {State = "Created"};
       private        void  DeactivateItem() => State = "Deactivated";
       private        void  ReactivateItem() => State += "Reactivated";
 
@@ -82,7 +81,7 @@ namespace Askowl.Able.Examples {
       Cache<AgnosticClassProcessed>.Entries.Destroy();
 
       // This would normally be in a static constructor. It only need be run once
-      Cache<AgnosticClassProcessed>.CreateItem = () => new AgnosticClassProcessed { State = "CreateItemStatic" };
+      Cache<AgnosticClassProcessed>.CreateItem = () => new AgnosticClassProcessed {State = "CreateItemStatic"};
 
       var agnosticClass = Cache<AgnosticClassProcessed>.Instance;
 
@@ -94,7 +93,7 @@ namespace Askowl.Able.Examples {
     [Test] public void DeactivateItemStatic() {
       Cache<AgnosticClassProcessed>.Entries.Destroy();
       // This would normally be in a static constructor. It only need be run once
-      Cache<AgnosticClassProcessed>.CreateItem     = () => new AgnosticClassProcessed { State = "CreateStatic" };
+      Cache<AgnosticClassProcessed>.CreateItem     = () => new AgnosticClassProcessed {State = "CreateStatic"};
       Cache<AgnosticClassProcessed>.DeactivateItem = (item) => item.State =  "AgnosticDeactivateItem";
       Cache<AgnosticClassProcessed>.ReactivateItem = (item) => item.State += " AgnosticReactivateItem";
 
@@ -112,7 +111,7 @@ namespace Askowl.Able.Examples {
 
       // This would normally be in a static constructor. It only need be run once
       Cache<AgnosticClassProcessed>.CreateItem =
-        () => new AgnosticClassProcessed { State = "CreateStatic" };
+        () => new AgnosticClassProcessed {State = "CreateStatic"};
 
       Cache<AgnosticClassProcessed>.DeactivateItem = (item) => item.State =  "SealedDeactivateItem";
       Cache<AgnosticClassProcessed>.ReactivateItem = (item) => item.State += " SealedReactivateItem";
