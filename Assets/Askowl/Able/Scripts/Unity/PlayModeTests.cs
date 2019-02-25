@@ -1,7 +1,9 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
 using System.Collections;
+using System.IO;
 using System.Text.RegularExpressions;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;

@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 namespace Askowl {
   /// <a href="http://bit.ly/2Oq9Axs">Tree Container</a>
@@ -62,11 +61,7 @@ namespace Askowl {
       public LinkedList<Node> Stack;
       public Trees            Tree;
 
-      public void Dispose() {
-        Debug.Log($"*** Dispose BEFORE {Tree.here}: {Stack.First.Item}"); //#DM#//
-        Tree.here = Stack.Pop();
-        Debug.Log($"*** Dispose AFTER '{Tree.here}'"); //#DM#//
-      }
+      public void Dispose() => Tree.here = Stack.Pop();
 
       static Anchors() => LinkedList<Node>.DeactivateItemStatic = (node) => { };
     }
@@ -115,6 +110,9 @@ namespace Askowl {
 
     /// <a href="http://bit.ly/2Oq9u94">Set if last search did not succeed</a>
     public bool Failed { get; private set; }
+
+    /// <a href=""></a> //#TBD#//
+    public bool Found => !Failed;
 
     /// <a href="http://bit.ly/2RezGSC">Set if here is root</a>
     public bool IsRoot => here == root;

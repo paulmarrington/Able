@@ -20,14 +20,13 @@ namespace Askowl {
 
       if (!SkipWhiteSpace()) return this;
 
-      if (json[idx] == '{') { ParseToNode(); }
-      else { ParseOneEntryToNode(); }
+      if (json[idx] == '{') { ParseToNode(); } else { ParseOneEntryToNode(); }
 
       return this;
     }
 
-    /// <a href="http://bit.ly/2NX3NjD">Clear deserialised JSON tree</a> <inheritdoc />
-    public void Dispose() { tree.Dispose(); }
+    /// <a href="http://bit.ly/2NX3NjD">Clear deserialized JSON tree</a> <inheritdoc />
+    public void Dispose() => tree.Dispose();
 
     /// <a href="http://bit.ly/2NX3NjD">Retrieve the current node in the parsed JSON tree</a>
     public Trees Node => tree;
@@ -39,7 +38,7 @@ namespace Askowl {
     private string json = "";
     private int    idx;
 
-    private StringBuilder builder = new StringBuilder();
+    private readonly StringBuilder builder = new StringBuilder();
     #endregion
 
     #region Parsing

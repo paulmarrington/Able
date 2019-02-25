@@ -13,10 +13,10 @@
   }
  */
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 
@@ -82,19 +82,10 @@ namespace Askowl {
                         .selectedBuildTargetGroup)
                     .Split(';').ToList();
 
-    private static void Save(List<string> defines) =>
+    private static void Save(List<string> defines) {
+      var asText = string.Join(separator: ";", value: defines.ToArray());
       PlayerSettings.SetScriptingDefineSymbolsForGroup(
-        targetGroup: EditorUserBuildSettings.selectedBuildTargetGroup,
-        defines: string.Join(separator: ";", value: defines.ToArray()));
-  }
-
-  /// <inheritdoc />
-  [InitializeOnLoad] public sealed class SetProjectName : DefineSymbols {
-    static SetProjectName() {
-      var    dataPath    = Application.dataPath.Split('/');
-      string projectName = dataPath[dataPath.Length - 2];
-      AddDefines(Regex.Replace(projectName,                "[^A-Za-z0-9_]", ""));
-      AddDefines(Regex.Replace(PlayerSettings.productName, "[^A-Za-z0-9_]", ""));
+        targetGroup: EditorUserBuildSettings.selectedBuildTargetGroup, defines: asText);
     }
   }
 }
