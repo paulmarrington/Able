@@ -23,7 +23,7 @@ namespace Askowl.Able.Transcript {
       tree = Trees.Instance.Add("Australia.Queensland.Brisbane.The Gap");
 
       //- When walking a tree, Failed will see if we are lost
-      Assert.IsFalse(tree.To("Australia.Brisbane").Failed);
+      Assert.IsTrue(tree.To("Australia.Brisbane").Failed);
 
       //- To always starts from the root. Use Next to continue a walk
       tree.To("Australia.Queensland").Next("Brisbane.The Gap");
@@ -34,7 +34,7 @@ namespace Askowl.Able.Transcript {
       //- The path can include movement backwards with empty locations (..)
       Assert.IsFalse(tree.To("Australia.Queensland.Brisbane...Queensland").Failed);
       tree.To("Australia.Queensland.Brisbane.The Gap");
-      Assert.IsFalse(tree.Next(".The Gap").Failed);
+      Assert.IsFalse(tree.Next("..The Gap").Failed);
 
       //- Just as Name names the current node, Key provides the full path from the root
       Assert.AreEqual("Australia.Queensland.Brisbane.The Gap", tree.Key);
@@ -54,14 +54,14 @@ namespace Askowl.Able.Transcript {
       Assert.IsFalse(tree.IsNull);
 
       //- Use array access where it is more convenient
-      Assert.AreEqual(tree.To("Australia.Queensland").Leaf, tree.To("Australia")["Brisbane"]);
+      Assert.AreEqual(tree.To("Australia.Queensland").Leaf, tree.To("Australia")["Queensland"]);
 
       //- Use Dispose to remove everything from and including the current node'
       tree.To("Australia.Queensland").Dispose();
 
       //- When traversing the contents of a tree it is useful to save amd restore locations
       tree = Trees.Instance.Add("a.b.c.d");
-      tree.Add("a.b.c2.d2");
+      tree.Root().Add("a.b.c2.d2");
       using (tree.Anchor("a.b")) {
         tree.Next("c.d");
       }
@@ -73,7 +73,7 @@ namespace Askowl.Able.Transcript {
       //- and to walk the structure. Use anchor to walk more than one level
       var c = "";
 
-      for (var name = tree.Root().FirstChild; name != null; name = tree.NextChild) c += name;
+      for (var name = tree.To("a.b").FirstChild; name != null; name = tree.NextChild) c += name;
 
       Assert.AreEqual("cc2", c);
     }
