@@ -57,8 +57,12 @@ namespace Askowl.Fibers.Examples {
 
     /// When "Example Scene" button is pressed
     public void ExampleSceneButton() {
+      #if AskowlTests
       if (!Application.CanStreamedLevelBeLoaded(exampleScene)) PlayModeController.AddSceneToBuildSettings(exampleScene);
       SceneManager.LoadScene(exampleScene);
+      #else
+      Debug.LogError("Enable integrity tests below please");
+      #endif
     }
   }
 
