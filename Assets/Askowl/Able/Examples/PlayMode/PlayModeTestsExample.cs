@@ -6,7 +6,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.TestTools;
-#if AskowlTests
+#if !ExcludeAskowlTests
 
 namespace Askowl.Able.Examples {
   /// Using <see cref="PlayModeTests" />

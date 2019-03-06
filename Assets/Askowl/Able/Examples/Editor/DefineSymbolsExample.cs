@@ -6,7 +6,7 @@
 //using NUnit.Framework;
 //using UnityEditor;
 //// ReSharper disable MissingXmlDoc
-//#if AskowlTests
+//#if !ExcludeAskowlTests
 //namespace Askowl.Able.Examples {
 //  public sealed class DefineSymbolsExample {
 //    [Test] public void DefineSymbolsSimplePasses() {

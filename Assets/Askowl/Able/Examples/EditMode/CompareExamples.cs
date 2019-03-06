@@ -1,5 +1,5 @@
 ﻿using NUnit.Framework;
-#if AskowlTests
+#if !ExcludeAskowlTests
 
 namespace Askowl.Able.Examples {
   public class CompareExamples {

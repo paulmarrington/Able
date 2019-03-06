@@ -3,7 +3,7 @@
 // ReSharper disable MissingXmlDoc
 using NUnit.Framework;
 using UnityEngine;
-#if AskowlTests
+#if !ExcludeAskowlTests
 namespace Askowl.Able.Examples {
   public class ExponentialMovingAverageExamples {
     [Test] public void AverageValue() {

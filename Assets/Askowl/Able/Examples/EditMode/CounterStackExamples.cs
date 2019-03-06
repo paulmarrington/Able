@@ -1,7 +1,7 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
 using NUnit.Framework;
-#if AskowlTests
+#if !ExcludeAskowlTests
 namespace Askowl.Able.Examples {
   public class CounterStackExamples {
     [Test] public void Instance() {

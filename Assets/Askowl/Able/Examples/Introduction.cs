@@ -23,7 +23,7 @@ namespace Askowl.Fibers.Examples {
 
     private void Start() {
       inStart = true;
-      #if AskowlTests
+      #if !ExcludeAskowlTests
       testsAvailable.isOn = true;
       #else
       testsAvailable.isOn = false;
@@ -57,7 +57,7 @@ namespace Askowl.Fibers.Examples {
 
     /// When "Example Scene" button is pressed
     public void ExampleSceneButton() {
-      #if AskowlTests
+      #if !ExcludeAskowlTests
       if (!Application.CanStreamedLevelBeLoaded(exampleScene)) PlayModeController.AddSceneToBuildSettings(exampleScene);
       SceneManager.LoadScene(exampleScene);
       #else
@@ -73,7 +73,7 @@ namespace Askowl.Fibers.Examples {
       if (state == PlayModeStateChange.EnteredEditMode) {
         using (var json = Json.Instance.Parse(File.ReadAllText("Assets/Askowl/Able/Configuration.json"))) {
           var enableTests = json.Node.To("EnableTesting").Found && (json.Node.Long == 1);
-          AddOrRemoveDefines(enableTests, "AskowlTests");
+          AddOrRemoveDefines(!enableTests, "ExcludeAskowlTests");
         }
       }
     }

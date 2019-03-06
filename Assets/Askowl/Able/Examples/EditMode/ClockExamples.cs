@@ -1,6 +1,6 @@
 ﻿using System;
 using NUnit.Framework;
-#if AskowlTests
+#if !ExcludeAskowlTests
 namespace Askowl.Able.Examples {
   public class ClockExamples {
     [Test] public void EpochTime() {

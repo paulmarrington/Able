@@ -7,7 +7,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
-#if AskowlTests
+#if !ExcludeAskowlTests
 namespace Askowl.Able.Examples {
   /// Using <see cref="T:Askowl.Components" /> <inheritdoc />
   public class ComponentsExample : PlayModeTests {

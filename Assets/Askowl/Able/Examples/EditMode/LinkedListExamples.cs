@@ -1,6 +1,6 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
-#if AskowlTests
+#if !ExcludeAskowlTests
 
 // ReSharper disable MemberCanBePrivate.Local disable UnusedAutoPropertyAccessor.Local
 // ReSharper disable StaticMemberInGenericType disable ClassNeverInstantiated.Global disable MissingXmlDoc disable UnusedMember.Local disable MemberHidesStaticFromOuterClass

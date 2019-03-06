@@ -1,6 +1,6 @@
 ﻿//- It is time for a simple one - trigonometry functions to make some of our Unity scripting a bit easier. Trigonometry is about triangles. For us that translates into distance and direction.
 
-#if AskowlTests
+#if !ExcludeAskowlTests
 namespace Askowl.Able.Transcript {
   using NUnit.Framework;
   using UnityEngine;

@@ -1,6 +1,6 @@
 ﻿//- If you are developing for augmented reality over distances larger than a room then you will be using GPS, Compass/Magnetometer and other instruments for location and direction. Any calculation for direction and distance between two or more points will need to take into account the curvature of the earth's surface. The branch of mathematics for these calculations is called Geodesy. Able provides a set of basic calculations in the Geodetic class.
 
-#if AskowlTests
+#if !ExcludeAskowlTests
 namespace Askowl.Able.Examples {
   using NUnit.Framework;
 

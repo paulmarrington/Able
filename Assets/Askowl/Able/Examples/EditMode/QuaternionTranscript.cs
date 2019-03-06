@@ -1,6 +1,6 @@
 ﻿//- Quaternions are truly mind-bending. Fortunately, Unity has done most of the work for us. As always, need always seems to exceed supply. The Askowl.Quaternion class adds a few extension methods with useful additions.
 
-#if AskowlTests
+#if !ExcludeAskowlTests
 namespace Askowl.Able.Transcript {
   using NUnit.Framework;
   using UnityEngine;
