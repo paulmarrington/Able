@@ -22,6 +22,14 @@ namespace Askowl {
     public List<Substitution> substitutions = new List<Substitution>();
 
     /// <a href=""></a> //#TBD#//
+    public Template Substitute(string[] substitutePairs) {
+      for (int i = 0; i < substitutePairs.Length; i += 2) {
+        Substitute(substitutePairs[0], substitutePairs[1]);
+      }
+      return this;
+    }
+
+    /// <a href=""></a> //#TBD#//
     public Template Substitute(string regex, object with) => Substitute(regex, _ => with.ToString());
 
     /// <a href=""></a> //#TBD#//
