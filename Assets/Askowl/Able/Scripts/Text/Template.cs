@@ -2,11 +2,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Askowl {
   /// <a href=""></a> //#TBD#//
   public class Template : IDisposable {
+    protected string result;
+
     /// <a href=""></a> //#TBD#//
     public static Template Instance => Cache<Template>.Instance;
 
@@ -22,15 +25,10 @@ namespace Askowl {
     public List<Substitution> substitutions = new List<Substitution>();
 
     /// <a href=""></a> //#TBD#//
-    public Template Substitute(string[] substitutePairs) {
-      for (int i = 0; i < substitutePairs.Length; i += 2) {
-        Substitute(substitutePairs[0], substitutePairs[1]);
-      }
+    public Template From(string text) {
+      result = text;
       return this;
     }
-
-    /// <a href=""></a> //#TBD#//
-    public Template Substitute(string regex, object with) => Substitute(regex, _ => with.ToString());
 
     /// <a href=""></a> //#TBD#//
     public Template Substitute(string regex, MatchEvaluator with) {
@@ -39,17 +37,71 @@ namespace Askowl {
     }
 
     /// <a href=""></a> //#TBD#//
-    public string Process(string text) {
+    public Template Substitute(string regex, object with) => Substitute(regex, _ => with.ToString());
+
+    /// <a href=""></a> //#TBD#//
+    public Template And(string regex, MatchEvaluator with) => Substitute(regex, with);
+
+    /// <a href=""></a> //#TBD#//
+    public Template And(string regex, object with) => Substitute(regex, with);
+
+    /// <a href=""></a> //#TBD#//
+    public string Result() {
       for (int i = 0; i < substitutions.Count; i++) {
-        text = substitutions[i].Regex.Replace(text, substitutions[i].With);
+        result = substitutions[i].Regex.Replace(result, substitutions[i].With);
       }
-      return text;
+      return result;
     }
 
+    /// <a href=""></a> //#TBD#//
+    public virtual void Add() { }
+
+    /// <a href=""></a> //#TBD#//
+    public virtual bool More() => false;
+
     /// <inheritdoc />
-    public void Dispose() {
+    public virtual void Dispose() {
       substitutions.Clear();
       Cache<Template>.Dispose(this);
     }
+
+    #region Inner Template
+    private class InnerTemplate : Template {
+      internal         Regex         regex;
+      internal         Match         match;
+      private          string        template;
+      private readonly StringBuilder builder = new StringBuilder();
+      internal         Template      parent;
+
+      public override void Add() {
+        builder.Append(From(template).Result());
+        substitutions.Clear();
+        match.NextMatch();
+      }
+
+      public override bool More() {
+        if (builder.Length > 0) {
+          result = $"{result.Substring(0, match.Index)}{builder}{result.Substring(match.Index + match.Length)}";
+          builder.Clear();
+        }
+        if (!match.Success || (match.Groups.Count < 2)) return false;
+        template = match.Groups[1].Value;
+        return true;
+      }
+
+      public override void Dispose() {
+        parent.result = regex.Replace(parent.result, Result());
+        base.Dispose();
+      }
+    }
+    /// <a href=""></a> //#TBD#//
+    public Template Inner(string regex) {
+      var inner = Cache<InnerTemplate>.Instance;
+      inner.parent = this;
+      inner.regex  = new Regex(regex, RegexOptions.Multiline);
+      inner.match  = inner.regex.Match(result);
+      return inner;
+    }
+    #endregion
   }
 }
