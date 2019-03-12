@@ -8,7 +8,8 @@ using System.Text.RegularExpressions;
 namespace Askowl {
   /// <a href=""></a> //#TBD#//
   public class Template : IDisposable {
-    protected string result;
+    /// <a href=""></a> //#TBD#//
+    protected string result = "";
 
     /// <a href=""></a> //#TBD#//
     public static Template Instance => Cache<Template>.Instance;
@@ -62,6 +63,7 @@ namespace Askowl {
     /// <inheritdoc />
     public virtual void Dispose() {
       substitutions.Clear();
+      result = "";
       Cache<Template>.Dispose(this);
     }
 
@@ -90,7 +92,7 @@ namespace Askowl {
       }
 
       public override void Dispose() {
-        parent.result = regex.Replace(parent.result, Result());
+        parent.result = regex.Replace(parent.result, result);
         base.Dispose();
       }
     }
