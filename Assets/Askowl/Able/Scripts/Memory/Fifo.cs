@@ -1,6 +1,7 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
 using System;
+using System.Linq;
 
 namespace Askowl {
   /// <a href="http://bit.ly/2NTA5Ml">Intentionally simple stack implementation</a>

@@ -19,7 +19,7 @@ namespace Askowl {
       /// <a href=""></a> //#TBD#//
       public Regex Regex;
       /// <a href=""></a> //#TBD#//
-      public MatchEvaluator With;
+      public string With;
     }
 
     /// <a href=""></a> //#TBD#//
@@ -32,22 +32,36 @@ namespace Askowl {
     }
 
     /// <a href=""></a> //#TBD#//
-    public Template Substitute(string regex, MatchEvaluator with) {
-      substitutions.Add(new Substitution {Regex = new Regex(regex, RegexOptions.Multiline), With = with});
+    public Template Substitute(string regex, string with) =>
+      Substitute(new Regex(regex, RegexOptions.Singleline), with);
+
+    /// <a href=""></a> //#TBD#//
+    public Template Substitute(Regex regex, string with) {
+      substitutions.Add(new Substitution {Regex = regex, With = with});
       return this;
     }
 
     /// <a href=""></a> //#TBD#//
-    public Template Substitute(string regex, object with) => Substitute(regex, _ => with.ToString());
+    public Template Substitute(string regex, object with) => Substitute(regex, with.ToString());
 
     /// <a href=""></a> //#TBD#//
-    public Template And(string regex, MatchEvaluator with) => Substitute(regex, with);
+    public Template Substitute(Regex regex, object with) => Substitute(regex, with.ToString());
+
+    /// <a href=""></a> //#TBD#//
+    public Template And(string regex, string with) => Substitute(regex, with);
 
     /// <a href=""></a> //#TBD#//
     public Template And(string regex, object with) => Substitute(regex, with);
 
     /// <a href=""></a> //#TBD#//
+    public Template And(Regex regex, string with) => Substitute(regex, with);
+
+    /// <a href=""></a> //#TBD#//
+    public Template And(Regex regex, object with) => Substitute(regex, with);
+
+    /// <a href=""></a> //#TBD#//
     public string Result() {
+      if (string.IsNullOrWhiteSpace(result)) return "";
       for (int i = 0; i < substitutions.Count; i++) {
         result = substitutions[i].Regex.Replace(result, substitutions[i].With);
       }
@@ -70,40 +84,50 @@ namespace Askowl {
     #region Inner Template
     private class InnerTemplate : Template {
       internal         Regex         regex;
-      internal         Match         match;
       private          string        template;
       private readonly StringBuilder builder = new StringBuilder();
       internal         Template      parent;
+      internal readonly List<(int left, int right, string value)> matches =
+        new List<(int left, int right, string value)>();
+      internal int match;
 
       public override void Add() {
         builder.Append(From(template).Result());
         substitutions.Clear();
-        match.NextMatch();
       }
 
       public override bool More() {
-        if (builder.Length > 0) {
-          result = $"{result.Substring(0, match.Index)}{builder}{result.Substring(match.Index + match.Length)}";
+        if (match < matches.Count) {
+          var left  = parent.result.Substring(0, matches[match].left);
+          var right = parent.result.Substring(matches[match].right);
+          parent.result = $"{left}{builder}{right}";
           builder.Clear();
         }
-        if (!match.Success || (match.Groups.Count < 2)) return false;
-        template = match.Groups[1].Value;
+        if (--match < 0) return false;
+        template = matches[match].value;
         return true;
       }
 
       public override void Dispose() {
-        parent.result = regex.Replace(parent.result, result);
+        if (!string.IsNullOrWhiteSpace(result)) parent.result = regex.Replace(parent.result, result);
         base.Dispose();
       }
     }
     /// <a href=""></a> //#TBD#//
-    public Template Inner(string regex) {
+    public Template Inner(Regex regex) {
       var inner = Cache<InnerTemplate>.Instance;
       inner.parent = this;
-      inner.regex  = new Regex(regex, RegexOptions.Multiline);
-      inner.match  = inner.regex.Match(result);
+      inner.regex  = regex;
+
+      inner.matches.Clear();
+      for (var match = regex.Match(result); match.Success; match = match.NextMatch())
+        if (match.Groups.Count >= 2)
+          inner.matches.Add((match.Index, match.Index + match.Length, match.Groups[1].Value));
+      inner.match = inner.matches.Count;
       return inner;
     }
+    /// <a href=""></a> //#TBD#//
+    public Template Inner(string regex) => Inner(new Regex(regex, RegexOptions.Singleline));
     #endregion
   }
 }
