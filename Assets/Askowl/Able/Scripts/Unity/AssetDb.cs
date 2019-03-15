@@ -3,6 +3,7 @@
 using System;
 using System.IO;
 using UnityEditor;
+using UnityEngine;
 using Object = UnityEngine.Object;
 
 namespace Askowl {
@@ -12,46 +13,95 @@ namespace Askowl {
     public static AssetDb Instance => Cache<AssetDb>.Instance;
     /// <a href=""></a> //#TBD#//
     public Boolean Error;
-
-    private string currentLocation = "";
+    /// <a href=""></a> //#TBD#//
+    public string CurrentFolder = "";
 
     /// <a href=""></a> //#TBD#//
-    public AssetDb CurrentFolder(out string path) {
-      path = "Assets";
-      foreach (Object obj in Selection.GetFiltered(typeof(Object), SelectionMode.Assets)) {
-        path = AssetDatabase.GetAssetPath(obj);
-        if (!string.IsNullOrEmpty(path) && File.Exists(path)) {
-          path = Path.GetDirectoryName(path);
+    public AssetDb ProjectFolder(out string path) {
+      Error = false;
+      path  = "Assets";
+      EditorUtility.FocusProjectWindow();
+      foreach (Object asset in Selection.GetFiltered(typeof(Object), SelectionMode.Assets))
+        if (SetFolderFor(asset))
           break;
-        }
-      }
-      currentLocation = path;
+      path = CurrentFolder;
       return this;
+    }
+    /// <a href=""></a> //#TBD#//
+    private bool SetFolderFor(Object asset) {
+      var path = AssetDatabase.GetAssetPath(asset);
+      if (!string.IsNullOrEmpty(path))
+        if (Directory.Exists(path)) {
+          CurrentFolder = path;
+          return true;
+        } else if (File.Exists(path)) {
+          CurrentFolder = Path.GetDirectoryName(path);
+          return true;
+        }
+      Error = true;
+      return false;
     }
     /// <a href=""></a> //#TBD#//
     public AssetDb Select(Object asset) {
-      if (Error) return Reset();
+      if (Error) return this;
       EditorUtility.FocusProjectWindow();
-      Selection.activeObject = asset;
+      SetFolderFor(Selection.activeObject = asset);
       EditorGUIUtility.PingObject(asset);
       return this;
     }
-    private AssetDb Reset() { throw new NotImplementedException(); }
+    /// <a href=""></a> //#TBD#//
+    public AssetDb Selected(out Object asset) {
+      asset = Selection.activeObject;
+      return this;
+    }
     /// <a href=""></a> //#TBD#//
     public AssetDb Find(string path, out Object asset) {
-      asset = AssetDatabase.LoadAssetAtPath(path, typeof(Object));
-      Error = asset != null;
+      CurrentFolder = AbsoluteFolder(path);
+      asset         = AssetDatabase.LoadAssetAtPath(CurrentFolder, typeof(Object));
+      Error         = asset == null;
       return this;
     }
     /// <a href=""></a> //#TBD#//
     public AssetDb Select(string path) => Find(path, out var asset).Select(asset);
+
     /// <a href=""></a> //#TBD#//
-    public AssetDb CreateFolders(string path) { return this; }
+    public AssetDb CreateFolders(string path) {
+      if (Error) return this;
+      if (path[0] == '/') {
+        path          = path.Substring(1);
+        CurrentFolder = "";
+      }
+      var folders = path.Split('/');
+      for (int i = 0; i < folders.Length; i++) {
+        Find(folders[i], out Object _);
+        if (Error) {
+          Debug.Log($"*** CreateFolders '{string.Join("/", folders, 0, i - 1)}'/'{folders[i]}'"); //#DM#//
+          AssetDatabase.CreateFolder(string.Join("/", folders, 0, i - 1), folders[i]);
+          CurrentFolder = AbsoluteFolder(folders[i]);
+          Debug.Log($"*** CreateFolders '{CurrentFolder}'"); //#DM#//
+          Error         = false;
+        }
+      }
+      return this;
+    }
     /// <a href=""></a> //#TBD#//
-    public AssetDb DeleteFolder(string path) { return this; }
+    public AssetDb Delete(string path) {
+      if (Error) return this;
+      Error = AssetDatabase.MoveAssetToTrash(AbsoluteFolder(path));
+      return this;
+    }
+    /// <a href=""></a> //#TBD#//
+    public AssetDb SubFolders(out string[] subFolders) {
+      subFolders = AssetDatabase.GetSubFolders(CurrentFolder);
+      return this;
+    }
+
+    private string AbsoluteFolder(string path) =>
+      (path[0] == '/') ? path.Substring(1) : (CurrentFolder != "") ? $"{CurrentFolder}/{path}" : path;
 
     public void Dispose() {
-      currentLocation = "";
+      CurrentFolder = "";
+      Error         = false;
       Cache<AssetDb>.Dispose(this);
     }
   }
