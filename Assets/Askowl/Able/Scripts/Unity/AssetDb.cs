@@ -56,9 +56,10 @@ namespace Askowl {
     }
     /// <a href=""></a> //#TBD#//
     public AssetDb Find(string path, out Object asset) {
-      CurrentFolder = AbsoluteFolder(path);
-      asset         = AssetDatabase.LoadAssetAtPath(CurrentFolder, typeof(Object));
-      Error         = asset == null;
+      path  = AbsoluteFolder(path);
+      asset = AssetDatabase.LoadAssetAtPath(path, typeof(Object));
+      Error = asset == null;
+      if (!Error) CurrentFolder = path;
       return this;
     }
     /// <a href=""></a> //#TBD#//
@@ -67,19 +68,17 @@ namespace Askowl {
     /// <a href=""></a> //#TBD#//
     public AssetDb CreateFolders(string path) {
       if (Error) return this;
-      if (path[0] == '/') {
-        path          = path.Substring(1);
-        CurrentFolder = "";
-      }
+      if (path[0] == '/') CurrentFolder = "";
+
       var folders = path.Split('/');
       for (int i = 0; i < folders.Length; i++) {
-        Find(folders[i], out Object _);
-        if (Error) {
-          Debug.Log($"*** CreateFolders '{string.Join("/", folders, 0, i - 1)}'/'{folders[i]}'"); //#DM#//
-          AssetDatabase.CreateFolder(string.Join("/", folders, 0, i - 1), folders[i]);
-          CurrentFolder = AbsoluteFolder(folders[i]);
-          Debug.Log($"*** CreateFolders '{CurrentFolder}'"); //#DM#//
-          Error         = false;
+        if (folders[i].Length != 0) {
+          Find(folders[i], out Object _);
+          if (Error) {
+            Error = AssetDatabase.CreateFolder(CurrentFolder, folders[i]) == null;
+            if (Error) return this;
+            CurrentFolder = $"{CurrentFolder}/{folders[i]}";
+          }
         }
       }
       return this;

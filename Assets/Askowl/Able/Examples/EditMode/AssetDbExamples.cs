@@ -81,7 +81,7 @@ namespace Askowl.Able.Examples {
         assetDb.CreateFolders(path);
         Assert.IsFalse(assetDb.Error);
         assetDb.Find("/Assets/Temp", out var asset).SubFolders(out string[] subFolders);
-        Assert.IsTrue(subFolders.Contains(guid));
+        Assert.IsTrue(subFolders.Contains($"Assets/Temp/{guid}"));
         assetDb.Delete(path);
       }
     }
