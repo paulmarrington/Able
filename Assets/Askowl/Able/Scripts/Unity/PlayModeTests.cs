@@ -1,5 +1,6 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
+using System;
 using System.Collections;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -7,6 +8,7 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
 namespace Askowl {
   /// <a href="http://bit.ly/2NZZYKj">PlayModeController wrapper with asserts</a> <inheritdoc />
@@ -62,5 +64,16 @@ namespace Askowl {
       MatchCollection matches = regex.Matches(against);
       Assert.AreEqual(matches.Count, 1, against);
     }
+
+    /// <a href=""></a> //#TBD#//
+    protected static void Fail(string message) => throw new Exception(message);
+
+    #region Unity Editor Only Methods
+    #if UNITY_EDITOR
+    /// <a href=""></a> //#TBD#//
+    protected static void SelectMenuItem(string path) =>
+      Assert.IsTrue(EditorApplication.ExecuteMenuItem(path));
+    #endif
+    #endregion
   }
 }

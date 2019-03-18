@@ -17,35 +17,36 @@ namespace Askowl {
     public string CurrentFolder = "";
 
     /// <a href=""></a> //#TBD#//
-    public AssetDb ProjectFolder(out string path) {
-      Error = false;
-      path  = "Assets";
+    public static string ProjectFolder() {
       EditorUtility.FocusProjectWindow();
-      foreach (Object asset in Selection.GetFiltered(typeof(Object), SelectionMode.Assets))
-        if (SetFolderFor(asset))
-          break;
-      path = CurrentFolder;
+      foreach (Object asset in Selection.GetFiltered(typeof(Object), SelectionMode.Assets)) {
+        var path = SetFolderFor(asset);
+        if (path != null) return path;
+      }
+      return "Assets";
+    }
+
+    /// <a href=""></a> //#TBD#//
+    public AssetDb ProjectFolder(out string path) {
+      path = ProjectFolder();
       return this;
     }
     /// <a href=""></a> //#TBD#//
-    private bool SetFolderFor(Object asset) {
+    private static string SetFolderFor(Object asset) {
       var path = AssetDatabase.GetAssetPath(asset);
       if (!string.IsNullOrEmpty(path))
         if (Directory.Exists(path)) {
-          CurrentFolder = path;
-          return true;
+          return path;
         } else if (File.Exists(path)) {
-          CurrentFolder = Path.GetDirectoryName(path);
-          return true;
+          return Path.GetDirectoryName(path);
         }
-      Error = true;
-      return false;
+      return null;
     }
     /// <a href=""></a> //#TBD#//
     public AssetDb Select(Object asset) {
       if (Error) return this;
       EditorUtility.FocusProjectWindow();
-      SetFolderFor(Selection.activeObject = asset);
+      CurrentFolder = SetFolderFor(Selection.activeObject = asset);
       EditorGUIUtility.PingObject(asset);
       return this;
     }
@@ -63,7 +64,7 @@ namespace Askowl {
       return this;
     }
     /// <a href=""></a> //#TBD#//
-    public AssetDb Select(string path) => Find(path, out var asset).Select(asset);
+    public AssetDb Select(string path = null) => Find(path ?? CurrentFolder, out var asset).Select(asset);
 
     /// <a href=""></a> //#TBD#//
     public AssetDb CreateFolders(string path) {
