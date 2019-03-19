@@ -96,13 +96,71 @@ namespace Askowl {
       return this;
     }
 
-    private string AbsoluteFolder(string path) =>
-      (path[0] == '/') ? path.Substring(1) : (CurrentFolder != "") ? $"{CurrentFolder}/{path}" : path;
+    private string AbsoluteFolder(string path) {
+      if (path.StartsWith("Assets")) return path;
+      return (path[0] == '/') ? path.Substring(1) : (CurrentFolder != "") ? $"{CurrentFolder}/{path}" : path;
+    }
 
     public void Dispose() {
       CurrentFolder = "";
       Error         = false;
       Cache<AssetDb>.Dispose(this);
     }
+
+    #region Asset Creation and Loading (Editor only)
+    #if UNITY_EDITOR
+    /// <a href=""></a> //#TBD#//
+    public static Object Load(string path, Type type) {
+      path = Objects.FindFile(path);
+      return (path == null) ? null : AssetDatabase.LoadAssetAtPath(path, type);
+    }
+
+    /// <a href=""></a> //#TBD#//
+    public static T Load<T>(string path) where T : Object => (T) Load(path, typeof(T));
+
+    /// <a href=""></a> //#TBD#//
+    public AssetDb Load(string path, out Object asset, Type type) {
+      asset = Load(path, type);
+      Error = asset == null;
+      return this;
+    }
+
+    /// <a href=""></a> //#TBD#//
+    public AssetDb Load<T>(string path, out T asset) where T : Object {
+      asset = Load<T>(path);
+      return this;
+    }
+
+    /// <a href=""></a> //#TBD#//
+    /// Warning: Changes path in project window. Get old path first with
+    ///   var activeObject = Selection.activeObject;
+    ///   var selectedPathInProjectView = AssetDatabase.GetAssetPath(Selection.activeObject);
+    /// afterwards you can return with
+    ///   EditorGUIUtility.PingObject(activeObject);
+    /// but it is not perfect. Left project pane returns correctly, but right pane still points elsewhere
+    public static Object LoadOrCreate(string path, Type type) {
+      var asset = Load(path, type);
+      if (asset != null) return asset;
+      AssetDatabase.CreateAsset(asset = ScriptableObject.CreateInstance(type), path);
+      AssetDatabase.SaveAssets();
+      AssetDatabase.Refresh();
+      return asset;
+    }
+
+    public AssetDb LoadOrCreate(string path, out Object asset, Type type) {
+      asset = LoadOrCreate(path, type);
+      return this;
+    }
+
+    /// <a href=""></a> //#TBD#//
+    public static T LoadOrCreate<T>(string path) where T : ScriptableObject => (T) LoadOrCreate(path, typeof(T));
+
+    /// <a href=""></a> //#TBD#//
+    public AssetDb LoadOrCreate<T>(string path, out T asset) where T : ScriptableObject {
+      asset = LoadOrCreate<T>(path);
+      return this;
+    }
+    #endif
+    #endregion
   }
 }
