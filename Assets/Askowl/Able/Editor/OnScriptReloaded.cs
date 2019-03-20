@@ -17,6 +17,8 @@ namespace Askowl {
   public static class OnScriptReloaded {
     /// <a href=""></a> //#TBD#//
     public static void Register(ScriptableObject continuation) {
+      if (!(continuation is IOnScriptReload))
+        throw new Exception($"'{continuation.GetType()}' is not 'IOnScriptReload'");
       var guid  = Guid.NewGuid().ToString();
       var guids = PlayerPrefs.GetString("Askowl.OnScriptReload") ?? "";
       PlayerPrefs.SetString("Askowl.OnScriptReload", $"{guid};{guids}");
@@ -29,8 +31,14 @@ namespace Askowl {
       var guids = PlayerPrefs.GetString("Askowl.OnScriptReload").Split(';').Reverse();
       PlayerPrefs.DeleteKey("Askowl.OnScriptReload");
       foreach (var guid in guids) {
-        var type = Type.GetType(typeName: guid);
-        (ScriptableObject.CreateInstance(type) as IOnScriptReload)?.OnScriptReload();
+        var typeName = PlayerPrefs.GetString(guid);
+        var json     = PlayerPrefs.GetString($"{guid}-Content");
+        PlayerPrefs.DeleteKey(guid);
+        var type             = Type.GetType(typeName);
+        var scriptableObject = (ScriptableObject.CreateInstance(type) as IOnScriptReload);
+        if (scriptableObject == null) throw new Exception($"Can't instantiate '{typeName}'");
+        EditorJsonUtility.FromJsonOverwrite(json, scriptableObject);
+        scriptableObject.OnScriptReload();
       }
     }
   }
