@@ -5,7 +5,6 @@ using System.Linq;
 using UnityEditor;
 using UnityEditor.Callbacks;
 using UnityEngine;
-using Object = UnityEngine.Object;
 
 namespace Askowl {
   /// <a href=""></a> //#TBD#//
@@ -16,9 +15,7 @@ namespace Askowl {
   /// <a href=""></a> //#TBD#//
   public static class OnScriptReloaded {
     /// <a href=""></a> //#TBD#//
-    public static void Register(ScriptableObject continuation) {
-      if (!(continuation is IOnScriptReload))
-        throw new Exception($"'{continuation.GetType()}' is not 'IOnScriptReload'");
+    public static void Register(object continuation) {
       var guid  = Guid.NewGuid().ToString();
       var guids = PlayerPrefs.GetString("Askowl.OnScriptReload") ?? "";
       PlayerPrefs.SetString("Askowl.OnScriptReload", $"{guid};{guids}");
@@ -30,16 +27,17 @@ namespace Askowl {
     [DidReloadScripts] private static void Phase2() {
       var guids = PlayerPrefs.GetString("Askowl.OnScriptReload").Split(';').Reverse();
       PlayerPrefs.DeleteKey("Askowl.OnScriptReload");
-      foreach (var guid in guids) {
-        var typeName = PlayerPrefs.GetString(guid);
-        var json     = PlayerPrefs.GetString($"{guid}-Content");
-        PlayerPrefs.DeleteKey(guid);
-        var type             = Type.GetType(typeName);
-        var scriptableObject = (ScriptableObject.CreateInstance(type) as IOnScriptReload);
-        if (scriptableObject == null) throw new Exception($"Can't instantiate '{typeName}'");
-        EditorJsonUtility.FromJsonOverwrite(json, scriptableObject);
-        scriptableObject.OnScriptReload();
-      }
+      foreach (var guid in guids)
+        if (!string.IsNullOrEmpty(guid)) {
+          var typeName = PlayerPrefs.GetString(guid);
+          var json     = PlayerPrefs.GetString($"{guid}-Content");
+          PlayerPrefs.DeleteKey(guid);
+          var type             = Type.GetType(typeName);
+          var scriptableObject = (ScriptableObject.CreateInstance(type) as IOnScriptReload);
+          if (scriptableObject == null) throw new Exception($"Can't instantiate '{typeName}'");
+          EditorJsonUtility.FromJsonOverwrite(json, scriptableObject);
+          scriptableObject.OnScriptReload();
+        }
     }
   }
 }
