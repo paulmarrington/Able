@@ -17,6 +17,7 @@ namespace Askowl {
     /// <a href="http://bit.ly/2RhLCD5">Find all game objects by name and presence of a type of component</a>
     public static T[] FindAll<T>(string name = "") where T : Object {
       var all = Resources.FindObjectsOfTypeAll<T>();
+      Debug.Log($"*** FindAll '{name}' of type '{typeof(T)}', found {all.Length}"); //#DM#//
       if (string.IsNullOrEmpty(name)) return all;
 
       var results = Lists<T>.Local;

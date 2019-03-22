@@ -32,11 +32,14 @@ namespace Askowl {
           var typeName = PlayerPrefs.GetString(guid);
           var json     = PlayerPrefs.GetString($"{guid}-Content");
           PlayerPrefs.DeleteKey(guid);
-          var type             = Type.GetType(typeName);
-          var scriptableObject = (ScriptableObject.CreateInstance(type) as IOnScriptReload);
-          if (scriptableObject == null) throw new Exception($"Can't instantiate '{typeName}'");
-          EditorJsonUtility.FromJsonOverwrite(json, scriptableObject);
-          scriptableObject.OnScriptReload();
+          var type = Type.GetType(typeName);
+          if (type == null) throw new Exception($"Unknown type {typeName}'");
+          var target = (type.IsAssignableFrom(typeof(ScriptableObject)))
+                         ? ScriptableObject.CreateInstance(type)
+                         : ObjectFactory.CreateInstance(type);
+          if (target == null) throw new Exception($"Can't instantiate '{typeName}'");
+          EditorJsonUtility.FromJsonOverwrite(json, target);
+          (target as IOnScriptReload)?.OnScriptReload();
         }
     }
   }
