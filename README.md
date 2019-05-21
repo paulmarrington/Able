@@ -1,4 +1,4 @@
 ---
 redirect_to:
-  - /Assets/Askowl/Able/Documentation/Askowl-Able
+  - /Assets/Askowl/Able/Documentation/Askowl-Able.md
 ---
