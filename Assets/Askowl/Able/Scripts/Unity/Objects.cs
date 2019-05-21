@@ -27,7 +27,7 @@ namespace Askowl {
     }
 
     /// <a href="http://bit.ly/2NUH87i">String representation of the absolute path to a game object</a>
-    public static string Path(GameObject gameObject) {
+    public static string AbsolutePath(GameObject gameObject) {
       var       path      = new List<string>();
       Transform transform = gameObject.transform;
 
@@ -75,9 +75,11 @@ namespace Askowl {
 
     /// <a href=""></a> //#TBD#//
     public static string FindFile(string path) {
-      string[] scenePaths = Directory.GetFiles(Application.dataPath, path, SearchOption.AllDirectories);
-      if (scenePaths.Length == 0) return null;
-      return scenePaths[0].Substring(startIndex: Application.dataPath.Length - "Assets".Length);
+      var fileName = Path.GetFileName(path) ?? "*";
+      path = Path.GetDirectoryName(path) ?? "";
+      if (!path.StartsWith("Assets/")) path = $"Assets/{path}";
+      string[] scenePaths                   = Directory.GetFiles(path, fileName, SearchOption.AllDirectories);
+      return scenePaths.Length > 0 ? scenePaths[0] : null;
     }
   }
 }

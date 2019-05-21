@@ -1,5 +1,7 @@
 ﻿// Copyright 2018 (C) paul@marrington.net http://www.askowl.net/unity-packages
 
+using UnityEngine;
+
 namespace Askowl {
   using System;
   using System.Collections;
@@ -67,7 +69,6 @@ namespace Askowl {
     /// <a href="http://bit.ly/2Oq9DcC">Add a map or set entry</a>
     public Map Add(object key, object value = null) {
       if (key == null) return this;
-
       if (!map.ContainsKey(key)) keys.Add(key);
       map[Key = key] = Value = value;
       return this;

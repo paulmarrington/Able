@@ -15,45 +15,46 @@ namespace Askowl.Able.Examples {
       }
     }
     [Test] public void FindAbsolute() {
-      using (var assetDb = AssetDb.Instance.Find("/Assets/Askowl/Able", out var asset)) {
+      using (var assetDb = AssetDb.Instance.Find("Assets/Askowl/Able", out var asset)) {
         Assert.IsFalse(assetDb.Error);
         Assert.IsNotNull(asset);
       }
     }
     [Test] public void FindRelative() {
-      using (var assetDb = AssetDb.Instance.Find("/Assets/Askowl", out var asset)) {
-        assetDb.Find("Able/Scripts", out asset);
+      using (var assetDb = AssetDb.Instance.CurrentFolder("Assets/Askowl")) {
+        assetDb.Find("./Able/Scripts", out var asset);
         Assert.IsFalse(assetDb.Error);
         Assert.IsNotNull(asset);
       }
     }
     [Test] public void CurrentFolder() {
-      using (var assetDb = AssetDb.Instance.Find("/Assets/Askowl", out var asset)) {
-        assetDb.Find("Able/Scripts", out asset);
+      // ReSharper disable once NotAccessedVariable
+      using (var assetDb = AssetDb.Instance.Find("Assets/Askowl/Able/Scripts/Unity/AssetDb.cs", out var asset)) {
         Assert.IsFalse(assetDb.Error);
-        Assert.AreEqual("Assets/Askowl/Able/Scripts", assetDb.CurrentFolder);
+        Assert.AreEqual("Assets/Askowl/Able/Scripts/Unity", assetDb.CurrentFolder());
       }
     }
     [Test] public void Error() {
-      using (var assetDb = AssetDb.Instance.Find("/Assets/Askowl", out var asset)) {
+      // ReSharper disable once NotAccessedVariable
+      using (var assetDb = AssetDb.Instance.Find("Assets/Askowl", out var asset)) {
         assetDb.Find("Not-Able/Scripts", out asset);
         Assert.IsTrue(assetDb.Error);
       }
     }
     [Test] public void SelectFolderFromAsset() {
-      using (var assetDb = AssetDb.Instance.Select("/Assets/Askowl/Able/Scripts/Able.asmdef")) {
+      using (var assetDb = AssetDb.Instance.Select("Assets/Askowl/Able/Scripts/Able.asmdef")) {
         assetDb.ProjectFolder(out var path);
         Assert.AreEqual("Assets/Askowl/Able/Scripts", path);
       }
     }
     [Test] public void SelectFolder() {
-      using (var assetDb = AssetDb.Instance.Select("/Assets/Askowl/Able/Scripts")) {
+      using (var assetDb = AssetDb.Instance.Select("Assets/Askowl/Able/Scripts")) {
         assetDb.ProjectFolder(out var path);
         Assert.AreEqual("Assets/Askowl/Able/Scripts", path);
       }
     }
     [Test] public void Selected() {
-      using (var assetDb = AssetDb.Instance.Select("/Assets/Askowl/Able/Scripts/Able.asmdef")) {
+      using (var assetDb = AssetDb.Instance.Select("Assets/Askowl/Able/Scripts/Able.asmdef")) {
         assetDb.Selected(out var asset);
         Assert.AreEqual("Able", asset.name);
       }
@@ -64,34 +65,34 @@ namespace Askowl.Able.Examples {
       using (var assetDb = AssetDb.Instance.Select(assetToSelect)) {
         assetDb.Selected(out var assetSelected);
         Assert.AreEqual(assetToSelect,        assetSelected);
-        Assert.AreEqual("Assets/Askowl/Able", assetDb.CurrentFolder);
+        Assert.AreEqual("Assets/Askowl/Able", assetDb.CurrentFolder());
       }
     }
     [Test] public void SubFolders() {
-      using (var assetDb = AssetDb.Instance.Select("/Assets/Askowl/Able/Scripts")) {
+      using (var assetDb = AssetDb.Instance.Select("Assets/Askowl/Able/Scripts")) {
         assetDb.SubFolders(out var subFolders);
         Assert.GreaterOrEqual(4, subFolders.Length);
         Assert.IsTrue(subFolders.Contains("Assets/Askowl/Able/Scripts/Memory"));
       }
     }
     [Test] public void CreateFolders() {
-      var guid = Guid.NewGuid().ToString();
-      var path = $"/Assets/Temp/{guid}";
+      var path = $"Assets/Temp/{(long) Clock.EpochTimeNow}";
       using (var assetDb = AssetDb.Instance) {
         assetDb.CreateFolders(path);
         Assert.IsFalse(assetDb.Error);
-        assetDb.Find("/Assets/Temp", out var asset).SubFolders(out string[] subFolders);
-        Assert.IsTrue(subFolders.Contains($"Assets/Temp/{guid}"));
+        assetDb.SubFolders("Assets/Temp", out string[] subFolders);
+        var j = string.Join(",", subFolders);
+        Assert.IsTrue(subFolders.Contains(path));
         assetDb.Delete(path);
       }
     }
     [Test] public void Delete() {
-      var guid = Guid.NewGuid().ToString();
-      var path = $"/Assets/Temp/{guid}";
+      var guid = ((int) Clock.EpochTimeNow + 1).ToString();
+      var path = $"Assets/Temp/{guid}";
       using (var assetDb = AssetDb.Instance) {
         assetDb.CreateFolders(path);
-        assetDb.Delete(path);
-        assetDb.Find("/Assets/Temp", out var asset).SubFolders(out string[] subFolders);
+        Assert.IsFalse(assetDb.Delete(path).Error);
+        assetDb.SubFolders("Assets/Temp", out string[] subFolders);
         Assert.IsFalse(subFolders.Contains(guid));
       }
     }

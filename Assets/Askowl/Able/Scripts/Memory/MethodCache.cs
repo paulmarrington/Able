@@ -2,6 +2,7 @@
 
 using System;
 using System.Reflection;
+using NUnit.Framework;
 
 namespace Askowl {
   /// <a href=""></a> //#TBD#//
@@ -9,7 +10,8 @@ namespace Askowl {
     private static readonly Map cache = Map.Instance;
 
     /// <a href=""></a> //#TBD#//
-    public static object Call(object instance, string method, object[] parameters) {
+    public static object Call(object instance, string method, params object[] parameters) {
+      if (instance == null) return null;
       var type = instance.GetType();
       if (!cache[type].Found) cache.Add(type, Map.Instance);
       var methods = cache.Value as Map;

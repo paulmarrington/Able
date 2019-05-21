@@ -72,7 +72,7 @@ public sealed class PostProcessBuild : ScriptableObject {
     AddPlistEntries(plist: plist, plistEntries: postProcessBuild.iOS.PlistEntries);
 
     File.WriteAllText(path: plistPath, contents: plist.WriteToString());
-#endif
+    #endif
   }
 
   private static void
@@ -89,8 +89,7 @@ public sealed class PostProcessBuild : ScriptableObject {
         replacement: "define UNITY_USES_REMOTE_NOTIFICATIONS 0");
 
       File.WriteAllText(path: headerPath, contents: code);
-    }
-    else { Debug.LogError(message: "Preprocessor file doesn't exist."); }
+    } else { Debug.LogError(message: "Preprocessor file doesn't exist."); }
   }
 
   #if UNITY_IOS || UNITY_TVOS
@@ -120,9 +119,9 @@ public sealed class PostProcessBuild : ScriptableObject {
       }
     }
   }
-#endif
+  #endif
 
-  private static PostProcessBuild Load() {
+  internal static PostProcessBuild Load() {
     PostProcessBuild instance      = Resources.Load<PostProcessBuild>("PostProcessBuild");
     if (instance == null) instance = Resources.Load<PostProcessBuild>("PostProcessBuildDefault");
     return instance;
@@ -136,18 +135,18 @@ internal sealed class MyCustomBuildProcessor : IPreprocessBuildWithReport {
   public void OnPreprocessBuild(BuildTarget target, string targetPath) {
     #if UNITY_ANDROID
     PostProcessBuild build = PostProcessBuild.Load();
-    string           path = "Assets/Plugins/Android/AndroidManifest.xml";
+    string           path  = "Assets/Plugins/Android/AndroidManifest.xml";
     string           tools = "xmlns:tools=\"http://schemas.android.com/tools\"";
-    string           tag = "<manifest";
+    string           tag   = "<manifest";
 
     try {
-      bool   changed = false;
+      bool   changed  = false;
       string manifest = File.ReadAllText(path);
 
       if (manifest.IndexOf(tools) == -1) {
         int at = manifest.IndexOf(tag) + tag.Length;
         manifest = manifest.Insert(at, " " + tools);
-        changed = true;
+        changed  = true;
       }
 
       if (build.android.EnableMultidex) {
@@ -156,7 +155,7 @@ internal sealed class MyCustomBuildProcessor : IPreprocessBuildWithReport {
         if (manifest.IndexOf(multidex) == -1) {
           int at = manifest.IndexOf(tag) + tag.Length;
           manifest = manifest.Insert(at, " " + multidex);
-          changed = true;
+          changed  = true;
         }
 
         // check enabled project mainTemplate.gradle or remove .DISABLED suffix
@@ -168,6 +167,6 @@ internal sealed class MyCustomBuildProcessor : IPreprocessBuildWithReport {
         File.WriteAllText(path, manifest);
       }
     } catch { }
-#endif
+    #endif
   }
 }

@@ -45,13 +45,13 @@ namespace Askowl.Able.Examples {
       Assert.AreEqual(2, gameObjects.Length);
     }
 
-    /// Using <see cref="Objects.Path"/>
+    /// Using <see cref="Objects.AbsolutePath"/>
     [UnityTest]
     public IEnumerator Path() {
       yield return LoadScene(sceneName);
 
       var gameObject = Objects.Find<GameObject>("Text");
-      string path       = Objects.Path(gameObject);
+      string path       = Objects.AbsolutePath(gameObject);
       Assert.AreEqual("Canvas/Level/Button Two/Text", path);
     }
 

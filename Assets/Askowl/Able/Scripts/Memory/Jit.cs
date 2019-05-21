@@ -11,7 +11,7 @@ namespace Askowl {
     /// <a href=""></a> //#TBD#//
     public T Value => (initialised) ? value : value = factory(initialised = true);
     /// <a href=""></a> //#TBD#//
-    public static implicit operator T(Jit<T> jit) => jit.value;
+    public static implicit operator T(Jit<T> jit) => jit.Value;
     /// <a href=""></a> //#TBD#//
     public override string ToString() => Value.ToString();
   }
